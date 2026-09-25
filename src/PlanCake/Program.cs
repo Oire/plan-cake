@@ -105,14 +105,13 @@ internal static class Program {
         var message = _("PlanCake needs the Microsoft Edge WebView2 Runtime, which is not installed on this computer.")
             + Environment.NewLine + Environment.NewLine
             + _("You can download it from {0}. Open the download page now?", WebView2DownloadUrl);
-        var answer = DialogHelper.Show(
+        var confirmed = DialogHelper.Confirm(
             message,
             _("WebView2 Runtime not found"),
-            MessageBoxButtons.YesNo,
             MessageBoxIcon.Error
         );
 
-        if (answer != DialogResult.Yes) {
+        if (!confirmed) {
             return;
         }
 

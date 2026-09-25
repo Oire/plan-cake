@@ -123,3 +123,34 @@ and renders once the page reports `ready`), so JAWS starts it as a new document;
 Forward send their saved block with that render. A re-render of the same file stays in place.
 Focusing the document view does nothing when the document already has the focus.
 
+## Later findings (Task 10)
+
+### An outside edit threw the reader to the top
+
+After a change made outside PlanCake the view reloaded, but JAWS jumped to the top of the
+document instead of staying on the block being read. The log showed why: every reload was
+posted with `focus` on lines `1-1`. The page reports a position only when the user acts on a
+block (Enter, a click, the context menu, F9, a link or check box getting the focus); reading with
+the arrow keys moves the JAWS virtual cursor, which the page never sees. So the last position
+the host knew was the file's first block, where a newly opened file starts, and each reload sent
+the virtual cursor back there. On top of that, the page replaced the whole content of `main`,
+destroying the nodes the virtual cursor was on, which on its own is enough for JAWS to fall back
+to the top ("sometimes" in other situations too).
+
+Decision: a render the user did not ask for by acting on a block (a change outside PlanCake,
+Reload, a language switch, the same file opened again) carries no focus. And every re-render of
+the same file updates the page in place (`web/morph.js`): unchanged nodes stay the same objects
+with their shifted `data-lines` and `data-note` patched, a changed node of the same kind is
+patched in place, and only what was added or removed is inserted or removed. The choice of which
+old node each new one becomes (common prefix and suffix, then a longest common subsequence of
+the nodes' content, then the changed stretches position by position) is a pure function, tested
+in Jint (`MorphPlanTests`). Explicit focus (a new note, a toggled task, Back and Forward) still
+applies after the update; a different file still gets a freshly loaded page.
+
+### Escape did not close a confirmation
+
+A Yes/No message box has no cancel button, so Escape and the close button did nothing in the
+Delete all notes confirmation (and in every other one). Every yes-or-no question now goes
+through `DialogHelper.Confirm`, a task dialog with Yes and No that allows cancel: Escape and the
+close button answer No; Yes stays the default button, and the dialog is mirrored in a
+right-to-left language.

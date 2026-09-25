@@ -25,6 +25,10 @@ decisions.
   (`Utils/WindowAccessibleName.cs`); without it JAWS announces no name.
 - **Keyboard alternatives:** every mouse interaction (drag, hover, context menu) must have a
   keyboard equivalent. No exceptions.
+- **Confirmations close with Escape, meaning No.** A Yes/No `MessageBox` has no cancel, so
+  Escape and the close button do nothing there: ask every yes-or-no question through
+  `DialogHelper.Confirm` (a task dialog with Yes, No and `AllowCancel`), never
+  `MessageBoxButtons.YesNo`.
 - **Native controls:** prefer `Oire.WinForms.NativeControls` over the stock WinForms
   owner-drawn equivalents where it offers one — the native peers are what screen readers
   actually understand.

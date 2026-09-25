@@ -411,7 +411,7 @@ public partial class MainWindow: Form {
             documentView.Navigate(PageFile);
         }
 
-        RenderDocument(opened: !reopened);
+        RenderDocument(opened: !reopened, restorePosition: !reopened);
         UpdateTitle();
 
         Log.Information(
@@ -435,11 +435,19 @@ public partial class MainWindow: Form {
     /// <paramref name="focusTaskLine"/>, if given and found, else returns to the block the user was on.
     /// A document just <paramref name="opened"/> without a saved position starts at its first block.
     /// </summary>
+    /// <param name="restorePosition">
+    /// False for a render the user did not ask for by acting on a block (a change outside
+    /// PlanCake, Reload, a language switch): the page is updated in place and nothing is focused,
+    /// so the JAWS virtual cursor stays where the user is reading. The last block the page
+    /// reported may be far from there, since the page never sees the virtual cursor move; sending
+    /// the focus to it (at first the opening block) threw the reader back (Task 10 JAWS check).
+    /// </param>
     private void RenderDocument(
         PageFocus? focus = null,
         int? focusNoteLine = null,
         int? focusTaskLine = null,
-        bool opened = false
+        bool opened = false,
+        bool restorePosition = true
     ) {
         if (_file is null) {
             return;
@@ -477,7 +485,7 @@ public partial class MainWindow: Form {
             : PositionRestorer.FindTarget(_position, _render.Blocks);
 
         if (focus is null && restored is { } target) {
-            focus = new PageFocus(Lines: target.Lines);
+            focus = restorePosition ? new PageFocus(Lines: target.Lines) : null;
             _position = target;
         } else if (focus is null) {
             _position = null;
@@ -956,14 +964,12 @@ public partial class MainWindow: Form {
         }
 
         if (ConfirmNoteDelete) {
-            var answer = DialogHelper.Show(
+            var confirmed = DialogHelper.Confirm(
                 _("Delete this note?\n\n{0}", MarkdownRenderer.Excerpt(MarkdownRenderer.NotePlainText(note.Note.Text))),
-                _("Delete note"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
+                _("Delete note")
             );
 
-            if (answer != DialogResult.Yes) {
+            if (!confirmed) {
                 ReturnFocus();
                 return;
             }
@@ -1024,12 +1030,10 @@ public partial class MainWindow: Form {
             ? _("Mark this task as done? The file on disk will be changed.\n\n{0}", text)
             : _("Mark this task as not done? The file on disk will be changed.\n\n{0}", text);
 
-        return DialogHelper.Show(
+        return DialogHelper.Confirm(
             question,
-            isChecked ? _("Check task") : _("Uncheck task"),
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question
-        ) == DialogResult.Yes;
+            isChecked ? _("Check task") : _("Uncheck task")
+        );
     }
 
     /// <summary>
@@ -1302,7 +1306,7 @@ public partial class MainWindow: Form {
             return false;
         }
 
-        RenderDocument();
+        RenderDocument(restorePosition: false);
 
         return true;
     }
@@ -1400,14 +1404,12 @@ public partial class MainWindow: Form {
         _askingReload = true;
 
         try {
-            var answer = DialogHelper.Show(
+            var confirmed = DialogHelper.Confirm(
                 _("{0} was changed outside PlanCake. Reload it?", Path.GetFileName(_file.Path)),
-                _("File changed"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
+                _("File changed")
             );
 
-            if (answer == DialogResult.Yes) {
+            if (confirmed) {
                 if (Reload(fromOutside: false)) {
                     ReturnFocus();
                     _announcer.Announce(_("File reloaded"));
@@ -1456,14 +1458,12 @@ public partial class MainWindow: Form {
         }
 
         var count = render.Notes.Count;
-        var answer = DialogHelper.Show(
+        var confirmed = DialogHelper.Confirm(
             _n("Delete the note in this file?", "Delete all {0} notes in this file?", count, count),
-            _("Delete all notes"),
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question
+            _("Delete all notes")
         );
 
-        if (answer != DialogResult.Yes) {
+        if (!confirmed) {
             ReturnFocus();
             return;
         }
@@ -1522,7 +1522,7 @@ public partial class MainWindow: Form {
             PostStrings();
         }
 
-        RenderDocument();
+        RenderDocument(restorePosition: false);
     }
 
     /// <summary>
@@ -1535,7 +1535,7 @@ public partial class MainWindow: Form {
         }
 
         _documentLanguage = code;
-        RenderDocument();
+        RenderDocument(restorePosition: false);
         ReturnFocus();
         _announcer.Announce(_("Document language: {0}", LanguageList.NativeName(code)));
     }

@@ -668,8 +668,12 @@ check tasks off from the document.
 **Files:**
 - Create: `src/PlanCake/Utils/FileWatcher.cs`, `src/PlanCake/Utils/SingleInstance.cs`,
   `src/PlanCake/Utils/Enums/ExternalChangeAction.cs` (for Task 12's setting),
-  `tests/PlanCake.Tests/FileWatcherTests.cs`, `tests/PlanCake.Tests/SingleInstanceTests.cs`
-- Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/Program.cs`
+  `src/PlanCake/web/morph.js`, `tests/PlanCake.Tests/FileWatcherTests.cs`,
+  `tests/PlanCake.Tests/SingleInstanceTests.cs`, `tests/PlanCake.Tests/MorphPlanTests.cs`,
+  `tests/PlanCake.Tests/DialogHelperTests.cs`
+- Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/Program.cs`, `src/PlanCake/web/app.js`,
+  `src/PlanCake/web/index.html`, `src/PlanCake/Utils/DialogHelper.cs`,
+  `tests/PlanCake.Tests/PlanCake.Tests.csproj` (Jint), `CLAUDE.md`, `docs/jaws-spike.md`
 
 - [x] `FileWatcher`: watches the open file's folder for changes, renames and deletions of that
       file (editors often save by rename), debounced 300 ms, marshaled to the UI thread;
@@ -695,6 +699,26 @@ check tasks off from the document.
       no "deleted" state; a real delete produces the deleted state
 - [x] tests: path normalization (case, `..`, trailing separators) gives one pipe name; a second
       registration for the same path is detected
+- [x] ➕ fix: an outside edit threw the JAWS virtual cursor to the top of the document. Cause
+      (from the log): the page reports a position only when the user acts on a block, never
+      while they read with the arrows, so every reload was posted with focus on the block the
+      file opened at, its first heading; and replacing `main`'s content destroyed the nodes the
+      virtual cursor was on. Now a render the user did not ask for by acting on a block (outside
+      change, Reload, a language switch, the same file opened again) carries no focus, and every
+      re-render of the same file updates the page in place (`web/morph.js`, written for PlanCake
+      rather than vendoring morphdom): unchanged nodes stay the same objects with their shifted
+      `data-lines` / `data-note` patched, changed nodes of the same kind are patched, only added
+      or removed ones are inserted or removed. The matching (common prefix and suffix, longest
+      common subsequence of node content, then position by position) is a pure function tested
+      in Jint (`MorphPlanTests`), with no JS toolchain. Explicit focus (new note, toggled task,
+      Back / Forward) still applies; a different file still gets a fresh page. See
+      `docs/jaws-spike.md`
+- [x] ➕ fix: Escape did not close the Delete all notes confirmation (a Yes/No message box has no
+      cancel), nor any other. Every yes-or-no question (delete note, delete all notes, task
+      toggle, the "ask first" reload, the missing WebView2 Runtime) goes through
+      `DialogHelper.Confirm`: a task dialog with Yes (default) and No, `AllowCancel`, so Escape and
+      the close button answer No, mirrored right to left. Rule added to `CLAUDE.md`; tests in
+      `DialogHelperTests`
 - [ ] **ask the user** to check with JAWS: an outside edit of the open file reloads it,
       announces "File reloaded" and keeps the reading position; deleting or renaming the file
       away is announced and the note commands are disabled; opening the same file a second time

@@ -221,13 +221,25 @@
     }
 
     function render(message) {
+        // A page shows one file: another file gets a freshly loaded page (Task 8). So a page that
+        // already shows a document is getting the same file again, and is updated in place, so
+        // that the nodes JAWS's virtual cursor sits on survive (morph.js).
+        const again = hasDocument;
         generation = message.generation;
         hasDocument = true;
-        current = null;
 
         // Raw HTML in the plan comes along: the content security policy keeps its scripts and
         // event handler attributes from running, and the host cancels any navigation.
-        main.innerHTML = message.html;
+        if (again) {
+            PlanCakeMorph.morph(main, message.html);
+        } else {
+            main.innerHTML = message.html;
+        }
+
+        if (current !== null && !main.contains(current)) {
+            current = null;
+        }
+
         main.querySelectorAll(taskSelector).forEach(showMixedState);
         main.setAttribute("lang", message.documentLang);
         document.title = message.title;
@@ -238,7 +250,7 @@
             focusNote(focus.note);
         } else if (typeof focus.lines === "string") {
             focusLines(focus.lines, focus.task === true);
-        } else {
+        } else if (!again) {
             window.scrollTo(0, 0);
         }
     }
