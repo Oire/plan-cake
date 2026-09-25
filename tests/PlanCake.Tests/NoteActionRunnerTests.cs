@@ -215,6 +215,81 @@ public class NoteActionRunnerTests: IDisposable {
         OnDisk.Should().Be("Para.\n");
     }
 
+    // Delete all notes
+
+    [Fact]
+    public void Clear_Success_RemovesEveryNoteAndAnnouncesTheCount() {
+        var runner = Runner("# Title\n[usernote]one[/usernote]\n\nPara.\n[usernote]two[/usernote]\n");
+        var rendered = runner.Store.File.Text;
+
+        var result = runner.Clear(rendered);
+
+        result.Status.Should().Be(NoteActionStatus.Done);
+        result.Message.Should().Be("All 2 notes deleted");
+        result.FocusNoteLine.Should().BeNull();
+        result.NeedsRender.Should().BeTrue();
+        OnDisk.Should().Be("# Title\n\nPara.\n");
+    }
+
+    [Fact]
+    public void Clear_OneNote_SaysSo() {
+        var runner = Runner("Para.\n[usernote]one[/usernote]\n");
+
+        runner.Clear(runner.Store.File.Text).Message.Should().Be("1 note deleted");
+    }
+
+    [Fact]
+    public void Clear_WithoutNotes_WritesNothing() {
+        var runner = Runner("Para.\n");
+
+        var result = runner.Clear(runner.Store.File.Text);
+
+        result.Status.Should().Be(NoteActionStatus.NothingToDo);
+        result.Message.Should().Be("There are no notes to delete.");
+        runner.Store.CanUndo.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Clear_FileChangedOnDisk_WritesNothing() {
+        var runner = Runner("Para.\n[usernote]one[/usernote]\n");
+        var rendered = runner.Store.File.Text;
+        File.WriteAllText(_path, "Para.\n[usernote]one[/usernote]\nMore.\n");
+
+        var result = runner.Clear(rendered);
+
+        result.Status.Should().Be(NoteActionStatus.Stale);
+        result.NeedsRender.Should().BeTrue();
+        OnDisk.Should().Be("Para.\n[usernote]one[/usernote]\nMore.\n");
+    }
+
+    [Fact]
+    public void Clear_ReadOnlyFile_IsRefusedWithTheReason() {
+        const string text = "Абзац.\n[usernote]заметка[/usernote]\n";
+        File.WriteAllBytes(_path, _windows1251.GetBytes(text));
+        var runner = RunnerForFile(new MarkdownFileOptions(AnsiEncoding: _windows1251));
+
+        var result = runner.Clear(text);
+
+        result.Status.Should().Be(NoteActionStatus.ReadOnly);
+        File.ReadAllBytes(_path).Should().Equal(_windows1251.GetBytes(text));
+    }
+
+    [Fact]
+    public void UndoAndRedo_OfAClear_PutTheNotesBackAndTakeThemAway() {
+        const string text = "Para.\n[usernote]one[/usernote]\n[usernote]two[/usernote]\n";
+        var runner = Runner(text);
+        runner.Clear(runner.Store.File.Text);
+
+        var undo = runner.Undo();
+
+        undo.Message.Should().Be("All notes deleted undone");
+        undo.FocusNoteLine.Should().BeNull();
+        OnDisk.Should().Be(text);
+
+        runner.Redo().Message.Should().Be("All notes deleted redone");
+        OnDisk.Should().Be("Para.\n");
+    }
+
     // Undo and redo
 
     [Fact]

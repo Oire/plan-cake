@@ -21,7 +21,7 @@ public partial class MainWindow: Form {
 
     // Settings that arrive with Task 12, hard-coded to their defaults until then. The document
     // language is English by default and never follows the interface language.
-    private const string DocumentLanguage = "en";
+    private const string DefaultDocumentLanguage = LanguageList.English;
     private const NoteEnterAction DocumentNoteEnterAction = NoteEnterAction.Save;
     private const bool ConfirmNoteDelete = true;
     private const bool ConfirmTaskToggle = true;
@@ -32,6 +32,15 @@ public partial class MainWindow: Form {
 
     private readonly StatusAnnouncer _announcer;
     private readonly string? _initialFile;
+
+    /// <summary>The designer's texts, kept so a language switch translates from English again.</summary>
+    private readonly ObjectPropertiesStore _localizationStore = new();
+
+    /// <summary>The menu items whose enabled state depends on the window's state, and when they are enabled.</summary>
+    private readonly List<(NativeMenuItemSpec Item, Func<bool> IsEnabled)> _menuEnabledWhen = [];
+
+    /// <summary>The menu items with a check mark, and when they are checked.</summary>
+    private readonly List<(NativeMenuItemSpec Item, Func<bool> IsChecked)> _menuCheckedWhen = [];
 
     /// <summary>The files visited in this window, for Back and Forward.</summary>
     private readonly NavigationHistory _history = new();
@@ -56,6 +65,19 @@ public partial class MainWindow: Form {
 
     /// <summary>The block the user last interacted with, from <see cref="_render"/>.</summary>
     private BlockInfo? _position;
+
+    /// <summary>
+    /// The note the document is on (the page reported it, or the view went to it), from
+    /// <see cref="_render"/>; <see langword="null"/> when the document is on a block. Notes → Edit
+    /// note and Delete note act on it while the document has the focus.
+    /// </summary>
+    private RenderedNote? _currentNote;
+
+    /// <summary>
+    /// The <c>lang</c> of the open document (View → Document language); another file starts with
+    /// the default again.
+    /// </summary>
+    private string _documentLanguage = DefaultDocumentLanguage;
 
     /// <summary>Where the page puts the virtual cursor when it shows <see cref="_render"/>.</summary>
     private PageFocus? _pendingFocus;
@@ -90,7 +112,7 @@ public partial class MainWindow: Form {
         // Walks the control tree and translates every text property through the gettext
         // catalog. Designer-set strings are therefore written in English and translated here;
         // strings built at run time go through _() instead.
-        Localizer.Localize(this, Utils.Localization.Catalog);
+        Localizer.Localize(this, Utils.Localization.Catalog, _localizationStore);
         TextDirection.Apply(this);
 
         _initialFile = initialFile;
@@ -122,18 +144,138 @@ public partial class MainWindow: Form {
     }
 
     /// <summary>
-    /// The menu bar, as data. Task 9 fills in the other menus; the shortcuts are shown only
-    /// (no <c>Keys</c>): <see cref="HostCommands"/> runs them, from the document too.
+    /// The menu bar, as data (Technical details → "Menus" in the plan). The shortcuts are shown
+    /// only: <see cref="HostCommands"/> runs them, from the document too. An item whose feature
+    /// arrives with a later task is added by that task; <see cref="MenuBuilder"/> drops the
+    /// separators its absence leaves doubled, leading or trailing. Enabled and checked states
+    /// are set again from the window's state whenever the menu bar opens (<see cref="WndProc"/>).
     /// </summary>
     private NativeMenuSpec BuildMenuSpec() {
-        var spec = new NativeMenuSpec();
+        _menuEnabledWhen.Clear();
+        _menuCheckedWhen.Clear();
 
-        spec.AddMenu(_("&View"), view => {
-            view.AddCheckable(_("&Notes list"), _showNotesList, ToggleNotesList);
-            view.Add(_("&Switch pane"), _("F6"), null, SwitchPane);
+        var spec = new NativeMenuSpec();
+        var bar = new MenuBuilder(spec);
+
+        bar.AddMenu(_("&File"), file => {
+            MenuCommand(file, _("&Open..."), HostCommand.Open);
+            // Task 11: Open from clipboard, Open from link.
+            file.AddSeparator();
+            EnabledWhen(MenuCommand(file, _("Open in &editor"), HostCommand.OpenInEditor), HasFile);
+            // Task 13: Export notes.
+            file.AddSeparator();
+            // Task 12: Settings.
+            file.AddSeparator();
+            file.Add(_("E&xit"), HostCommands.KeyText(Keys.Alt | Keys.F4), Close);
         });
 
+        bar.AddMenu(_("&Edit"), edit => {
+            EnabledWhen(MenuCommand(edit, _("&Undo"), HostCommand.Undo), () => _notes?.Store.CanUndo == true);
+            EnabledWhen(MenuCommand(edit, _("&Redo"), HostCommand.Redo), () => _notes?.Store.CanRedo == true);
+            edit.AddSeparator();
+            EnabledWhen(edit.Add(_("&Delete all notes..."), null, DeleteAllNotes), HasNotes);
+        });
+
+        bar.AddMenu(_("&View"), view => {
+            CheckedWhen(view.AddCheckable(_("&Notes list"), _showNotesList, null, ToggleNotesList), () => _showNotesList);
+            MenuCommand(view, _("&Switch pane"), HostCommand.SwitchPane);
+            view.AddSeparator();
+
+            // Language names carry no mnemonics: each is written in its own language.
+            view.AddMenu(_("&Interface language"), languages => {
+                var options = LanguageList.InterfaceLanguages(_("System default"));
+
+                foreach (var option in options) {
+                    var code = option.Code;
+                    CheckedWhen(
+                        languages.AddRadio(option.Name, "interfaceLanguage", false, () => SetInterfaceLanguage(code)),
+                        () => LanguageList.Find(options, Config.General.Language).Code == code
+                    );
+                }
+            });
+
+            EnabledWhen(view.AddMenu(_("&Document language"), languages => {
+                foreach (var option in LanguageList.DocumentLanguages()) {
+                    var code = option.Code;
+                    CheckedWhen(
+                        languages.AddRadio(option.Name, "documentLanguage", false, () => SetDocumentLanguage(code)),
+                        () => _documentLanguage == code
+                    );
+                }
+            }), HasFile);
+
+            view.AddSeparator();
+            MenuCommand(view, _("&Zoom in"), HostCommand.ZoomIn);
+            MenuCommand(view, _("Zoom &out"), HostCommand.ZoomOut);
+            MenuCommand(view, _("R&eset zoom"), HostCommand.ResetZoom);
+            view.AddSeparator();
+            EnabledWhen(MenuCommand(view, _("&Back"), HostCommand.Back), () => _history.CanGoBack);
+            EnabledWhen(MenuCommand(view, _("&Forward"), HostCommand.Forward), () => _history.CanGoForward);
+            EnabledWhen(MenuCommand(view, _("&Reload"), HostCommand.Reload), HasFile);
+        });
+
+        bar.AddMenu(_("&Notes"), notes => {
+            EnabledWhen(notes.Add(_("&Edit note..."), null, EditCurrentNote), () => CurrentNote() is not null);
+            EnabledWhen(notes.Add(_("&Delete note"), null, DeleteCurrentNote), () => CurrentNote() is not null);
+            notes.AddSeparator();
+            EnabledWhen(MenuCommand(notes, _("&Next note"), HostCommand.NextNote), HasNotes);
+            EnabledWhen(MenuCommand(notes, _("&Previous note"), HostCommand.PreviousNote), HasNotes);
+        });
+
+        bar.AddMenu(_("&Help"), help => {
+            // Task 16: User manual.
+            help.Add(_("&Keyboard shortcuts"), null, ShowShortcuts);
+            help.AddSeparator();
+            // Task 14: Check for updates.
+            MenuCommand(help, _("&About PlanCake"), HostCommand.About);
+        });
+
+        RefreshMenuState();
+
         return spec;
+    }
+
+    /// <summary>A menu item that runs a host command and shows the command's first key.</summary>
+    private NativeMenuItemSpec MenuCommand(MenuBuilder menu, string text, HostCommand command) =>
+        menu.Add(text, HostCommands.MenuShortcut(command), () => RunCommand(command, Keys.None));
+
+    private NativeMenuItemSpec EnabledWhen(NativeMenuItemSpec item, Func<bool> isEnabled) {
+        _menuEnabledWhen.Add((item, isEnabled));
+        return item;
+    }
+
+    private NativeMenuItemSpec CheckedWhen(NativeMenuItemSpec item, Func<bool> isChecked) {
+        _menuCheckedWhen.Add((item, isChecked));
+        return item;
+    }
+
+    /// <summary>Sets every menu item's enabled and checked state from the window's state.</summary>
+    private void RefreshMenuState() {
+        foreach (var (item, isEnabled) in _menuEnabledWhen) {
+            item.IsEnabled = isEnabled();
+        }
+
+        foreach (var (item, isChecked) in _menuCheckedWhen) {
+            item.IsChecked = isChecked();
+        }
+    }
+
+    private bool HasFile() => _file is not null;
+
+    private bool HasNotes() => _render is { Notes.Count: > 0 };
+
+    /// <summary>
+    /// The native menu reads each item's state from its spec when a menu opens; <c>WM_INITMENU</c>
+    /// comes once before any of them, when the menu bar is entered by keyboard or mouse.
+    /// </summary>
+    protected override void WndProc(ref Message m) {
+        const int WM_INITMENU = 0x0116;
+
+        if (m.Msg == WM_INITMENU) {
+            RefreshMenuState();
+        }
+
+        base.WndProc(ref m);
     }
 
     protected override async void OnLoad(EventArgs e) {
@@ -203,6 +345,7 @@ public partial class MainWindow: Form {
             }
 
             _position = position;
+            _documentLanguage = DefaultDocumentLanguage;
         }
 
         _file = file;
@@ -220,7 +363,7 @@ public partial class MainWindow: Form {
         }
 
         RenderDocument(opened: !reopened);
-        Text = _("{0} - {1}", Path.GetFileName(file.Path), App.Name);
+        UpdateTitle();
 
         Log.Information(
             "Opened {Path}: encoding={Encoding} bom={Bom} readOnly={ReadOnly} convertedFrom={ConvertedFrom} notes={Notes}",
@@ -257,7 +400,7 @@ public partial class MainWindow: Form {
             _markers,
             RenderMode.Interactive,
             CurrentRenderStrings(),
-            DocumentLanguage
+            _documentLanguage
         );
 
         // Another file starts with nothing selected in the notes list.
@@ -295,6 +438,7 @@ public partial class MainWindow: Form {
         // A note the view goes to (one just added, edited or restored, in the document or from
         // the list) is selected in the list too; otherwise the list keeps its own selection.
         var listFocus = focus?.Note is { } focusedIndex ? _render.Notes[focusedIndex] : null;
+        _currentNote = listFocus;
         FillNotesList(_render, listSelection, listFocus);
         PostRender();
     }
@@ -308,7 +452,7 @@ public partial class MainWindow: Form {
         documentView.PostMessage(new RenderMessage(
             _render.Html,
             _generation,
-            DocumentLanguage,
+            _documentLanguage,
             _render.Title ?? Path.GetFileName(_file.Path),
             _pendingFocus
         ));
@@ -361,7 +505,24 @@ public partial class MainWindow: Form {
     /// <see cref="TryRunShortcut"/>, so the one table in <see cref="HostCommands"/> decides.
     /// </summary>
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData) =>
-        TryRunShortcut(keyData) || base.ProcessCmdKey(ref msg, keyData);
+        TryLeaveNotesListByTab(keyData) || TryRunShortcut(keyData) || base.ProcessCmdKey(ref msg, keyData);
+
+    /// <summary>
+    /// Tab and Shift+Tab in the notes list go to the document: Tab to its first focusable
+    /// element, Shift+Tab to its last. The list passes Tab on only among the controls of its own
+    /// panel, where it is the only stop, so without this the focus never left it. The other half
+    /// of the cycle is the WebView2's own: Tab from the page's last element and Shift+Tab from its
+    /// first go to the next tab stop of the window, which is the list while it is shown, and back
+    /// into the page while it is hidden.
+    /// </summary>
+    private bool TryLeaveNotesListByTab(Keys keyData) {
+        if (keyData is not (Keys.Tab or (Keys.Shift | Keys.Tab)) || !IsNotesListFocused || !documentView.IsInitialized) {
+            return false;
+        }
+
+        documentView.EnterByTab(forward: keyData == Keys.Tab);
+        return true;
+    }
 
     /// <summary>
     /// Host shortcuts pressed in the document. The WebView2 control reports them as a
@@ -407,6 +568,18 @@ public partial class MainWindow: Form {
         Log.Debug("Host command {Command} from {Keys}", command, keyData);
 
         switch (command) {
+            case HostCommand.Open:
+                ShowOpenDialog();
+                break;
+            case HostCommand.OpenInEditor:
+                OpenInEditor();
+                break;
+            case HostCommand.Reload:
+                ReloadFile();
+                break;
+            case HostCommand.About:
+                ShowAbout();
+                break;
             case HostCommand.ZoomIn:
                 SetZoom(DocumentView.StepZoom(documentView.ZoomFactor, 1));
                 break;
@@ -438,7 +611,7 @@ public partial class MainWindow: Form {
                 UndoOrRedo(redo: true);
                 break;
             default:
-                // The other commands arrive with their own tasks (menus, settings, notes list…).
+                // The other commands arrive with their own tasks (see HostCommands.IsAvailable).
                 Log.Debug("Host command {Command} is not available yet", command);
                 break;
         }
@@ -582,6 +755,7 @@ public partial class MainWindow: Form {
         if (PageMessages.GetInt(message, "note") is not null) {
             if (PageMessages.FindNote(message, _render.Notes) is { } note) {
                 _position = note.Block;
+                _currentNote = note;
                 SelectNoteInList(note);
             }
 
@@ -590,6 +764,7 @@ public partial class MainWindow: Form {
 
         if (PageMessages.GetString(message, "lines") is { } lines) {
             _position = _render.Blocks.FirstOrDefault(block => block.Lines == lines) ?? _position;
+            _currentNote = null;
         }
     }
 
@@ -608,6 +783,7 @@ public partial class MainWindow: Form {
             }
 
             _position = note.Block ?? _position;
+            _currentNote = note;
             SelectNoteInList(note);
 
             return new NoteTarget(_generation, _renderedText, note.Block, note);
@@ -616,6 +792,7 @@ public partial class MainWindow: Form {
         if (PageMessages.GetString(message, "lines") is { } lines
             && _render.Blocks.FirstOrDefault(block => block.Lines == lines) is { } found) {
             _position = found;
+            _currentNote = null;
 
             return new NoteTarget(_generation, _renderedText, found, null);
         }
@@ -971,6 +1148,184 @@ public partial class MainWindow: Form {
         BeginInvoke(() => OpenDroppedFiles(files));
     }
 
+    // --- Menu commands -----------------------------------------------------------------
+
+    /// <summary>The window title: the open file's name, then the program's.</summary>
+    private void UpdateTitle() =>
+        Text = _file is null ? App.Name : _("{0} - {1}", Path.GetFileName(_file.Path), App.Name);
+
+    /// <summary>File → Open: Markdown files first, then any file.</summary>
+    private void ShowOpenDialog() {
+        using var dialog = new OpenFileDialog {
+            Title = _("Open"),
+            Filter = $"{_("Markdown files")} (*.md;*.markdown)|*.md;*.markdown|{_("All files")} (*.*)|*.*",
+            CheckFileExists = true,
+            RestoreDirectory = true,
+        };
+
+        if (_file is not null && Path.GetDirectoryName(_file.Path) is { } folder) {
+            dialog.InitialDirectory = folder;
+        }
+
+        if (dialog.ShowDialog(this) == DialogResult.OK) {
+            OpenFile(dialog.FileName);
+        } else {
+            ReturnFocus();
+        }
+    }
+
+    /// <summary>File → Open in editor: the open file in the program Windows opens Markdown files with.</summary>
+    private void OpenInEditor() {
+        if (_file is null) {
+            _announcer.Announce(_("No file is open."));
+            return;
+        }
+
+        ShellOpen(_file.Path);
+    }
+
+    /// <summary>
+    /// View → Reload: reads the file again and shows it at the same place. Undo and redo go on
+    /// working: each checks the file still holds the text it expects before it writes.
+    /// </summary>
+    private void ReloadFile() {
+        if (_file is not { } file) {
+            _announcer.Announce(_("No file is open."));
+            return;
+        }
+
+        try {
+            file.Reload();
+        } catch (IOException ex) {
+            Log.Error(ex, "Unable to reload {Path}", file.Path);
+            ShowError(_("Unable to reload {0}: {1}", file.Path, ex.Message));
+            return;
+        }
+
+        RenderDocument();
+        ReturnFocus();
+        _announcer.Announce(_("File reloaded"));
+    }
+
+    /// <summary>
+    /// The note Notes → Edit note and Delete note act on: the one selected in the list while the
+    /// list has the focus, else the one the document is on.
+    /// </summary>
+    private RenderedNote? CurrentNote() {
+        var note = IsNotesListFocused ? SelectedListNote() : _currentNote;
+
+        return note is not null && _render is not null && _render.Notes.Contains(note) ? note : null;
+    }
+
+    private void EditCurrentNote() {
+        if (CurrentNote() is { } note) {
+            EditNote(CurrentTarget(note), note);
+        }
+    }
+
+    private void DeleteCurrentNote() {
+        if (CurrentNote() is { } note) {
+            DeleteNote(CurrentTarget(note), note);
+        }
+    }
+
+    /// <summary>Edit → Delete all notes: always asks first, then removes every note of the file.</summary>
+    private void DeleteAllNotes() {
+        if (_notes is not { } notes || _render is not { Notes.Count: > 0 } render) {
+            _announcer.Announce(_("There are no notes to delete."));
+            return;
+        }
+
+        if (notes.CannotWriteReason is { } reason) {
+            _announcer.Announce(reason);
+            return;
+        }
+
+        var count = render.Notes.Count;
+        var answer = DialogHelper.Show(
+            _n("Delete the note in this file?", "Delete all {0} notes in this file?", count, count),
+            _("Delete all notes"),
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question
+        );
+
+        if (answer != DialogResult.Yes) {
+            ReturnFocus();
+            return;
+        }
+
+        ShowNoteResult(notes.Clear(_renderedText));
+    }
+
+    /// <summary>Help → Keyboard shortcuts.</summary>
+    private void ShowShortcuts() {
+        using var dialog = new ShortcutsDialog(ShortcutsDialog.BuildRows());
+        dialog.ShowDialog(this);
+        ReturnFocus();
+    }
+
+    /// <summary>Help → About PlanCake.</summary>
+    private void ShowAbout() {
+        using var dialog = new AboutDialog();
+        dialog.ShowDialog(this);
+        ReturnFocus();
+    }
+
+    /// <summary>
+    /// View → Interface language: saves the choice and switches the menus, the window and the
+    /// page chrome to it at once. The document's own language does not change.
+    /// </summary>
+    private void SetInterfaceLanguage(string code) {
+        if (String.Equals(Config.General.Language, code, StringComparison.OrdinalIgnoreCase)) {
+            return;
+        }
+
+        Config.General.Language = code;
+        Config.Save();
+        Utils.Localization.SetLanguage(code);
+        Log.Information("Interface language set to {Language}", code);
+
+        // Out of the menu command first: a switch of direction recreates the window's handle.
+        BeginInvoke(ApplyLocalization);
+    }
+
+    /// <summary>
+    /// Translates the window into the current interface language, as SIC does: the designer's
+    /// texts from English again, the direction, what the walk of the controls does not reach (the
+    /// list's columns and name, the menu, the title), the page chrome, and a new render, whose
+    /// notes carry localized role descriptions.
+    /// </summary>
+    private void ApplyLocalization() {
+        Localizer.Revert(this, _localizationStore);
+        Localizer.Localize(this, Utils.Localization.Catalog, _localizationStore);
+        TextDirection.Apply(this);
+        LocalizeNotesList();
+        _menuBar?.Attach(BuildMenuSpec());
+        _notesListMenu?.Rebuild(BuildNotesListMenuSpec());
+        UpdateTitle();
+
+        if (_pageReady) {
+            PostStrings();
+        }
+
+        RenderDocument();
+    }
+
+    /// <summary>
+    /// View → Document language: renders the open document again with this <c>lang</c>, which
+    /// picks the screen reader's voice. For this document only: another file starts with the default.
+    /// </summary>
+    private void SetDocumentLanguage(string code) {
+        if (_file is null || _documentLanguage == code) {
+            return;
+        }
+
+        _documentLanguage = code;
+        RenderDocument();
+        ReturnFocus();
+        _announcer.Announce(_("Document language: {0}", LanguageList.NativeName(code)));
+    }
+
     // --- The notes list beside the document ---------------------------------------------
 
     /// <summary>True while the notes list is shown.</summary>
@@ -1125,9 +1480,6 @@ public partial class MainWindow: Form {
         _showNotesList = !_showNotesList;
         splitContainer.Panel2Collapsed = !_showNotesList;
 
-        // The menu reads the check mark from its spec.
-        _menuBar?.Rebuild(BuildMenuSpec());
-
         if (hadFocus) {
             FocusDocument();
         }
@@ -1183,6 +1535,7 @@ public partial class MainWindow: Form {
         }
 
         _position = note.Block ?? _position;
+        _currentNote = note;
         documentView.PostMessage(new FocusNoteMessage(note.Index));
         FocusDocument();
     }

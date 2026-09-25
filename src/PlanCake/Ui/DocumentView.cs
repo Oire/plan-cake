@@ -40,7 +40,7 @@ internal sealed class DocumentView: UserControl {
     /// <summary>The largest zoom factor, 300%.</summary>
     public const double MaxZoom = 3.0;
 
-    private readonly WebView2 _webView;
+    private readonly TabWebView _webView;
 
     /// <summary>
     /// The one navigation the view may make: the page <see cref="Navigate"/> asked for. Every
@@ -66,7 +66,7 @@ internal sealed class DocumentView: UserControl {
     public event KeyEventHandler? AcceleratorKeyDown;
 
     public DocumentView() {
-        _webView = new WebView2 {
+        _webView = new TabWebView {
             Name = "webView",
             Dock = DockStyle.Fill,
         };
@@ -197,6 +197,19 @@ internal sealed class DocumentView: UserControl {
         }
     }
 
+    /// <summary>
+    /// Moves keyboard focus into the document the way Tab (<paramref name="forward"/>) or
+    /// Shift+Tab would from the control before or after it: to the page's first or last
+    /// focusable element, or to the page itself when it has none. Used by the window for Tab and
+    /// Shift+Tab out of the notes list, which the list cannot pass on beyond its own panel.
+    /// </summary>
+    public void EnterByTab(bool forward) {
+        _webView.EnterByTab(forward);
+
+        // Should the directed select not take the focus, the document still gets it.
+        FocusDocument();
+    }
+
     private void EnsureInitialized() {
         if (!IsInitialized) {
             throw new InvalidOperationException("The document view has not been initialized.");
@@ -267,6 +280,17 @@ internal sealed class DocumentView: UserControl {
     private void OnNewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e) {
         Log.Information("New window blocked: {Uri}", e.Uri);
         e.Handled = true;
+    }
+
+    /// <summary>
+    /// The WebView2 control, with a way in for Tab from outside. <see cref="WebView2"/> takes the
+    /// direction of a directed <c>Select</c> as the page element to focus (first or last) once it
+    /// gets the focus; selecting it directly sets that direction before anything focuses it, where
+    /// a <c>SelectNextControl</c> through the enclosing <see cref="DocumentView"/> would focus
+    /// it first with no direction and so return to the element focused last.
+    /// </summary>
+    private sealed class TabWebView: WebView2 {
+        public void EnterByTab(bool forward) => Select(directed: true, forward);
     }
 
     protected override void Dispose(bool disposing) {

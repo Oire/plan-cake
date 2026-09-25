@@ -116,6 +116,27 @@ internal sealed class NoteActionRunner {
     }
 
     /// <summary>
+    /// Removes every note of the file (Edit → Delete all notes); the view returns to the block the
+    /// user was on. Undo puts them all back at once.
+    /// </summary>
+    public NoteActionResult Clear(string renderedText) {
+        if (CannotWriteReason is { } reason) {
+            return new NoteActionResult(NoteActionStatus.ReadOnly, reason);
+        }
+
+        return Run(
+            () => Store.Clear(renderedText),
+            change => change.Count == 0
+                ? new NoteActionResult(NoteActionStatus.NothingToDo, _("There are no notes to delete."))
+                : new NoteActionResult(
+                    NoteActionStatus.Done,
+                    _n("{0} note deleted", "All {0} notes deleted", change.Count, change.Count)
+                ),
+            _("The file changed. Please try again.")
+        );
+    }
+
+    /// <summary>
     /// Checks or unchecks the task-list item starting on <paramref name="line"/>; the focus stays
     /// on its check box.
     /// </summary>

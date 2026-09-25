@@ -20,6 +20,9 @@ public static class App {
     public const string ManufacturerNameFull = "Oire Software";
     public const string ConfigFileExtension = "cfg";
 
+    /// <summary>The source repository, linked from the About dialog.</summary>
+    public const string RepoUrl = "https://github.com/Oire/plan-cake";
+
     /// <summary>
     /// Subfolder of <see cref="DataFolder"/> that holds user-generated content.
     /// Config files stay at the root of <see cref="DataFolder"/>

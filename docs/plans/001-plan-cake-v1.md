@@ -620,17 +620,22 @@ check tasks off from the document.
 
 **Files:**
 - Create: `src/PlanCake/Ui/ShortcutsDialog.cs` (+ `.Designer.cs`), `src/PlanCake/Ui/AboutDialog.cs`
-  (+ `.Designer.cs`), `src/PlanCake/Utils/LanguageList.cs`
-- Modify: `src/PlanCake/Ui/MainWindow.cs`
+  (+ `.Designer.cs`), `src/PlanCake/Utils/LanguageList.cs`, `src/PlanCake/Ui/MenuBuilder.cs`,
+  `tests/PlanCake.Tests/MenuBuilderTests.cs`, `tests/PlanCake.Tests/LanguageListTests.cs`,
+  `tests/PlanCake.Tests/ShortcutsDialogTests.cs`
+- Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/Ui/HostCommands.cs`,
+  `src/PlanCake/Ui/DocumentView.cs`, `src/PlanCake/Notes/NoteActionRunner.cs`,
+  `src/PlanCake/Utils/Constants/App.cs`, `tests/PlanCake.Tests/HostCommandsTests.cs`,
+  `tests/PlanCake.Tests/NoteActionRunnerTests.cs`
 
-- [ ] `BuildMenuSpec()` with exactly the menus in Technical details → "Menus", shortcuts
+- [x] `BuildMenuSpec()` with exactly the menus in Technical details → "Menus", shortcuts
       registered through the host command table so they work with focus in the document too;
       items that need a file or a note are disabled without one; an item whose feature comes
       in a later task (Open from clipboard and Open from link: Task 11; Settings: Task 12;
       Export notes: Task 13; Check for updates: Task 14; User manual: Task 16) is added by
       that task, not stubbed here; a separator left doubled, leading or trailing by a missing
       item is dropped
-- [ ] View → Interface language: System default plus every shipped language, current one
+- [x] View → Interface language: System default plus every shipped language, current one
       checked, built by a new `Utils/LanguageList.cs` (the `locale\<code>\` scan with native
       names that SIC's Settings dialog does; Task 12's dialog reuses it); choosing one saves
       it to `Config` and applies it live (`ApplyLocalization`, as in SIC, plus a re-render so
@@ -641,15 +646,22 @@ check tasks off from the document.
       language is not one of the six; the document language is English and never follows the
       system (plans are usually written in English, and a Russian Windows must not make JAWS
       read them with a Russian voice)
-- [ ] File → Open (`OpenFileDialog`, filter `*.md;*.markdown`, then all files), Open in editor
+- [x] File → Open (`OpenFileDialog`, filter `*.md;*.markdown`, then all files), Open in editor
       (`UseShellExecute` on the file), Exit; View → Reload
-- [ ] `ShortcutsDialog`: a `NativeListView` with "Command" and "Shortcut" columns built from the
+- [x] `ShortcutsDialog`: a `NativeListView` with "Command" and "Shortcut" columns built from the
       same command table (so it cannot drift), plus the in-document keys (Enter, Applications
       key, Space on a task checkbox); a Close button. It is the one place that lists every shortcut, including the
       in-document keys no menu shows
-- [ ] `AboutDialog` modeled on SIC's: product, version, copyright, repository link, "Copy info"
-- [ ] Delete all notes asks for confirmation (always), then `NoteStore.Clear`
-- [ ] validation commands pass
+- [x] `AboutDialog` modeled on SIC's: product, version, copyright, repository link, "Copy info"
+- [x] Delete all notes asks for confirmation (always), then `NoteStore.Clear`
+- [x] ➕ Tab and Shift+Tab leave the notes list for the document: Tab to the page's first
+      focusable element, Shift+Tab to its last (`DocumentView.EnterByTab`, a directed select of
+      the WebView2), so Tab cycles document → list → document in both directions; Tab from the
+      page's last element and Shift+Tab from its first reach the list through the WebView2's own
+      handling, and with the list hidden Tab stays in the document. Found by the user: Tab
+      reached the list from the document and could not leave it (only F6 did), because the list
+      passes Tab on only among the controls of its own panel, where it is the only stop
+- [x] validation commands pass
 
 ### Task 10: Follow changes on disk, and one window per file
 
