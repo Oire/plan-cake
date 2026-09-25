@@ -80,4 +80,42 @@ public class PageMessagesTests {
     public void StepZoom_MovesInTenPercentStepsWithinLimits(double current, int direction, double expected) {
         DocumentView.StepZoom(current, direction).Should().BeApproximately(expected, 1e-9);
     }
+
+    [Fact]
+    public void GetDouble_And_GetRect_ReadTheContextMenuGeometry() {
+        var message = Parse(
+            """{ "type": "contextMenu", "rect": { "x": 10.5, "y": 20, "width": 300, "height": 40 }, "scale": 1.5 }"""
+        );
+
+        PageMessages.GetDouble(message, "scale").Should().Be(1.5);
+        PageMessages.GetDouble(message, "type").Should().BeNull();
+        PageMessages.GetRect(message, "rect").Should().Be(new RectangleF(10.5f, 20, 300, 40));
+        PageMessages.GetRect(Parse("""{ "rect": { "x": 1, "y": 2, "width": 3 } }"""), "rect").Should().BeNull();
+        PageMessages.GetRect(Parse("""{ "rect": "0,0,1,1" }"""), "rect").Should().BeNull();
+        PageMessages.GetRect(message, "missing").Should().BeNull();
+    }
+
+    [Fact]
+    public void MenuAnchor_ScalesCssPixelsToTheBottomLeftOfTheElement() {
+        var anchor = DocumentView.MenuAnchor(new RectangleF(10, 20, 300, 40), 1.5, new Size(1000, 700));
+
+        anchor.Should().Be(new Point(15, 90));
+    }
+
+    [Fact]
+    public void MenuAnchor_ElementTallerThanTheView_UsesItsTop() {
+        var anchor = DocumentView.MenuAnchor(new RectangleF(8, 100, 500, 2000), 1, new Size(1000, 700));
+
+        anchor.Should().Be(new Point(8, 100));
+    }
+
+    [Fact]
+    public void MenuAnchor_ElementScrolledPartlyOut_StaysInsideTheView() {
+        DocumentView.MenuAnchor(new RectangleF(-20, -500, 100, 1500), 1, new Size(1000, 700))
+            .Should().Be(new Point(0, 0));
+        DocumentView.MenuAnchor(new RectangleF(10, 690, 100, 30), 1, new Size(1000, 700))
+            .Should().Be(new Point(10, 690));
+        DocumentView.MenuAnchor(new RectangleF(10, 20, 100, 30), double.NaN, new Size(1000, 700))
+            .Should().Be(new Point(10, 50));
+    }
 }

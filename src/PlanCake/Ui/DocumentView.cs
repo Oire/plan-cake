@@ -158,6 +158,32 @@ internal sealed class DocumentView: UserControl {
         return Math.Clamp(tenths / 10, MinZoom, MaxZoom);
     }
 
+    /// <summary>
+    /// Where a context menu for a page element opens, in client coordinates of the view: below
+    /// the element's left edge, or at its top when its bottom is out of sight, kept inside the view.
+    /// </summary>
+    /// <param name="cssRect">The element's client rectangle as the page reports it, in CSS pixels.</param>
+    /// <param name="scale">
+    /// The page's <c>devicePixelRatio</c>, which already includes the zoom factor: CSS pixels times
+    /// it are the view's pixels.
+    /// </param>
+    /// <param name="clientSize">The size of the view.</param>
+    internal static Point MenuAnchor(RectangleF cssRect, double scale, Size clientSize) {
+        if (!double.IsFinite(scale) || scale <= 0) {
+            scale = 1;
+        }
+
+        var left = cssRect.Left * scale;
+        var top = cssRect.Top * scale;
+        var bottom = cssRect.Bottom * scale;
+        var y = bottom >= 0 && bottom < clientSize.Height ? bottom : top;
+
+        return new Point(
+            (int)Math.Round(Math.Clamp(left, 0, Math.Max(0, clientSize.Width - 1))),
+            (int)Math.Round(Math.Clamp(y, 0, Math.Max(0, clientSize.Height - 1)))
+        );
+    }
+
     /// <summary>Moves keyboard focus into the document, where the screen reader can read it.</summary>
     public void FocusDocument() => _webView.Focus();
 

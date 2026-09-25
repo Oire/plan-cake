@@ -64,7 +64,11 @@ internal static class PageMessages {
     /// <summary>Enter or a click on a note: <c>{ note, generation }</c>.</summary>
     public const string ActivateNote = "activateNote";
 
-    /// <summary>The Applications key, Shift+F10 or a right-click: <c>{ lines, note?, rect, generation }</c>.</summary>
+    /// <summary>
+    /// The Applications key, Shift+F10 or a right-click: <c>{ lines, note?, rect, scale, generation }</c>,
+    /// <c>rect</c> being the element's client rectangle in CSS pixels and <c>scale</c> the page's
+    /// <c>devicePixelRatio</c>.
+    /// </summary>
     public const string ContextMenu = "contextMenu";
 
     /// <summary>The block (or note) the user last interacted with: <c>{ lines?, note?, generation }</c>.</summary>
@@ -103,6 +107,31 @@ internal static class PageMessages {
         && value.ValueKind == JsonValueKind.String
             ? value.GetString()
             : null;
+
+    /// <summary>A number property of a page message, or <see langword="null"/> when it is missing or not a number.</summary>
+    public static double? GetDouble(JsonElement message, string property) =>
+        message.ValueKind == JsonValueKind.Object
+        && message.TryGetProperty(property, out var value)
+        && value.ValueKind == JsonValueKind.Number
+            ? value.GetDouble()
+            : null;
+
+    /// <summary>
+    /// A rectangle property of a page message (<c>{ x, y, width, height }</c>), or
+    /// <see langword="null"/> when it is missing or incomplete.
+    /// </summary>
+    public static RectangleF? GetRect(JsonElement message, string property) {
+        if (message.ValueKind != JsonValueKind.Object
+            || !message.TryGetProperty(property, out var rect)
+            || GetDouble(rect, "x") is not { } x
+            || GetDouble(rect, "y") is not { } y
+            || GetDouble(rect, "width") is not { } width
+            || GetDouble(rect, "height") is not { } height) {
+            return null;
+        }
+
+        return new RectangleF((float)x, (float)y, (float)width, (float)height);
+    }
 
     /// <summary>An integer property of a page message, or <see langword="null"/> when it is missing or not an integer.</summary>
     public static int? GetInt(JsonElement message, string property) =>

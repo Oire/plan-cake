@@ -326,6 +326,8 @@
             type: "contextMenu",
             lines: linesOf(element),
             rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+            // CSS pixels times this are the view's pixels; it already includes the zoom.
+            scale: window.devicePixelRatio || 1,
             generation: generation
         };
 

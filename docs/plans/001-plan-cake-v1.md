@@ -445,33 +445,33 @@ decide which note triggers the later tasks build.**
   `src/PlanCake/Notes/NoteActionRunner.cs`, `tests/PlanCake.Tests/NoteActionRunnerTests.cs`
 - Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/web/app.js`
 
-- [ ] `NoteDialog`: title "Add note" or "Edit note"; a read-only label "Note on:" with the block
+- [x] `NoteDialog`: title "Add note" or "Edit note"; a read-only label "Note on:" with the block
       excerpt; a multiline, word-wrapping note `TextBox` with a real `Label`; OK and Cancel;
       Enter saves and Ctrl+Enter inserts a line break, or the reverse, per the setting (Task 12;
       hard-code the default until then); OK disabled while the text is blank; a rejected text
       (closing marker) shows why and keeps the dialog open
-- [ ] Enter on a block → `NoteDialog` → `NoteStore.Add` → re-render → focus the new note
+- [x] Enter on a block → `NoteDialog` → `NoteStore.Add` → re-render → focus the new note
       → announce "Note added"; Enter on a note → edit (the note style is `Note` by default,
       hard-coded until Task 12)
-- [ ] Applications key / Shift+F10 on a block or note → `NativeContextMenu.Show` at the
+- [x] Applications key / Shift+F10 on a block or note → `NativeContextMenu.Show` at the
       element's screen position (page sends its client rectangle in CSS pixels; multiply by
       `devicePixelRatio` only, which already includes the zoom, then `webView.PointToScreen`):
       Add note, Edit note, Delete note (only on a note), Copy block text (the block's full
       plain text from `BlockInfo`)
-- [ ] note deletion asks for confirmation (the `ConfirmNoteDelete` default, hard-coded until
+- [x] note deletion asks for confirmation (the `ConfirmNoteDelete` default, hard-coded until
       Task 12)
-- [ ] the outcome of each note action lives in a small UI-free `NoteActionRunner` (success →
+- [x] the outcome of each note action lives in a small UI-free `NoteActionRunner` (success →
       announcement text and focus target; `StaleFileException` → nothing written, re-render,
       "The file changed. Please try again.", dialog text kept for the retry; `IOException` →
       error message, dialog text kept; read-only file → refused with the reason), with tests
       for each outcome in `tests/PlanCake.Tests/NoteActionRunnerTests.cs`
-- [ ] Undo (Ctrl+Z) and Redo (Ctrl+Y) through `NoteStore`, announced ("Note added undone" etc.)
+- [x] Undo (Ctrl+Z) and Redo (Ctrl+Y) through `NoteStore`, announced ("Note added undone" etc.)
 - [ ] **ask the user** to check with JAWS: add, edit, delete, undo and redo a note on a
       paragraph, a nested list item, a table row and a code block; the virtual cursor lands on
       the new note each time; Enter on a block does not switch JAWS to forms mode, and Enter on
       a note opens the editor every time, not only the first; Alt+Left / Backspace return to
       the previous file at the same block, Alt+Right goes forward (Task 6)
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### ➕ Task 7a: Toggle task-list items
 
@@ -877,7 +877,7 @@ JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, eac
   showed that the host's UIA notifications are heard in the virtual buffer, so every
   announcement goes through `StatusAnnouncer`
 - page → host: `activate` `{ lines, generation }` (Enter or a click on a block),
-  `activateNote` `{ note, generation }`, `contextMenu` `{ lines, note?, rect, generation }`,
+  `activateNote` `{ note, generation }`, `contextMenu` `{ lines, note?, rect, scale, generation }` (`rect` in CSS pixels, `scale` the page's `devicePixelRatio`),
   `toggleTask` `{ lines, checked, generation }` (Task 7a), `position` `{ lines?, note?,
   generation }` (last block or note interacted with; the host maps a note to its block),
   `openLink` `{ href }`, `noMoreNotes` `{}`, `dropFiles` `{}` (the dropped `File` objects come

@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Oire.PlanCake.Tests;
 
+[Collection(LocalizationCollection.Name)]
 public class LocalizationTests {
     [Fact]
     public void GetCurrentCulture_WithNoCatalogForTheLanguage_FallsBackToEnglish() {

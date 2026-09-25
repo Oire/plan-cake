@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using GetText.WindowsForms;
@@ -7,6 +8,7 @@ using Oire.PlanCake.Notes;
 using Oire.PlanCake.Rendering;
 using Oire.PlanCake.Utils;
 using Oire.PlanCake.Utils.Enums;
+using Oire.WinForms.NativeControls;
 using Serilog;
 using static Oire.PlanCake.Utils.Localization;
 using App = Oire.PlanCake.Utils.Constants.App;
@@ -21,6 +23,11 @@ public partial class MainWindow: Form {
     // language is English by default and never follows the interface language.
     private const string DocumentLanguage = "en";
     private const NoteStyle DocumentNoteStyle = NoteStyle.Note;
+    private const NoteEnterAction DocumentNoteEnterAction = NoteEnterAction.Save;
+    private const bool ConfirmNoteDelete = true;
+
+    /// <summary>The note markers, <c>[usernote]</c> … <c>[/usernote]</c> until Task 12 makes them a setting.</summary>
+    private static readonly NoteMarkers _markers = NoteMarkers.Default;
 
     private readonly StatusAnnouncer _announcer;
     private readonly string? _initialFile;
@@ -31,8 +38,17 @@ public partial class MainWindow: Form {
     /// <summary>The open file, or <see langword="null"/> before the first one is opened.</summary>
     private MarkdownFile? _file;
 
+    /// <summary>Adds, edits and deletes the notes of <see cref="_file"/>, with undo and redo.</summary>
+    private NoteActionRunner? _notes;
+
     /// <summary>The render the page shows (or is about to show).</summary>
     private RenderResult? _render;
+
+    /// <summary>The file text <see cref="_render"/> was made from.</summary>
+    private string _renderedText = String.Empty;
+
+    /// <summary>A note text that could not be written because the file changed, kept for the retry.</summary>
+    private NoteDraft? _draft;
 
     /// <summary>The number of <see cref="_render"/>; a page message about an older one is ignored.</summary>
     private int _generation;
@@ -145,6 +161,8 @@ public partial class MainWindow: Form {
         }
 
         _file = file;
+        _notes = new NoteActionRunner(new NoteStore(file, _markers));
+        _draft = null;
 
         RenderDocument();
         Text = _("{0} - {1}", Path.GetFileName(file.Path), App.Name);
@@ -165,22 +183,30 @@ public partial class MainWindow: Form {
 
     /// <summary>
     /// Renders the open file and sends it to the page. Without an explicit
-    /// <paramref name="focus"/>, the page returns to the block the user was on.
+    /// <paramref name="focus"/>, the page goes to the note starting on
+    /// <paramref name="focusNoteLine"/>, if given and found, else returns to the block the user was on.
     /// </summary>
-    private void RenderDocument(PageFocus? focus = null) {
+    private void RenderDocument(PageFocus? focus = null, int? focusNoteLine = null) {
         if (_file is null) {
             return;
         }
 
         var options = new RenderOptions(
-            NoteMarkers.Default,
+            _markers,
             RenderMode.Interactive,
             DocumentNoteStyle,
             CurrentRenderStrings(),
             DocumentLanguage
         );
-        _render = MarkdownRenderer.Render(_file.Text, options);
+        _renderedText = _file.Text;
+        _render = MarkdownRenderer.Render(_renderedText, options);
         _generation++;
+
+        if (focus is null && focusNoteLine is { } line
+            && _render.Notes.FirstOrDefault(note => note.Note.StartLine == line) is { } focusedNote) {
+            focus = new PageFocus(Note: focusedNote.Index);
+            _position = focusedNote.Block ?? _position;
+        }
 
         if (focus is null && PositionRestorer.FindTarget(_position, _render.Blocks) is { } target) {
             focus = new PageFocus(Lines: target.Lines);
@@ -321,6 +347,12 @@ public partial class MainWindow: Form {
             case HostCommand.PreviousNote:
                 MoveToNote(forward: false);
                 break;
+            case HostCommand.Undo:
+                UndoOrRedo(redo: false);
+                break;
+            case HostCommand.Redo:
+                UndoOrRedo(redo: true);
+                break;
             default:
                 // The other commands arrive with their own tasks (menus, settings, notes list…).
                 Log.Debug("Host command {Command} is not available yet", command);
@@ -394,11 +426,24 @@ public partial class MainWindow: Form {
 
                 break;
             case PageMessages.Activate:
+                if (FindTarget(e.Message) is { Block: { } block } target) {
+                    BeginInvoke(WhileCurrent(target, () => AddNote(target, block)));
+                }
+
+                break;
             case PageMessages.ActivateNote:
+                if (FindTarget(e.Message) is { Note: { } note } noteTarget) {
+                    BeginInvoke(WhileCurrent(noteTarget, () => EditNote(noteTarget, note)));
+                }
+
+                break;
             case PageMessages.ContextMenu:
-                // The note dialog and the context menu arrive in Task 7; the page has already
-                // reported the position.
-                Log.Debug("Page {Type}: {Json}", e.Type, e.Message.GetRawText());
+                if (FindTarget(e.Message) is { } menuTarget) {
+                    var rect = PageMessages.GetRect(e.Message, "rect");
+                    var scale = PageMessages.GetDouble(e.Message, "scale") ?? 1;
+                    BeginInvoke(WhileCurrent(menuTarget, () => ShowContextMenu(menuTarget, rect, scale)));
+                }
+
                 break;
             case PageMessages.OpenLink:
                 var href = PageMessages.GetString(e.Message, "href") ?? "";
@@ -439,6 +484,248 @@ public partial class MainWindow: Form {
 
         if (PageMessages.GetString(message, "lines") is { } lines) {
             _position = _render.Blocks.FirstOrDefault(block => block.Lines == lines) ?? _position;
+        }
+    }
+
+    /// <summary>
+    /// The block or note a page message is about (<c>note</c> wins over <c>lines</c>), from the
+    /// current render; <see langword="null"/> for an older render or an unknown element.
+    /// </summary>
+    private NoteTarget? FindTarget(JsonElement message) {
+        if (_render is null || !IsCurrentRender(message)) {
+            return null;
+        }
+
+        if (PageMessages.GetInt(message, "note") is { } index) {
+            if (index < 0 || index >= _render.Notes.Count) {
+                return null;
+            }
+
+            var note = _render.Notes[index];
+            _position = note.Block ?? _position;
+
+            return new NoteTarget(_generation, _renderedText, note.Block, note);
+        }
+
+        if (PageMessages.GetString(message, "lines") is { } lines
+            && _render.Blocks.FirstOrDefault(block => block.Lines == lines) is { } found) {
+            _position = found;
+
+            return new NoteTarget(_generation, _renderedText, found, null);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Wraps a deferred action about <paramref name="target"/> so that it does nothing once the
+    /// render the target came from has been replaced.
+    /// </summary>
+    private Action WhileCurrent(NoteTarget target, Action action) => () => {
+        if (target.Generation == _generation) {
+            action();
+        }
+    };
+
+    /// <summary>Enter or a click on a block (or Add note in its menu): asks for a note and writes it after the block.</summary>
+    private void AddNote(NoteTarget target, BlockInfo block) {
+        if (_notes is not { } notes) {
+            return;
+        }
+
+        if (notes.CannotWriteReason is { } reason) {
+            _announcer.Announce(reason);
+            return;
+        }
+
+        var text = TakeDraft(NoteDialogMode.Add, block.Text) ?? String.Empty;
+        RunNoteDialog(
+            NoteDialogMode.Add, block.Excerpt, block.Text, text,
+            noteText => notes.Add(target.RenderedText, block, noteText)
+        );
+    }
+
+    /// <summary>Enter or a click on a note (or Edit note in its menu): edits its text.</summary>
+    private void EditNote(NoteTarget target, RenderedNote note) {
+        if (_notes is not { } notes) {
+            return;
+        }
+
+        if (notes.CannotWriteReason is { } reason) {
+            _announcer.Announce(reason);
+            return;
+        }
+
+        var text = TakeDraft(NoteDialogMode.Edit, note.Note.Text) ?? note.Note.Text;
+        RunNoteDialog(
+            NoteDialogMode.Edit, BlockExcerpt(note), note.Note.Text, text,
+            noteText => notes.Edit(target.RenderedText, note.Note, noteText)
+        );
+    }
+
+    /// <summary>
+    /// Shows the note dialog until the note is written or the user cancels. A failed write
+    /// reopens the dialog with the text; when the file changed on disk, the document is shown
+    /// again and the text kept in <see cref="_draft"/> for the next attempt on the same block or note.
+    /// </summary>
+    private void RunNoteDialog(
+        NoteDialogMode mode,
+        string excerpt,
+        string draftKey,
+        string text,
+        Func<string, NoteActionResult> save
+    ) {
+        while (_notes is { } notes) {
+            using (var dialog = new NoteDialog(mode, excerpt, text, notes.DescribeTextError, DocumentNoteEnterAction)) {
+                if (dialog.ShowDialog(this) != DialogResult.OK) {
+                    FocusDocument();
+                    return;
+                }
+
+                text = dialog.NoteText;
+            }
+
+            var result = save(text);
+            ShowNoteResult(result);
+
+            if (result.Status is NoteActionStatus.Failed or NoteActionStatus.InvalidText) {
+                continue;
+            }
+
+            if (result.KeepsText) {
+                _draft = new NoteDraft(mode, draftKey, text);
+            }
+
+            return;
+        }
+    }
+
+    /// <summary>The kept draft for this block or note, taken out; <see langword="null"/> when there is none.</summary>
+    private string? TakeDraft(NoteDialogMode mode, string key) {
+        if (_draft is not { } draft || draft.Mode != mode || !String.Equals(draft.Key, key, StringComparison.Ordinal)) {
+            return null;
+        }
+
+        _draft = null;
+
+        return draft.Text;
+    }
+
+    /// <summary>Delete note: asks first (unless the setting says not to), then removes the note.</summary>
+    private void DeleteNote(NoteTarget target, RenderedNote note) {
+        if (_notes is not { } notes) {
+            return;
+        }
+
+        if (notes.CannotWriteReason is { } reason) {
+            _announcer.Announce(reason);
+            return;
+        }
+
+        if (ConfirmNoteDelete) {
+            var answer = DialogHelper.Show(
+                _("Delete this note?\n\n{0}", MarkdownRenderer.Excerpt(note.Note.Text)),
+                _("Delete note"),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (answer != DialogResult.Yes) {
+                FocusDocument();
+                return;
+            }
+        }
+
+        _position = note.Block ?? _position;
+        ShowNoteResult(notes.Delete(target.RenderedText, note.Note));
+    }
+
+    private void UndoOrRedo(bool redo) {
+        if (_notes is not { } notes) {
+            _announcer.Announce(redo ? _("Nothing to redo") : _("Nothing to undo"));
+            return;
+        }
+
+        ShowNoteResult(redo ? notes.Redo() : notes.Undo());
+    }
+
+    /// <summary>Shows the outcome of a note action: re-renders when the file changed, and tells the user.</summary>
+    private void ShowNoteResult(NoteActionResult result) {
+        switch (result.Status) {
+            case NoteActionStatus.Done:
+                RenderDocument(focusNoteLine: result.FocusNoteLine);
+                FocusDocument();
+                _announcer.Announce(result.Message);
+                break;
+            case NoteActionStatus.Stale:
+                RenderDocument();
+                FocusDocument();
+                _announcer.Announce(result.Message);
+                break;
+            case NoteActionStatus.Failed:
+            case NoteActionStatus.InvalidText:
+                ShowError(result.Message);
+                break;
+            default:
+                _announcer.Announce(result.Message);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// The context menu of a block or a note, at the element's position: Add note, then Edit and
+    /// Delete note on a note, then Copy block text.
+    /// </summary>
+    private void ShowContextMenu(NoteTarget target, RectangleF? rect, double scale) {
+        var spec = new NativeMenuSpec();
+
+        if (target.Block is { } block) {
+            spec.Add(_("&Add note"), WhileCurrent(target, () => AddNote(target, block)));
+        }
+
+        if (target.Note is { } note) {
+            spec.Add(_("&Edit note"), WhileCurrent(target, () => EditNote(target, note)));
+            spec.Add(_("&Delete note"), WhileCurrent(target, () => DeleteNote(target, note)));
+        }
+
+        if (target.Block is { } copied) {
+            spec.Add(_("&Copy block text"), () => CopyBlockText(copied));
+        }
+
+        if (spec.Items.Count == 0) {
+            return;
+        }
+
+        var anchor = rect is { } bounds
+            ? DocumentView.MenuAnchor(bounds, scale, documentView.ClientSize)
+            : Point.Empty;
+
+        using var menu = new NativeContextMenu(spec);
+        menu.Show(this, documentView.PointToScreen(anchor));
+    }
+
+    private void CopyBlockText(BlockInfo block) {
+        if (String.IsNullOrEmpty(block.Text)) {
+            _announcer.Announce(_("The block has no text to copy."));
+            return;
+        }
+
+        try {
+            Clipboard.SetText(block.Text);
+            _announcer.Announce(_("Block text copied"));
+        } catch (ExternalException ex) {
+            Log.Error(ex, "Unable to copy the block text to the clipboard");
+            _announcer.Announce(_("Unable to copy to the clipboard."));
+        }
+    }
+
+    /// <summary>The excerpt of the block a note is on, for the note dialog.</summary>
+    private static string BlockExcerpt(RenderedNote note) =>
+        note.Block?.Excerpt ?? _("The start of the document");
+
+    private void FocusDocument() {
+        if (documentView.IsInitialized) {
+            documentView.FocusDocument();
         }
     }
 
@@ -510,3 +797,19 @@ public partial class MainWindow: Form {
         base.OnFormClosed(e);
     }
 }
+
+/// <summary>
+/// The block or note a page action is about, with the render it came from: the text that render
+/// was made from is what the note store checks the file against.
+/// </summary>
+/// <param name="Generation">The render's number.</param>
+/// <param name="RenderedText">The file text the render was made from.</param>
+/// <param name="Block">The block, or the block the note is on; <see langword="null"/> for a note at the top.</param>
+/// <param name="Note">The note, when the action is about one.</param>
+internal sealed record NoteTarget(int Generation, string RenderedText, BlockInfo? Block, RenderedNote? Note);
+
+/// <summary>A note text kept after the file changed under it, for the next attempt on the same block or note.</summary>
+/// <param name="Mode">Whether it was a new note or an edit.</param>
+/// <param name="Key">The block's text (a new note) or the note's original text (an edit).</param>
+/// <param name="Text">What the user typed.</param>
+internal sealed record NoteDraft(NoteDialogMode Mode, string Key, string Text);
