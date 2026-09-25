@@ -766,12 +766,15 @@ check tasks off from the document.
       and a temp Downloads folder)
 - [x] tests for `ClipboardClassifier`: a drop list with and without a Markdown file, a quoted
       and an unquoted path, a link, other text, an empty clipboard
-- [ ] **ask the user** to check with JAWS: Ctrl+V after copying a `.md` file in Explorer opens
+- [x] **ask the user** to check with JAWS: Ctrl+V after copying a `.md` file in Explorer opens
       it; Ctrl+V with a copied path ("Copy as path") or a copied http(s) link to a Markdown file
       opens it; Ctrl+V with nothing usable (plain text, a copied non-Markdown file) announces why;
       File → Open from link… (a real Label, Enter opens, Escape cancels) opens a GitHub blob link
       and a raw link, announcing the download and where it was saved; an invalid link is refused
-      with the reason; a link to a web page is refused
+      with the reason; a link to a web page is refused.
+      Results: all passed; the web page link was announced as "Downloading Oire.md" before being
+      refused, so the start of a download now names the host ("Downloading from github.com…")
+      and the file name comes only with "Downloaded and saved to"
 - [x] validation commands pass
 
 ### Task 12: Settings

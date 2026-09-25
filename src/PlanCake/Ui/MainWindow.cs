@@ -1354,11 +1354,11 @@ public partial class MainWindow: Form {
         using var cancellation = new CancellationTokenSource();
         _download = cancellation;
 
-        // The name the file is saved under says what is coming; a whole link is long to listen to.
-        var name = UrlHelper.IsValidHttpUrl(url, out var link)
-            ? MarkdownDownloader.FileNameFor(MarkdownDownloader.RewriteGitHubBlob(new Uri(link)))
-            : url;
-        _announcer.Announce(_("Downloading {0}...", name));
+        // The host only: a whole link is long to listen to, and a file name guessed before the
+        // content is accepted misleads when the link turns out to be a web page (Task 11 JAWS check).
+        // The name comes with "Downloaded and saved to".
+        var source = UrlHelper.IsValidHttpUrl(url, out var link) ? new Uri(link).Host : url;
+        _announcer.Announce(_("Downloading from {0}...", source));
         DownloadResult result;
 
         try {
