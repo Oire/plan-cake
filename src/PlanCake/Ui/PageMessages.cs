@@ -76,6 +76,12 @@ internal static class PageMessages {
     /// <summary><c>nextNote</c> or <c>previousNote</c> found no note in that direction.</summary>
     public const string NoMoreNotes = "noMoreNotes";
 
+    /// <summary>
+    /// Backspace in the page, outside any text field: go back to the previous file. Covers the
+    /// case where the browser does not report Backspace to the host as an accelerator key.
+    /// </summary>
+    public const string GoBack = "goBack";
+
     /// <summary>Files were dropped on the page; their paths come as the message's additional objects.</summary>
     public const string DropFiles = "dropFiles";
 

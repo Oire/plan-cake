@@ -25,6 +25,9 @@ public partial class MainWindow: Form {
     private readonly StatusAnnouncer _announcer;
     private readonly string? _initialFile;
 
+    /// <summary>The files visited in this window, for Back and Forward.</summary>
+    private readonly NavigationHistory _history = new();
+
     /// <summary>The open file, or <see langword="null"/> before the first one is opened.</summary>
     private MarkdownFile? _file;
 
@@ -101,10 +104,18 @@ public partial class MainWindow: Form {
     /// <summary>
     /// Opens a Markdown file in the window. Every way of opening one (the command line, drag and
     /// drop, a link in the document, and later File → Open, the clipboard and a web link) goes
-    /// through here. On failure the user is told why and the current document stays.
+    /// through here, and the file being left goes into the history for Back. On failure the
+    /// user is told why and the current document stays.
     /// </summary>
     /// <returns>True when the file was opened.</returns>
-    internal bool OpenFile(string path) {
+    internal bool OpenFile(string path) => LoadFile(path, position: null, recordHistory: true);
+
+    /// <param name="path">The file to open.</param>
+    /// <param name="position">The block to return to in it (from the history), if any.</param>
+    /// <param name="recordHistory">
+    /// Push the file being left onto the history; false when moving through the history itself.
+    /// </param>
+    private bool LoadFile(string path, BlockInfo? position, bool recordHistory) {
         MarkdownFile file;
 
         try {
@@ -124,11 +135,16 @@ public partial class MainWindow: Form {
 
         // Opening the same file again keeps the reading position; another file starts at the top.
         var reopened = _file is not null && String.Equals(_file.Path, file.Path, StringComparison.OrdinalIgnoreCase);
-        _file = file;
 
         if (!reopened) {
-            _position = null;
+            if (recordHistory && _file is not null) {
+                _history.Push(new HistoryEntry(_file.Path, _position));
+            }
+
+            _position = position;
         }
+
+        _file = file;
 
         RenderDocument();
         Text = _("{0} - {1}", Path.GetFileName(file.Path), App.Name);
@@ -246,13 +262,20 @@ public partial class MainWindow: Form {
     /// accelerator table and <see cref="ProcessCmdKey"/>.
     /// </summary>
     private void OnDocumentAcceleratorKeyDown(object? sender, KeyEventArgs e) {
-        if (TryRunShortcut(e.KeyData)) {
+        if (TryRunShortcut(e.KeyData, fromDocument: true)) {
             e.Handled = true;
         }
     }
 
-    private bool TryRunShortcut(Keys keyData) {
+    private bool TryRunShortcut(Keys keyData, bool fromDocument = false) {
         if (!HostCommands.TryGetCommand(keyData, out var command)) {
+            return false;
+        }
+
+        // Backspace means Back only in the document and the window's lists, never in a box the
+        // user types in.
+        if (keyData == Keys.Back && !fromDocument
+            && FocusedControl() is TextBoxBase or ComboBox or UpDownBase) {
             return false;
         }
 
@@ -260,6 +283,17 @@ public partial class MainWindow: Form {
         // dialog it opens does not start a nested message loop inside that event.
         BeginInvoke(() => RunCommand(command, keyData));
         return true;
+    }
+
+    /// <summary>The innermost control of this window that has focus.</summary>
+    private Control? FocusedControl() {
+        Control? control = ActiveControl;
+
+        while (control is ContainerControl { ActiveControl: { } inner }) {
+            control = inner;
+        }
+
+        return control;
     }
 
     private void RunCommand(HostCommand command, Keys keyData) {
@@ -274,6 +308,12 @@ public partial class MainWindow: Form {
                 break;
             case HostCommand.ResetZoom:
                 SetZoom(DocumentView.StepZoom(documentView.ZoomFactor, 0));
+                break;
+            case HostCommand.Back:
+                MoveThroughHistory(back: true);
+                break;
+            case HostCommand.Forward:
+                MoveThroughHistory(back: false);
                 break;
             case HostCommand.NextNote:
                 MoveToNote(forward: true);
@@ -295,6 +335,34 @@ public partial class MainWindow: Form {
 
         documentView.ZoomFactor = zoom;
         _announcer.Announce(_("Zoom {0}%", (int)Math.Round(documentView.ZoomFactor * 100)));
+    }
+
+    /// <summary>
+    /// Back or Forward: opens the previous or next file at the block the user was on, skipping
+    /// (and dropping) files that no longer exist.
+    /// </summary>
+    private void MoveThroughHistory(bool back) {
+        var current = _file is null ? null : new HistoryEntry(_file.Path, _position);
+        Func<HistoryEntry, bool> open = entry => LoadFile(entry.Path, entry.Position, recordHistory: false);
+        var move = back
+            ? _history.GoBack(current, File.Exists, open)
+            : _history.GoForward(current, File.Exists, open);
+
+        var messages = move.Missing
+            .Select(path => _("{0} no longer exists and was removed from the history.", Path.GetFileName(path)))
+            .ToList();
+
+        if (move.Outcome == HistoryOutcome.AtEnd) {
+            messages.Add(back ? _("No previous file") : _("No next file"));
+        }
+
+        if (messages.Count > 0) {
+            Log.Information(
+                "History {Direction}: {Outcome}, missing={Missing}",
+                back ? "back" : "forward", move.Outcome, move.Missing
+            );
+            _announcer.Announce(String.Join(" ", messages));
+        }
     }
 
     private void MoveToNote(bool forward) {
@@ -335,6 +403,9 @@ public partial class MainWindow: Form {
             case PageMessages.OpenLink:
                 var href = PageMessages.GetString(e.Message, "href") ?? "";
                 BeginInvoke(() => OpenLink(href));
+                break;
+            case PageMessages.GoBack:
+                BeginInvoke(() => RunCommand(HostCommand.Back, Keys.Back));
                 break;
             case PageMessages.NoMoreNotes:
                 _announcer.Announce(_("No more notes"));

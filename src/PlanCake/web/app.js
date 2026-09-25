@@ -57,6 +57,20 @@
         return element;
     }
 
+    // A field the user types in, where Backspace deletes text.
+    function isTextField(node) {
+        if (!(node instanceof Element)) {
+            return false;
+        }
+
+        if (node.isContentEditable || node.tagName === "TEXTAREA" || node.tagName === "SELECT") {
+            return true;
+        }
+
+        const nonTextInputs = ["button", "checkbox", "color", "file", "hidden", "image", "radio", "range", "reset", "submit"];
+        return node.tagName === "INPUT" && !nonTextInputs.includes((node.getAttribute("type") || "text").toLowerCase());
+    }
+
     function isNote(element) {
         return element.hasAttribute("data-note");
     }
@@ -260,7 +274,22 @@
     // JAWS turns Enter into a click. When it is in forms mode, or the element has real focus,
     // Enter arrives as a key instead, and a div would ignore it: treat it like the click.
     document.addEventListener("keydown", function (event) {
-        if (event.key !== "Enter" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+            return;
+        }
+
+        // Backspace goes back to the previous file, as in a browser, unless the user is typing.
+        // The host usually sees the key first; this covers the case where it does not.
+        if (event.key === "Backspace") {
+            if (!isTextField(event.target)) {
+                event.preventDefault();
+                post({ type: "goBack" });
+            }
+
+            return;
+        }
+
+        if (event.key !== "Enter") {
             return;
         }
 

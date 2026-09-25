@@ -419,9 +419,23 @@ decide which note triggers the later tasks build.**
       (`dropFiles`) and the host reads the paths from the `CoreWebView2File` objects
 - [x] zoom: Ctrl+Plus, Ctrl+Minus (main keyboard and numpad: `Oemplus`, `OemMinus`, `Add`,
       `Subtract`), Ctrl+0 set `ZoomFactor` in steps of 10%, 50%–300%
-- [ ] **ask the user** to check with JAWS: an 800-line plan reads with H, I, L, T and B
+- [x] ➕ back and forward: a browser-like history of visited files in the window, kept in a
+      UI-free `Utils/NavigationHistory.cs` (tests in
+      `tests/PlanCake.Tests/NavigationHistoryTests.cs`). Opening another file by any route (a
+      `.md` link, the command line, drag and drop, and later File → Open, the clipboard and a
+      web link) pushes the current file with its reading position (the last block interacted
+      with, the `BlockInfo` `PositionRestorer` uses) and clears the forward list; Alt+Left
+      Arrow and Backspace go back to the previous file at that position, Alt+Right Arrow goes
+      forward. At either end, "No previous file" / "No next file" is announced; a file in the
+      history that no longer exists is announced, dropped from the history and skipped. The
+      keys go through `HostCommands`; Backspace never fires from a text box, and the page also
+      reports it (`goBack`) in case the browser does not treat it as an accelerator key.
+      Added after the Task 6 JAWS check found no way back from a followed `.md` link
+- [x] **ask the user** to check with JAWS: an 800-line plan reads with H, I, L, T and B
       navigation, no Markdown punctuation is read, links open in the browser, zoom works,
-      Enter on a block does not switch JAWS to forms mode
+      Enter on a block does not switch JAWS to forms mode.
+      Results: all pass; a relative `.md` link opens in PlanCake but had no way back (added
+      back and forward above, checked in Task 7); F9 not reported (checked in Task 8)
 - [x] validation commands pass
 
 ### Task 7: Add, edit and delete notes from the document
@@ -455,7 +469,8 @@ decide which note triggers the later tasks build.**
 - [ ] **ask the user** to check with JAWS: add, edit, delete, undo and redo a note on a
       paragraph, a nested list item, a table row and a code block; the virtual cursor lands on
       the new note each time; Enter on a block does not switch JAWS to forms mode, and Enter on
-      a note opens the editor every time, not only the first
+      a note opens the editor every time, not only the first; Alt+Left / Backspace return to
+      the previous file at the same block, Alt+Right goes forward (Task 6)
 - [ ] validation commands pass
 
 ### ➕ Task 7a: Toggle task-list items
@@ -572,7 +587,10 @@ check tasks off from the document.
       upper-cased path>`; a second `plancake same.md` connects, calls
       `AllowSetForegroundWindow`, sends "activate", exits with `ExitCode.Success`; the first
       window restores and activates itself; `MainWindow.OpenFile` (Task 6) re-registers under
-      the new path, so every way of opening a file is covered
+      the new path, so every way of opening a file is covered. With the back/forward history
+      (Task 6): following a link to, or going Back or Forward to, a file already open in
+      another window activates that window instead; this window stays on its file and its
+      history is unchanged
 - [ ] `FileWatcher` takes an injectable clock/timer so its logic is testable without real
       waits
 - [ ] tests: bursts of events inside 300 ms produce one reload; PlanCake's own write produces
@@ -863,15 +881,15 @@ JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, eac
   `toggleTask` `{ lines, checked, generation }` (Task 7a), `position` `{ lines?, note?,
   generation }` (last block or note interacted with; the host maps a note to its block),
   `openLink` `{ href }`, `noMoreNotes` `{}`, `dropFiles` `{}` (the dropped `File` objects come
-  as additional objects), `ready` `{}`
+  as additional objects), `goBack` `{}` (Backspace in the page, outside any text field), `ready` `{}`
 - the host ignores any message whose `generation` is not the latest render
 
 ### Keyboard
 
 Host shortcuts (must work with focus in the document and in the list): Ctrl+O, Ctrl+V, Ctrl+L,
 Ctrl+E, Ctrl+comma, F5, F6, F9, Shift+F9, Ctrl+Z, Ctrl+Y, Ctrl+Plus, Ctrl+Minus (both also on
-the numpad), Ctrl+0, F1,
-Shift+F1, Alt+F4.
+the numpad), Ctrl+0, Alt+Left Arrow and Backspace (back to the previous file), Alt+Right
+Arrow (forward), F1, Shift+F1, Alt+F4. Backspace never fires from a text box.
 In the document: Enter on a block / note, Space (or Enter) on a task checkbox, Applications key
 and Shift+F10. In the list: Enter, Delete, Applications key.
 
@@ -887,8 +905,10 @@ extended-select mode, so F8 never reaches PlanCake.
 - **View:** Notes list (checkable), Switch pane (F6), separator, Interface language ▸ (System
   default, then each shipped language by native name), Document language ▸ (English, Русский,
   Українська, Français, עברית, Deutsch), separator, Zoom in (Ctrl+Plus), Zoom out
-  (Ctrl+Minus), Reset zoom (Ctrl+0), separator, Reload (F5). Language names carry no
-  mnemonics; the two submenus' own mnemonics must differ from every other View item's.
+  (Ctrl+Minus), Reset zoom (Ctrl+0), separator, Back (Alt+Left), Forward (Alt+Right), Reload
+  (F5). Backspace is not shown on any menu item. Language names carry no mnemonics; the two
+  submenus' own mnemonics must differ from every other View item's, and every View item's
+  mnemonic is unique within View.
 - **Notes:** Edit note, Delete note, separator, Next note (F9), Previous note (Shift+F9)
 - **Help:** User manual (F1), Keyboard shortcuts, separator, Check for updates, About PlanCake (Shift+F1)
 

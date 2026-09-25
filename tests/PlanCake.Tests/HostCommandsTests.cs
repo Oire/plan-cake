@@ -16,6 +16,9 @@ public class HostCommandsTests {
         { Keys.Control | Keys.E, nameof(HostCommand.OpenInEditor) },
         { Keys.Control | Keys.Oemcomma, nameof(HostCommand.Settings) },
         { Keys.F5, nameof(HostCommand.Reload) },
+        { Keys.Alt | Keys.Left, nameof(HostCommand.Back) },
+        { Keys.Back, nameof(HostCommand.Back) },
+        { Keys.Alt | Keys.Right, nameof(HostCommand.Forward) },
         { Keys.F6, nameof(HostCommand.SwitchPane) },
         { Keys.F9, nameof(HostCommand.NextNote) },
         { Keys.Shift | Keys.F9, nameof(HostCommand.PreviousNote) },
@@ -46,6 +49,8 @@ public class HostCommandsTests {
     [InlineData(Keys.Control | Keys.A)] // JAWS handles Select all in the document itself.
     [InlineData(Keys.F8)] // JAWS takes F8 for extended select (Task 2 spike): notes use F9.
     [InlineData(Keys.Shift | Keys.F8)]
+    [InlineData(Keys.Left)] // Plain arrows move the virtual cursor.
+    [InlineData(Keys.Control | Keys.Back)] // Deletes a word in a text box.
     public void TryGetCommand_LeavesOtherKeysAlone(Keys keys) {
         HostCommands.TryGetCommand(keys, out _).Should().BeFalse();
     }
