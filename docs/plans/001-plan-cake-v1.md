@@ -608,9 +608,12 @@ check tasks off from the document.
       goes out on the new page's `ready`; a re-render of the same file stays in place.
       `DocumentView.FocusDocument` does nothing when the document already has the focus. See
       `docs/jaws-spike.md`
-- [ ] **ask the user** to check the list, F6 and F9 with JAWS; also: a parent task with some
+- [x] **ask the user** to check the list, F6 and F9 with JAWS; also: a parent task with some
       children checked reads as partially checked (Task 7a); following a `.md` link lands at
-      the top of the new file (Task 7a fix)
+      the top of the new file (Task 7a fix).
+      Results: F6, F9 / Shift+F9, Enter, Delete, the list menu, hiding the list and the
+      partially checked parent passed first time; the unnamed list, the list not following the
+      document and the link landing at the end were fixed (➕ items above) and pass on re-check
 - [x] validation commands pass
 
 ### Task 9: Menu bar and the small dialogs
