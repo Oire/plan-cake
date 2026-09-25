@@ -464,6 +464,112 @@ public class NoteStoreTests: IDisposable {
         store.CanRedo.Should().BeFalse();
     }
 
+    // Task-list toggles
+
+    [Fact]
+    public void ToggleTask_ChecksAndUnchecksTheItem() {
+        var store = Store("- [ ] one\n- [X] two\n");
+
+        var check = store.ToggleTask(store.File.Text, 1, isChecked: true);
+
+        check.Operation.Should().Be(NoteOperation.CheckTask);
+        check.Line.Should().Be(1);
+        OnDisk.Should().Be("- [x] one\n- [X] two\n");
+
+        var uncheck = store.ToggleTask(store.File.Text, 2, isChecked: false);
+
+        uncheck.Operation.Should().Be(NoteOperation.UncheckTask);
+        OnDisk.Should().Be("- [x] one\n- [ ] two\n");
+    }
+
+    [Fact]
+    public void ToggleTask_ItemWithANoteAfterIt_LeavesTheNoteUntouched() {
+        var store = Store("- [ ] one\n  [usernote]why[/usernote]\n- [ ] two\n");
+
+        store.ToggleTask(store.File.Text, 1, isChecked: true);
+
+        OnDisk.Should().Be("- [x] one\n  [usernote]why[/usernote]\n- [ ] two\n");
+    }
+
+    [Fact]
+    public void ToggleTask_CrLfFile_KeepsCrLf() {
+        var store = Store("- [ ] one\r\n- [ ] two\r\n");
+
+        store.ToggleTask(store.File.Text, 2, isChecked: true);
+
+        OnDisk.Should().Be("- [ ] one\r\n- [x] two\r\n");
+    }
+
+    [Fact]
+    public void ToggleTask_FileChangedOnDisk_ThrowsStaleAndWritesNothing() {
+        var store = Store("- [ ] one\n");
+        var rendered = store.File.Text;
+        File.WriteAllText(_path, "- [ ] one\n- [ ] added elsewhere\n");
+
+        var toggle = () => store.ToggleTask(rendered, 1, isChecked: true);
+
+        toggle.Should().Throw<StaleFileException>();
+        OnDisk.Should().Be("- [ ] one\n- [ ] added elsewhere\n");
+        store.CanUndo.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ToggleTask_LineWithoutATaskMarker_ThrowsAndWritesNothing() {
+        var store = Store("- plain\n");
+
+        var toggle = () => store.ToggleTask(store.File.Text, 1, isChecked: true);
+
+        toggle.Should().Throw<ArgumentException>();
+        OnDisk.Should().Be("- plain\n");
+        store.CanUndo.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ToggleTask_ReadOnlyFile_IsRefused() {
+        _path = Path.Combine(_folder, "ansi.md");
+        var bytes = _windows1251.GetBytes("- [ ] задача\n");
+        File.WriteAllBytes(_path, bytes);
+        var store = Store(options: new MarkdownFileOptions(AnsiEncoding: _windows1251));
+
+        var toggle = () => store.ToggleTask(store.File.Text, 1, isChecked: true);
+
+        toggle.Should().Throw<ReadOnlyFileException>();
+        File.ReadAllBytes(_path).Should().Equal(bytes);
+    }
+
+    [Fact]
+    public void ToggleTask_UndoAndRedo_ShareTheNotesHistory() {
+        var store = Store("Para.\n\n- [ ] one\n");
+        AddAfter(store, BlockKind.Paragraph, "a note");
+        var afterAdd = OnDisk;
+        store.ToggleTask(store.File.Text, 4, isChecked: true);
+        var afterToggle = OnDisk;
+        afterToggle.Should().Be("Para.\n[usernote]a note[/usernote]\n\n- [x] one\n");
+
+        store.Undo().Operation.Should().Be(NoteOperation.CheckTask);
+        OnDisk.Should().Be(afterAdd);
+
+        store.Undo().Operation.Should().Be(NoteOperation.Add);
+        OnDisk.Should().Be("Para.\n\n- [ ] one\n");
+
+        store.Redo();
+        store.Redo().Operation.Should().Be(NoteOperation.CheckTask);
+        OnDisk.Should().Be(afterToggle);
+    }
+
+    [Fact]
+    public void ToggleTask_UndoAfterAnExternalChange_IsRefused() {
+        var store = Store("- [ ] one\n");
+        store.ToggleTask(store.File.Text, 1, isChecked: true);
+        File.WriteAllText(_path, "- [ ] one\n");
+
+        var undo = () => store.Undo();
+
+        undo.Should().Throw<StaleFileException>();
+        OnDisk.Should().Be("- [ ] one\n");
+        store.CanUndo.Should().BeFalse();
+    }
+
     // Round trip
 
     [Fact]

@@ -36,7 +36,16 @@ internal enum NoteActionStatus {
 /// focus starts on; <see langword="null"/> when no note is left to focus (the view then returns to
 /// the block the user was on).
 /// </param>
-internal sealed record NoteActionResult(NoteActionStatus Status, string Message, int? FocusNoteLine = null) {
+/// <param name="FocusTaskLine">
+/// After <see cref="NoteActionStatus.Done"/> on a task-list toggle (or its undo or redo), the
+/// 1-based line the task-list item starts on, whose check box keeps the focus.
+/// </param>
+internal sealed record NoteActionResult(
+    NoteActionStatus Status,
+    string Message,
+    int? FocusNoteLine = null,
+    int? FocusTaskLine = null
+) {
     /// <summary>True when the view must be rendered again from the file's current text.</summary>
     public bool NeedsRender => Status is NoteActionStatus.Done or NoteActionStatus.Stale;
 
@@ -106,6 +115,26 @@ internal sealed class NoteActionRunner {
         );
     }
 
+    /// <summary>
+    /// Checks or unchecks the task-list item starting on <paramref name="line"/>; the focus stays
+    /// on its check box.
+    /// </summary>
+    public NoteActionResult ToggleTask(string renderedText, int line, bool isChecked) {
+        if (CannotWriteReason is { } reason) {
+            return new NoteActionResult(NoteActionStatus.ReadOnly, reason);
+        }
+
+        return Run(
+            () => Store.ToggleTask(renderedText, line, isChecked),
+            change => new NoteActionResult(
+                NoteActionStatus.Done,
+                isChecked ? _("Task checked") : _("Task unchecked"),
+                FocusTaskLine: change.Line
+            ),
+            _("The file changed. Please try again.")
+        );
+    }
+
     /// <summary>Undoes the last change, announcing which one.</summary>
     public NoteActionResult Undo() {
         if (!Store.CanUndo) {
@@ -117,7 +146,8 @@ internal sealed class NoteActionRunner {
             change => new NoteActionResult(
                 NoteActionStatus.Done,
                 UndoneMessage(change.Operation),
-                change.Operation is NoteOperation.Edit or NoteOperation.Delete ? change.Line : null
+                change.Operation is NoteOperation.Edit or NoteOperation.Delete ? change.Line : null,
+                TaskLine(change)
             ),
             _("The file changed, so there is nothing more to undo or redo.")
         );
@@ -134,7 +164,8 @@ internal sealed class NoteActionRunner {
             change => new NoteActionResult(
                 NoteActionStatus.Done,
                 RedoneMessage(change.Operation),
-                change.Operation is NoteOperation.Add or NoteOperation.Edit ? change.Line : null
+                change.Operation is NoteOperation.Add or NoteOperation.Edit ? change.Line : null,
+                TaskLine(change)
             ),
             _("The file changed, so there is nothing more to undo or redo.")
         );
@@ -162,31 +193,37 @@ internal sealed class NoteActionRunner {
         try {
             var change = action();
             Log.Information(
-                "Note {Operation} in {Path}: line={Line} count={Count}",
+                "{Operation} in {Path}: line={Line} count={Count}",
                 change.Operation, Store.File.Path, change.Line, change.Count
             );
 
             return done(change);
         } catch (StaleFileException ex) {
-            Log.Warning(ex, "Note action refused: {Path} changed on disk", Store.File.Path);
+            Log.Warning(ex, "Action refused: {Path} changed on disk", Store.File.Path);
 
             return new NoteActionResult(NoteActionStatus.Stale, staleMessage);
         } catch (ReadOnlyFileException ex) {
-            Log.Warning(ex, "Note action refused: {Path} is read-only", Store.File.Path);
+            Log.Warning(ex, "Action refused: {Path} is read-only", Store.File.Path);
 
             return new NoteActionResult(NoteActionStatus.ReadOnly, ReadOnlyMessage);
         } catch (IOException ex) {
-            Log.Error(ex, "Note action failed on {Path}", Store.File.Path);
+            Log.Error(ex, "Action failed on {Path}", Store.File.Path);
 
             return new NoteActionResult(NoteActionStatus.Failed, _("Unable to write the file: {0}", ex.Message));
         }
     }
+
+    /// <summary>The line of a toggled task-list item, whose check box gets the focus back.</summary>
+    private static int? TaskLine(NoteChange change) =>
+        change.Operation is NoteOperation.CheckTask or NoteOperation.UncheckTask ? change.Line : null;
 
     private static string UndoneMessage(NoteOperation operation) => operation switch {
         NoteOperation.Add => _("Note added undone"),
         NoteOperation.Edit => _("Note edited undone"),
         NoteOperation.Delete => _("Note deleted undone"),
         NoteOperation.Clear => _("All notes deleted undone"),
+        NoteOperation.CheckTask => _("Task checked undone"),
+        NoteOperation.UncheckTask => _("Task unchecked undone"),
         _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null),
     };
 
@@ -195,6 +232,8 @@ internal sealed class NoteActionRunner {
         NoteOperation.Edit => _("Note edited redone"),
         NoteOperation.Delete => _("Note deleted redone"),
         NoteOperation.Clear => _("All notes deleted redone"),
+        NoteOperation.CheckTask => _("Task checked redone"),
+        NoteOperation.UncheckTask => _("Task unchecked redone"),
         _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null),
     };
 }

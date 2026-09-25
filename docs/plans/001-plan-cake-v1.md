@@ -500,36 +500,40 @@ check tasks off from the document.
 - Create: `src/PlanCake/Notes/TaskToggle.cs`, `tests/PlanCake.Tests/TaskToggleTests.cs`
 - Modify: `src/PlanCake/Rendering/MarkdownRenderer.cs`, `src/PlanCake/Notes/NoteStore.cs`,
   `src/PlanCake/Notes/NoteActionRunner.cs`, `src/PlanCake/Ui/MainWindow.cs`,
-  `src/PlanCake/web/app.js`, `tests/PlanCake.Tests/NoteStoreTests.cs`
+  `src/PlanCake/Ui/PageMessages.cs`, `src/PlanCake/web/app.js`,
+  `tests/PlanCake.Tests/NoteStoreTests.cs`, `tests/PlanCake.Tests/NoteActionRunnerTests.cs`,
+  `tests/PlanCake.Tests/MarkdownRendererTests.cs`, `tests/PlanCake.Tests/PageMessagesTests.cs`
 
-- [ ] the renderer's `Interactive` mode renders task-list checkboxes enabled (no `disabled`);
+- [x] the renderer's `Interactive` mode renders task-list checkboxes enabled (no `disabled`);
       `Export` mode keeps them disabled
-- [ ] toggling a checkbox (Space, Enter or a mouse click) sends the host `toggleTask`
+- [x] toggling a checkbox (Space, Enter or a mouse click) sends the host `toggleTask`
       `{ lines, checked, generation }` (Technical details → "Page protocol"), `lines` being the
       item's `data-lines`; the host ignores it when the generation is stale, like every other
       page message
-- [ ] when `ConfirmTaskToggle` is on (default true, hard-coded until Task 12) the host asks
+- [x] when `ConfirmTaskToggle` is on (default true, hard-coded until Task 12) the host asks
       first, deferred with `BeginInvoke`; the question says plainly that the file on disk will
       be changed. Cancel sends `taskState` `{ lines, checked }` back with the file's state, so
-      the checkbox reverts
-- [ ] `TaskToggle.SetChecked(source, line, isChecked)`: a pure function that rewrites the task
+      the checkbox reverts. Built with Yes/No, like the note delete confirmation; the question
+      shows the item's text without its `[ ]` / `[x]`
+- [x] `TaskToggle.SetChecked(source, line, isChecked)`: a pure function that rewrites the task
       marker (`[ ]`, `[x]` or `[X]`) of the list item starting on that original line, leaving
       everything else on the line, the line endings and every other line untouched; it throws
       when the line holds no task marker
-- [ ] `NoteStore.ToggleTask(renderedText, line, isChecked)` writes it through the same stale-safe
+- [x] `NoteStore.ToggleTask(renderedText, line, isChecked)` writes it through the same stale-safe
       path as the note operations (Task 5): `StaleFileException` → nothing written, re-render,
       "The file changed. Please try again."; `IOException` and read-only files handled as in
       `NoteActionRunner`. On success: re-render, focus stays on that checkbox (the item's
-      lines), announce "Task checked" or "Task unchecked"
-- [ ] Undo and Redo cover toggles exactly like note actions (same stacks, announced "Task
+      lines), announce "Task checked" or "Task unchecked". Found while building it: the page
+      focuses the check box itself through a `task: true` flag on the render's `focus`
+- [x] Undo and Redo cover toggles exactly like note actions (same stacks, announced "Task
       checked undone" and so on)
-- [ ] tests: check an unchecked item, uncheck a checked one, uncheck `[X]` (capital), a nested
+- [x] tests: check an unchecked item, uncheck a checked one, uncheck `[X]` (capital), a nested
       item, an item with a note right after it (the note is untouched), a line without a task
       marker rejected, a stale file rejected with nothing written, undo and redo of a toggle
 - [ ] **ask the user** to check with JAWS: Space toggles a task in the virtual cursor, the
       confirmation reads well, cancel leaves the checkbox as it was, focus stays on the
       checkbox, undo and redo work
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 8: Notes list beside the document
 
@@ -894,8 +898,9 @@ which is harmless); for a list item's leading paragraph, inside the item after t
 ### Page protocol
 
 JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, each with a `type`:
-- host → page: `render` `{ html, generation, documentLang, title, focus: { lines?, note? } }`
-  (`title`: the first heading, else the file name),
+- host → page: `render` `{ html, generation, documentLang, title, focus: { lines?, note?, task? } }`
+  (`title`: the first heading, else the file name; `task: true` focuses the task-list check box
+  inside the `lines` block, Task 7a),
   `strings` `{ uiLang, uiDir, … }` (page chrome and live messages only: the note role
   descriptions are already in the rendered HTML), `focusNote` `{ note }`, `focusLines`
   `{ lines }`, `nextNote` / `previousNote` `{}`, `taskState` `{ lines, checked }` (Task 7a:

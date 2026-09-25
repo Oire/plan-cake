@@ -8,6 +8,12 @@ internal enum NoteOperation {
     Edit,
     Delete,
     Clear,
+
+    /// <summary>A task-list item was checked (Task 7a).</summary>
+    CheckTask,
+
+    /// <summary>A task-list item was unchecked (Task 7a).</summary>
+    UncheckTask,
 }
 
 /// <summary>What is wrong with a note's text, if anything.</summary>
@@ -33,14 +39,15 @@ internal enum NoteTextError {
 /// <param name="After">The file's text after the change.</param>
 /// <param name="Line">
 /// The 1-based line of <see cref="After"/> the added or edited note starts on, or the line the
-/// deleted note started on; <see langword="null"/> for <see cref="NoteOperation.Clear"/>.
+/// deleted note started on, or the line the toggled task-list item starts on;
+/// <see langword="null"/> for <see cref="NoteOperation.Clear"/>.
 /// </param>
-/// <param name="Count">How many notes the change touched.</param>
+/// <param name="Count">How many notes (or tasks) the change touched.</param>
 internal sealed record NoteChange(NoteOperation Operation, string Before, string After, int? Line, int Count);
 
 /// <summary>
-/// Adds, edits and deletes notes in a Markdown file, never over a change the caller has not
-/// seen, and undoes and redoes those changes, per Task 5 and Technical details → "Note placement
+/// Adds, edits and deletes notes in a Markdown file (and checks and unchecks its task-list
+/// items), never over a change the caller has not seen, and undoes and redoes those changes, per Task 5 and Technical details → "Note placement
 /// in the file" in the PlanCake plan.
 /// </summary>
 /// <remarks>
@@ -152,6 +159,19 @@ internal sealed class NoteStore {
         var after = RemoveAll(current, notes);
 
         return Apply(new NoteChange(NoteOperation.Clear, current, after, null, notes.Count));
+    }
+
+    /// <summary>
+    /// Checks or unchecks the task-list item starting on <paramref name="line"/> (1-based,
+    /// original), through the same stale-safe write and undo history as the note operations.
+    /// </summary>
+    /// <exception cref="ArgumentException">The line holds no task marker.</exception>
+    public NoteChange ToggleTask(string renderedText, int line, bool isChecked) {
+        var current = ReadCurrent(renderedText);
+        var after = TaskToggle.SetChecked(current, line, isChecked);
+        var operation = isChecked ? NoteOperation.CheckTask : NoteOperation.UncheckTask;
+
+        return Apply(new NoteChange(operation, current, after, line, 1));
     }
 
     /// <summary>

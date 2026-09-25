@@ -14,6 +14,10 @@
     const noteSelector = "[data-note]";
     const targetSelector = noteSelector + ", " + blockSelector;
 
+    // A task-list check box the host rendered enabled (Task 7a). Toggling one asks the host to
+    // rewrite the item's marker in the file.
+    const taskSelector = "input.task-list-item-checkbox";
+
     // Elements with a behavior of their own: a click or Enter on one inside a block does not
     // activate the block.
     const interactiveSelector = "a[href], button, input, select, textarea, summary, label, audio, video, "
@@ -124,13 +128,41 @@
         element.focus();
     }
 
-    function focusLines(lines) {
-        const element = main.querySelector('[data-lines="' + CSS.escape(String(lines)) + '"]');
+    function blockAt(lines) {
+        return main.querySelector('[data-lines="' + CSS.escape(String(lines)) + '"]');
+    }
 
-        if (element) {
-            current = element;
-            focusElement(element);
+    // The task-list check box of the block with these lines, or null.
+    function taskAt(lines) {
+        const element = blockAt(lines);
+        return element ? element.querySelector(taskSelector) : null;
+    }
+
+    // `task`: focus the block's task-list check box instead of the block, so the focus stays on
+    // the check box the user just toggled.
+    function focusLines(lines, task) {
+        const element = blockAt(lines);
+
+        if (!element) {
+            return;
         }
+
+        current = element;
+        const checkbox = task ? element.querySelector(taskSelector) : null;
+        focusElement(checkbox || element);
+    }
+
+    function setTaskState(lines, checked) {
+        const checkbox = taskAt(lines);
+
+        if (checkbox) {
+            checkbox.checked = checked;
+        }
+    }
+
+    // A task-list check box inside the document, or null.
+    function taskCheckbox(node) {
+        return node instanceof Element && node.matches(taskSelector) && main.contains(node) ? node : null;
     }
 
     function focusNote(index) {
@@ -197,7 +229,7 @@
         if (typeof focus.note === "number") {
             focusNote(focus.note);
         } else if (typeof focus.lines === "string") {
-            focusLines(focus.lines);
+            focusLines(focus.lines, focus.task === true);
         } else {
             window.scrollTo(0, 0);
         }
@@ -293,6 +325,15 @@
             return;
         }
 
+        // A check box ignores Enter on its own; Enter toggles a task as Space does.
+        const checkbox = taskCheckbox(event.target);
+
+        if (checkbox) {
+            event.preventDefault();
+            checkbox.click();
+            return;
+        }
+
         const element = event.target;
 
         if (!(element instanceof Element) || !main.contains(element)
@@ -302,6 +343,31 @@
 
         event.preventDefault();
         activate(element);
+    });
+
+    // Space, Enter or a click on a task-list check box. The page shows the new state at once;
+    // the host rewrites the file, or sends the file's state back ("taskState") when the user
+    // cancels or the file cannot be written.
+    document.addEventListener("change", function (event) {
+        const checkbox = taskCheckbox(event.target);
+
+        if (!checkbox) {
+            return;
+        }
+
+        const block = checkbox.closest(blockSelector);
+
+        if (!block || !main.contains(block)) {
+            return;
+        }
+
+        setCurrent(block);
+        post({
+            type: "toggleTask",
+            lines: block.getAttribute("data-lines"),
+            checked: checkbox.checked,
+            generation: generation
+        });
     });
 
     // The Applications key, Shift+F10 and a right-click all end up here.
@@ -374,7 +440,10 @@
                     applyStrings(message);
                     break;
                 case "focusLines":
-                    focusLines(message.lines);
+                    focusLines(message.lines, false);
+                    break;
+                case "taskState":
+                    setTaskState(message.lines, message.checked === true);
                     break;
                 case "focusNote":
                     focusNote(message.note);

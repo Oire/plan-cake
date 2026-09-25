@@ -284,6 +284,104 @@ public class NoteActionRunnerTests: IDisposable {
         redo.FocusNoteLine.Should().BeNull();
     }
 
+    // Task-list toggles
+
+    [Fact]
+    public void ToggleTask_Success_AnnouncesAndKeepsTheFocusOnTheItem() {
+        var runner = Runner("# Plan\n\n- [ ] one\n- [x] two\n");
+
+        var check = runner.ToggleTask(runner.Store.File.Text, 3, isChecked: true);
+
+        check.Status.Should().Be(NoteActionStatus.Done);
+        check.Message.Should().Be("Task checked");
+        check.FocusTaskLine.Should().Be(3);
+        check.FocusNoteLine.Should().BeNull();
+        check.NeedsRender.Should().BeTrue();
+
+        var uncheck = runner.ToggleTask(runner.Store.File.Text, 4, isChecked: false);
+
+        uncheck.Message.Should().Be("Task unchecked");
+        uncheck.FocusTaskLine.Should().Be(4);
+        OnDisk.Should().Be("# Plan\n\n- [x] one\n- [ ] two\n");
+    }
+
+    [Fact]
+    public void ToggleTask_FileChangedOnDisk_WritesNothing() {
+        var runner = Runner("- [ ] one\n");
+        var rendered = runner.Store.File.Text;
+        File.WriteAllText(_path, "- [ ] one, changed elsewhere\n");
+
+        var result = runner.ToggleTask(rendered, 1, isChecked: true);
+
+        result.Status.Should().Be(NoteActionStatus.Stale);
+        result.Message.Should().Be("The file changed. Please try again.");
+        result.NeedsRender.Should().BeTrue();
+        OnDisk.Should().Be("- [ ] one, changed elsewhere\n");
+    }
+
+    [Fact]
+    public void ToggleTask_LockedFile_FailsWithTheReason() {
+        var runner = Runner("- [ ] one\n");
+        var rendered = runner.Store.File.Text;
+        NoteActionResult result;
+
+        using (new FileStream(_path, FileMode.Open, FileAccess.ReadWrite, FileShare.None)) {
+            result = runner.ToggleTask(rendered, 1, isChecked: true);
+        }
+
+        result.Status.Should().Be(NoteActionStatus.Failed);
+        result.Message.Should().StartWith("Unable to write the file: ");
+        result.NeedsRender.Should().BeFalse();
+        OnDisk.Should().Be("- [ ] one\n");
+    }
+
+    [Fact]
+    public void ToggleTask_ReadOnlyFile_IsRefusedWithTheReason() {
+        var bytes = _windows1251.GetBytes("- [ ] задача\n");
+        File.WriteAllBytes(_path, bytes);
+        var runner = RunnerForFile(new MarkdownFileOptions(AnsiEncoding: _windows1251));
+
+        var result = runner.ToggleTask(runner.Store.File.Text, 1, isChecked: true);
+
+        result.Status.Should().Be(NoteActionStatus.ReadOnly);
+        result.Message.Should().Be(runner.CannotWriteReason);
+        result.NeedsRender.Should().BeFalse();
+        File.ReadAllBytes(_path).Should().Equal(bytes);
+    }
+
+    [Theory]
+    [InlineData(true, "Task checked undone", "Task checked redone")]
+    [InlineData(false, "Task unchecked undone", "Task unchecked redone")]
+    public void UndoAndRedo_OfAToggle_AnnounceItAndFocusTheItem(bool isChecked, string undone, string redone) {
+        var before = isChecked ? "- [ ] one\n" : "- [x] one\n";
+        var runner = Runner(before);
+        runner.ToggleTask(runner.Store.File.Text, 1, isChecked);
+        var after = OnDisk;
+
+        var undo = runner.Undo();
+
+        undo.Message.Should().Be(undone);
+        undo.FocusTaskLine.Should().Be(1);
+        undo.FocusNoteLine.Should().BeNull();
+        OnDisk.Should().Be(before);
+
+        var redo = runner.Redo();
+
+        redo.Message.Should().Be(redone);
+        redo.FocusTaskLine.Should().Be(1);
+        OnDisk.Should().Be(after);
+    }
+
+    [Fact]
+    public void UndoAndRedo_OfANoteAction_FocusNoTask() {
+        var runner = Runner("Para.\n");
+        var rendered = runner.Store.File.Text;
+        runner.Add(rendered, Render(rendered).Blocks[0], "Check this");
+
+        runner.Undo().FocusTaskLine.Should().BeNull();
+        runner.Redo().FocusTaskLine.Should().BeNull();
+    }
+
     [Fact]
     public void Undo_AfterAnExternalChange_IsRefusedAndTheHistoryIsGone() {
         var runner = Runner("Para.\n");

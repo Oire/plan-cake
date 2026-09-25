@@ -68,6 +68,33 @@ public class PageMessagesTests {
         PageMessages.GetInt(Parse("[1]"), "note").Should().BeNull();
     }
 
+    [Fact]
+    public void GetBool_ReadsOnlyBooleans() {
+        var message = Parse("""{ "type": "toggleTask", "lines": "3-3", "checked": true, "off": false, "text": "true" }""");
+
+        PageMessages.GetBool(message, "checked").Should().BeTrue();
+        PageMessages.GetBool(message, "off").Should().BeFalse();
+        PageMessages.GetBool(message, "text").Should().BeNull();
+        PageMessages.GetBool(message, "missing").Should().BeNull();
+        PageMessages.GetBool(Parse("[true]"), "checked").Should().BeNull();
+    }
+
+    [Fact]
+    public void Serialize_TaskMessages_UseTheProtocolNames() {
+        var state = Parse(PageMessages.Serialize(new TaskStateMessage("3-3", Checked: false)));
+
+        state.GetProperty("type").GetString().Should().Be("taskState");
+        state.GetProperty("lines").GetString().Should().Be("3-3");
+        state.GetProperty("checked").GetBoolean().Should().BeFalse();
+
+        var focus = Parse(PageMessages.Serialize(new RenderMessage("", 1, "en", "Plan", new PageFocus("3-3", Task: true))))
+            .GetProperty("focus");
+
+        focus.GetProperty("lines").GetString().Should().Be("3-3");
+        focus.GetProperty("task").GetBoolean().Should().BeTrue();
+        PageMessages.ToggleTask.Should().Be("toggleTask");
+    }
+
     [Theory]
     [InlineData(1.0, 1, 1.1)]
     [InlineData(1.0, -1, 0.9)]

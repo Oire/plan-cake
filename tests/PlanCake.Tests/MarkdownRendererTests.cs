@@ -150,12 +150,35 @@ public class MarkdownRendererTests {
     }
 
     [Fact]
-    public void Render_TaskList_CheckboxesStayDisabled() {
+    public void Render_TaskListInteractive_CheckboxesAreEnabled() {
         var result = Render("- [x] done\n- [ ] todo\n");
+
+        result.Html.Should().Contain(
+            """<li class="task-list-item" dir="auto" data-lines="1-1"><input class="task-list-item-checkbox" type="checkbox" checked="checked" /> done</li>"""
+        ).And.Contain(
+            """<li class="task-list-item" dir="auto" data-lines="2-2"><input class="task-list-item-checkbox" type="checkbox" /> todo</li>"""
+        );
+        result.Html.Should().NotContain("disabled");
+        Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "2-2");
+    }
+
+    [Fact]
+    public void Render_TaskListLooseInteractive_CheckboxSitsInTheStampedParagraph() {
+        var result = Render("- [ ] one\n\n- [x] two\n");
+
+        result.Html.Should().Contain(
+            """<p dir="auto" data-lines="1-1"><input class="task-list-item-checkbox" type="checkbox" /> one</p>"""
+        );
+        Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "3-3");
+    }
+
+    [Fact]
+    public void Render_TaskListExport_CheckboxesStayDisabled() {
+        var result = Render("- [x] done\n- [ ] todo\n", RenderMode.Export);
 
         result.Html.Should().Contain("""<input disabled="disabled" type="checkbox" checked="checked" />""")
             .And.Contain("""<input disabled="disabled" type="checkbox" />""");
-        Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "2-2");
+        result.Html.Should().NotContain("task-list-item-checkbox");
     }
 
     [Fact]

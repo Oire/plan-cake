@@ -5,9 +5,11 @@ namespace Oire.PlanCake.Ui;
 
 /// <summary>
 /// Where the page puts the virtual cursor after a render: on a block (by its <c>data-lines</c>)
-/// or on a note (by its <c>data-note</c> index). Neither means the top of the document.
+/// or on a note (by its <c>data-note</c> index). Neither means the top of the document. With
+/// <see cref="Task"/>, the focus goes to the task-list check box inside the block instead of
+/// the block itself, so it stays on the check box the user just toggled.
 /// </summary>
-internal sealed record PageFocus(string? Lines = null, int? Note = null);
+internal sealed record PageFocus(string? Lines = null, int? Note = null, bool? Task = null);
 
 /// <summary>Host → page: shows a rendered document in the page's <c>main</c> element.</summary>
 /// <param name="Html">The document body the renderer produced.</param>
@@ -40,6 +42,14 @@ internal sealed record FocusNoteMessage(int Note) {
     public string Type { get; } = "focusNote";
 }
 
+/// <summary>
+/// Host → page: sets the task-list check box of the block with these <c>data-lines</c> to the
+/// file's state, after a toggle was canceled or could not be written.
+/// </summary>
+internal sealed record TaskStateMessage(string Lines, bool Checked) {
+    public string Type { get; } = "taskState";
+}
+
 /// <summary>Host → page: moves to the next note after the current position.</summary>
 internal sealed record NextNoteMessage {
     public string Type { get; } = "nextNote";
@@ -70,6 +80,12 @@ internal static class PageMessages {
     /// <c>devicePixelRatio</c>.
     /// </summary>
     public const string ContextMenu = "contextMenu";
+
+    /// <summary>
+    /// A task-list check box was toggled (Space, Enter or a click): <c>{ lines, checked, generation }</c>,
+    /// <c>lines</c> being the item's <c>data-lines</c> and <c>checked</c> its new state.
+    /// </summary>
+    public const string ToggleTask = "toggleTask";
 
     /// <summary>The block (or note) the user last interacted with: <c>{ lines?, note?, generation }</c>.</summary>
     public const string Position = "position";
@@ -106,6 +122,14 @@ internal static class PageMessages {
         && message.TryGetProperty(property, out var value)
         && value.ValueKind == JsonValueKind.String
             ? value.GetString()
+            : null;
+
+    /// <summary>A Boolean property of a page message, or <see langword="null"/> when it is missing or not a Boolean.</summary>
+    public static bool? GetBool(JsonElement message, string property) =>
+        message.ValueKind == JsonValueKind.Object
+        && message.TryGetProperty(property, out var value)
+        && value.ValueKind is JsonValueKind.True or JsonValueKind.False
+            ? value.GetBoolean()
             : null;
 
     /// <summary>A number property of a page message, or <see langword="null"/> when it is missing or not a number.</summary>

@@ -3,6 +3,7 @@ using System.Text;
 using Markdig;
 using Markdig.Extensions.Footnotes;
 using Markdig.Extensions.Tables;
+using Markdig.Extensions.TaskLists;
 using Markdig.Helpers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
@@ -93,7 +94,7 @@ internal static class MarkdownRenderer {
         walker.Walk(document);
 
         var notes = InsertNotes(document, parse.Notes, walker.Blocks, options);
-        var body = ToHtml(document);
+        var body = ToHtml(document, options.Mode);
         var title = walker.Title;
         var html = options.Mode == RenderMode.Export
             ? ExportDocument(body, title, options.DocumentLanguage)
@@ -102,10 +103,16 @@ internal static class MarkdownRenderer {
         return new RenderResult(html, walker.Blocks.Select(block => block.Info).ToList(), notes, title, parse);
     }
 
-    private static string ToHtml(MarkdownDocument document) {
+    private static string ToHtml(MarkdownDocument document, RenderMode mode) {
         using var writer = new StringWriter(CultureInfo.InvariantCulture);
         var renderer = new HtmlRenderer(writer);
         _pipeline.Setup(renderer);
+
+        // The window's task-list check boxes can be toggled (Task 7a); an exported file's stay
+        // disabled, as Markdig renders them.
+        if (mode == RenderMode.Interactive) {
+            renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new EnabledTaskListRenderer());
+        }
 
         // The block's attributes (data-lines, dir) belong on the <pre> the user lands on, not on
         // the <code> inside it.
@@ -243,6 +250,30 @@ internal static class MarkdownRenderer {
         writer.Flush();
 
         return writer.ToString().Trim();
+    }
+
+    /// <summary>
+    /// A task-list check box the user can toggle: enabled, with a class the page finds it by. The
+    /// page sends the toggle to the host, which rewrites the marker in the file.
+    /// </summary>
+    private sealed class EnabledTaskListRenderer: HtmlObjectRenderer<TaskList> {
+        /// <summary>The class the page finds a task-list check box by.</summary>
+        public const string CheckboxClass = "task-list-item-checkbox";
+
+        protected override void Write(HtmlRenderer renderer, TaskList obj) {
+            if (!renderer.EnableHtmlForInline) {
+                renderer.Write(obj.Checked ? "[x]" : "[ ]");
+                return;
+            }
+
+            renderer.Write($"<input class=\"{CheckboxClass}\" type=\"checkbox\"");
+
+            if (obj.Checked) {
+                renderer.Write(" checked=\"checked\"");
+            }
+
+            renderer.Write(" />");
+        }
     }
 
     /// <summary>A heading inside a note: a bold paragraph, so it is not a heading of the document.</summary>

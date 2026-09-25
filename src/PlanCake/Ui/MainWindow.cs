@@ -24,6 +24,7 @@ public partial class MainWindow: Form {
     private const string DocumentLanguage = "en";
     private const NoteEnterAction DocumentNoteEnterAction = NoteEnterAction.Save;
     private const bool ConfirmNoteDelete = true;
+    private const bool ConfirmTaskToggle = true;
 
     /// <summary>The note markers, <c>[usernote]</c> … <c>[/usernote]</c> until Task 12 makes them a setting.</summary>
     private static readonly NoteMarkers _markers = NoteMarkers.Default;
@@ -60,6 +61,12 @@ public partial class MainWindow: Form {
 
     /// <summary>True once the page has loaded and can take messages.</summary>
     private bool _pageReady;
+
+    /// <summary>
+    /// True while a task toggle is asking or writing: a second toggle (a double-click) is ignored,
+    /// and the render that follows the first one resets the check box anyway.
+    /// </summary>
+    private bool _togglingTask;
 
     public MainWindow() : this(null) { }
 
@@ -183,9 +190,10 @@ public partial class MainWindow: Form {
     /// <summary>
     /// Renders the open file and sends it to the page. Without an explicit
     /// <paramref name="focus"/>, the page goes to the note starting on
-    /// <paramref name="focusNoteLine"/>, if given and found, else returns to the block the user was on.
+    /// <paramref name="focusNoteLine"/>, or to the check box of the task-list item starting on
+    /// <paramref name="focusTaskLine"/>, if given and found, else returns to the block the user was on.
     /// </summary>
-    private void RenderDocument(PageFocus? focus = null, int? focusNoteLine = null) {
+    private void RenderDocument(PageFocus? focus = null, int? focusNoteLine = null, int? focusTaskLine = null) {
         if (_file is null) {
             return;
         }
@@ -204,6 +212,13 @@ public partial class MainWindow: Form {
             && _render.Notes.FirstOrDefault(note => note.Note.StartLine == line) is { } focusedNote) {
             focus = new PageFocus(Note: focusedNote.Index);
             _position = focusedNote.Block ?? _position;
+        }
+
+        if (focus is null && focusTaskLine is { } taskLine
+            && _render.Blocks.FirstOrDefault(block => block.Kind == BlockKind.ListItem && block.StartLine == taskLine)
+                is { } taskItem) {
+            focus = new PageFocus(Lines: taskItem.Lines, Task: true);
+            _position = taskItem;
         }
 
         if (focus is null && PositionRestorer.FindTarget(_position, _render.Blocks) is { } target) {
@@ -443,6 +458,13 @@ public partial class MainWindow: Form {
                 }
 
                 break;
+            case PageMessages.ToggleTask:
+                if (FindTarget(e.Message) is { Block: { } taskBlock, Note: null } taskTarget
+                    && PageMessages.GetBool(e.Message, "checked") is { } isChecked) {
+                    BeginInvoke(WhileCurrent(taskTarget, () => ToggleTask(taskTarget, taskBlock, isChecked)));
+                }
+
+                break;
             case PageMessages.OpenLink:
                 var href = PageMessages.GetString(e.Message, "href") ?? "";
                 BeginInvoke(() => OpenLink(href));
@@ -638,6 +660,72 @@ public partial class MainWindow: Form {
         ShowNoteResult(notes.Delete(target.RenderedText, note.Note));
     }
 
+    /// <summary>
+    /// A task-list check box was toggled in the page: asks first (unless the setting says not to),
+    /// then rewrites the item's marker in the file. When nothing is written, the check box is
+    /// set back to the file's state.
+    /// </summary>
+    private void ToggleTask(NoteTarget target, BlockInfo item, bool isChecked) {
+        if (_notes is not { } notes || _togglingTask) {
+            return;
+        }
+
+        if (TaskToggle.IsChecked(target.RenderedText, item.StartLine) is not { } fileState) {
+            Log.Warning("Task toggle on {Lines}, which holds no task marker", item.Lines);
+            return;
+        }
+
+        _togglingTask = true;
+
+        try {
+            _position = item;
+
+            if (notes.CannotWriteReason is { } reason) {
+                RevertTask(item, fileState);
+                _announcer.Announce(reason);
+                return;
+            }
+
+            if (ConfirmTaskToggle && !ConfirmToggle(item, isChecked)) {
+                RevertTask(item, fileState);
+                FocusDocument();
+                return;
+            }
+
+            var result = notes.ToggleTask(target.RenderedText, item.StartLine, isChecked);
+
+            if (!result.NeedsRender) {
+                RevertTask(item, fileState);
+            }
+
+            ShowNoteResult(result);
+        } finally {
+            _togglingTask = false;
+        }
+    }
+
+    /// <summary>Asks before a check box rewrites the file on disk.</summary>
+    private static bool ConfirmToggle(BlockInfo item, bool isChecked) {
+        var text = TaskToggle.WithoutMarker(item.Excerpt);
+        var question = isChecked
+            ? _("Mark this task as done? The file on disk will be changed.\n\n{0}", text)
+            : _("Mark this task as not done? The file on disk will be changed.\n\n{0}", text);
+
+        return DialogHelper.Show(
+            question,
+            isChecked ? _("Check task") : _("Uncheck task"),
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question
+        ) == DialogResult.Yes;
+    }
+
+    /// <summary>Sets the item's check box in the page back to the file's state.</summary>
+    private void RevertTask(BlockInfo item, bool fileState) {
+        if (_pageReady) {
+            documentView.PostMessage(new TaskStateMessage(item.Lines, fileState));
+        }
+    }
+
     private void UndoOrRedo(bool redo) {
         if (_notes is not { } notes) {
             _announcer.Announce(redo ? _("Nothing to redo") : _("Nothing to undo"));
@@ -651,7 +739,7 @@ public partial class MainWindow: Form {
     private void ShowNoteResult(NoteActionResult result) {
         switch (result.Status) {
             case NoteActionStatus.Done:
-                RenderDocument(focusNoteLine: result.FocusNoteLine);
+                RenderDocument(focusNoteLine: result.FocusNoteLine, focusTaskLine: result.FocusTaskLine);
                 FocusDocument();
                 _announcer.Announce(result.Message);
                 break;
