@@ -40,7 +40,7 @@ names; Task 1 adapts it.
 - [ ] notes show in the document after their block, as user notes (`role="note"`), with the
       Markdown written in them rendered, and in a notes list beside it;
       notes can be edited, deleted, navigated with F9 / Shift+F9, undone and redone
-- [ ] a task-list checkbox can be toggled from the document (Space, Enter or a click), after a
+- [x] a task-list checkbox can be toggled from the document (Space, Enter or a click), after a
       confirmation that can be turned off; the file on disk gets `[x]` or `[ ]` on that item's
       line, and the toggle can be undone and redone
 - [ ] when the file changes on disk the view reloads (or asks, per settings) and keeps the
@@ -502,7 +502,8 @@ check tasks off from the document.
   `src/PlanCake/Notes/NoteActionRunner.cs`, `src/PlanCake/Ui/MainWindow.cs`,
   `src/PlanCake/Ui/PageMessages.cs`, `src/PlanCake/web/app.js`,
   `tests/PlanCake.Tests/NoteStoreTests.cs`, `tests/PlanCake.Tests/NoteActionRunnerTests.cs`,
-  `tests/PlanCake.Tests/MarkdownRendererTests.cs`, `tests/PlanCake.Tests/PageMessagesTests.cs`
+  `tests/PlanCake.Tests/MarkdownRendererTests.cs`, `tests/PlanCake.Tests/PageMessagesTests.cs`,
+  `src/PlanCake/Rendering/PositionRestorer.cs`, `tests/PlanCake.Tests/PositionRestorerTests.cs`
 
 - [x] the renderer's `Interactive` mode renders task-list checkboxes enabled (no `disabled`);
       `Export` mode keeps them disabled
@@ -530,9 +531,29 @@ check tasks off from the document.
 - [x] tests: check an unchecked item, uncheck a checked one, uncheck `[X]` (capital), a nested
       item, an item with a note right after it (the note is untouched), a line without a task
       marker rejected, a stale file rejected with nothing written, undo and redo of a toggle
-- [ ] **ask the user** to check with JAWS: Space toggles a task in the virtual cursor, the
+- [x] ➕ partially checked parent (display only; Markdown has no third state, so nothing new
+      is ever written): an unchecked (`[ ]`) task item some but not all of whose nested task
+      items (at any depth) are checked shows its checkbox as partially checked. The renderer
+      finds these items (`MarkdownRenderer.FindMixedTasks`) and marks the checkbox
+      `data-mixed="true"`; `app.js` sets `indeterminate` after every render and every
+      `taskState`, so it survives re-renders and undo/redo. A `[x]` parent shows checked
+      whatever its children say. Toggling a partially checked parent asks "Mark this task as
+      done?" and writes `[x]` on its own line only; children are never changed. Exported HTML
+      keeps its disabled checkboxes and marks a partially checked one `aria-checked="mixed"`
+      (no script runs there to set `indeterminate`). Tests in `MarkdownRendererTests`
+- [x] ➕ fix: following a relative `.md` link landed at the end of the new file. Cause: a file
+      opened fresh had no saved position, so the host sent no focus and the page only scrolled
+      to the top; the DOM focus (the followed link) was gone with the old content and JAWS kept
+      its old place in the virtual buffer, which in a shorter file is the end. (The position of
+      the file being left was not the cause: `LoadFile` already dropped it.) Now a document just
+      opened (link, command line, drag and drop, later File → Open, clipboard and web link, and
+      Back/Forward without a saved position) focuses its first block,
+      `PositionRestorer.FindOpeningTarget`; Back/Forward with a saved position and a re-render
+      of the same file still restore it. Tests in `PositionRestorerTests`
+- [x] **ask the user** to check with JAWS: Space toggles a task in the virtual cursor, the
       confirmation reads well, cancel leaves the checkbox as it was, focus stays on the
-      checkbox, undo and redo work
+      checkbox, undo and redo work.
+      Results: all pass; the Yes/No confirmation stays
 - [x] validation commands pass
 
 ### Task 8: Notes list beside the document
@@ -553,7 +574,9 @@ check tasks off from the document.
       they focus the note after / before the current position; in the list they move
       the selection; at the ends, announce "No more notes"
 - [ ] the list keeps its selection across re-renders when the same note still exists
-- [ ] **ask the user** to check the list, F6 and F9 with JAWS
+- [ ] **ask the user** to check the list, F6 and F9 with JAWS; also: a parent task with some
+      children checked reads as partially checked (Task 7a); following a `.md` link lands at
+      the top of the new file (Task 7a fix)
 - [ ] validation commands pass
 
 ### Task 9: Menu bar and the small dialogs

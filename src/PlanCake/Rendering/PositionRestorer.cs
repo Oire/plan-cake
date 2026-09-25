@@ -26,6 +26,20 @@ internal static class PositionRestorer {
         return Nearest(previous.StartLine, sameText) ?? Nearest(previous.StartLine, blocks);
     }
 
+    /// <summary>
+    /// Where the view goes in a document just opened (from a link, the command line, a drop, …,
+    /// or Back and Forward): the <paramref name="saved"/> position the history kept for this
+    /// file, found again, else the first block. Never the position in the file being left,
+    /// and never "leave the virtual cursor where it was": after the page's content is replaced,
+    /// JAWS would keep its old place in the buffer, which in a shorter file is the end.
+    /// </summary>
+    /// <returns><see langword="null"/> only for a document without any block.</returns>
+    public static BlockInfo? FindOpeningTarget(BlockInfo? saved, IReadOnlyList<BlockInfo> blocks) {
+        ArgumentNullException.ThrowIfNull(blocks);
+
+        return FindTarget(saved, blocks) ?? (blocks.Count > 0 ? blocks[0] : null);
+    }
+
     private static BlockInfo? Nearest(int line, IEnumerable<BlockInfo> candidates) {
         BlockInfo? nearest = null;
         var nearestDistance = int.MaxValue;

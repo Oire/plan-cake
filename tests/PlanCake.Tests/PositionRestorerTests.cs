@@ -109,4 +109,33 @@ public class PositionRestorerTests {
         target.Should().NotBeNull();
         target!.Lines.Should().Be("7-7");
     }
+
+    // Opening a document
+
+    [Fact]
+    public void FindOpeningTarget_NoSavedPosition_StartsAtTheFirstBlock() {
+        // A file opened fresh (a followed .md link, the command line, a drop) has no saved
+        // position: the view starts at the top, never where the previous file was left.
+        var blocks = new[] {
+            Block(BlockKind.Heading, 1, 1, "Other plan"),
+            Block(BlockKind.Paragraph, 3, 3, "Short."),
+        };
+
+        PositionRestorer.FindOpeningTarget(null, blocks).Should().BeSameAs(blocks[0]);
+    }
+
+    [Fact]
+    public void FindOpeningTarget_SavedPositionFromTheHistory_ReturnsToIt() {
+        var saved = Block(BlockKind.Paragraph, 3, 3, "Short.");
+        var blocks = new[] {
+            Block(BlockKind.Heading, 1, 1, "Other plan"),
+            Block(BlockKind.Paragraph, 3, 3, "Short."),
+        };
+
+        PositionRestorer.FindOpeningTarget(saved, blocks).Should().BeSameAs(blocks[1]);
+    }
+
+    [Fact]
+    public void FindOpeningTarget_EmptyDocument_ReturnsNull() =>
+        PositionRestorer.FindOpeningTarget(null, []).Should().BeNull();
 }

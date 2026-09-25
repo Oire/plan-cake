@@ -170,7 +170,7 @@ public partial class MainWindow: Form {
         _notes = new NoteActionRunner(new NoteStore(file, _markers));
         _draft = null;
 
-        RenderDocument();
+        RenderDocument(opened: !reopened);
         Text = _("{0} - {1}", Path.GetFileName(file.Path), App.Name);
 
         Log.Information(
@@ -192,8 +192,14 @@ public partial class MainWindow: Form {
     /// <paramref name="focus"/>, the page goes to the note starting on
     /// <paramref name="focusNoteLine"/>, or to the check box of the task-list item starting on
     /// <paramref name="focusTaskLine"/>, if given and found, else returns to the block the user was on.
+    /// A document just <paramref name="opened"/> without a saved position starts at its first block.
     /// </summary>
-    private void RenderDocument(PageFocus? focus = null, int? focusNoteLine = null, int? focusTaskLine = null) {
+    private void RenderDocument(
+        PageFocus? focus = null,
+        int? focusNoteLine = null,
+        int? focusTaskLine = null,
+        bool opened = false
+    ) {
         if (_file is null) {
             return;
         }
@@ -221,7 +227,11 @@ public partial class MainWindow: Form {
             _position = taskItem;
         }
 
-        if (focus is null && PositionRestorer.FindTarget(_position, _render.Blocks) is { } target) {
+        var restored = opened
+            ? PositionRestorer.FindOpeningTarget(_position, _render.Blocks)
+            : PositionRestorer.FindTarget(_position, _render.Blocks);
+
+        if (focus is null && restored is { } target) {
             focus = new PageFocus(Lines: target.Lines);
             _position = target;
         } else if (focus is null) {
