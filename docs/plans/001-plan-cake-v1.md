@@ -252,23 +252,23 @@ decide which note triggers the later tasks build.**
 - Create: `src/PlanCake/Notes/NoteMarkers.cs`, `src/PlanCake/Notes/Note.cs`,
   `src/PlanCake/Notes/NoteParser.cs`, `tests/PlanCake.Tests/NoteParserTests.cs`
 
-- [ ] `NoteMarkers` record: `Opening` (required), `Closing` (empty = single-token mode);
+- [x] `NoteMarkers` record: `Opening` (required), `Closing` (empty = single-token mode);
       `Validate()` rejects empty opening, leading/trailing whitespace, line breaks, and
       `Closing == Opening`; default `[usernote]` / `[/usernote]`
-- [ ] `NoteParser.Parse(string source, NoteMarkers markers)` returns the notes (text, 1-based
+- [x] `NoteParser.Parse(string source, NoteMarkers markers)` returns the notes (text, 1-based
       start and end line, character spans) and the **stripped source** with a mapping from
       stripped line numbers to original ones, per Technical details → "Note parsing"
-- [ ] tests: paired note on its own line, note spanning several lines, note mid-line with text
+- [x] tests: paired note on its own line, note spanning several lines, note mid-line with text
       before and after, several notes on one line, single-token mode running to end of line,
       notes inside a fenced code block and a table, line mapping after stripping
-- [ ] continuation lines of a multi-line note lose the indentation PlanCake writes in front of
+- [x] continuation lines of a multi-line note lose the indentation PlanCake writes in front of
       them (Technical details → "Note parsing"), so a note inside a nested list item reads back
       exactly as it was typed
-- [ ] tests: unterminated opening marker (treated as running to end of file, and reported),
+- [x] tests: unterminated opening marker (treated as running to end of file, and reported),
       closing marker without an opening one (left as text), empty note, CRLF source,
       multi-line notes with list indentation read back without it; a hand-written
       `> [usernote]…[/usernote]` line inside a quote is removed entirely
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 4: Render Markdown with source line ranges and notes
 
