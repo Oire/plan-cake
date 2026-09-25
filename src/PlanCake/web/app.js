@@ -205,8 +205,8 @@
             return;
         }
 
-        focusElement(next);
         setCurrent(next);
+        focusElement(next);
     }
 
     function showNoDocument() {
@@ -376,6 +376,24 @@
             checked: checkbox.checked,
             generation: generation
         });
+    });
+
+    // Focus reaching a link, a check box or anything else in the document (JAWS moves the
+    // focus to such elements as its virtual cursor passes them) makes its block or note the
+    // current one, so F9 and Shift+F9 start from where the user is. A block or note the page
+    // focuses itself is already current.
+    document.addEventListener("focusin", function (event) {
+        const node = event.target;
+
+        if (!(node instanceof Element) || node === main || !main.contains(node)) {
+            return;
+        }
+
+        const element = node.closest(targetSelector);
+
+        if (element && main.contains(element) && element !== current) {
+            setCurrent(element);
+        }
     });
 
     // The Applications key, Shift+F10 and a right-click all end up here.

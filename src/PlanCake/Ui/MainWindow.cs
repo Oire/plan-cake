@@ -25,6 +25,7 @@ public partial class MainWindow: Form {
     private const NoteEnterAction DocumentNoteEnterAction = NoteEnterAction.Save;
     private const bool ConfirmNoteDelete = true;
     private const bool ConfirmTaskToggle = true;
+    private const bool ShowNotesListByDefault = true;
 
     /// <summary>The note markers, <c>[usernote]</c> … <c>[/usernote]</c> until Task 12 makes them a setting.</summary>
     private static readonly NoteMarkers _markers = NoteMarkers.Default;
@@ -68,6 +69,15 @@ public partial class MainWindow: Form {
     /// </summary>
     private bool _togglingTask;
 
+    /// <summary>Whether the notes list beside the document is shown (View → Notes list).</summary>
+    private bool _showNotesList = ShowNotesListByDefault;
+
+    /// <summary>The window's menu bar, attached once the window has a handle.</summary>
+    private NativeMenuBar? _menuBar;
+
+    /// <summary>The context menu of the notes list: Edit note, Delete note.</summary>
+    private NativeContextMenu? _notesListMenu;
+
     public MainWindow() : this(null) { }
 
     /// <param name="initialFile">The file to open once the window is up, from the command line.</param>
@@ -84,6 +94,7 @@ public partial class MainWindow: Form {
         _announcer = new StatusAnnouncer(statusStrip, statusLabel);
         documentView.MessageReceived += OnPageMessage;
         documentView.AcceleratorKeyDown += OnDocumentAcceleratorKeyDown;
+        SetUpNotesList();
 
         // Drops on the document itself arrive as a page message (the browser handles them);
         // these cover the rest of the window.
@@ -97,6 +108,30 @@ public partial class MainWindow: Form {
     /// <c>Program</c> reads this afterwards to choose the exit code.
     /// </summary>
     internal bool StartupFailed { get; private set; }
+
+    protected override void OnHandleCreated(EventArgs e) {
+        base.OnHandleCreated(e);
+
+        // The menu needs the window's handle; a recreated handle (a right-to-left switch) gets
+        // the menu attached again.
+        _menuBar ??= new NativeMenuBar(this);
+        _menuBar.Attach(BuildMenuSpec());
+    }
+
+    /// <summary>
+    /// The menu bar, as data. Task 9 fills in the other menus; the shortcuts are shown only
+    /// (no <c>Keys</c>): <see cref="HostCommands"/> runs them, from the document too.
+    /// </summary>
+    private NativeMenuSpec BuildMenuSpec() {
+        var spec = new NativeMenuSpec();
+
+        spec.AddMenu(_("&View"), view => {
+            view.AddCheckable(_("&Notes list"), _showNotesList, ToggleNotesList);
+            view.Add(_("&Switch pane"), _("F6"), null, SwitchPane);
+        });
+
+        return spec;
+    }
 
     protected override async void OnLoad(EventArgs e) {
         base.OnLoad(e);
@@ -210,6 +245,9 @@ public partial class MainWindow: Form {
             CurrentRenderStrings(),
             DocumentLanguage
         );
+
+        // Another file starts with nothing selected in the notes list.
+        var listSelection = opened ? null : SelectedListNote();
         _renderedText = _file.Text;
         _render = MarkdownRenderer.Render(_renderedText, options);
         _generation++;
@@ -239,6 +277,11 @@ public partial class MainWindow: Form {
         }
 
         _pendingFocus = focus;
+
+        // A note action started in the list (the list has the focus again once its dialog
+        // closed) selects the note it produced; otherwise the list keeps its own selection.
+        var listFocus = IsNotesListFocused && focus?.Note is { } focusedIndex ? _render.Notes[focusedIndex] : null;
+        FillNotesList(_render, listSelection, listFocus);
         PostRender();
     }
 
@@ -364,6 +407,9 @@ public partial class MainWindow: Form {
             case HostCommand.Forward:
                 MoveThroughHistory(back: false);
                 break;
+            case HostCommand.SwitchPane:
+                SwitchPane();
+                break;
             case HostCommand.NextNote:
                 MoveToNote(forward: true);
                 break;
@@ -420,7 +466,16 @@ public partial class MainWindow: Form {
         }
     }
 
+    /// <summary>
+    /// F9 / Shift+F9: in the notes list, moves the selection; in the document, the page moves to
+    /// the next or previous note from the current position.
+    /// </summary>
     private void MoveToNote(bool forward) {
+        if (IsNotesListFocused) {
+            MoveListSelection(forward);
+            return;
+        }
+
         if (!_pageReady || _render is null) {
             _announcer.Announce(_("No more notes"));
             return;
@@ -608,7 +663,7 @@ public partial class MainWindow: Form {
         while (_notes is { } notes) {
             using (var dialog = new NoteDialog(mode, excerpt, text, notes.DescribeTextError, DocumentNoteEnterAction)) {
                 if (dialog.ShowDialog(this) != DialogResult.OK) {
-                    FocusDocument();
+                    ReturnFocus();
                     return;
                 }
 
@@ -661,7 +716,7 @@ public partial class MainWindow: Form {
             );
 
             if (answer != DialogResult.Yes) {
-                FocusDocument();
+                ReturnFocus();
                 return;
             }
         }
@@ -750,12 +805,12 @@ public partial class MainWindow: Form {
         switch (result.Status) {
             case NoteActionStatus.Done:
                 RenderDocument(focusNoteLine: result.FocusNoteLine, focusTaskLine: result.FocusTaskLine);
-                FocusDocument();
+                ReturnFocus();
                 _announcer.Announce(result.Message);
                 break;
             case NoteActionStatus.Stale:
                 RenderDocument();
-                FocusDocument();
+                ReturnFocus();
                 _announcer.Announce(result.Message);
                 break;
             case NoteActionStatus.Failed:
@@ -825,6 +880,16 @@ public partial class MainWindow: Form {
         }
     }
 
+    /// <summary>
+    /// After a note action: back to the document, unless the user is working in the notes list,
+    /// where the focus stays (a closed dialog has already given it back to the list).
+    /// </summary>
+    private void ReturnFocus() {
+        if (!IsNotesListFocused) {
+            FocusDocument();
+        }
+    }
+
     /// <summary>Follows a link from the document: see <see cref="LinkResolver"/>.</summary>
     private void OpenLink(string href) {
         var folder = _file is null ? null : Path.GetDirectoryName(_file.Path);
@@ -885,11 +950,218 @@ public partial class MainWindow: Form {
         BeginInvoke(() => OpenDroppedFiles(files));
     }
 
+    // --- The notes list beside the document ---------------------------------------------
+
+    /// <summary>True while the notes list is shown.</summary>
+    private bool IsNotesListVisible => !splitContainer.Panel2Collapsed;
+
+    /// <summary>True while the notes list is shown and has the keyboard focus.</summary>
+    private bool IsNotesListFocused => IsNotesListVisible && notesList.ContainsFocus;
+
+    private void SetUpNotesList() {
+        notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(60)));
+        notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(200)));
+        notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(300)));
+        LocalizeNotesList();
+
+        notesList.ItemActivate += OnNotesListItemActivate;
+        notesList.KeyDown += OnNotesListKeyDown;
+
+        _notesListMenu = new NativeContextMenu(BuildNotesListMenuSpec()) {
+            Resolver = ResolveNotesListMenu,
+        };
+        _notesListMenu.AttachTo(notesList);
+
+        splitContainer.Panel2Collapsed = !_showNotesList;
+    }
+
+    /// <summary>
+    /// The list's column headers and name, which the catalog walk of <c>Localizer</c> does not
+    /// reach: the columns are not controls, and the list window is not a child the label names.
+    /// </summary>
+    private void LocalizeNotesList() {
+        notesList.Columns[0].Text = _("Lines");
+        notesList.Columns[1].Text = _("Block");
+        notesList.Columns[2].Text = _("Note");
+        notesList.AccessibleName = notesLabel.Text;
+    }
+
+    /// <summary>The context menu of the list; its items act on the selected note.</summary>
+    private NativeMenuSpec BuildNotesListMenuSpec() => new NativeMenuSpec()
+        .Add(_("&Edit note"), EditSelectedNote)
+        .Add(_("&Delete note"), DeleteSelectedNote);
+
+    /// <summary>
+    /// A right-click selects the row under the pointer first; without a selected note there is
+    /// no menu.
+    /// </summary>
+    private NativeContextMenu? ResolveNotesListMenu(NativeContextMenuRequest request) {
+        if (!request.FromKeyboard
+            && notesList.GetItemAt(notesList.PointToClient(request.ScreenLocation)) is { } item) {
+            SelectListItem(item);
+        }
+
+        return SelectedListNote() is null ? null : _notesListMenu;
+    }
+
+    /// <summary>
+    /// Shows the notes of <paramref name="render"/> in the list. The selection stays on the same
+    /// note (<see cref="PositionRestorer.FindNote"/>), or goes to <paramref name="focused"/> when
+    /// given. Rows that did not change are left alone, so a screen reader in the list hears nothing.
+    /// </summary>
+    private void FillNotesList(RenderResult render, RenderedNote? previous, RenderedNote? focused) {
+        var startOfDocument = _("The start of the document");
+        var rows = render.Notes.Select(note => NotesListRow.From(note, startOfDocument).ToCells()).ToList();
+        var unchanged = rows.Count == notesList.Items.Count
+            && rows.Select((cells, index) => cells.SequenceEqual(notesList.Items[index].Cells)).All(same => same);
+
+        RenderedNote? selected;
+
+        if (unchanged) {
+            for (var index = 0; index < rows.Count; index++) {
+                notesList.Items[index].Tag = render.Notes[index];
+            }
+
+            selected = focused;
+        } else {
+            selected = focused ?? PositionRestorer.FindNote(previous, render.Notes);
+            notesList.BeginUpdate();
+
+            try {
+                notesList.Items.Clear();
+
+                for (var index = 0; index < rows.Count; index++) {
+                    notesList.Items.Add(new NativeListViewItem(rows[index]) { Tag = render.Notes[index] });
+                }
+            } finally {
+                notesList.EndUpdate();
+            }
+        }
+
+        if (selected is not null && selected.Index < notesList.Items.Count) {
+            SelectListItem(notesList.Items[selected.Index]);
+        }
+    }
+
+    /// <summary>Selects <paramref name="item"/> alone, gives it the list's focus rectangle and scrolls to it.</summary>
+    private void SelectListItem(NativeListViewItem item) {
+        if (item.Selected && item.Focused) {
+            return;
+        }
+
+        notesList.ClearSelection();
+        item.Selected = true;
+        item.Focused = true;
+        item.EnsureVisible();
+    }
+
+    /// <summary>The note selected in the list, from the current render, or <see langword="null"/>.</summary>
+    private RenderedNote? SelectedListNote() =>
+        notesList.SelectedItems.Count > 0 && notesList.SelectedItems[0].Tag is RenderedNote note ? note : null;
+
+    /// <summary>View → Notes list: shows or hides the list. A hidden list is skipped by F6.</summary>
+    private void ToggleNotesList() {
+        var hadFocus = IsNotesListFocused;
+        _showNotesList = !_showNotesList;
+        splitContainer.Panel2Collapsed = !_showNotesList;
+
+        // The menu reads the check mark from its spec.
+        _menuBar?.Rebuild(BuildMenuSpec());
+
+        if (hadFocus) {
+            FocusDocument();
+        }
+
+        _announcer.Announce(_showNotesList ? _("Notes list shown") : _("Notes list hidden"));
+    }
+
+    /// <summary>F6: from the document to the notes list and back; to the document while the list is hidden.</summary>
+    private void SwitchPane() {
+        if (!IsNotesListVisible || IsNotesListFocused) {
+            FocusDocument();
+            return;
+        }
+
+        // A list with nothing selected says nothing when it gets the focus.
+        if (notesList.Items.Count > 0 && notesList.SelectedItems.Count == 0) {
+            SelectListItem(notesList.Items[0]);
+        }
+
+        notesList.Focus();
+
+        if (notesList.Items.Count == 0) {
+            _announcer.Announce(_("No notes"));
+        }
+    }
+
+    /// <summary>F9 / Shift+F9 in the list: the next or previous row.</summary>
+    private void MoveListSelection(bool forward) {
+        var count = notesList.Items.Count;
+        var current = notesList.SelectedItems.Count > 0 ? notesList.SelectedItems[0].Index : -1;
+        var next = current < 0
+            ? (forward ? 0 : count - 1)
+            : current + (forward ? 1 : -1);
+
+        if (next < 0 || next >= count) {
+            _announcer.Announce(_("No more notes"));
+            return;
+        }
+
+        SelectListItem(notesList.Items[next]);
+    }
+
+    /// <summary>Enter (or a double-click) on a row: the note in the document, with the focus.</summary>
+    private void OnNotesListItemActivate(object? sender, NativeListViewItemEventArgs e) {
+        if (e.Item.Tag is RenderedNote note) {
+            BeginInvoke(() => JumpToNote(note));
+        }
+    }
+
+    private void JumpToNote(RenderedNote note) {
+        if (!_pageReady || _render is null || !_render.Notes.Contains(note)) {
+            return;
+        }
+
+        _position = note.Block ?? _position;
+        documentView.PostMessage(new FocusNoteMessage(note.Index));
+        FocusDocument();
+    }
+
+    private void OnNotesListKeyDown(object? sender, KeyEventArgs e) {
+        if (e.KeyData == Keys.Delete) {
+            e.Handled = true;
+            BeginInvoke(DeleteSelectedNote);
+        }
+    }
+
+    private void EditSelectedNote() {
+        if (SelectedListNote() is { } note) {
+            EditNote(CurrentTarget(note), note);
+        }
+    }
+
+    private void DeleteSelectedNote() {
+        if (SelectedListNote() is { } note) {
+            DeleteNote(CurrentTarget(note), note);
+        }
+    }
+
+    /// <summary>A note of the current render as the target of a note action.</summary>
+    private NoteTarget CurrentTarget(RenderedNote note) => new(_generation, _renderedText, note.Block, note);
+
     protected override void OnFormClosed(FormClosedEventArgs e) {
         documentView.MessageReceived -= OnPageMessage;
         documentView.AcceleratorKeyDown -= OnDocumentAcceleratorKeyDown;
+        notesList.ItemActivate -= OnNotesListItemActivate;
+        notesList.KeyDown -= OnNotesListKeyDown;
         DragEnter -= OnWindowDragEnter;
         DragDrop -= OnWindowDragDrop;
+
+        // Before the handles go: the menus need the windows they belong to while they are released.
+        _menuBar?.Dispose();
+        _menuBar = null;
+        _notesListMenu?.Dispose();
+        _notesListMenu = null;
         base.OnFormClosed(e);
     }
 }

@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using Oire.PlanCake.Notes;
 using Oire.PlanCake.Rendering;
 using Xunit;
 
@@ -138,4 +139,77 @@ public class PositionRestorerTests {
     [Fact]
     public void FindOpeningTarget_EmptyDocument_ReturnsNull() =>
         PositionRestorer.FindOpeningTarget(null, []).Should().BeNull();
+
+    // Notes list selection
+
+    private static RenderedNote NoteOn(int index, int line, string text, BlockInfo? block) =>
+        new(index, new Note(text, line, line, 0, 0, Unterminated: false), block);
+
+    [Fact]
+    public void FindNote_SameNoteAfterLinesShifted_FindsIt() {
+        var block = Block(BlockKind.Paragraph, 5, 5, "Second.");
+        var previous = NoteOn(1, 6, "Check this.", block);
+        var shifted = Block(BlockKind.Paragraph, 9, 9, "Second.");
+        var notes = new[] {
+            NoteOn(0, 3, "A new note above.", Block(BlockKind.Heading, 1, 1, "Plan")),
+            NoteOn(1, 5, "Another new one.", Block(BlockKind.Paragraph, 4, 4, "First.")),
+            NoteOn(2, 10, "Check this.", shifted),
+        };
+
+        PositionRestorer.FindNote(previous, notes).Should().BeSameAs(notes[2]);
+    }
+
+    [Fact]
+    public void FindNote_SameTextOnAnotherBlock_IsNotTheSameNote() {
+        var previous = NoteOn(0, 20, "Why?", Block(BlockKind.Paragraph, 19, 19, "Second."));
+        var notes = new[] {
+            NoteOn(0, 4, "Why?", Block(BlockKind.Paragraph, 3, 3, "First.")),
+            NoteOn(1, 21, "Why not?", Block(BlockKind.Paragraph, 19, 19, "Second.")),
+        };
+
+        PositionRestorer.FindNote(previous, notes).Should().BeSameAs(notes[1]);
+    }
+
+    [Fact]
+    public void FindNote_SameNoteSeveralTimes_TakesTheNearest() {
+        var block = Block(BlockKind.ListItem, 10, 10, "Done");
+        var previous = NoteOn(1, 21, "Same", block);
+        var notes = new[] {
+            NoteOn(0, 11, "Same", block),
+            NoteOn(1, 23, "Same", block),
+            NoteOn(2, 41, "Same", block),
+        };
+
+        PositionRestorer.FindNote(previous, notes).Should().BeSameAs(notes[1]);
+    }
+
+    [Fact]
+    public void FindNote_NoteDeleted_TakesTheNoteWithTheNearestStartLine() {
+        var previous = NoteOn(1, 12, "Deleted", Block(BlockKind.Paragraph, 11, 11, "Middle."));
+        var notes = new[] {
+            NoteOn(0, 4, "First", Block(BlockKind.Paragraph, 3, 3, "Top.")),
+            NoteOn(1, 14, "Last", Block(BlockKind.Paragraph, 13, 13, "Bottom.")),
+        };
+
+        PositionRestorer.FindNote(previous, notes).Should().BeSameAs(notes[1]);
+    }
+
+    [Fact]
+    public void FindNote_NoteAtTheTop_MatchesWithoutABlock() {
+        var previous = NoteOn(0, 1, "Top note", null);
+        var notes = new[] {
+            NoteOn(0, 1, "Top note", null),
+            NoteOn(1, 5, "Top note", Block(BlockKind.Paragraph, 3, 3, "Text.")),
+        };
+
+        PositionRestorer.FindNote(previous, notes).Should().BeSameAs(notes[0]);
+    }
+
+    [Fact]
+    public void FindNote_NoPreviousNote_ReturnsNull() =>
+        PositionRestorer.FindNote(null, [NoteOn(0, 1, "Note", null)]).Should().BeNull();
+
+    [Fact]
+    public void FindNote_NoNotesLeft_ReturnsNull() =>
+        PositionRestorer.FindNote(NoteOn(0, 1, "Note", null), []).Should().BeNull();
 }

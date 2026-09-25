@@ -25,10 +25,19 @@ partial class MainWindow {
     /// </summary>
     private void InitializeComponent() {
         mainLayout = new TableLayoutPanel();
+        splitContainer = new SplitContainer();
         documentView = new DocumentView();
+        notesLayout = new TableLayoutPanel();
+        notesLabel = new Label();
+        notesList = new Oire.WinForms.NativeControls.NativeListView();
         statusStrip = new StatusStrip();
         statusLabel = new ToolStripStatusLabel();
         mainLayout.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)splitContainer).BeginInit();
+        splitContainer.Panel1.SuspendLayout();
+        splitContainer.Panel2.SuspendLayout();
+        splitContainer.SuspendLayout();
+        notesLayout.SuspendLayout();
         statusStrip.SuspendLayout();
         SuspendLayout();
         //
@@ -36,7 +45,7 @@ partial class MainWindow {
         //
         mainLayout.ColumnCount = 1;
         mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        mainLayout.Controls.Add(documentView, 0, 0);
+        mainLayout.Controls.Add(splitContainer, 0, 0);
         mainLayout.Controls.Add(statusStrip, 0, 1);
         mainLayout.Dock = DockStyle.Fill;
         mainLayout.Margin = new Padding(0);
@@ -46,12 +55,58 @@ partial class MainWindow {
         mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         mainLayout.TabIndex = 0;
         //
+        // splitContainer
+        //
+        splitContainer.Dock = DockStyle.Fill;
+        splitContainer.Margin = new Padding(0);
+        splitContainer.Name = "splitContainer";
+        splitContainer.Orientation = Orientation.Vertical;
+        splitContainer.Size = new Size(1000, 678);
+        splitContainer.Panel1.Controls.Add(documentView);
+        splitContainer.Panel2.Controls.Add(notesLayout);
+        splitContainer.SplitterDistance = 680;
+        splitContainer.Panel1MinSize = 200;
+        splitContainer.Panel2MinSize = 150;
+        splitContainer.FixedPanel = FixedPanel.Panel2;
+        splitContainer.TabIndex = 0;
+        splitContainer.TabStop = false;
+        //
         // documentView
         //
         documentView.Dock = DockStyle.Fill;
         documentView.Margin = new Padding(0);
         documentView.Name = "documentView";
         documentView.TabIndex = 0;
+        //
+        // notesLayout
+        //
+        notesLayout.ColumnCount = 1;
+        notesLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        notesLayout.Controls.Add(notesLabel, 0, 0);
+        notesLayout.Controls.Add(notesList, 0, 1);
+        notesLayout.Dock = DockStyle.Fill;
+        notesLayout.Margin = new Padding(0);
+        notesLayout.Name = "notesLayout";
+        notesLayout.RowCount = 2;
+        notesLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        notesLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        notesLayout.TabIndex = 0;
+        //
+        // notesLabel
+        //
+        notesLabel.AutoSize = true;
+        notesLabel.Margin = new Padding(3, 3, 3, 3);
+        notesLabel.Name = "notesLabel";
+        notesLabel.TabIndex = 0;
+        notesLabel.Text = "Notes";
+        notesLabel.UseMnemonic = false;
+        //
+        // notesList
+        //
+        notesList.Dock = DockStyle.Fill;
+        notesList.Margin = new Padding(0);
+        notesList.Name = "notesList";
+        notesList.TabIndex = 1;
         //
         // statusStrip
         //
@@ -76,6 +131,12 @@ partial class MainWindow {
         Name = "MainWindow";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "PlanCake";
+        splitContainer.Panel1.ResumeLayout(false);
+        splitContainer.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)splitContainer).EndInit();
+        splitContainer.ResumeLayout(false);
+        notesLayout.ResumeLayout(false);
+        notesLayout.PerformLayout();
         mainLayout.ResumeLayout(false);
         mainLayout.PerformLayout();
         statusStrip.ResumeLayout(false);
@@ -86,7 +147,11 @@ partial class MainWindow {
     #endregion
 
     private TableLayoutPanel mainLayout;
+    private SplitContainer splitContainer;
     private DocumentView documentView;
+    private TableLayoutPanel notesLayout;
+    private Label notesLabel;
+    private Oire.WinForms.NativeControls.NativeListView notesList;
     private StatusStrip statusStrip;
     private ToolStripStatusLabel statusLabel;
 }

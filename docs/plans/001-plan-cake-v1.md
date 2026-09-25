@@ -559,25 +559,35 @@ check tasks off from the document.
 ### Task 8: Notes list beside the document
 
 **Files:**
+- Create: `src/PlanCake/Ui/NotesListRow.cs`, `tests/PlanCake.Tests/NotesListRowTests.cs`
 - Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/Ui/MainWindow.Designer.cs`,
-  `src/PlanCake/web/app.js`
+  `src/PlanCake/web/app.js`, `src/PlanCake/Rendering/PositionRestorer.cs`,
+  `tests/PlanCake.Tests/PositionRestorerTests.cs`
 
-- [ ] a `SplitContainer` (document first, notes list second) with a `NativeListView`, columns
+- [x] a `SplitContainer` (document first, notes list second) with a `NativeListView`, columns
       "Lines", "Block", "Note", filled from the render result after every render; a real
       `Label` "Notes" names it; the "Note" column shows the note's Markdown stripped to plain
-      text (`MarkdownRenderer.NotePlainText`, Task 7), so JAWS reads no backticks
-- [ ] F6 switches focus between the document and the list; View → Notes list shows or hides the
-      list (hidden list is skipped by F6)
-- [ ] Enter (`ItemActivate`) jumps to that note in the document and focuses it; Delete deletes
+      text (`MarkdownRenderer.NotePlainText`, Task 7), so JAWS reads no backticks. "Lines" is the
+      note's own lines in the file (`12`, or `12-14`); the cells come from `NotesListRow`
+- [x] F6 switches focus between the document and the list; View → Notes list shows or hides the
+      list (hidden list is skipped by F6). Found while building it: there was no menu bar yet, so
+      this task attaches the `NativeMenuBar` with a View menu holding Notes list and Switch pane
+      (F6 shown only, run through `HostCommands`); Task 9 adds the rest
+- [x] Enter (`ItemActivate`) jumps to that note in the document and focuses it; Delete deletes
       it; a context menu on the list offers Edit note and Delete note
-- [ ] F9 / Shift+F9 move to the next / previous note from wherever focus is: in the document
+- [x] F9 / Shift+F9 move to the next / previous note from wherever focus is: in the document
       they focus the note after / before the current position; in the list they move
-      the selection; at the ends, announce "No more notes"
-- [ ] the list keeps its selection across re-renders when the same note still exists
+      the selection; at the ends, announce "No more notes". Found while building it: focus
+      reaching a link or check box in the page (JAWS moves it there) now makes that block the
+      current position too (`focusin` in `app.js`)
+- [x] the list keeps its selection across re-renders when the same note still exists
+      (`PositionRestorer.FindNote`: same text on a block with the same text, else the nearest
+      note, which is where it goes after a delete); an edit, delete or undo started in the list
+      keeps the focus in the list and selects the note it produced
 - [ ] **ask the user** to check the list, F6 and F9 with JAWS; also: a parent task with some
       children checked reads as partially checked (Task 7a); following a `.md` link lands at
       the top of the new file (Task 7a fix)
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 9: Menu bar and the small dialogs
 

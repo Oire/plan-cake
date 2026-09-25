@@ -40,6 +40,46 @@ internal static class PositionRestorer {
         return FindTarget(saved, blocks) ?? (blocks.Count > 0 ? blocks[0] : null);
     }
 
+    /// <summary>
+    /// The note of <paramref name="notes"/> that stands for <paramref name="previous"/>, from an
+    /// earlier render, so the notes list keeps its selection: one with the same text on a block
+    /// with the same text (the nearest one when there are several), else the note whose start
+    /// line is nearest to the previous start line (the earlier one on a tie), which is where
+    /// the selection goes when the note itself was deleted or edited.
+    /// </summary>
+    /// <returns><see langword="null"/> without a previous note or without any note.</returns>
+    public static RenderedNote? FindNote(RenderedNote? previous, IReadOnlyList<RenderedNote> notes) {
+        ArgumentNullException.ThrowIfNull(notes);
+
+        if (previous is null || notes.Count == 0) {
+            return null;
+        }
+
+        var line = previous.Note.StartLine;
+        var same = notes.Where(note =>
+            string.Equals(note.Note.Text, previous.Note.Text, StringComparison.Ordinal)
+            && string.Equals(note.Block?.Text, previous.Block?.Text, StringComparison.Ordinal)
+        );
+
+        return NearestNote(line, same) ?? NearestNote(line, notes);
+    }
+
+    private static RenderedNote? NearestNote(int line, IEnumerable<RenderedNote> candidates) {
+        RenderedNote? nearest = null;
+        var nearestDistance = int.MaxValue;
+
+        foreach (var note in candidates) {
+            var distance = Math.Abs(note.Note.StartLine - line);
+
+            if (distance < nearestDistance) {
+                nearest = note;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearest;
+    }
+
     private static BlockInfo? Nearest(int line, IEnumerable<BlockInfo> candidates) {
         BlockInfo? nearest = null;
         var nearestDistance = int.MaxValue;
