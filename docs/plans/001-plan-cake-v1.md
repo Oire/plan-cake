@@ -39,9 +39,14 @@ names; Task 1 adapts it.
       notes can be edited, deleted, navigated with F8 / Shift+F8, undone and redone
 - [ ] when the file changes on disk the view reloads (or asks, per settings) and keeps the
       reading position; a note is never written over a change the user has not seen
-- [ ] File → Settings changes the language (English, Russian, Ukrainian, French, Hebrew with
-      right-to-left layout, German), the note markers, and the other settings listed in
-      Technical details; changes apply without a restart
+- [ ] File → Settings changes the interface language (English, Russian, Ukrainian, French,
+      Hebrew with right-to-left layout, German), the default document language, the note
+      markers, and the other settings listed in Technical details; changes apply without a
+      restart
+- [ ] View → Interface language and View → Document language switch those two languages from
+      the menu; JAWS reads the plan in the document language (English by default), whatever
+      the interface language is
+- [ ] links and raw HTML in a plan cannot navigate the view away or run script
 - [ ] `plancake list <file> [--json]`, `check`, `clear` and `export` work headless with the
       output and exit codes in Technical details
 - [ ] F1 opens the user manual in the current language
@@ -91,12 +96,16 @@ names; Task 1 adapts it.
   `NativeListView` (`Columns`, `Items` of `NativeListViewItem` with `Cells`, `ItemActivate`,
   `SelectedIndexChanged`, `EnsureVisible`). Its README explains attach/dispose ordering.
 - **New dependencies:** `Microsoft.Web.WebView2` (WinForms control), `Markdig`,
-  `System.CommandLine` (same major as SIC), `NetSparkleUpdater.SparkleUpdater` +
-  `NetSparkleUpdater.UI.WinForms.NetCore` (same versions as SIC). Latest stable of each.
+  `System.CommandLine`, `NetSparkleUpdater.SparkleUpdater` +
+  `NetSparkleUpdater.UI.WinForms.NetCore`: the latest stable version of each (for the last
+  three, the same major version SIC uses, so its code ports as is).
 - **Debussy's note convention:** `C:\Users\User\.claude\plugins\marketplaces\Debussy\plugins\planning\skills\plan-exec\references\settings.md`
-  (`noteMarkers`: a single token runs to the end of the line; an `open...close` pair spans
-  everything between) and `manual-review.md` beside it. PlanCake must read notes exactly as
-  that convention defines them, so a note written by hand in an editor works too.
+  (`noteMarkers`: a single token runs to the end of the line "and on into following lines that
+  plainly continue it"; an `open...close` pair spans everything between) and
+  `manual-review.md` beside it. PlanCake reads **one** marker configuration, its own, and a
+  note written by hand in an editor with that pair works too. Deliberate divergence: in
+  single-token mode a PlanCake note ends at the end of its line, because "plainly continues"
+  is a judgment a parser cannot make.
 
 ## Development approach
 
@@ -111,7 +120,16 @@ names; Task 1 adapts it.
 - The primary user is blind and uses JAWS. A UI task is not done until its JAWS checks pass;
   a subagent cannot run JAWS, so it stops and asks the user to run them.
 - Every user-visible string goes through `_()` or the designer + `Localizer.Localize`, from the
-  first task that introduces it. English only until Task 14.
+  first task that introduces it; page strings come from the host through the `strings` message
+  from Task 6 on, never as `app.js` literals. English only until Task 14.
+- Every dialog sets its own title in the constructor, right after `Localizer.Localize`
+  (`Text = _("Add note");`): the gettext extractor misses a form's bare `Text =` in the
+  designer, as SIC's `CLAUDE.md` explains.
+- Settings that a task needs before Task 11 exists are hard-coded to their default in that task
+  and wired to `Config` in Task 11.
+- The **interface language** (menus, dialogs, page chrome) and the **document language** (the
+  `lang` of the rendered plan, which picks JAWS's voice) are independent. Never derive one from
+  the other.
 - Line numbers are **1-based** everywhere a user or a CLI consumer sees them, and in the
   `data-lines` attribute. Markdig's 0-based `Line` is converted at the boundary.
 
@@ -131,13 +149,15 @@ names; Task 1 adapts it.
       `plancake` (so the published exe is `plancake.exe`), `RootNamespace` = `Oire.PlanCake`,
       `InternalsVisibleTo` = `PlanCake.Tests`, the `Oire.WinFormsTemplate` namespace everywhere
 - [ ] `App.Name` = `PlanCake` (data folder `%APPDATA%\Oire\PlanCake`, config `PlanCake.cfg`);
-      remove the unused database constants if nothing refers to them; `Product` = `PlanCake`,
-      `Description` = "Read and annotate Markdown files with a screen reader"; catalog name
-      in `messages.pot`; the translation-script path in the CI workflow
-- [ ] check the gettext scripts: they take the catalog name from `AssemblyName`; with the
-      lowercase `plancake` assembly name the catalog becomes `plancake.po`/`.mo` — make sure
-      `Localization` looks for the same name (fix whichever side disagrees, and say so in
-      `locale/README.md`)
+      remove the database constants (`DatabaseFileExtension`, `DatabasePath`) and the
+      `AppConstantsTests` assertions on them, since PlanCake has no database; `Product` =
+      `PlanCake`, `Description` = "Read and annotate Markdown files with a screen reader";
+      catalog name in `messages.pot`; the translation-script path in the CI workflow
+- [ ] catalog name: the gettext scripts take it from `AssemblyName` (`plancake`), while
+      `Localization` loads `<App.Name>.mo` (`PlanCake`). Make both use the same name with the
+      same case (e.g. have `Localization` use the assembly name), and correct the template
+      README's claim that `App.Name` drives the catalog, in `README.md` and
+      `locale/README.md`
 - [ ] replace the README's template text with a short PlanCake README (what it is, build
       commands); rewrite `CLAUDE.md`'s title and structure section for PlanCake, keeping every
       convention
@@ -158,26 +178,30 @@ decide which note triggers the later tasks build.**
   `src/PlanCake/Utils/StatusAnnouncer.cs`, `src/PlanCake/Utils/TextDirection.cs`,
   `src/PlanCake/Utils/DialogHelper.cs`, `docs/jaws-spike.md`
 
-- [ ] add `Microsoft.Web.WebView2`; `web\**` copied to output; set
-      `IncludeNativeLibrariesForSelfExtract` so `WebView2Loader.dll` survives single-file
-      publish, and confirm a `dotnet publish -c Release` build starts
+- [ ] add `Microsoft.Web.WebView2`; `web\**` copied to output; confirm a
+      `dotnet publish -c Release` build starts (single-file publish leaves `WebView2Loader.dll`
+      next to the exe, which the installer and the portable zip must ship)
 - [ ] `DocumentView` (a `UserControl` wrapping the `WebView2` control): creates the
       `CoreWebView2Environment` with its user data folder under `App.DataFolder\WebView2`
       (the install folder is not writable), maps the virtual host `https://app.plancake/` to
       `AppContext.BaseDirectory\web`, disables default context menus, browser accelerator keys,
       the status bar and (in Release) dev tools, and exposes `PostMessage(object)` plus a
       `MessageReceived` event over `chrome.webview` JSON messages
-- [ ] copy `TextDirection` and `DialogHelper` from SIC; missing WebView2 Runtime: catch
-      `WebView2RuntimeNotFoundException` at first use, show a `DialogHelper` message with the
-      download link (`https://go.microsoft.com/fwlink/p/?LinkId=2124703`), exit with
-      `ExitCode.Error`
+- [ ] copy `TextDirection` and `DialogHelper` from SIC; missing WebView2 Runtime: before
+      creating the window, `Program` checks
+      `CoreWebView2Environment.GetAvailableBrowserVersionString()` (catching
+      `WebView2RuntimeNotFoundException`), shows a `DialogHelper` message with the download link
+      (`https://go.microsoft.com/fwlink/p/?LinkId=2124703`) and returns `ExitCode.Error`;
+      `DocumentView` never exits the process itself (deciding to stop is `Program`'s job)
 - [ ] `StatusAnnouncer`: sets the status-strip label and raises a UI Automation notification
       (`AccessibilityObject.RaiseAutomationNotification`, `ImportantMostRecent`) so JAWS speaks
       status messages wherever focus is
-- [ ] keys pressed while the WebView2 has focus do not pass through the host's message loop:
-      handle `CoreWebView2Controller.AcceleratorKeyPressed` (or the control's `ProcessCmdKey`
-      forwarding) and route the shortcuts to a single host command table; for the spike, log
-      each planned shortcut from Technical details → "Keyboard" to the status announcer
+- [ ] keys pressed while the WebView2 has focus do not pass through the host's message loop,
+      and the native menu bar's accelerator table never sees them. The WinForms `WebView2`
+      control forwards accelerator keys to `ProcessCmdKey`: override `ProcessCmdKey` in
+      `MainWindow` and route shortcuts to a single host command table (the same table the menu
+      uses); for the spike, log each planned shortcut from Technical details → "Keyboard" to
+      the status announcer
 - [ ] `spike.html` per Technical details → "JAWS spike page", loaded at startup for now
 - [ ] **stop and ask the user** to run the JAWS checklist in Technical details → "JAWS spike
       checklist" and report the answers; write them to `docs/jaws-spike.md`; then update this
@@ -200,8 +224,12 @@ decide which note triggers the later tasks build.**
 - [ ] tests: paired note on its own line, note spanning several lines, note mid-line with text
       before and after, several notes on one line, single-token mode running to end of line,
       notes inside a fenced code block and a table, line mapping after stripping
+- [ ] continuation lines of a multi-line note lose the prefix PlanCake writes in front of them
+      (Technical details → "Note parsing"), so a note inside a blockquote or a nested list item
+      reads back exactly as it was typed
 - [ ] tests: unterminated opening marker (treated as running to end of file, and reported),
-      closing marker without an opening one (left as text), empty note, CRLF source
+      closing marker without an opening one (left as text), empty note, CRLF source,
+      multi-line notes with `> ` and list-indent prefixes read back without them
 - [ ] validation commands pass
 
 ### Task 4: Render Markdown with source line ranges and notes
@@ -219,13 +247,20 @@ decide which note triggers the later tasks build.**
 - [ ] anchor every note to its block and insert its HTML into the AST where Technical details →
       "Note placement in the view" says; two modes: `Interactive` (note buttons) and `Export`
       (static `<aside>`), all note text HTML-encoded
-- [ ] every block gets `dir="auto"`; task-list checkboxes stay read-only
+- [ ] every block gets `dir="auto"` and no `lang` of its own (the document language is set once
+      on the container, see Task 6); task-list checkboxes stay read-only
+- [ ] raw HTML in the source is rendered (so `<details>` or `<kbd>` work); scripts are blocked
+      by the page's content security policy (Task 6), and `Export` mode puts the same policy
+      in a `<meta http-equiv="Content-Security-Policy">`
 - [ ] tests: line ranges for a paragraph, heading, tight and loose list items (a parent item's
-      range excludes its nested list), table rows, fenced and indented code, a paragraph in a
-      blockquote; ranges correct when notes sit above, inside and below the block
-- [ ] tests: note buttons land after the right block for each kind, including a table row and a
-      nested list item; note text with `<`, `&` and quotes is encoded; excerpt is plain text
-      truncated to 80 characters with an ellipsis
+      range excludes its nested list), a list item whose first child is a code block, table
+      rows (`TableRow.Line` and `Span` are populated for pipe tables), fenced and indented code,
+      a paragraph in a blockquote; ranges correct when notes sit above, inside and below
+- [ ] tests: note buttons land after the right block for each kind, including a table row, a
+      nested list item, a note before the first block and an unterminated note; note text with
+      `<`, `&` and quotes is encoded; excerpt is plain text truncated to 80 characters with an
+      ellipsis; export output contains the CSP meta and a raw `<script>` from the source stays
+      under it
 - [ ] validation commands pass
 
 ### Task 5: Write notes to the file safely
@@ -236,7 +271,10 @@ decide which note triggers the later tasks build.**
   `tests/PlanCake.Tests/MarkdownFileTests.cs`
 
 - [ ] `MarkdownFile`: reads a file detecting the encoding (UTF-8 with or without BOM, UTF-16
-      BOMs; otherwise UTF-8) and the dominant line ending; writes back with the same encoding,
+      BOMs; otherwise strict UTF-8 with `throwOnInvalidBytes: true`) and the dominant line
+      ending; a file that is not valid in its detected encoding (say, Windows-1251) opens
+      read-only with a warning (decoded with the system ANSI code page for display) and is
+      never written, so PlanCake cannot damage it; writes back with the same encoding,
       BOM and line ending, atomically (temp file in the same folder + `File.Replace`, or
       `File.Move` when the target is gone); retries a locked file 5 times over about a second,
       then throws `IOException`
@@ -253,33 +291,54 @@ decide which note triggers the later tasks build.**
       fenced code block's closing fence, a paragraph inside a blockquote (`> ` prefix kept);
       two notes on one block stack in order; multi-line note; edit; delete; clear
 - [ ] tests: stale file rejected with nothing written; CRLF and LF preserved; BOM preserved and
-      not added; closing marker in text rejected; locked file retried then failing; undo, redo,
-      and undo refused after an external change
+      not added; a Windows-1251 file opens read-only and every write is refused; closing marker
+      in text rejected; locked file retried then failing; undo, redo, and undo refused after an
+      external change
+- [ ] tests: round trip (add, parse, edit, parse) of a multi-line note inside a blockquote and
+      inside a nested list item leaves exactly one prefix per line
 - [ ] validation commands pass
 
 ### Task 6: Show the document and talk to the page
 
 **Files:**
 - Create: `src/PlanCake/web/index.html`, `src/PlanCake/web/app.js`, `src/PlanCake/web/app.css`,
-  `src/PlanCake/Ui/PageMessages.cs`
+  `src/PlanCake/Ui/PageMessages.cs`, `src/PlanCake/Rendering/PositionRestorer.cs`,
+  `tests/PlanCake.Tests/PositionRestorerTests.cs`
 - Modify: `src/PlanCake/Ui/DocumentView.cs`, `src/PlanCake/Ui/MainWindow.cs`,
   `src/PlanCake/Program.cs`
 - Delete: `src/PlanCake/web/spike.html`
 
 - [ ] `index.html` + `app.js`: a `main` element that receives rendered HTML; the message
-      protocol in Technical details → "Page protocol"; a delegated `click` listener and a
-      `contextmenu` listener on the document (only those Task 2 kept); `tabindex="-1"` on
-      annotatable blocks so focusing them moves the JAWS virtual cursor
+      protocol in Technical details → "Page protocol", including the `strings` message for
+      every page string; a delegated `click` listener and a `contextmenu` listener on the
+      document (only those Task 2 kept); `tabindex="-1"` on annotatable blocks so focusing them
+      moves the JAWS virtual cursor
+- [ ] languages: `<html lang>` and `dir` follow the **interface** language (page chrome);
+      `main` gets `lang` from the **document** language (hard-coded `en` until Task 11), sent
+      with every `render`
+- [ ] `index.html` carries a strict content security policy: `default-src 'none'; script-src
+      https://app.plancake; style-src https://app.plancake 'unsafe-inline'; img-src
+      https://app.plancake data:` (no inline script, no `eval`), so raw HTML in a plan renders
+      but cannot run script
 - [ ] `app.css`: readable defaults, visible focus outline, note buttons distinct from text,
       supports Windows high contrast (`forced-colors`) and light/dark (`prefers-color-scheme`)
-- [ ] `MainWindow` opens the file given on the command line: read with `MarkdownFile`, render,
-      post to the page, set the window title to `<file name> - PlanCake`; the page's `<title>`
-      is the first heading
-- [ ] links: `NavigationStarting` and `NewWindowRequested` for anything but the app host are
-      canceled and opened in the default browser; in-page anchors (`#…`) scroll and focus
-- [ ] position restore: after every re-render the page focuses the block matching the last one
-      the user interacted with (same text, else nearest start line), or the element the host
-      names (a new note)
+- [ ] `Program.Main()` becomes `Main(string[] args)`; for now the first argument, if any, is
+      the file to open (Task 12 replaces this with System.CommandLine). `MainWindow` reads it
+      with `MarkdownFile`, renders, posts to the page, sets the window title to
+      `<file name> - PlanCake`; the page's `<title>` is the first heading
+- [ ] navigation lockdown: after the initial load of `index.html`, `NavigationStarting` cancels
+      **every** navigation, and `NewWindowRequested` every new window. In-page anchors (`#…`)
+      are handled by `app.js` (scroll and focus, no navigation). `app.js` intercepts link
+      clicks and sends the host the raw `href`: absolute `http(s)`/`mailto` open with
+      `UseShellExecute`; a relative target resolves against the `.md` file's folder, and a
+      `.md`/`.markdown` target opens in PlanCake, anything else with `UseShellExecute`; missing
+      targets are announced
+- [ ] position restore, host side so it can be tested: the page reports the last block the
+      user interacted with (`position`); after a re-render `PositionRestorer` picks the target
+      from the new `BlockInfo` list (a block with identical text, else the block whose start
+      line is nearest) and the host sends `focusLines`; a new note is focused by index instead
+- [ ] tests for `PositionRestorer`: same text found after lines shifted, text changed so the
+      nearest line wins, block deleted at the end of the file, empty document
 - [ ] zoom: Ctrl+Plus, Ctrl+Minus, Ctrl+0 set `ZoomFactor` in steps of 10%, 50%–300%
 - [ ] **ask the user** to check with JAWS: an 800-line plan reads with H, I, L, T and B
       navigation, no Markdown punctuation is read, links open in the browser, zoom works
@@ -288,7 +347,8 @@ decide which note triggers the later tasks build.**
 ### Task 7: Add, edit and delete notes from the document
 
 **Files:**
-- Create: `src/PlanCake/Ui/NoteDialog.cs`, `src/PlanCake/Ui/NoteDialog.Designer.cs`
+- Create: `src/PlanCake/Ui/NoteDialog.cs`, `src/PlanCake/Ui/NoteDialog.Designer.cs`,
+  `src/PlanCake/Notes/NoteActionRunner.cs`, `tests/PlanCake.Tests/NoteActionRunnerTests.cs`
 - Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/web/app.js`
 
 - [ ] `NoteDialog`: title "Add note" or "Edit note"; a read-only label "Note on:" with the block
@@ -299,12 +359,16 @@ decide which note triggers the later tasks build.**
 - [ ] Enter on a block → `NoteDialog` → `NoteStore.Add` → re-render → focus the new note button
       → announce "Note added"; Enter on a note button → edit
 - [ ] Applications key / Shift+F10 on a block or note → `NativeContextMenu.Show` at the
-      element's screen position (page sends its client rectangle; convert with the zoom factor,
-      `devicePixelRatio` and `PointToScreen`): Add note, Edit note, Delete note (only on a
-      note), Copy block text
-- [ ] `StaleFileException` → nothing written, re-render, announce "The file changed. Please try
-      again." with the dialog's text kept for the retry; `IOException` → error message, dialog
-      text kept
+      element's screen position (page sends its client rectangle in CSS pixels; multiply by
+      `devicePixelRatio` only, which already includes the zoom, then `webView.PointToScreen`):
+      Add note, Edit note, Delete note (only on a note), Copy block text
+- [ ] note deletion asks for confirmation (the `ConfirmNoteDelete` default, hard-coded until
+      Task 11)
+- [ ] the outcome of each note action lives in a small UI-free `NoteActionRunner` (success →
+      announcement text and focus target; `StaleFileException` → nothing written, re-render,
+      "The file changed. Please try again.", dialog text kept for the retry; `IOException` →
+      error message, dialog text kept; read-only file → refused with the reason), with tests
+      for each outcome in `tests/PlanCake.Tests/NoteActionRunnerTests.cs`
 - [ ] Undo (Ctrl+Z) and Redo (Ctrl+Y) through `NoteStore`, announced ("Note added undone" etc.)
 - [ ] **ask the user** to check with JAWS: add, edit, delete, undo and redo a note on a
       paragraph, a nested list item, a table row and a code block; the virtual cursor lands on
@@ -341,6 +405,11 @@ decide which note triggers the later tasks build.**
 - [ ] `BuildMenuSpec()` with exactly the menus in Technical details → "Menus", shortcuts
       registered through the host command table so they work with focus in the document too;
       items that need a file or a note are disabled without one
+- [ ] View → Interface language: System default plus every shipped language (the same list the
+      Settings dialog builds, native names), current one checked; choosing one saves it to
+      `Config` and applies it live (`ApplyLocalization`, as in SIC). View → Document language:
+      the six languages, current one checked; choosing one re-renders with the new `lang` for
+      this document only (opening another file returns to the default from Settings)
 - [ ] File → Open (`OpenFileDialog`, filter `*.md;*.markdown`, then all files), Open in editor
       (`UseShellExecute` on the file), Exit; View → Reload
 - [ ] `ShortcutsDialog`: a `NativeListView` with "Command" and "Shortcut" columns built from the
@@ -354,21 +423,26 @@ decide which note triggers the later tasks build.**
 
 **Files:**
 - Create: `src/PlanCake/Utils/FileWatcher.cs`, `src/PlanCake/Utils/SingleInstance.cs`,
-  `tests/PlanCake.Tests/SingleInstanceTests.cs`
+  `tests/PlanCake.Tests/FileWatcherTests.cs`, `tests/PlanCake.Tests/SingleInstanceTests.cs`
 - Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/Program.cs`
 
 - [ ] `FileWatcher`: watches the open file's folder for changes, renames and deletions of that
       file (editors often save by rename), debounced 300 ms, marshaled to the UI thread;
       ignores changes whose content equals what PlanCake itself last wrote
-- [ ] external change → re-render with position restore and announce "File reloaded", or, when
-      the setting says ask, ask first (No keeps the view, announces that F5 reloads, and note
-      actions then fail as stale)
+- [ ] external change → re-render with position restore and announce "File reloaded"; build the
+      "ask first" branch too (No keeps the view, announces that F5 reloads, and note actions
+      then fail as stale) but hard-code `AutoReload` until Task 11 wires the setting
 - [ ] file deleted or renamed away → announce it, disable note commands and Reload until it
       reappears, then reload
 - [ ] `SingleInstance`: per normalized full path, a named pipe `PlanCake-<SHA-256 of the
       upper-cased path>`; a second `plancake same.md` connects, calls
       `AllowSetForegroundWindow`, sends "activate", exits with `ExitCode.Success`; the first
       window restores and activates itself; File → Open re-registers under the new path
+- [ ] `FileWatcher` takes an injectable clock/timer so its logic is testable without real
+      waits
+- [ ] tests: bursts of events inside 300 ms produce one reload; PlanCake's own write produces
+      none; save-by-rename (write temp, delete original, rename temp) produces one reload and
+      no "deleted" state; a real delete produces the deleted state
 - [ ] tests: path normalization (case, `..`, trailing separators) gives one pipe name; a second
       registration for the same path is detected
 - [ ] validation commands pass
@@ -384,15 +458,20 @@ decide which note triggers the later tasks build.**
 - [ ] `Config` sections and defaults per Technical details → "Settings"; drop the template's
       `ConfirmExit` (nothing is ever unsaved)
 - [ ] `SettingsDialog` like SIC's: a `TabControl` with General and Notes tabs, each a flat
-      `TableLayoutPanel`, real `Label`s, OK/Cancel; language list built as SIC builds it;
+      `TableLayoutPanel`, real `Label`s, OK/Cancel; interface language list built as SIC builds
+      it; default document language a combo box of the six languages (native names);
       markers validated with `NoteMarkers.Validate` and the reason shown next to the field
-- [ ] File → Settings (Ctrl+comma); on OK: save, apply language live (`ApplyLocalization`, as
-      in SIC, including the menu and list columns), re-render with the new markers, re-apply
-      the other settings
-- [ ] `NoteDialog` follows the note-field Enter setting; the page follows the block Enter
-      setting (Enter opens the context menu instead of the dialog)
-- [ ] tests: defaults, round trip of every new setting, invalid enum or marker values in the
-      file fall back to defaults
+- [ ] File → Settings (Ctrl+comma); on OK: save, then apply live
+- [ ] wire every setting to its behavior, replacing the hard-coded defaults of earlier tasks:
+      `Language` → `ApplyLocalization` (menu, list columns, page `strings`) and the View →
+      Interface language check mark; `DefaultDocumentLanguage` → the `lang` of newly opened
+      documents; `ConfirmNoteDelete` → the confirmation in Task 7 (Delete all notes always
+      confirms); `ExternalChangeAction` → Task 10's reload-or-ask branch; `ShowNotesList` →
+      the list's visibility at startup; `OpeningMarker`/`ClosingMarker` → `NoteParser`,
+      `NoteStore` and a re-render; `BlockEnterAction` → the page (Enter opens the context menu
+      instead of the dialog); `NoteEnterAction` → `NoteDialog`
+- [ ] tests: defaults, round trip of every new setting, invalid enum, marker or document
+      language values in the file fall back to defaults
 - [ ] validation commands pass
 
 ### Task 12: Command-line mode
@@ -406,14 +485,18 @@ decide which note triggers the later tasks build.**
 - [ ] System.CommandLine root command with an optional `file` argument (→ GUI, via
       `SingleInstance`) and the subcommands `list`, `check`, `clear`, `export` with the options,
       output and exit codes in Technical details → "Command line"
-- [ ] `ConsoleAttacher`: for subcommands, `--help` and `--version` only,
-      `AttachConsole(ATTACH_PARENT_PROCESS)` so output shows in an interactive terminal; the GUI
-      path never touches the console
-- [ ] `CliRunner` takes `TextWriter`s for output and error so tests need no console; `Config`
-      loaded with GUI dialogs off (errors to stderr), markers from config unless overridden
-- [ ] tests: `list` text and JSON on a file with notes of each kind; `list` on a file without
-      notes; `check` 0 and 3; `clear` removes all notes and leaves the rest byte-identical;
-      `export` writes standalone HTML with notes as `<aside>` and no script
+- [ ] `ConsoleAttacher`: for subcommands, `--help`, `--version` and parse errors only; calls
+      `AttachConsole(ATTACH_PARENT_PROCESS)` **only when stdout is not already redirected**
+      (`GetStdHandle` + `GetFileType`), so captured output from Claude's tools or a pipe is
+      never taken over; sets `Console.OutputEncoding` and the error encoding to UTF-8 without
+      BOM; the GUI path never touches the console
+- [ ] `CliRunner` takes `TextWriter`s for output and error so tests need no console; markers
+      and the document language come from `Config` unless overridden by options
+- [ ] tests: `list` text and JSON on a file with notes of each kind; a Cyrillic and a Hebrew note
+      survive `list --json` byte for byte as UTF-8; `list` on a file without notes; `check` 0
+      and 3; `clear` removes all notes and leaves the rest byte-identical; `export` writes
+      standalone HTML with notes as `<aside>`, the CSP meta, and `lang` from the document
+      language (not the interface language); `--single-token` switches the marker mode
 - [ ] tests: missing file, unreadable file, invalid marker options → message on stderr and
       `ExitCode.Error`
 - [ ] validation commands pass
@@ -440,8 +523,8 @@ decide which note triggers the later tasks build.**
 - Modify: `src/PlanCake/locale/messages.pot`, `src/PlanCake/PlanCake.csproj`,
   `src/PlanCake/web/app.js`
 
-- [ ] every page string (note button prefix, live messages) comes from the host through the
-      `strings` message, not from `app.js` literals
+- [ ] check that no user-visible literal crept into `app.js` or `index.html` (all page strings
+      come through the `strings` message since Task 6)
 - [ ] `Extract-Strings.ps1`, then `New-Language.ps1` for ru, uk, fr, he, de, then translate every
       entry; no fuzzy entries; menu mnemonics unique per menu level in every catalog (run the
       app once in each language to prove it)
@@ -474,8 +557,9 @@ decide which note triggers the later tasks build.**
   `installer/build-installer.bat`, `installer/deploy.example.json`, `changelogs/1.0.0.md`
 - Modify: `.gitignore`
 
-- [ ] `plancake.iss` from SIC's `sic.iss`: PlanCake names, the six languages, `web\*`, `help\*`,
-      `locale\*`; `Dependency_AddDotNet100Desktop` **and** `Dependency_AddWebView2`
+- [ ] `plancake.iss` from SIC's `sic.iss`: PlanCake names, the six languages, the exe,
+      `WebView2Loader.dll`, `web\*`, `help\*`, `locale\*`; `Dependency_AddDotNet100Desktop`
+      **and** `Dependency_AddWebView2`; the portable zip carries the same files
 - [ ] add `{app}` to the machine `PATH` (`[Registry]` on
       `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment`, `ChangesEnvironment=yes`,
       skipped when already present, removed on uninstall)
@@ -510,7 +594,12 @@ decide which note triggers the later tasks build.**
 - The line map records, for every stripped line, its original 1-based line number, so a block
   at stripped lines 40–42 reports original lines 41–44 when a note sat inside it.
 - An opening marker with no closing marker runs to the end of the file and is flagged
-  `Unterminated`; the GUI announces it, `list` prints a warning to stderr.
+  `Unterminated`; the GUI announces it, `list` prints a warning to stderr. It is anchored like
+  any other note, by its start line.
+- Continuation lines: for the second and later lines of a multi-line note, the parser removes
+  the prefix PlanCake writes (the leading run of whitespace and `>` characters, up to the
+  length of the first line's prefix) before keeping the text, so reading back what
+  "Note placement in the file" wrote gives exactly the typed text.
 
 ### Annotatable blocks
 
@@ -521,7 +610,8 @@ inclusive) and `tabindex="-1"`:
 - `ListItemBlock`: stamped with the range of its **leading paragraph only**, because in a tight
   list Markdig renders the paragraph without a `<p>` and its attributes would be lost; nested
   lists inside the item get their own stamps. In a loose list the `<p>` is stamped too, with
-  the same range;
+  the same range. An item whose first child is not a paragraph (a code block, a heading) is
+  not stamped itself; that first child is stamped as usual;
 - blocks inside a `QuoteBlock` are stamped; the quote itself is not.
 
 The end line comes from the block's `Span.End` mapped to a line through a table of line-start
@@ -530,10 +620,12 @@ offsets of the stripped source, then through the line map.
 ### Note placement in the view
 
 A note is anchored to the last annotatable block that ends before the note starts (for a note
-written by hand in the middle of a block: the block containing its line). The renderer inserts
-an `HtmlBlock` right after the anchor in the anchor's parent container; for a `TableRow` anchor
-it appends the `HtmlBlock` to the row's last cell; for a list item's leading paragraph, inside
-the item after that paragraph.
+written by hand in the middle of a block: the block containing its line). A note before the
+first block has no anchor: it is rendered at the top of the document, and `list` reports its
+block as `0-0` with an empty excerpt and `blockKind` `"start"`. The renderer inserts an
+`HtmlBlock` right after the anchor in the anchor's parent container; for a `TableRow` anchor it
+appends the `HtmlBlock` to the row's last cell (Markdig then wraps that cell's text in `<p>`,
+which is harmless); for a list item's leading paragraph, inside the item after that paragraph.
 
 - Interactive: `<button type="button" class="note" data-note="<index>">Note: <text></button>`
   ("Note:" localized; line breaks as `<br>`).
@@ -554,13 +646,14 @@ the item after that paragraph.
 ### Page protocol
 
 JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, each with a `type`:
-- host → page: `render` `{ html, generation, focus: { lines?, note? } }`, `strings`
-  `{ notePrefix, … }`, `focusNote` `{ note }`, `focusLines` `{ lines }`, `nextNote` /
-  `previousNote` `{}`, `announce` `{ text }` (only if Task 2 showed UIA notifications are
-  not heard in the virtual buffer)
+- host → page: `render` `{ html, generation, documentLang, focus: { lines?, note? } }`,
+  `strings` `{ uiLang, uiDir, notePrefix, … }`, `focusNote` `{ note }`, `focusLines`
+  `{ lines }`, `nextNote` / `previousNote` `{}`, `announce` `{ text }` (only if Task 2 showed
+  UIA notifications are not heard in the virtual buffer)
 - page → host: `activate` `{ lines, generation }` (Enter on a block), `activateNote`
   `{ note, generation }`, `contextMenu` `{ lines, note?, rect, generation }`, `position`
-  `{ lines, text }` (last block interacted with), `noMoreNotes` `{}`, `ready` `{}`
+  `{ lines, text }` (last block interacted with), `openLink` `{ href }`, `noMoreNotes` `{}`,
+  `ready` `{}`
 - the host ignores any message whose `generation` is not the latest render
 
 ### Keyboard
@@ -574,8 +667,11 @@ Delete, Applications key.
 
 - **File:** Open… (Ctrl+O), Open in editor (Ctrl+E), separator, Settings… (Ctrl+comma),
   separator, Exit (Alt+F4, display only)
-- **View:** Notes list (checkable), Switch pane (F6), separator, Zoom in (Ctrl+Plus), Zoom out
-  (Ctrl+Minus), Reset zoom (Ctrl+0), separator, Reload (F5)
+- **View:** Notes list (checkable), Switch pane (F6), separator, Interface language ▸ (System
+  default, then each shipped language by native name), Document language ▸ (English, Русский,
+  Українська, Français, עברית, Deutsch), separator, Zoom in (Ctrl+Plus), Zoom out
+  (Ctrl+Minus), Reset zoom (Ctrl+0), separator, Reload (F5). Language names carry no
+  mnemonics; the two submenus' own mnemonics must differ from every other View item's.
 - **Notes:** Edit note, Delete note, separator, Next note (F8), Previous note (Shift+F8),
   separator, Undo (Ctrl+Z), Redo (Ctrl+Y), separator, Delete all notes…
 - **Help:** User manual (F1), Keyboard shortcuts, separator, Check for updates, About PlanCake
@@ -585,7 +681,8 @@ No Edit menu; no menu may end up with a single item.
 ### Settings
 
 `PlanCake.cfg`, SharpConfig sections:
-- `[General]`: `Language` (default `System`), `ConfirmNoteDelete` (true),
+- `[General]`: `Language` (interface, default `System`), `DefaultDocumentLanguage` (`en`; one
+  of `en`, `ru`, `uk`, `fr`, `he`, `de`), `ConfirmNoteDelete` (true),
   `ExternalChangeAction` (`AutoReload` | `Ask`, default `AutoReload`), `ShowNotesList` (true),
   `CheckForUpdatesOnStartup` (true), `UpdateCheckInterval` (`Weekly`)
 - `[Notes]`: `OpeningMarker` (`[usernote]`), `ClosingMarker` (`[/usernote]`, empty = single
@@ -594,8 +691,9 @@ No Edit menu; no menu may end up with a single item.
 
 ### Command line
 
-`plancake [file]` opens the window. Subcommands (all accept `--open-marker <text>` and
-`--close-marker <text>`, where `--close-marker ""` selects single-token mode):
+`plancake [file]` opens the window. Subcommands all accept `--open-marker <text>`,
+`--close-marker <text>` and `--single-token` (single-token mode; a flag, because Windows
+PowerShell 5.1 drops an empty `""` argument when calling an exe). Output is UTF-8 without BOM.
 - `list <file> [--json]`: one note per entry. Text form, one line per note:
   `<noteStart>-<noteEnd> after <blockStart>-<blockEnd> "<excerpt>": <text>` (line breaks in the
   text shown as ` / `). JSON form: an array of `{ "noteStartLine", "noteEndLine",
@@ -605,8 +703,9 @@ No Edit menu; no menu may end up with a single item.
   `ExitCode.NotesRemain` (3, new constant) with any. `ExitCode.Error` (1) stays for failures, so
   a caller can tell "notes left" from "could not read".
 - `clear <file>`: removes every note, prints how many; exit 0.
-- `export <file> -o <out.html>`: standalone HTML (inline CSS, no script, `lang` from the UI
-  language, `<title>` from the first heading), notes as `<aside>`; exit 0.
+- `export <file> -o <out.html> [--lang <code>]`: standalone HTML (inline CSS, the CSP meta,
+  no script of its own, `lang` from `--lang` or else `DefaultDocumentLanguage` — never the
+  interface language, `<title>` from the first heading), notes as `<aside>`; exit 0.
 - Errors: message on stderr, exit 1.
 
 Caveat for the docs: interactive PowerShell and cmd do not wait for a GUI-subsystem exe, so
@@ -641,8 +740,10 @@ For the user to run in the spike build, with JAWS in the virtual cursor:
 - Full JAWS pass on a real plan of 800+ lines: read it end to end, annotate twenty blocks of
   every kind, let Claude act on them through manual review, confirm the reload keeps the place.
 - Debussy (`C:\Users\User\.claude\plugins\marketplaces\Debussy`, `plugins/planning`):
-  `noteMarkers` already accepts pairs, so the user sets `"noteMarkers": ["[usernote]...[/usernote]",
-  "!USERNOTE!"]` in `~/.claude/debussy.json`. Separate change there: plan-make's Manual review
+  `noteMarkers` already accepts pairs, so the user sets `"noteMarkers": ["[usernote]...[/usernote]"]`
+  in `~/.claude/debussy.json`, matching PlanCake's markers. If `!USERNOTE!` stays in that list
+  for hand-written notes, remember that PlanCake reads only its own markers, so
+  `plancake check` would not count those. Separate change there: plan-make's Manual review
   hand-off starts `plancake <plan>` when `plancake` is on the PATH, and manual review uses
   `plancake list --json` to find notes and `plancake check` for its verify step.
 - Add `Set-Alias pk plancake` to the PowerShell profile (and `alias pk=plancake` to the bash
