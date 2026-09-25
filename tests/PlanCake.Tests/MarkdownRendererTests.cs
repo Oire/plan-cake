@@ -26,8 +26,12 @@ public class MarkdownRendererTests {
     private const string NoteRoles =
         "role=\"note\" aria-roledescription=\"user note\" aria-brailleroledescription=\"unote\"";
 
-    private static string NoteDiv(int index, string text) =>
-        $"""<div class="note" {NoteRoles} data-note="{index}" dir="auto">{text}</div>""";
+    /// <summary>A user note whose text renders as one paragraph.</summary>
+    private static string NoteDiv(int index, string text) => NoteDivHtml(index, $"""<p dir="auto">{text}</p>""");
+
+    /// <summary>A user note with the given inner HTML.</summary>
+    private static string NoteDivHtml(int index, string html) =>
+        $"""<div class="note" {NoteRoles} data-note="{index}" dir="auto">{html}</div>""";
 
     // Line ranges
 
@@ -239,7 +243,9 @@ public class MarkdownRendererTests {
 
         result.Notes[0].Note.Unterminated.Should().BeTrue();
         result.Notes[0].Block!.Lines.Should().Be("3-3");
-        result.Html.Should().EndWith($"Two</p>\n{NoteDiv(0, "runs on<br><br>and on")}\n");
+        result.Html.Should().EndWith(
+            $"Two</p>\n{NoteDivHtml(0, "<p dir=\"auto\">runs on</p>\n<p dir=\"auto\">and on</p>")}\n"
+        );
     }
 
     [Fact]
@@ -260,8 +266,80 @@ public class MarkdownRendererTests {
     public void Render_NoteText_IsEncodedAndLineBreaksBecomeBr() {
         var result = Render("Para\n[usernote]a <b> & \"q\" 'r'\nnext[/usernote]\n");
 
-        result.Html.Should().Contain(NoteDiv(0, "a &lt;b&gt; &amp; &quot;q&quot; &#39;r&#39;<br>next"));
+        result.Html.Should().Contain(NoteDiv(0, "a &lt;b&gt; &amp; &quot;q&quot; 'r'<br />\nnext"));
         result.Html.Should().NotContain("<b>");
+    }
+
+    // Markdown in notes
+
+    [Fact]
+    public void Render_NoteMarkdown_InlineCodeAndEmphasisRender() {
+        var result = Render("Para\n[usernote]Use `dotnet test`, *not* **that**[/usernote]\n");
+
+        result.Html.Should().Contain(
+            NoteDiv(0, "Use <code>dotnet test</code>, <em>not</em> <strong>that</strong>")
+        );
+        result.Html.Should().NotContain("`");
+    }
+
+    [Fact]
+    public void Render_NoteMarkdown_HeadingBecomesABoldParagraph() {
+        var result = Render("# Title\n[usernote]## Why\nBecause.[/usernote]\n");
+
+        result.Html.Should().Contain(
+            NoteDivHtml(0, "<p dir=\"auto\"><strong>Why</strong></p>\n<p dir=\"auto\">Because.</p>")
+        );
+        result.Html.Should().NotContain("<h2");
+        result.Blocks.Should().ContainSingle("a heading in a note is not a block of the document");
+        result.Title.Should().Be("Title");
+    }
+
+    [Fact]
+    public void Render_NoteMarkdown_ListAndCodeBlockRender() {
+        var result = Render("Para\n[usernote]Steps:\n\n- one\n- two\n\n```\nx = 1\n```[/usernote]\n");
+
+        var note = NoteHtml(result.Html, 0);
+        note.Should().Contain("<ul dir=\"auto\">\n<li dir=\"auto\">one</li>\n<li dir=\"auto\">two</li>\n</ul>");
+        note.Should().Contain("<pre dir=\"auto\"><code>x = 1\n</code></pre>");
+    }
+
+    [Fact]
+    public void Render_NoteMarkdown_InnerBlocksAreNotAnnotatable() {
+        var result = Render("Para\n[usernote]## Heading\n\n- item\n\n| a |\n|---|\n| b |\n\n```\ncode\n```[/usernote]\n");
+
+        NoteHtml(result.Html, 0).Should().NotContain("data-lines");
+        result.Blocks.Should().ContainSingle().Which.Kind.Should().Be(BlockKind.Paragraph);
+    }
+
+    [Fact]
+    public void Render_NoteMarkdown_LinkStaysALinkInAUserNote() {
+        var result = Render("Para\n[usernote]See [the docs](https://example.com).[/usernote]\n");
+
+        NoteHtml(result.Html, 0).Should().Contain("<a href=\"https://example.com\">the docs</a>");
+    }
+
+    [Fact]
+    public void Render_ButtonStyle_HoldsInlineMarkdownOnly() {
+        var result = Render(
+            "Para\n[usernote]## Title\nUse `code` and *this* [link](https://example.com), https://example.org\n\n"
+                + "- [ ] a task\n\n```\nx < 1\n```[/usernote]\n",
+            style: NoteStyle.Button
+        );
+
+        var start = result.Html.IndexOf("<button", StringComparison.Ordinal);
+        var button = result.Html[start..(result.Html.IndexOf("</button>", start, StringComparison.Ordinal) + 9)];
+        button.Should().StartWith("""<button type="button" class="note" data-note="0" dir="auto">Note: Title<br>""");
+        button.Should().Contain("<code>code</code>").And.Contain("<em>this</em>").And.Contain(" link, https://example.org");
+        button.Should().Contain("[ ] a task").And.Contain("<code>x &lt; 1</code>");
+        foreach (var tag in new[] { "<a", "<p", "<h", "<ul", "<li", "<pre", "<div", "<input", "<table" }) {
+            button.Should().NotContain(tag);
+        }
+    }
+
+    [Fact]
+    public void NotePlainText_DropsTheMarkdownPunctuation() {
+        MarkdownRenderer.NotePlainText("Use `dotnet test`, **not** [that](https://example.com)")
+            .Should().Be("Use dotnet test, not that");
     }
 
     [Fact]
@@ -283,6 +361,14 @@ public class MarkdownRendererTests {
             .And.Contain("""aria-brailleroledescription="зам" """);
         Render("Para\n[usernote]n[/usernote]\n", style: NoteStyle.Button, strings: strings)
             .Html.Should().Contain(">Заметка: n</button>");
+    }
+
+    /// <summary>The HTML of the user note with this <c>data-note</c> index.</summary>
+    private static string NoteHtml(string html, int index) {
+        var start = html.IndexOf($"data-note=\"{index}\"", StringComparison.Ordinal);
+        start.Should().BeGreaterThanOrEqualTo(0);
+
+        return html[start..html.IndexOf("</div>", start, StringComparison.Ordinal)];
     }
 
     // Excerpts
@@ -329,7 +415,16 @@ public class MarkdownRendererTests {
         html.Should().Contain(meta).And.Contain("<title>Plan</title>");
         html.IndexOf("<script>alert(1)</script>", StringComparison.Ordinal)
             .Should().BeGreaterThan(html.IndexOf(meta, StringComparison.Ordinal));
-        html.Should().Contain($"""<div class="note" {NoteRoles} dir="auto">a note</div>""");
+        html.Should().Contain($"""<div class="note" {NoteRoles} dir="auto"><p dir="auto">a note</p></div>""");
         html.Should().NotContain("data-note").And.Contain("disabled=\"disabled\"");
+    }
+
+    [Fact]
+    public void Render_Export_RendersTheNoteMarkdown() {
+        var html = Render("Text\n[usernote]Use `code`, *really*[/usernote]\n", RenderMode.Export).Html;
+
+        html.Should().Contain(
+            $"""<div class="note" {NoteRoles} dir="auto"><p dir="auto">Use <code>code</code>, <em>really</em></p></div>"""
+        );
     }
 }

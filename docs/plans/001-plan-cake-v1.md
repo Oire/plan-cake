@@ -38,7 +38,7 @@ names; Task 1 adapts it.
       or Shift+F10 opens the context menu; confirming writes `[usernote]text[/usernote]` after
       that block's last source line, and the view returns to the new note
 - [ ] notes show in the document after their block, as user notes (`role="note"`) or buttons
-      per settings, and in a notes list beside it;
+      per settings, with the Markdown written in them rendered, and in a notes list beside it;
       notes can be edited, deleted, navigated with F9 / Shift+F9, undone and redone
 - [ ] a task-list checkbox can be toggled from the document (Space, Enter or a click), after a
       confirmation that can be turned off; the file on disk gets `[x]` or `[ ]` on that item's
@@ -289,7 +289,8 @@ decide which note triggers the later tasks build.**
 - [x] anchor every note to its block and insert its HTML into the AST where Technical details →
       "Note placement in the view" says; two modes: `Interactive` (a user note or a button, per
       the note style) and `Export`
-      (static `role="note"` element), all note text HTML-encoded
+      (static `role="note"` element), all note text HTML-encoded (rendered as Markdown since
+      Task 7, raw HTML in it still shown as text)
 - [x] every block gets `dir="auto"` and no `lang` of its own (the document language is set once
       on the container, see Task 6); task-list checkboxes stay as Markdig renders them
       (disabled) until Task 7a enables them
@@ -466,11 +467,27 @@ decide which note triggers the later tasks build.**
       error message, dialog text kept; read-only file → refused with the reason), with tests
       for each outcome in `tests/PlanCake.Tests/NoteActionRunnerTests.cs`
 - [x] Undo (Ctrl+Z) and Redo (Ctrl+Y) through `NoteStore`, announced ("Note added undone" etc.)
-- [ ] **ask the user** to check with JAWS: add, edit, delete, undo and redo a note on a
+- [x] ➕ Markdown in notes: the note text in the file stays exactly what the user typed; only
+      its rendering changes. Note style `Note` and export render it as Markdown with the
+      document's extensions (emphasis, inline code, links, lists, fenced code), a typed line break
+      staying a line break, raw HTML shown as text and footnotes left out (their ids would clash
+      with the document's); every inner block gets `dir="auto"`, none gets `data-lines` or
+      becomes annotatable, and a heading renders as a bold paragraph (`<p><strong>`) so that it
+      never joins the document's heading navigation. Note style `Button` holds phrasing content
+      only: the inline Markdown of each block (emphasis, code) after the "Note:" prefix, blocks
+      joined with `<br>`, a link shown as its text without the `<a>`, a task checkbox as `[x]` /
+      `[ ]`. A link inside a user note is followed like a document link, not taken as a click on
+      the note. Where a note is shown as one line of plain text (the delete confirmation, Task 8's
+      notes list) it is Markdig's plain-text rendering of it (`MarkdownRenderer.NotePlainText`),
+      so JAWS reads no backticks; the CLI (`list`, JSON) keeps the raw text, which Claude reads as
+      Markdown. Added after the Task 7 JAWS check found backticks read out literally
+- [x] **ask the user** to check with JAWS: add, edit, delete, undo and redo a note on a
       paragraph, a nested list item, a table row and a code block; the virtual cursor lands on
       the new note each time; Enter on a block does not switch JAWS to forms mode, and Enter on
       a note opens the editor every time, not only the first; Alt+Left / Backspace return to
-      the previous file at the same block, Alt+Right goes forward (Task 6)
+      the previous file at the same block, Alt+Right goes forward (Task 6).
+      Results: adding, editing and deleting notes, focus and forms mode pass; Markdown in a note
+      was shown raw, fixed by the ➕ item above
 - [x] validation commands pass
 
 ### ➕ Task 7a: Toggle task-list items
@@ -521,7 +538,8 @@ check tasks off from the document.
 
 - [ ] a `SplitContainer` (document first, notes list second) with a `NativeListView`, columns
       "Lines", "Block", "Note", filled from the render result after every render; a real
-      `Label` "Notes" names it
+      `Label` "Notes" names it; the "Note" column shows the note's Markdown stripped to plain
+      text (`MarkdownRenderer.NotePlainText`, Task 7), so JAWS reads no backticks
 - [ ] F6 switches focus between the document and the list; View → Notes list shows or hides the
       list (hidden list is skipped by F6)
 - [ ] Enter (`ItemActivate`) jumps to that note in the document and focuses it; Delete deletes
@@ -840,16 +858,26 @@ which is harmless); for a list item's leading paragraph, inside the item after t
 
 - Interactive, note style `Note` (default): `<div class="note" role="note"
   aria-roledescription="user note" aria-brailleroledescription="unote"
-  data-note="<index>"><text></div>`, with no `tabindex` of its own (like blocks, it gets one
-  only while the page focuses it); Enter or a click on it edits it (same click and `keydown`
-  Enter delegation as blocks); F9 / Shift+F9 move between notes.
-- Interactive, note style `Button`: `<button type="button" class="note" data-note="<index>">Note:
-  <text></button>`; B / Shift+B also move between notes.
-- Both: "user note", "unote" and "Note:" localized; line breaks as `<br>`.
+  data-note="<index>" dir="auto"><note blocks></div>`, with no `tabindex` of its own (like
+  blocks, it gets one only while the page focuses it); Enter or a click on it edits it (same
+  click and `keydown` Enter delegation as blocks), except a click or Enter on a link inside it,
+  which follows the link; F9 / Shift+F9 move between notes.
+- `<note blocks>`: the note text rendered as Markdown with the document's extensions (Task 7 ➕
+  item): a typed line break stays a line break (`<br />`), raw HTML is shown as text, footnotes
+  are left out; every block gets `dir="auto"`, none gets `data-lines`; a heading becomes
+  `<p dir="auto"><strong>…</strong></p>`, never an `<hN>`.
+- Interactive, note style `Button`: `<button type="button" class="note" data-note="<index>"
+  dir="auto">Note: <note inline></button>`, where `<note inline>` is phrasing content only:
+  each block's inline Markdown (emphasis, code) joined with `<br>`, a link as its text without
+  the `<a>`, a task checkbox as `[x]` / `[ ]`, a code block as `<code>` with `<br>` between its
+  lines; B / Shift+B also move between notes.
+- Both: "user note", "unote" and "Note:" localized.
 - Export: `<div class="note" role="note" aria-roledescription="user note"
-  aria-brailleroledescription="unote"><text></div>`, both role descriptions localized (from
-  the catalog; in the CLI, the interface language from `Config`). Not `<aside>`: its implicit
-  `complementary` role would make every note a landmark.
+  aria-brailleroledescription="unote" dir="auto"><note blocks></div>`, both role descriptions
+  localized (from the catalog; in the CLI, the interface language from `Config`). Not `<aside>`:
+  its implicit `complementary` role would make every note a landmark.
+- A note shown on one line of plain text (the delete confirmation, the notes list) is
+  `MarkdownRenderer.NotePlainText`; the CLI's `list` output keeps the raw text.
 
 ### Note placement in the file
 
@@ -939,7 +967,7 @@ PowerShell 5.1 drops an empty `""` argument when calling an exe). Output is UTF-
 - `list <file> [--json] [-o <out>]`: one note per entry; `-o` writes to a file (UTF-8 without
   BOM) instead of standard output. Text form, one line per note:
   `<noteStart>-<noteEnd> after <blockStart>-<blockEnd> "<excerpt>": <text>` (line breaks in the
-  text shown as ` / `). JSON form: an array of `{ "noteStartLine", "noteEndLine",
+  text shown as ` / `; the note's Markdown stays raw). JSON form: an array of `{ "noteStartLine", "noteEndLine",
   "blockStartLine", "blockEndLine", "blockKind", "blockExcerpt", "text" }`, UTF-8, indented.
   No notes: empty output (text) or `[]` (JSON). Exit 0.
 - `check <file>`: prints the note count; exit `ExitCode.Success` (0) with none,
@@ -948,7 +976,8 @@ PowerShell 5.1 drops an empty `""` argument when calling an exe). Output is UTF-
 - `clear <file>`: removes every note, prints how many; exit 0.
 - `export <file> -o <out.html> [--lang <code>]`: standalone HTML (inline CSS, the CSP meta,
   no script of its own, `lang` from `--lang` or else `DefaultDocumentLanguage` — never the
-  interface language, `<title>` from the first heading), notes as `role="note"` elements; exit 0.
+  interface language, `<title>` from the first heading), notes as `role="note"` elements with
+  their Markdown rendered (Technical details → "Note placement in the view"); exit 0.
 - Errors: message on stderr, exit 1.
 
 Caveat for the docs: interactive PowerShell and cmd do not wait for a GUI-subsystem exe, so

@@ -1,11 +1,15 @@
 using System.Globalization;
 using System.Text;
 using Markdig;
+using Markdig.Extensions.Footnotes;
 using Markdig.Extensions.Tables;
+using Markdig.Extensions.TaskLists;
 using Markdig.Helpers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
+using Markdig.Renderers.Html.Inlines;
 using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 using Oire.PlanCake.Notes;
 using Oire.PlanCake.Utils.Enums;
 
@@ -55,12 +59,32 @@ internal static class MarkdownRenderer {
         table { border-collapse: collapse; }
         th, td { border: 1px solid; padding: 0.25em 0.5em; }
         .note { border-inline-start: 0.3em solid; margin: 0.5em 0; padding: 0.25em 0.75em; font-style: italic; }
+        .note > :first-child { margin-top: 0; }
+        .note > :last-child { margin-bottom: 0; }
         """;
 
     private static readonly MarkdownPipeline _pipeline = new MarkdownPipelineBuilder()
         .UseAdvancedExtensions()
         .UsePreciseSourceLocation()
         .Build();
+
+    /// <summary>
+    /// The pipeline a note's own text is rendered with: the document's extensions, except that
+    /// raw HTML is shown as text (a note cannot fake the page's own attributes), a line break the
+    /// user typed stays a line break, and footnotes are left out (their ids would clash with the
+    /// document's).
+    /// </summary>
+    private static readonly MarkdownPipeline _notePipeline = BuildNotePipeline();
+
+    private static MarkdownPipeline BuildNotePipeline() {
+        var builder = new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .UseSoftlineBreakAsHardlineBreak()
+            .DisableHtml();
+        builder.Extensions.RemoveAll(extension => extension is FootnoteExtension);
+
+        return builder.Build();
+    }
 
     /// <summary>A block the user can annotate, and the AST node its notes are inserted after.</summary>
     private sealed record Annotatable(BlockInfo Info, Block Target);
@@ -165,22 +189,137 @@ internal static class MarkdownRenderer {
     }
 
     private static string NoteHtml(Note note, int index, RenderOptions options) {
-        var text = string.Join("<br>", note.Text.Split('\n').Select(HtmlEncode));
         var strings = options.Strings;
         var roleDescriptions =
             $"""role="note" aria-roledescription="{HtmlEncode(strings.NoteRoleDescription)}" """
             + $"""aria-brailleroledescription="{HtmlEncode(strings.NoteBrailleRoleDescription)}" """;
 
         if (options.Mode == RenderMode.Export) {
-            return $"""<div class="note" {roleDescriptions}dir="auto">{text}</div>""";
+            return $"""<div class="note" {roleDescriptions}dir="auto">{NoteBlockHtml(note.Text)}</div>""";
         }
 
         var noteIndex = index.ToString(CultureInfo.InvariantCulture);
 
         return options.NoteStyle == NoteStyle.Button
             ? $"""<button type="button" class="note" data-note="{noteIndex}" dir="auto">"""
-                + $"{HtmlEncode(strings.NoteLabel)} {text}</button>"
-            : $"""<div class="note" {roleDescriptions}data-note="{noteIndex}" dir="auto">{text}</div>""";
+                + $"{HtmlEncode(strings.NoteLabel)} {NoteInlineHtml(note.Text)}</button>"
+            : $"""<div class="note" {roleDescriptions}data-note="{noteIndex}" dir="auto">"""
+                + $"{NoteBlockHtml(note.Text)}</div>";
+    }
+
+    /// <summary>
+    /// A note's text rendered as Markdown for a <c>role="note"</c> element: every block gets
+    /// <c>dir="auto"</c>, none gets <c>data-lines</c>, and a heading becomes a bold paragraph so
+    /// that it never joins the document's heading navigation.
+    /// </summary>
+    internal static string NoteBlockHtml(string text) {
+        var document = Markdown.Parse(text, _notePipeline);
+
+        foreach (var block in document.Descendants<Block>()) {
+            block.GetAttributes().AddPropertyIfNotExist("dir", "auto");
+        }
+
+        using var writer = new StringWriter(CultureInfo.InvariantCulture);
+        var renderer = new HtmlRenderer(writer);
+        _notePipeline.Setup(renderer);
+        renderer.ObjectRenderers.Replace<HeadingRenderer>(new BoldParagraphHeadingRenderer());
+
+        if (renderer.ObjectRenderers.FindExact<CodeBlockRenderer>() is { } codeRenderer) {
+            codeRenderer.OutputAttributesOnPre = true;
+        }
+
+        renderer.Render(document);
+        writer.Flush();
+
+        return writer.ToString().TrimEnd('\n');
+    }
+
+    /// <summary>
+    /// A note's text rendered for a button, which may hold phrasing content only: the inline
+    /// Markdown of each block (emphasis, code), blocks joined with <c>&lt;br&gt;</c>, a link shown
+    /// as its text without the <c>&lt;a&gt;</c> and a task checkbox as <c>[x]</c> or <c>[ ]</c>.
+    /// </summary>
+    internal static string NoteInlineHtml(string text) {
+        var document = Markdown.Parse(text, _notePipeline);
+
+        using var writer = new StringWriter(CultureInfo.InvariantCulture);
+        var renderer = new HtmlRenderer(writer);
+        _notePipeline.Setup(renderer);
+        renderer.ObjectRenderers.Replace<LinkInlineRenderer>(new LinkTextRenderer());
+        renderer.ObjectRenderers.Replace<AutolinkInlineRenderer>(new AutolinkTextRenderer());
+        renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListTextRenderer());
+
+        var first = true;
+
+        foreach (var leaf in document.Descendants<LeafBlock>()) {
+            if (leaf is not CodeBlock && leaf.Inline is null) {
+                continue;
+            }
+
+            if (!first) {
+                renderer.Write("<br>");
+            }
+
+            first = false;
+
+            if (leaf is CodeBlock code) {
+                var lines = code.Lines.ToString().TrimEnd('\n').Split('\n');
+                renderer.Write("<code>").Write(string.Join("<br>", lines.Select(HtmlEncode))).Write("</code>");
+            } else {
+                renderer.WriteLeafInline(leaf);
+            }
+        }
+
+        writer.Flush();
+
+        return writer.ToString().TrimEnd('\n');
+    }
+
+    /// <summary>
+    /// A note's text as plain text, for places that show a note on one line (the delete
+    /// confirmation, the notes list): no Markdown punctuation for a screen reader to read out.
+    /// </summary>
+    internal static string NotePlainText(string text) {
+        var document = Markdown.Parse(text, _notePipeline);
+
+        using var writer = new StringWriter(CultureInfo.InvariantCulture);
+        var renderer = new HtmlRenderer(writer) {
+            EnableHtmlForBlock = false,
+            EnableHtmlForInline = false,
+            EnableHtmlEscape = false,
+        };
+        _notePipeline.Setup(renderer);
+        renderer.Render(document);
+        writer.Flush();
+
+        return writer.ToString().Trim();
+    }
+
+    /// <summary>A heading inside a note: a bold paragraph, so it is not a heading of the document.</summary>
+    private sealed class BoldParagraphHeadingRenderer: HtmlObjectRenderer<HeadingBlock> {
+        protected override void Write(HtmlRenderer renderer, HeadingBlock obj) {
+            renderer.EnsureLine();
+            renderer.Write("<p dir=\"auto\"><strong>");
+            renderer.WriteLeafInline(obj);
+            renderer.Write("</strong></p>");
+            renderer.WriteLine();
+        }
+    }
+
+    /// <summary>A link inside a note button: its text only, since a button cannot hold a link.</summary>
+    private sealed class LinkTextRenderer: HtmlObjectRenderer<LinkInline> {
+        protected override void Write(HtmlRenderer renderer, LinkInline obj) => renderer.WriteChildren(obj);
+    }
+
+    /// <summary>An autolink inside a note button: its address as text.</summary>
+    private sealed class AutolinkTextRenderer: HtmlObjectRenderer<AutolinkInline> {
+        protected override void Write(HtmlRenderer renderer, AutolinkInline obj) => renderer.WriteEscape(obj.Url);
+    }
+
+    /// <summary>A task checkbox inside a note button: <c>[x]</c> or <c>[ ]</c> as text.</summary>
+    private sealed class TaskListTextRenderer: HtmlObjectRenderer<TaskList> {
+        protected override void Write(HtmlRenderer renderer, TaskList obj) =>
+            renderer.Write(obj.Checked ? "[x]" : "[ ]");
     }
 
     private static string ExportDocument(string body, string? title, string language) => $"""

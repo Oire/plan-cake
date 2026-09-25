@@ -160,6 +160,19 @@ td .note {
     margin: 0.25rem 0 0;
 }
 
+/* A note's text is Markdown: its own paragraphs, lists and code sit snug inside the box. */
+.note > :first-child {
+    margin-top: 0;
+}
+
+.note > :last-child {
+    margin-bottom: 0;
+}
+
+.note a {
+    cursor: pointer;
+}
+
 @media (forced-colors: active) {
     .note {
         border-color: CanvasText;

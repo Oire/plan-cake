@@ -624,7 +624,7 @@ public partial class MainWindow: Form {
 
         if (ConfirmNoteDelete) {
             var answer = DialogHelper.Show(
-                _("Delete this note?\n\n{0}", MarkdownRenderer.Excerpt(note.Note.Text)),
+                _("Delete this note?\n\n{0}", MarkdownRenderer.Excerpt(MarkdownRenderer.NotePlainText(note.Note.Text))),
                 _("Delete note"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
