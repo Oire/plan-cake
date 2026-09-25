@@ -31,7 +31,7 @@ names; Task 1 adapts it.
 ## Done when
 
 - [ ] `plancake plan.md` opens a window showing `plan.md` rendered as HTML in WebView2; JAWS
-      reads it in its virtual buffer with heading, list, table and button navigation, and no
+      reads it in its virtual buffer with heading, list and table navigation, and no
       Markdown punctuation is read out
 - [ ] pressing Enter (and/or the Applications key, whichever survived Task 2) on a paragraph,
       list item, heading, table row or code block opens the note dialog; confirming writes
@@ -141,6 +141,10 @@ names; Task 1 adapts it.
 - The **interface language** (menus, dialogs, page chrome) and the **document language** (the
   `lang` of the rendered plan, which picks JAWS's voice) are independent. Never derive one from
   the other.
+- Never open a dialog, a message box or a menu directly inside a WebView2 event handler
+  (`WebMessageReceived`, `NavigationStarting`, …) or inside `ProcessCmdKey` when WebView2
+  forwarded the key: defer it with `BeginInvoke`. A nested message loop inside those
+  handlers re-enters WebView2, which Microsoft's threading guidance warns against.
 - Line numbers are **1-based** everywhere a user or a CLI consumer sees them, and in the
   `data-lines` attribute. Markdig's 0-based `Line` is converted at the boundary.
 
@@ -250,21 +254,26 @@ decide which note triggers the later tasks build.**
       exactly as it was typed
 - [ ] tests: unterminated opening marker (treated as running to end of file, and reported),
       closing marker without an opening one (left as text), empty note, CRLF source,
-      multi-line notes with list indentation read back without it
+      multi-line notes with list indentation read back without it; a hand-written
+      `> [usernote]…[/usernote]` line inside a quote is removed entirely
 - [ ] validation commands pass
 
 ### Task 4: Render Markdown with source line ranges and notes
 
 **Files:**
 - Create: `src/PlanCake/Rendering/MarkdownRenderer.cs`, `src/PlanCake/Rendering/RenderResult.cs`,
-  `src/PlanCake/Rendering/BlockInfo.cs`, `tests/PlanCake.Tests/MarkdownRendererTests.cs`
+  `src/PlanCake/Rendering/BlockInfo.cs`, `src/PlanCake/Rendering/RenderStrings.cs`,
+  `src/PlanCake/Utils/Enums/NoteStyle.cs`, `tests/PlanCake.Tests/MarkdownRendererTests.cs`
 - Modify: `src/PlanCake/PlanCake.csproj` (Markdig)
 
 - [ ] pipeline: `UseAdvancedExtensions()` (pipe tables, task lists, auto-identifiers, …) +
       `UsePreciseSourceLocation()`; parse the stripped source from `NoteParser`
 - [ ] walk the AST and stamp each annotatable block with `data-lines="start-end"` in
       **original** line numbers, per Technical details → "Annotatable blocks"; collect a
-      `BlockInfo` per block (range, kind, plain-text excerpt)
+      `BlockInfo` per block (range, kind, full plain text, and an 80-character excerpt of it)
+- [ ] the renderer never calls `_()`: the localized strings it writes ("Note:", "user note",
+      "unote") come in a `RenderStrings` record, so its tests do not touch `Localization`;
+      `NoteStyle` (`Note` | `Button`) is an enum in `Utils/Enums/`
 - [ ] anchor every note to its block and insert its HTML into the AST where Technical details →
       "Note placement in the view" says; two modes: `Interactive` (a user note or a button, per
       the note style) and `Export`
@@ -272,8 +281,9 @@ decide which note triggers the later tasks build.**
 - [ ] every block gets `dir="auto"` and no `lang` of its own (the document language is set once
       on the container, see Task 6); task-list checkboxes stay read-only
 - [ ] raw HTML in the source is rendered (so `<details>` or `<kbd>` work); scripts are blocked
-      by the page's content security policy (Task 6), and `Export` mode puts the same policy
-      in a `<meta http-equiv="Content-Security-Policy">`
+      by the page's content security policy (Task 6); `Export` mode puts a policy fit for a
+      standalone file in a `<meta http-equiv="Content-Security-Policy">`: `default-src
+      'none'; script-src 'none'; style-src 'unsafe-inline'; img-src * data:`
 - [ ] tests: line ranges for a paragraph, heading, tight and loose list items (a parent item's
       range excludes its nested list), a list item whose first child is a code block, table
       rows (`TableRow.Line` and `Span` are populated for pipe tables), fenced and indented code,
@@ -295,7 +305,10 @@ decide which note triggers the later tasks build.**
 - [ ] `MarkdownFile`: reads a file detecting the encoding (UTF-8 with or without BOM, UTF-16
       BOMs; otherwise strict UTF-8 with `throwOnInvalidBytes: true`) and the dominant line
       ending; a file that is not valid in its detected encoding (say, Windows-1251) is decoded
-      with the system ANSI code page and then either opens read-only with a warning (default)
+      with the Windows ANSI code page (`Encoding.RegisterProvider(CodePagesEncodingProvider.
+      Instance)`, then `Encoding.GetEncoding(0)`; never `CurrentCulture`, which PlanCake sets to
+      the interface language), injectable so tests pass Windows-1251 explicitly whatever the
+      machine's code page, and then either opens read-only with a warning (default)
       and is never written, so PlanCake cannot damage it, or, when the Advanced setting
       `ConvertToUtf8` is on (hard-coded off until Task 12), is converted: written back once as
       UTF-8 without BOM, same line endings, and announced ("Converted from Windows-1251 to
@@ -308,7 +321,8 @@ decide which note triggers the later tasks build.**
       text)`, `Edit(note, text)`, `Delete(note)`, `Clear()`; placement and indentation per
       Technical details → "Note placement in the file"
 - [ ] note text validation: rejects text containing the closing marker (paired mode) or a line
-      break (single-token mode); converts pasted line breaks to spaces in single-token mode
+      break or the opening token (single-token mode, where it would split the note in two
+      when read back); converts pasted line breaks to spaces in single-token mode
 - [ ] undo/redo: each operation records the file text before and after; `Undo` writes the
       "before" text only if the file still equals the "after" text (otherwise
       `StaleFileException` and both stacks are cleared); `Redo` symmetric
@@ -330,7 +344,8 @@ decide which note triggers the later tasks build.**
 **Files:**
 - Create: `src/PlanCake/web/index.html`, `src/PlanCake/web/app.js`, `src/PlanCake/web/app.css`,
   `src/PlanCake/Ui/PageMessages.cs`, `src/PlanCake/Rendering/PositionRestorer.cs`,
-  `tests/PlanCake.Tests/PositionRestorerTests.cs`
+  `src/PlanCake/Utils/LinkResolver.cs`, `tests/PlanCake.Tests/PositionRestorerTests.cs`,
+  `tests/PlanCake.Tests/LinkResolverTests.cs`
 - Modify: `src/PlanCake/Ui/DocumentView.cs`, `src/PlanCake/Ui/MainWindow.cs`,
   `src/PlanCake/Program.cs`
 - Delete: `src/PlanCake/web/spike.html`
@@ -350,7 +365,9 @@ decide which note triggers the later tasks build.**
 - [ ] `app.css`: readable defaults, visible focus outline, notes distinct from text,
       supports Windows high contrast (`forced-colors`) and light/dark (`prefers-color-scheme`)
 - [ ] `Program.Main()` becomes `Main(string[] args)`; for now the first argument, if any, is
-      the file to open (Task 13 replaces this with System.CommandLine). `MainWindow` reads it
+      the file to open (Task 13 replaces this with System.CommandLine). Every way of opening a
+      file (command line, File → Open, drag and drop, `.md` links, and later the clipboard
+      and links in Task 11) goes through one `MainWindow.OpenFile(path)`. It reads it
       with `MarkdownFile`, renders, posts to the page, sets the window title to
       `<file name> - PlanCake`; the page's `<title>` is the first heading
 - [ ] navigation lockdown: after the initial load of `index.html`, `NavigationStarting` cancels
@@ -359,11 +376,14 @@ decide which note triggers the later tasks build.**
       clicks and sends the host the raw `href`: absolute `http(s)`/`mailto` open with
       `UseShellExecute`; a relative target resolves against the `.md` file's folder, and a
       `.md`/`.markdown` target opens in PlanCake, anything else with `UseShellExecute`; missing
-      targets are announced
-- [ ] position restore, host side so it can be tested: the page reports the last block the
-      user interacted with (`position`); after a re-render `PositionRestorer` picks the target
-      from the new `BlockInfo` list (a block with identical text, else the block whose start
-      line is nearest) and the host sends `focusLines`; a new note is focused by index instead
+      targets are announced. The decision (external, in-page, relative `.md`, relative other,
+      missing) is a pure `LinkResolver`, tested for each case
+- [ ] position restore, host side so it can be tested: the page reports only the lines of the
+      last block the user interacted with (`position`); the host looks up that block's full
+      text in the previous render's `BlockInfo` list, and after a re-render
+      `PositionRestorer` picks the target from the new list (a block with identical full
+      text, else the block whose start line is nearest) and sends `focusLines`; a new note
+      is focused by index instead
 - [ ] tests for `PositionRestorer`: same text found after lines shifted, text changed so the
       nearest line wins, block deleted at the end of the file, empty document
 - [ ] mouse, alongside the keyboard: a single click only places focus (so text can still be
@@ -374,7 +394,8 @@ decide which note triggers the later tasks build.**
       and double-click does nothing extra
 - [ ] a Markdown file dragged from Explorer onto the window opens (`AllowDrop`, first `.md` /
       `.markdown` of the drop)
-- [ ] zoom: Ctrl+Plus, Ctrl+Minus, Ctrl+0 set `ZoomFactor` in steps of 10%, 50%–300%
+- [ ] zoom: Ctrl+Plus, Ctrl+Minus (main keyboard and numpad: `Oemplus`, `OemMinus`, `Add`,
+      `Subtract`), Ctrl+0 set `ZoomFactor` in steps of 10%, 50%–300%
 - [ ] **ask the user** to check with JAWS: an 800-line plan reads with H, I, L, T and B
       navigation, no Markdown punctuation is read, links open in the browser, zoom works
 - [ ] validation commands pass
@@ -397,7 +418,8 @@ decide which note triggers the later tasks build.**
 - [ ] Applications key / Shift+F10 on a block or note → `NativeContextMenu.Show` at the
       element's screen position (page sends its client rectangle in CSS pixels; multiply by
       `devicePixelRatio` only, which already includes the zoom, then `webView.PointToScreen`):
-      Add note, Edit note, Delete note (only on a note), Copy block text
+      Add note, Edit note, Delete note (only on a note), Copy block text (the block's full
+      plain text from `BlockInfo`)
 - [ ] note deletion asks for confirmation (the `ConfirmNoteDelete` default, hard-coded until
       Task 12)
 - [ ] the outcome of each note action lives in a small UI-free `NoteActionRunner` (success →
@@ -435,17 +457,21 @@ decide which note triggers the later tasks build.**
 
 **Files:**
 - Create: `src/PlanCake/Ui/ShortcutsDialog.cs` (+ `.Designer.cs`), `src/PlanCake/Ui/AboutDialog.cs`
-  (+ `.Designer.cs`)
+  (+ `.Designer.cs`), `src/PlanCake/Utils/LanguageList.cs`
 - Modify: `src/PlanCake/Ui/MainWindow.cs`
 
 - [ ] `BuildMenuSpec()` with exactly the menus in Technical details → "Menus", shortcuts
       registered through the host command table so they work with focus in the document too;
       items that need a file or a note are disabled without one; an item whose feature comes
-      in a later task (Open from clipboard and Open from link: Task 11; Export notes: Task 13;
-      Check for updates: Task 14) is added by that task, not stubbed here
-- [ ] View → Interface language: System default plus every shipped language (the same list the
-      Settings dialog builds, native names), current one checked; choosing one saves it to
-      `Config` and applies it live (`ApplyLocalization`, as in SIC). View → Document language:
+      in a later task (Open from clipboard and Open from link: Task 11; Settings: Task 12;
+      Export notes: Task 13; Check for updates: Task 14; User manual: Task 16) is added by
+      that task, not stubbed here; a separator left doubled, leading or trailing by a missing
+      item is dropped
+- [ ] View → Interface language: System default plus every shipped language, current one
+      checked, built by a new `Utils/LanguageList.cs` (the `locale\<code>\` scan with native
+      names that SIC's Settings dialog does; Task 12's dialog reuses it); choosing one saves
+      it to `Config` and applies it live (`ApplyLocalization`, as in SIC, plus a re-render so
+      the notes' localized role descriptions follow). View → Document language:
       the six languages, current one checked; choosing one re-renders with the new `lang` for
       this document only (opening another file returns to the default from Settings).
       Defaults: the interface language is `System`, falling back to English when the Windows
@@ -480,7 +506,8 @@ decide which note triggers the later tasks build.**
 - [ ] `SingleInstance`: per normalized full path, a named pipe `PlanCake-<SHA-256 of the
       upper-cased path>`; a second `plancake same.md` connects, calls
       `AllowSetForegroundWindow`, sends "activate", exits with `ExitCode.Success`; the first
-      window restores and activates itself; File → Open re-registers under the new path
+      window restores and activates itself; `MainWindow.OpenFile` (Task 6) re-registers under
+      the new path, so every way of opening a file is covered
 - [ ] `FileWatcher` takes an injectable clock/timer so its logic is testable without real
       waits
 - [ ] tests: bursts of events inside 300 ms produce one reload; PlanCake's own write produces
@@ -494,27 +521,36 @@ decide which note triggers the later tasks build.**
 
 **Files:**
 - Create: `src/PlanCake/Ui/OpenLinkDialog.cs` (+ `.Designer.cs`), `src/PlanCake/Utils/UrlHelper.cs`,
-  `src/PlanCake/Services/MarkdownDownloader.cs`, `tests/PlanCake.Tests/UrlHelperTests.cs`,
-  `tests/PlanCake.Tests/MarkdownDownloaderTests.cs`
+  `src/PlanCake/Services/MarkdownDownloader.cs`, `src/PlanCake/Utils/ClipboardClassifier.cs`,
+  `tests/PlanCake.Tests/UrlHelperTests.cs`, `tests/PlanCake.Tests/MarkdownDownloaderTests.cs`,
+  `tests/PlanCake.Tests/ClipboardClassifierTests.cs`
 - Modify: `src/PlanCake/Ui/MainWindow.cs`
 
 - [ ] File → Open from clipboard (Ctrl+V, ported from SIC's paste handling): a file drop list
       (files copied in Explorer) opens its first `.md` / `.markdown` file; text holding a local
-      path to such a file opens it; text holding an http(s) link opens it as below; anything
-      else is announced ("The clipboard holds no Markdown file or link")
+      path to such a file opens it (surrounding quotes, as Explorer's "Copy as path" adds,
+      are stripped); text holding an http(s) link opens it as below; anything else is
+      announced ("The clipboard holds no Markdown file or link"). The decision is a pure
+      `ClipboardClassifier` over the clipboard's contents (drop list, text), so it is tested
+      without a real clipboard
 - [ ] port SIC's `UrlHelper.IsValidHttpUrl`; File → Open from link… (Ctrl+L) opens
-      `OpenLinkDialog` (a real `Label`, a URL `TextBox` pre-filled from the clipboard when it
-      holds a link, OK/Cancel, title set in the constructor)
+      `OpenLinkDialog`, modeled on SIC's `AddUrlDialog` (a real `Label`, a URL `TextBox`
+      pre-filled from the clipboard when it holds a link, OK/Cancel, title set in the
+      constructor)
 - [ ] `MarkdownDownloader`: rewrites a GitHub `github.com/<owner>/<repo>/blob/<ref>/<path>` link
       to its `raw.githubusercontent.com` form; downloads with `HttpClient` (30-second timeout,
-      10 MB limit); refuses an HTML page ("This link leads to a web page, not a Markdown
-      file"); saves the file to the user's Downloads folder under its own name, adding
+      10 MB limit); refuses a non-success HTTP status (announcing it) and an HTML page ("This
+      link leads to a web page, not a Markdown file"); names the file after the last URL
+      segment, adding `.md` when it has no extension; saves it to the user's Downloads folder
+      (`SHGetKnownFolderPath(FOLDERID_Downloads)`, which may be relocated) under that name, adding
       ` (2)`, ` (3)`… when taken, as browsers do; the window then opens that local copy, and
       notes go into it
 - [ ] tests: `UrlHelper` accepts http(s) and rejects other schemes and junk; GitHub blob links
-      are rewritten and other links left alone; an HTML response is refused; an oversized
-      response is refused; a taken file name gets ` (2)` (with an injectable `HttpMessageHandler`
+      are rewritten and other links left alone; a 404 is refused; an HTML response is refused;
+      an oversized response is refused; a URL without an extension saves as `.md`; a taken file name gets ` (2)` (with an injectable `HttpMessageHandler`
       and a temp Downloads folder)
+- [ ] tests for `ClipboardClassifier`: a drop list with and without a Markdown file, a quoted
+      and an unquoted path, a link, other text, an empty clipboard
 - [ ] validation commands pass
 
 ### Task 12: Settings
@@ -528,12 +564,13 @@ decide which note triggers the later tasks build.**
 - [ ] `Config` sections and defaults per Technical details → "Settings"; drop the template's
       `ConfirmExit` (nothing is ever unsaved)
 - [ ] `SettingsDialog` like SIC's: a `TabControl` with General, Notes and Advanced tabs, each a flat
-      `TableLayoutPanel`, real `Label`s, OK/Cancel; interface language list built as SIC builds
-      it; default document language a combo box of the six languages (native names);
+      `TableLayoutPanel`, real `Label`s, OK/Cancel; interface language list from
+      `LanguageList` (Task 9); default document language a combo box of the six languages (native names);
       markers validated with `NoteMarkers.Validate` and the reason shown next to the field
 - [ ] File → Settings (Ctrl+comma); on OK: save, then apply live
 - [ ] wire every setting to its behavior, replacing the hard-coded defaults of earlier tasks:
-      `Language` → `ApplyLocalization` (menu, list columns, page `strings`) and the View →
+      `Language` → `ApplyLocalization` (menu, list columns, page `strings`, and a re-render
+      with new `RenderStrings`) and the View →
       Interface language check mark; `DefaultDocumentLanguage` → the `lang` of newly opened
       documents; `ConfirmNoteDelete` → the confirmation in Task 7 (Delete all notes always
       confirms); `ExternalChangeAction` → Task 10's reload-or-ask branch; `ShowNotesList` →
@@ -559,8 +596,11 @@ decide which note triggers the later tasks build.**
 - [ ] `ConsoleAttacher`: for subcommands, `--help`, `--version` and parse errors only; calls
       `AttachConsole(ATTACH_PARENT_PROCESS)` **only when stdout is not already redirected**
       (`GetStdHandle` + `GetFileType`), so captured output from Claude's tools or a pipe is
-      never taken over; sets `Console.OutputEncoding` and the error encoding to UTF-8 without
-      BOM; the GUI path never touches the console
+      never taken over; only after a successful attach does it set `Console.OutputEncoding`
+      to UTF-8 (the setter fails without a console); when output is redirected, `CliRunner`
+      and System.CommandLine's invocation output get `new StreamWriter(Console.
+      OpenStandardOutput(), new UTF8Encoding(false))` (and the same for stderr); the GUI path
+      never touches the console
 - [ ] `NotesJson` (in `src/PlanCake/Notes/`) builds the JSON that `list --json` prints, and
       File → Export notes… (a `SaveFileDialog`, default name `<plan name>.notes.json`) writes
       the same JSON from the window, so both stay identical
@@ -652,11 +692,15 @@ decide which note triggers the later tasks build.**
 
 ### Task 18: Update documentation
 
+**Files:**
+- Modify: `README.md`, `CLAUDE.md`, `CHANGELOG.md`, `changelogs/1.0.0.md`
+
 - [ ] README: what PlanCake is, installing, reading and annotating, the command line with
       examples, the `pk` alias (`Set-Alias pk plancake` in the PowerShell profile,
       `alias pk=plancake` in bash), how to point Debussy's `noteMarkers` at PlanCake's markers
 - [ ] CLAUDE.md: architecture (Notes, Rendering, Ui, Cli, Services, `web/`), the page protocol,
-      the WebView2 gotchas (user data folder, accelerator keys, single-file native loader),
+      the WebView2 gotchas (user data folder, accelerator keys, single-file native loader,
+      `BeginInvoke` before any dialog or menu started from a WebView2 event),
       the JAWS spike results, the three pieces of a language, the AttachConsole caveat
 - [ ] CHANGELOG.md and `changelogs/1.0.0.md`: the 1.0.0 feature list
 
@@ -703,7 +747,8 @@ offsets of the stripped source, then through the line map.
 A note is anchored to the last annotatable block that ends before the note starts (for a note
 written by hand in the middle of a block: the block containing its line). A note before the
 first block has no anchor: it is rendered at the top of the document, and `list` reports its
-block as `0-0` with an empty excerpt and `blockKind` `"start"`. The renderer inserts an
+block as `0-0` with an empty excerpt and `blockKind` `"start"` (the other values:
+`"paragraph"`, `"heading"`, `"listItem"`, `"code"`, `"tableRow"`). The renderer inserts an
 `HtmlBlock` right after the anchor in the anchor's parent container; for a `TableRow` anchor it
 appends the `HtmlBlock` to the row's last cell (Markdig then wraps that cell's text in `<p>`,
 which is harmless); for a list item's leading paragraph, inside the item after that paragraph.
@@ -738,19 +783,21 @@ which is harmless); for a list item's leading paragraph, inside the item after t
 
 JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, each with a `type`:
 - host → page: `render` `{ html, generation, documentLang, focus: { lines?, note? } }`,
-  `strings` `{ uiLang, uiDir, notePrefix, … }`, `focusNote` `{ note }`, `focusLines`
+  `strings` `{ uiLang, uiDir, … }` (page chrome and live messages only: the note labels are
+  already in the rendered HTML, so the page never adds its own "Note:"), `focusNote` `{ note }`, `focusLines`
   `{ lines }`, `nextNote` / `previousNote` `{}`, `announce` `{ text }` (only if Task 2 showed
   UIA notifications are not heard in the virtual buffer)
 - page → host: `activate` `{ lines, generation }` (Enter on a block), `activateNote`
   `{ note, generation }`, `contextMenu` `{ lines, note?, rect, generation }`, `position`
-  `{ lines, text }` (last block interacted with), `openLink` `{ href }`, `noMoreNotes` `{}`,
+  `{ lines }` (last block interacted with), `openLink` `{ href }`, `noMoreNotes` `{}`,
   `ready` `{}`
 - the host ignores any message whose `generation` is not the latest render
 
 ### Keyboard
 
 Host shortcuts (must work with focus in the document and in the list): Ctrl+O, Ctrl+V, Ctrl+L,
-Ctrl+E, Ctrl+comma, F5, F6, F8, Shift+F8, Ctrl+Z, Ctrl+Y, Ctrl+Plus, Ctrl+Minus, Ctrl+0, F1,
+Ctrl+E, Ctrl+comma, F5, F6, F8, Shift+F8, Ctrl+Z, Ctrl+Y, Ctrl+Plus, Ctrl+Minus (both also on
+the numpad), Ctrl+0, F1,
 Shift+F1, Alt+F4.
 In the document: Enter on a block / note, Applications key and Shift+F10. In the list: Enter,
 Delete, Applications key.
@@ -852,8 +899,7 @@ For the user to run in the spike build, with JAWS in the virtual cursor:
   hand-off starts `plancake <plan>` when `plancake` is on the PATH, and manual review uses
   `plancake list --json` to find notes and `plancake check` for its verify step.
 - Idea for later, needing work in both apps: a notes import in Notika
-  (`C:eposccessmind
-otika-windows`) that reads PlanCake's notes JSON. Notika has no
+  (`C:\repos\accessmind\notika-windows`) that reads PlanCake's notes JSON. Notika has no
   import surface today (SQLCipher-encrypted SQLite store).
 - Add `Set-Alias pk plancake` to the PowerShell profile (and `alias pk=plancake` to the bash
   profile).
