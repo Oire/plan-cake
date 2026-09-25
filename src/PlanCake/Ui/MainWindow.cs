@@ -22,7 +22,6 @@ public partial class MainWindow: Form {
     // Settings that arrive with Task 12, hard-coded to their defaults until then. The document
     // language is English by default and never follows the interface language.
     private const string DocumentLanguage = "en";
-    private const NoteStyle DocumentNoteStyle = NoteStyle.Note;
     private const NoteEnterAction DocumentNoteEnterAction = NoteEnterAction.Save;
     private const bool ConfirmNoteDelete = true;
 
@@ -194,7 +193,6 @@ public partial class MainWindow: Form {
         var options = new RenderOptions(
             _markers,
             RenderMode.Interactive,
-            DocumentNoteStyle,
             CurrentRenderStrings(),
             DocumentLanguage
         );
@@ -235,7 +233,7 @@ public partial class MainWindow: Form {
     }
 
     private static RenderStrings CurrentRenderStrings() =>
-        new(_("Note:"), _("user note"), _("unote"));
+        new(_("user note"), _("unote"));
 
     private void PostStrings() => documentView.PostMessage(new StringsMessage(
         Utils.Localization.GetCurrentCulture().Name,

@@ -1,23 +1,21 @@
 using AwesomeAssertions;
 using Oire.PlanCake.Notes;
 using Oire.PlanCake.Rendering;
-using Oire.PlanCake.Utils.Enums;
 using Xunit;
 
 namespace Oire.PlanCake.Tests;
 
 public class MarkdownRendererTests {
-    private static readonly RenderStrings _strings = new("Note:", "user note", "unote");
+    private static readonly RenderStrings _strings = new("user note", "unote");
 
     private static RenderResult Render(
         string source,
         RenderMode mode = RenderMode.Interactive,
-        NoteStyle style = NoteStyle.Note,
         RenderStrings? strings = null,
         string documentLanguage = "en"
     ) => MarkdownRenderer.Render(
         source,
-        new RenderOptions(NoteMarkers.Default, mode, style, strings ?? _strings, documentLanguage)
+        new RenderOptions(NoteMarkers.Default, mode, strings ?? _strings, documentLanguage)
     );
 
     private static IEnumerable<string> Ranges(RenderResult result, BlockKind kind) =>
@@ -319,48 +317,20 @@ public class MarkdownRendererTests {
     }
 
     [Fact]
-    public void Render_ButtonStyle_HoldsInlineMarkdownOnly() {
-        var result = Render(
-            "Para\n[usernote]## Title\nUse `code` and *this* [link](https://example.com), https://example.org\n\n"
-                + "- [ ] a task\n\n```\nx < 1\n```[/usernote]\n",
-            style: NoteStyle.Button
-        );
-
-        var start = result.Html.IndexOf("<button", StringComparison.Ordinal);
-        var button = result.Html[start..(result.Html.IndexOf("</button>", start, StringComparison.Ordinal) + 9)];
-        button.Should().StartWith("""<button type="button" class="note" data-note="0" dir="auto">Note: Title<br>""");
-        button.Should().Contain("<code>code</code>").And.Contain("<em>this</em>").And.Contain(" link, https://example.org");
-        button.Should().Contain("[ ] a task").And.Contain("<code>x &lt; 1</code>");
-        foreach (var tag in new[] { "<a", "<p", "<h", "<ul", "<li", "<pre", "<div", "<input", "<table" }) {
-            button.Should().NotContain(tag);
-        }
-    }
-
-    [Fact]
     public void NotePlainText_DropsTheMarkdownPunctuation() {
         MarkdownRenderer.NotePlainText("Use `dotnet test`, **not** [that](https://example.com)")
             .Should().Be("Use dotnet test, not that");
     }
 
     [Fact]
-    public void Render_ButtonStyle_WritesALabelledButton() {
-        var result = Render("Para\n[usernote]x < y[/usernote]\n", style: NoteStyle.Button);
-
-        result.Html.Should()
-            .Contain("""<button type="button" class="note" data-note="0" dir="auto">Note: x &lt; y</button>""");
-    }
-
-    [Fact]
     public void Render_LocalizedStrings_AreWrittenEncoded() {
-        var strings = new RenderStrings("Заметка:", "заметка \"пользователя\"", "зам");
+        var strings = new RenderStrings("заметка \"пользователя\"", "зам");
 
         var result = Render("Para\n[usernote]n[/usernote]\n", strings: strings);
 
         result.Html.Should()
             .Contain("""aria-roledescription="заметка &quot;пользователя&quot;" """)
             .And.Contain("""aria-brailleroledescription="зам" """);
-        Render("Para\n[usernote]n[/usernote]\n", style: NoteStyle.Button, strings: strings)
-            .Html.Should().Contain(">Заметка: n</button>");
     }
 
     /// <summary>The HTML of the user note with this <c>data-note</c> index.</summary>

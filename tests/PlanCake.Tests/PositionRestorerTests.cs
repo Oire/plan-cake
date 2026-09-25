@@ -96,9 +96,9 @@ public class PositionRestorerTests {
 
     [Fact]
     public void FindTarget_AfterARealReRender_ReturnsToTheSameParagraph() {
-        var strings = new RenderStrings("Note:", "user note", "unote");
+        var strings = new RenderStrings("user note", "unote");
         var options = new RenderOptions(
-            Notes.NoteMarkers.Default, RenderMode.Interactive, Utils.Enums.NoteStyle.Note, strings
+            Notes.NoteMarkers.Default, RenderMode.Interactive, strings
         );
         var before = MarkdownRenderer.Render("# Plan\n\nFirst.\n\nSecond.\n", options);
         var after = MarkdownRenderer.Render("# Plan\n\nNew.\n\nFirst.\n\nSecond.\n", options);

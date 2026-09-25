@@ -140,9 +140,6 @@ img {
 /* Notes: set apart from the text by a bar, a background and italics, so they are
    distinct without color too. */
 .note {
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
     margin: 0.5rem 0 1rem;
     padding: 0.4rem 0.75rem;
     border: 1px solid var(--note-border);
@@ -150,9 +147,7 @@ img {
     border-radius: 0.2rem;
     background: var(--note-background);
     color: var(--note-text);
-    font: inherit;
     font-style: italic;
-    text-align: start;
     cursor: pointer;
 }
 

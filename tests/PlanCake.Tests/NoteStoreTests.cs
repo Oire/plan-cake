@@ -2,13 +2,12 @@ using System.Text;
 using AwesomeAssertions;
 using Oire.PlanCake.Notes;
 using Oire.PlanCake.Rendering;
-using Oire.PlanCake.Utils.Enums;
 using Xunit;
 
 namespace Oire.PlanCake.Tests;
 
 public class NoteStoreTests: IDisposable {
-    private static readonly RenderStrings _strings = new("Note:", "user note", "unote");
+    private static readonly RenderStrings _strings = new("user note", "unote");
     private static readonly NoteMarkers _singleToken = new("!USERNOTE!");
     private static readonly Encoding _windows1251 = CodePagesEncodingProvider.Instance.GetEncoding(1251)!;
 
@@ -42,7 +41,7 @@ public class NoteStoreTests: IDisposable {
 
     private static RenderResult Render(string text, NoteMarkers? markers = null) => MarkdownRenderer.Render(
         text,
-        new RenderOptions(markers ?? NoteMarkers.Default, RenderMode.Interactive, NoteStyle.Note, _strings)
+        new RenderOptions(markers ?? NoteMarkers.Default, RenderMode.Interactive, _strings)
     );
 
     private static BlockInfo Block(RenderResult render, BlockKind kind, int index = 0) =>

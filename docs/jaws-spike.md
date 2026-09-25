@@ -79,6 +79,10 @@ stays as it is: plans are hard-wrapped at about 100 columns, and turning soft br
 Decision: the note style `Note` (the `role="note"` div) remains the default; `Button` stays
 available in the settings.
 
+Later decision (Task 7): the `Button` style was dropped altogether. Long button labels are hard
+to listen to, and the `role="note"` div already works with Enter and with F9 / Shift+F9, so
+every note is a `role="note"` user note.
+
 ## 8. Host shortcuts
 
 Every shortcut in the plan's Keyboard section was announced by the host, except F8: JAWS

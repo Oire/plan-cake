@@ -36,7 +36,7 @@
     }
 
     // The block or note an event on `node` belongs to, or null. A link, a button or a form
-    // control inside a block keeps its own behavior; a note shown as a button is the note.
+    // control inside a block or a note keeps its own behavior.
     function targetOf(node) {
         if (!(node instanceof Element) || !main.contains(node)) {
             return null;

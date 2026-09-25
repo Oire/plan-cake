@@ -3,21 +3,17 @@ using System.Text;
 using Markdig;
 using Markdig.Extensions.Footnotes;
 using Markdig.Extensions.Tables;
-using Markdig.Extensions.TaskLists;
 using Markdig.Helpers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
-using Markdig.Renderers.Html.Inlines;
 using Markdig.Syntax;
-using Markdig.Syntax.Inlines;
 using Oire.PlanCake.Notes;
-using Oire.PlanCake.Utils.Enums;
 
 namespace Oire.PlanCake.Rendering;
 
 /// <summary>What the rendered HTML is for.</summary>
 internal enum RenderMode {
-    /// <summary>The window's document view: notes are user notes or buttons the page can activate.</summary>
+    /// <summary>The window's document view: notes are user notes the page can activate.</summary>
     Interactive,
 
     /// <summary>A standalone HTML file: notes are static <c>role="note"</c> elements.</summary>
@@ -27,7 +23,6 @@ internal enum RenderMode {
 /// <summary>How <see cref="MarkdownRenderer.Render"/> renders a source.</summary>
 /// <param name="Markers">The markers notes are written with.</param>
 /// <param name="Mode">Interactive view or standalone export.</param>
-/// <param name="NoteStyle">How a note appears in <see cref="RenderMode.Interactive"/> mode.</param>
 /// <param name="Strings">The localized strings written into the document.</param>
 /// <param name="DocumentLanguage">
 /// The <c>lang</c> of an exported document. The interactive page sets it on its container instead.
@@ -35,7 +30,6 @@ internal enum RenderMode {
 internal sealed record RenderOptions(
     NoteMarkers Markers,
     RenderMode Mode,
-    NoteStyle NoteStyle,
     RenderStrings Strings,
     string DocumentLanguage = "en"
 );
@@ -200,11 +194,8 @@ internal static class MarkdownRenderer {
 
         var noteIndex = index.ToString(CultureInfo.InvariantCulture);
 
-        return options.NoteStyle == NoteStyle.Button
-            ? $"""<button type="button" class="note" data-note="{noteIndex}" dir="auto">"""
-                + $"{HtmlEncode(strings.NoteLabel)} {NoteInlineHtml(note.Text)}</button>"
-            : $"""<div class="note" {roleDescriptions}data-note="{noteIndex}" dir="auto">"""
-                + $"{NoteBlockHtml(note.Text)}</div>";
+        return $"""<div class="note" {roleDescriptions}data-note="{noteIndex}" dir="auto">"""
+            + $"{NoteBlockHtml(note.Text)}</div>";
     }
 
     /// <summary>
@@ -229,47 +220,6 @@ internal static class MarkdownRenderer {
         }
 
         renderer.Render(document);
-        writer.Flush();
-
-        return writer.ToString().TrimEnd('\n');
-    }
-
-    /// <summary>
-    /// A note's text rendered for a button, which may hold phrasing content only: the inline
-    /// Markdown of each block (emphasis, code), blocks joined with <c>&lt;br&gt;</c>, a link shown
-    /// as its text without the <c>&lt;a&gt;</c> and a task checkbox as <c>[x]</c> or <c>[ ]</c>.
-    /// </summary>
-    internal static string NoteInlineHtml(string text) {
-        var document = Markdown.Parse(text, _notePipeline);
-
-        using var writer = new StringWriter(CultureInfo.InvariantCulture);
-        var renderer = new HtmlRenderer(writer);
-        _notePipeline.Setup(renderer);
-        renderer.ObjectRenderers.Replace<LinkInlineRenderer>(new LinkTextRenderer());
-        renderer.ObjectRenderers.Replace<AutolinkInlineRenderer>(new AutolinkTextRenderer());
-        renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListTextRenderer());
-
-        var first = true;
-
-        foreach (var leaf in document.Descendants<LeafBlock>()) {
-            if (leaf is not CodeBlock && leaf.Inline is null) {
-                continue;
-            }
-
-            if (!first) {
-                renderer.Write("<br>");
-            }
-
-            first = false;
-
-            if (leaf is CodeBlock code) {
-                var lines = code.Lines.ToString().TrimEnd('\n').Split('\n');
-                renderer.Write("<code>").Write(string.Join("<br>", lines.Select(HtmlEncode))).Write("</code>");
-            } else {
-                renderer.WriteLeafInline(leaf);
-            }
-        }
-
         writer.Flush();
 
         return writer.ToString().TrimEnd('\n');
@@ -304,22 +254,6 @@ internal static class MarkdownRenderer {
             renderer.Write("</strong></p>");
             renderer.WriteLine();
         }
-    }
-
-    /// <summary>A link inside a note button: its text only, since a button cannot hold a link.</summary>
-    private sealed class LinkTextRenderer: HtmlObjectRenderer<LinkInline> {
-        protected override void Write(HtmlRenderer renderer, LinkInline obj) => renderer.WriteChildren(obj);
-    }
-
-    /// <summary>An autolink inside a note button: its address as text.</summary>
-    private sealed class AutolinkTextRenderer: HtmlObjectRenderer<AutolinkInline> {
-        protected override void Write(HtmlRenderer renderer, AutolinkInline obj) => renderer.WriteEscape(obj.Url);
-    }
-
-    /// <summary>A task checkbox inside a note button: <c>[x]</c> or <c>[ ]</c> as text.</summary>
-    private sealed class TaskListTextRenderer: HtmlObjectRenderer<TaskList> {
-        protected override void Write(HtmlRenderer renderer, TaskList obj) =>
-            renderer.Write(obj.Checked ? "[x]" : "[ ]");
     }
 
     private static string ExportDocument(string body, string? title, string language) => $"""

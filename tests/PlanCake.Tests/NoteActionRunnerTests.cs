@@ -3,14 +3,13 @@ using AwesomeAssertions;
 using Oire.PlanCake.Notes;
 using Oire.PlanCake.Rendering;
 using Oire.PlanCake.Utils;
-using Oire.PlanCake.Utils.Enums;
 using Xunit;
 
 namespace Oire.PlanCake.Tests;
 
 [Collection(LocalizationCollection.Name)]
 public class NoteActionRunnerTests: IDisposable {
-    private static readonly RenderStrings _strings = new("Note:", "user note", "unote");
+    private static readonly RenderStrings _strings = new("user note", "unote");
     private static readonly Encoding _windows1251 = CodePagesEncodingProvider.Instance.GetEncoding(1251)!;
 
     private readonly string _folder;
@@ -46,7 +45,7 @@ public class NoteActionRunnerTests: IDisposable {
 
     private static RenderResult Render(string text) => MarkdownRenderer.Render(
         text,
-        new RenderOptions(NoteMarkers.Default, RenderMode.Interactive, NoteStyle.Note, _strings)
+        new RenderOptions(NoteMarkers.Default, RenderMode.Interactive, _strings)
     );
 
     private string OnDisk => File.ReadAllText(_path);

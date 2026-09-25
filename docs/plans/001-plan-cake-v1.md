@@ -37,8 +37,8 @@ names; Task 1 adapts it.
       it) opens the note dialog without switching JAWS to forms mode, and the Applications key
       or Shift+F10 opens the context menu; confirming writes `[usernote]text[/usernote]` after
       that block's last source line, and the view returns to the new note
-- [ ] notes show in the document after their block, as user notes (`role="note"`) or buttons
-      per settings, with the Markdown written in them rendered, and in a notes list beside it;
+- [ ] notes show in the document after their block, as user notes (`role="note"`), with the
+      Markdown written in them rendered, and in a notes list beside it;
       notes can be edited, deleted, navigated with F9 / Shift+F9, undone and redone
 - [ ] a task-list checkbox can be toggled from the document (Space, Enter or a click), after a
       confirmation that can be turned off; the file on disk gets `[x]` or `[ ]` on that item's
@@ -275,7 +275,7 @@ decide which note triggers the later tasks build.**
 **Files:**
 - Create: `src/PlanCake/Rendering/MarkdownRenderer.cs`, `src/PlanCake/Rendering/RenderResult.cs`,
   `src/PlanCake/Rendering/BlockInfo.cs`, `src/PlanCake/Rendering/RenderStrings.cs`,
-  `src/PlanCake/Utils/Enums/NoteStyle.cs`, `tests/PlanCake.Tests/MarkdownRendererTests.cs`
+  `src/PlanCake/Utils/Enums/NoteStyle.cs` (removed in Task 7), `tests/PlanCake.Tests/MarkdownRendererTests.cs`
 - Modify: `src/PlanCake/PlanCake.csproj` (Markdig)
 
 - [x] pipeline: `UseAdvancedExtensions()` (pipe tables, task lists, auto-identifiers, …) +
@@ -283,12 +283,12 @@ decide which note triggers the later tasks build.**
 - [x] walk the AST and stamp each annotatable block with `data-lines="start-end"` in
       **original** line numbers, per Technical details → "Annotatable blocks"; collect a
       `BlockInfo` per block (range, kind, full plain text, and an 80-character excerpt of it)
-- [x] the renderer never calls `_()`: the localized strings it writes ("Note:", "user note",
-      "unote") come in a `RenderStrings` record, so its tests do not touch `Localization`;
-      `NoteStyle` (`Note` | `Button`) is an enum in `Utils/Enums/`
+- [x] the renderer never calls `_()`: the localized strings it writes ("user note", "unote")
+      come in a `RenderStrings` record, so its tests do not touch `Localization`; a `NoteStyle`
+      enum (`Note` | `Button`) lived in `Utils/Enums/` until Task 7 dropped the button style
 - [x] anchor every note to its block and insert its HTML into the AST where Technical details →
-      "Note placement in the view" says; two modes: `Interactive` (a user note or a button, per
-      the note style) and `Export`
+      "Note placement in the view" says; two modes: `Interactive` (a user note the page can
+      activate) and `Export`
       (static `role="note"` element), all note text HTML-encoded (rendered as Markdown since
       Task 7, raw HTML in it still shown as text)
 - [x] every block gets `dir="auto"` and no `lang` of its own (the document language is set once
@@ -444,7 +444,9 @@ decide which note triggers the later tasks build.**
 **Files:**
 - Create: `src/PlanCake/Ui/NoteDialog.cs`, `src/PlanCake/Ui/NoteDialog.Designer.cs`,
   `src/PlanCake/Notes/NoteActionRunner.cs`, `tests/PlanCake.Tests/NoteActionRunnerTests.cs`
-- Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/web/app.js`
+- Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/web/app.js`, `src/PlanCake/web/app.css`,
+  `src/PlanCake/Rendering/MarkdownRenderer.cs`, `src/PlanCake/Rendering/RenderStrings.cs`
+- Delete: `src/PlanCake/Utils/Enums/NoteStyle.cs` (the button note style was dropped)
 
 - [x] `NoteDialog`: title "Add note" or "Edit note"; a read-only label "Note on:" with the block
       excerpt; a multiline, word-wrapping note `TextBox` with a real `Label`; OK and Cancel;
@@ -452,8 +454,8 @@ decide which note triggers the later tasks build.**
       hard-code the default until then); OK disabled while the text is blank; a rejected text
       (closing marker) shows why and keeps the dialog open
 - [x] Enter on a block → `NoteDialog` → `NoteStore.Add` → re-render → focus the new note
-      → announce "Note added"; Enter on a note → edit (the note style is `Note` by default,
-      hard-coded until Task 12)
+      → announce "Note added"; Enter on a note → edit (a note is always a `role="note"` user
+      note: the button style was dropped, see Technical details → "Note placement in the view")
 - [x] Applications key / Shift+F10 on a block or note → `NativeContextMenu.Show` at the
       element's screen position (page sends its client rectangle in CSS pixels; multiply by
       `devicePixelRatio` only, which already includes the zoom, then `webView.PointToScreen`):
@@ -468,15 +470,12 @@ decide which note triggers the later tasks build.**
       for each outcome in `tests/PlanCake.Tests/NoteActionRunnerTests.cs`
 - [x] Undo (Ctrl+Z) and Redo (Ctrl+Y) through `NoteStore`, announced ("Note added undone" etc.)
 - [x] ➕ Markdown in notes: the note text in the file stays exactly what the user typed; only
-      its rendering changes. Note style `Note` and export render it as Markdown with the
+      its rendering changes. User notes and export render it as Markdown with the
       document's extensions (emphasis, inline code, links, lists, fenced code), a typed line break
       staying a line break, raw HTML shown as text and footnotes left out (their ids would clash
       with the document's); every inner block gets `dir="auto"`, none gets `data-lines` or
       becomes annotatable, and a heading renders as a bold paragraph (`<p><strong>`) so that it
-      never joins the document's heading navigation. Note style `Button` holds phrasing content
-      only: the inline Markdown of each block (emphasis, code) after the "Note:" prefix, blocks
-      joined with `<br>`, a link shown as its text without the `<a>`, a task checkbox as `[x]` /
-      `[ ]`. A link inside a user note is followed like a document link, not taken as a click on
+      never joins the document's heading navigation. A link inside a user note is followed like a document link, not taken as a click on
       the note. Where a note is shown as one line of plain text (the delete confirmation, Task 8's
       notes list) it is Markdig's plain-text rendering of it (`MarkdownRenderer.NotePlainText`),
       so JAWS reads no backticks; the CLI (`list`, JSON) keeps the raw text, which Claude reads as
@@ -486,8 +485,10 @@ decide which note triggers the later tasks build.**
       the new note each time; Enter on a block does not switch JAWS to forms mode, and Enter on
       a note opens the editor every time, not only the first; Alt+Left / Backspace return to
       the previous file at the same block, Alt+Right goes forward (Task 6).
-      Results: adding, editing and deleting notes, focus and forms mode pass; Markdown in a note
-      was shown raw, fixed by the ➕ item above
+      Results: adding, editing and deleting notes, focus and forms mode pass; Alt+Left /
+      Backspace return to the same block and Alt+Right goes forward; Markdown in a note was
+      shown raw, fixed by the ➕ item above. The user then dropped the button note style (see
+      Technical details → "Note placement in the view")
 - [x] validation commands pass
 
 ### ➕ Task 7a: Toggle task-list items
@@ -677,7 +678,7 @@ check tasks off from the document.
       documents; `ConfirmNoteDelete` → the confirmation in Task 7 (Delete all notes always
       confirms); `ConfirmTaskToggle` → the confirmation in Task 7a; `ExternalChangeAction` → Task 10's reload-or-ask branch; `ShowNotesList` →
       the list's visibility at startup; `OpeningMarker`/`ClosingMarker` → `NoteParser`,
-      `NoteStore` and a re-render; `NoteStyle` → the renderer and a re-render; `BlockEnterAction` → the page (Enter opens the context menu
+      `NoteStore` and a re-render; `BlockEnterAction` → the page (Enter opens the context menu
       instead of the dialog); `NoteEnterAction` → `NoteDialog`; `ConvertToUtf8` →
       `MarkdownFile` (Task 5)
 - [ ] tests: defaults, round trip of every new setting, invalid enum, marker or document
@@ -856,7 +857,7 @@ block as `0-0` with an empty excerpt and `blockKind` `"start"` (the other values
 appends the `HtmlBlock` to the row's last cell (Markdig then wraps that cell's text in `<p>`,
 which is harmless); for a list item's leading paragraph, inside the item after that paragraph.
 
-- Interactive, note style `Note` (default): `<div class="note" role="note"
+- Interactive: `<div class="note" role="note"
   aria-roledescription="user note" aria-brailleroledescription="unote"
   data-note="<index>" dir="auto"><note blocks></div>`, with no `tabindex` of its own (like
   blocks, it gets one only while the page focuses it); Enter or a click on it edits it (same
@@ -866,12 +867,9 @@ which is harmless); for a list item's leading paragraph, inside the item after t
   item): a typed line break stays a line break (`<br />`), raw HTML is shown as text, footnotes
   are left out; every block gets `dir="auto"`, none gets `data-lines`; a heading becomes
   `<p dir="auto"><strong>…</strong></p>`, never an `<hN>`.
-- Interactive, note style `Button`: `<button type="button" class="note" data-note="<index>"
-  dir="auto">Note: <note inline></button>`, where `<note inline>` is phrasing content only:
-  each block's inline Markdown (emphasis, code) joined with `<br>`, a link as its text without
-  the `<a>`, a task checkbox as `[x]` / `[ ]`, a code block as `<code>` with `<br>` between its
-  lines; B / Shift+B also move between notes.
-- Both: "user note", "unote" and "Note:" localized.
+- "user note" and "unote" localized.
+- A button style was considered and dropped: long button labels are hard to listen to, and
+  F9 / Shift+F9 already move between notes.
 - Export: `<div class="note" role="note" aria-roledescription="user note"
   aria-brailleroledescription="unote" dir="auto"><note blocks></div>`, both role descriptions
   localized (from the catalog; in the CLI, the interface language from `Config`). Not `<aside>`:
@@ -898,8 +896,8 @@ which is harmless); for a list item's leading paragraph, inside the item after t
 JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, each with a `type`:
 - host → page: `render` `{ html, generation, documentLang, title, focus: { lines?, note? } }`
   (`title`: the first heading, else the file name),
-  `strings` `{ uiLang, uiDir, … }` (page chrome and live messages only: the note labels are
-  already in the rendered HTML, so the page never adds its own "Note:"), `focusNote` `{ note }`, `focusLines`
+  `strings` `{ uiLang, uiDir, … }` (page chrome and live messages only: the note role
+  descriptions are already in the rendered HTML), `focusNote` `{ note }`, `focusLines`
   `{ lines }`, `nextNote` / `previousNote` `{}`, `taskState` `{ lines, checked }` (Task 7a:
   sets a task checkbox back after a canceled toggle). No `announce` message: the Task 2 spike
   showed that the host's UIA notifications are heard in the virtual buffer, so every
@@ -952,8 +950,7 @@ itself.
   `ExternalChangeAction` (`AutoReload` | `Ask`, default `AutoReload`), `ShowNotesList` (true),
   `CheckForUpdatesOnStartup` (true), `UpdateCheckInterval` (`Weekly`)
 - `[Notes]`: `OpeningMarker` (`[usernote]`), `ClosingMarker` (`[/usernote]`, empty = single
-  token), `NoteStyle` (`Note` | `Button`, default `Note`: how a note appears in the document),
-  `BlockEnterAction` (`AddNote` | `ContextMenu`, default `AddNote`), `NoteEnterAction`
+  token), `BlockEnterAction` (`AddNote` | `ContextMenu`, default `AddNote`), `NoteEnterAction`
   (`Save` | `NewLine`, default `Save`; Ctrl+Enter does the other)
 - `[Advanced]`: `ConvertToUtf8` (false): "Convert files that are not UTF-8 to UTF-8 (without
   BOM) when opening them"; the checkbox's label says plainly that the file on disk is
