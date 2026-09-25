@@ -184,8 +184,18 @@ internal sealed class DocumentView: UserControl {
         );
     }
 
-    /// <summary>Moves keyboard focus into the document, where the screen reader can read it.</summary>
-    public void FocusDocument() => _webView.Focus();
+    /// <summary>
+    /// Moves keyboard focus into the document, where the screen reader can read it. Does nothing
+    /// when the document already has it: focusing the control again takes the focus from the
+    /// browser's own window and hands it back, and a screen reader that sees the document lose
+    /// and regain the focus while the page replaces its content keeps its old place in the
+    /// virtual buffer instead of following the page's focus (Task 8 JAWS check).
+    /// </summary>
+    public void FocusDocument() {
+        if (!_webView.ContainsFocus) {
+            _webView.Focus();
+        }
+    }
 
     private void EnsureInitialized() {
         if (!IsInitialized) {

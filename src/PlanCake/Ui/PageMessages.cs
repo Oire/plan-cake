@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Oire.PlanCake.Rendering;
 
 namespace Oire.PlanCake.Ui;
 
@@ -155,6 +156,17 @@ internal static class PageMessages {
         }
 
         return new RectangleF((float)x, (float)y, (float)width, (float)height);
+    }
+
+    /// <summary>
+    /// The note a page message is about (its <c>note</c> index: <c>position</c>,
+    /// <c>activateNote</c>, <c>contextMenu</c> on a note), from the render the message belongs to;
+    /// <see langword="null"/> when the message names no note or one that is not there.
+    /// </summary>
+    public static RenderedNote? FindNote(JsonElement message, IReadOnlyList<RenderedNote> notes) {
+        ArgumentNullException.ThrowIfNull(notes);
+
+        return GetInt(message, "note") is { } index && index >= 0 && index < notes.Count ? notes[index] : null;
     }
 
     /// <summary>An integer property of a page message, or <see langword="null"/> when it is missing or not an integer.</summary>

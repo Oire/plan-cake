@@ -1,5 +1,7 @@
 using System.Text.Json;
 using AwesomeAssertions;
+using Oire.PlanCake.Notes;
+using Oire.PlanCake.Rendering;
 using Oire.PlanCake.Ui;
 using Xunit;
 
@@ -145,4 +147,28 @@ public class PageMessagesTests {
         DocumentView.MenuAnchor(new RectangleF(10, 20, 100, 30), double.NaN, new Size(1000, 700))
             .Should().Be(new Point(10, 50));
     }
+
+    // The note a page message is about: the notes list selects it
+
+    private static readonly RenderedNote[] _notes = [
+        new(0, new Note("Top", 1, 1, 0, 10, Unterminated: false), null),
+        new(1, new Note("Second", 5, 5, 40, 60, Unterminated: false),
+            new BlockInfo(BlockKind.Paragraph, 3, 4, "Text.", "Text.")),
+    ];
+
+    [Theory]
+    [InlineData("""{ "type": "position", "note": 1, "generation": 2 }""")]
+    [InlineData("""{ "type": "activateNote", "note": 1, "generation": 2 }""")]
+    [InlineData("""{ "type": "contextMenu", "lines": "3-4", "note": 1, "generation": 2 }""")]
+    public void FindNote_MessageAboutANote_ReturnsIt(string json) =>
+        PageMessages.FindNote(Parse(json), _notes).Should().BeSameAs(_notes[1]);
+
+    [Theory]
+    [InlineData("""{ "type": "position", "lines": "3-4", "generation": 2 }""")]
+    [InlineData("""{ "type": "contextMenu", "lines": "3-4", "generation": 2 }""")]
+    [InlineData("""{ "type": "position", "note": 2, "generation": 2 }""")]
+    [InlineData("""{ "type": "position", "note": -1, "generation": 2 }""")]
+    [InlineData("""{ "type": "position", "note": "1", "generation": 2 }""")]
+    public void FindNote_NoKnownNote_ReturnsNull(string json) =>
+        PageMessages.FindNote(Parse(json), _notes).Should().BeNull();
 }

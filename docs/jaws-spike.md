@@ -90,3 +90,36 @@ takes F8 for its extended-select mode, so it never reaches the page or the host.
 
 Decision: note navigation moves from F8 / Shift+F8 to F9 / Shift+F9, which the spike had
 used only for its test focus command.
+
+## Later findings (Task 8)
+
+### The notes list had no name
+
+The list is a `NativeListView`: a real `SysListView32` inside a WinForms container. Its
+`AccessibleName` sets the list window's text, but an MSAA probe showed the list window's
+`accName` empty: the system proxy for a list view does not use the window text, and falls back
+only to a static control just before the list window among its siblings, which it has none of
+(it is the container's only child). JAWS reads the MSAA name, so it announced the rows but not
+"Notes". Screen readers do not read a preceding label for a list view anyway.
+
+Decision: the list keeps its visible "Notes" label, gets `AccessibleName` as the library
+documents, and its window is also named through `IAccPropServices.SetHwndPropStr`
+(`PROPID_ACC_NAME`), which the proxy consults first; the probe then reports "Notes". The
+library should do this itself; until it does, PlanCake does it (`WindowAccessibleName`).
+
+### A followed link landed at the end of the new file
+
+The Task 7a fix sent focus to the new file's first block, and the page did focus it, yet JAWS
+stayed at its old offset in the virtual buffer (the end of a shorter file). Two things differed
+from a re-render after a note, which JAWS follows correctly. The page's content was replaced
+in place, so JAWS treated it as an update of the same document and kept its offset; and the
+host focused the document view again right after posting the render, which took the focus from
+the browser's window and handed it back while the page was replacing its content. A UI
+Automation probe after following the link reported the focus on the document, not on the
+heading the page had focused.
+
+Decision: a different file gets a freshly loaded page (the host navigates to `index.html` again
+and renders once the page reports `ready`), so JAWS starts it as a new document; Back and
+Forward send their saved block with that render. A re-render of the same file stays in place.
+Focusing the document view does nothing when the document already has the focus.
+

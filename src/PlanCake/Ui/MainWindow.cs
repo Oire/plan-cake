@@ -78,6 +78,9 @@ public partial class MainWindow: Form {
     /// <summary>The context menu of the notes list: Edit note, Delete note.</summary>
     private NativeContextMenu? _notesListMenu;
 
+    /// <summary>The list window and the name last given to it for MSAA.</summary>
+    private (IntPtr Handle, string Name)? _notesListName;
+
     public MainWindow() : this(null) { }
 
     /// <param name="initialFile">The file to open once the window is up, from the command line.</param>
@@ -135,6 +138,7 @@ public partial class MainWindow: Form {
 
     protected override async void OnLoad(EventArgs e) {
         base.OnLoad(e);
+        NameNotesList();
 
         try {
             await documentView.InitializeAsync();
@@ -204,6 +208,16 @@ public partial class MainWindow: Form {
         _file = file;
         _notes = new NoteActionRunner(new NoteStore(file, _markers));
         _draft = null;
+
+        // Another file gets a fresh page, so a screen reader starts it as a new document, at the
+        // top (or at the block Back returns to); the render waits for the new page's "ready".
+        // Replacing the content in place left JAWS at its old offset in the virtual buffer,
+        // which in a shorter file is the end (Task 8 JAWS check). The same file again, and every
+        // re-render after a note action, stays in place so the reading position survives.
+        if (!reopened && _pageReady) {
+            _pageReady = false;
+            documentView.Navigate(PageFile);
+        }
 
         RenderDocument(opened: !reopened);
         Text = _("{0} - {1}", Path.GetFileName(file.Path), App.Name);
@@ -278,9 +292,9 @@ public partial class MainWindow: Form {
 
         _pendingFocus = focus;
 
-        // A note action started in the list (the list has the focus again once its dialog
-        // closed) selects the note it produced; otherwise the list keeps its own selection.
-        var listFocus = IsNotesListFocused && focus?.Note is { } focusedIndex ? _render.Notes[focusedIndex] : null;
+        // A note the view goes to (one just added, edited or restored, in the document or from
+        // the list) is selected in the list too; otherwise the list keeps its own selection.
+        var listFocus = focus?.Note is { } focusedIndex ? _render.Notes[focusedIndex] : null;
         FillNotesList(_render, listSelection, listFocus);
         PostRender();
     }
@@ -290,6 +304,7 @@ public partial class MainWindow: Form {
             return;
         }
 
+        Log.Debug("Render {Generation} posted, focus {Focus}", _generation, _pendingFocus);
         documentView.PostMessage(new RenderMessage(
             _render.Html,
             _generation,
@@ -489,12 +504,17 @@ public partial class MainWindow: Form {
     /// dialog or a menu is deferred with <c>BeginInvoke</c>.
     /// </summary>
     private void OnPageMessage(object? sender, PageMessageEventArgs e) {
+        Log.Debug("Page message {Json}", e.Message.GetRawText());
+
         switch (e.Type) {
             case PageMessages.Ready:
                 Log.Information("Page ready");
                 _pageReady = true;
-                PostStrings();
+
+                // The document first: a page that already shows it has no "No file is open" to
+                // flash while the strings arrive.
                 PostRender();
+                PostStrings();
                 documentView.FocusDocument();
                 break;
             case PageMessages.Position:
@@ -559,9 +579,10 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (PageMessages.GetInt(message, "note") is { } note) {
-            if (note >= 0 && note < _render.Notes.Count) {
-                _position = _render.Notes[note].Block;
+        if (PageMessages.GetInt(message, "note") is not null) {
+            if (PageMessages.FindNote(message, _render.Notes) is { } note) {
+                _position = note.Block;
+                SelectNoteInList(note);
             }
 
             return;
@@ -581,13 +602,13 @@ public partial class MainWindow: Form {
             return null;
         }
 
-        if (PageMessages.GetInt(message, "note") is { } index) {
-            if (index < 0 || index >= _render.Notes.Count) {
+        if (PageMessages.GetInt(message, "note") is not null) {
+            if (PageMessages.FindNote(message, _render.Notes) is not { } note) {
                 return null;
             }
 
-            var note = _render.Notes[index];
             _position = note.Block ?? _position;
+            SelectNoteInList(note);
 
             return new NoteTarget(_generation, _renderedText, note.Block, note);
         }
@@ -966,6 +987,7 @@ public partial class MainWindow: Form {
 
         notesList.ItemActivate += OnNotesListItemActivate;
         notesList.KeyDown += OnNotesListKeyDown;
+        notesList.GotFocus += OnNotesListGotFocus;
 
         _notesListMenu = new NativeContextMenu(BuildNotesListMenuSpec()) {
             Resolver = ResolveNotesListMenu,
@@ -977,14 +999,41 @@ public partial class MainWindow: Form {
 
     /// <summary>
     /// The list's column headers and name, which the catalog walk of <c>Localizer</c> does not
-    /// reach: the columns are not controls, and the list window is not a child the label names.
+    /// reach: the columns are not controls. Screen readers do not read a preceding label for a
+    /// list view, so the list is named itself. Call this again after any walk of the controls
+    /// (a live language switch): <c>AccessibleName</c> is forwarded only when it is set through
+    /// a <see cref="NativeListView"/>-typed reference.
     /// </summary>
     private void LocalizeNotesList() {
         notesList.Columns[0].Text = _("Lines");
         notesList.Columns[1].Text = _("Block");
         notesList.Columns[2].Text = _("Note");
-        notesList.AccessibleName = notesLabel.Text;
+        notesList.AccessibleName = _("Notes");
+        _notesListName = null;
+        NameNotesList();
     }
+
+    /// <summary>
+    /// Names the list window itself for MSAA, which is what JAWS reads: the system proxy of a
+    /// list view ignores the window text <c>AccessibleName</c> sets (see
+    /// <see cref="WindowAccessibleName"/>). The list window exists only once the control has a
+    /// handle, and a right-to-left switch recreates it, so this runs again on the way in.
+    /// </summary>
+    private void NameNotesList() {
+        var handle = notesList.ListHandle;
+        var name = notesList.AccessibleName ?? String.Empty;
+
+        if (handle == IntPtr.Zero || _notesListName == (handle, name)) {
+            return;
+        }
+
+        if (WindowAccessibleName.Set(handle, name)) {
+            _notesListName = (handle, name);
+        }
+    }
+
+    // The container gets the focus first and hands it to the list window right after this.
+    private void OnNotesListGotFocus(object? sender, EventArgs e) => NameNotesList();
 
     /// <summary>The context menu of the list; its items act on the selected note.</summary>
     private NativeMenuSpec BuildNotesListMenuSpec() => new NativeMenuSpec()
@@ -1053,6 +1102,17 @@ public partial class MainWindow: Form {
         item.Selected = true;
         item.Focused = true;
         item.EnsureVisible();
+    }
+
+    /// <summary>
+    /// Selects <paramref name="note"/> in the list without moving the focus, so the list follows
+    /// the note the user acts on or moves to in the document. The page cannot see the JAWS
+    /// virtual cursor, so merely reading past a note does not move the selection.
+    /// </summary>
+    private void SelectNoteInList(RenderedNote note) {
+        if (note.Index < notesList.Items.Count && notesList.Items[note.Index].Tag is RenderedNote listed && listed == note) {
+            SelectListItem(notesList.Items[note.Index]);
+        }
     }
 
     /// <summary>The note selected in the list, from the current render, or <see langword="null"/>.</summary>
@@ -1154,6 +1214,7 @@ public partial class MainWindow: Form {
         documentView.AcceleratorKeyDown -= OnDocumentAcceleratorKeyDown;
         notesList.ItemActivate -= OnNotesListItemActivate;
         notesList.KeyDown -= OnNotesListKeyDown;
+        notesList.GotFocus -= OnNotesListGotFocus;
         DragEnter -= OnWindowDragEnter;
         DragDrop -= OnWindowDragDrop;
 

@@ -16,7 +16,13 @@ decisions.
   `FlowLayoutPanel`.
 - **Labels:** use real `Label` controls with their `Text` property. **Do not** rely on
   `AccessibleDescription` / `AccessibleName` as a substitute — screen readers associate a
-  label with a control best through a visible `Label` next to it.
+  label with a control best through a visible `Label` next to it. The one exception is
+  `NativeListView`: screen readers do not read a preceding label for a list view, so it is
+  named through its own `AccessibleName` (the library's documented way; set it through a
+  `NativeListView`-typed reference, and again after anything that walks `Controls`). Keep the
+  visible label as well. The system proxy of a list view ignores the window text that
+  property sets, so PlanCake also names the list window through MSAA annotation
+  (`Utils/WindowAccessibleName.cs`); without it JAWS announces no name.
 - **Keyboard alternatives:** every mouse interaction (drag, hover, context menu) must have a
   keyboard equivalent. No exceptions.
 - **Native controls:** prefer `Oire.WinForms.NativeControls` over the stock WinForms

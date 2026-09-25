@@ -559,16 +559,25 @@ check tasks off from the document.
 ### Task 8: Notes list beside the document
 
 **Files:**
-- Create: `src/PlanCake/Ui/NotesListRow.cs`, `tests/PlanCake.Tests/NotesListRowTests.cs`
+- Create: `src/PlanCake/Ui/NotesListRow.cs`, `src/PlanCake/Utils/WindowAccessibleName.cs`,
+  `tests/PlanCake.Tests/NotesListRowTests.cs`
 - Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/Ui/MainWindow.Designer.cs`,
+  `src/PlanCake/Ui/DocumentView.cs`, `src/PlanCake/Ui/PageMessages.cs`,
   `src/PlanCake/web/app.js`, `src/PlanCake/Rendering/PositionRestorer.cs`,
-  `tests/PlanCake.Tests/PositionRestorerTests.cs`
+  `tests/PlanCake.Tests/PositionRestorerTests.cs`, `tests/PlanCake.Tests/PageMessagesTests.cs`,
+  `CLAUDE.md`, `docs/jaws-spike.md`
 
 - [x] a `SplitContainer` (document first, notes list second) with a `NativeListView`, columns
       "Lines", "Block", "Note", filled from the render result after every render; a real
       `Label` "Notes" names it; the "Note" column shows the note's Markdown stripped to plain
       text (`MarkdownRenderer.NotePlainText`, Task 7), so JAWS reads no backticks. "Lines" is the
-      note's own lines in the file (`12`, or `12-14`); the cells come from `NotesListRow`
+      note's own lines in the file (`12`, or `12-14`); the cells come from `NotesListRow`.
+      Screen readers do not read a preceding label for a list view, so the list is named through
+      its own `AccessibleName = _("Notes")` (set through the `NativeListView`-typed field; Task
+      9/12's `ApplyLocalization` must call `LocalizeNotesList()` again after `Localizer`), and,
+      because the list view's system proxy ignores the window text that sets, through MSAA
+      annotation of the list window (`Utils/WindowAccessibleName.cs`). Found in the Task 8 JAWS
+      check: the list was not announced as "Notes"; see `docs/jaws-spike.md`
 - [x] F6 switches focus between the document and the list; View → Notes list shows or hides the
       list (hidden list is skipped by F6). Found while building it: there was no menu bar yet, so
       this task attaches the `NativeMenuBar` with a View menu holding Notes list and Switch pane
@@ -583,7 +592,22 @@ check tasks off from the document.
 - [x] the list keeps its selection across re-renders when the same note still exists
       (`PositionRestorer.FindNote`: same text on a block with the same text, else the nearest
       note, which is where it goes after a delete); an edit, delete or undo started in the list
-      keeps the focus in the list and selects the note it produced
+      keeps the focus in the list and selects the note it produced. The list also follows the
+      document: a note the document reports (Enter or the context menu on a note, F9 / Shift+F9
+      landing on one, a `position` message naming one, a note just added or edited there) is
+      selected in the list without moving the focus (`PageMessages.FindNote`). Following the
+      JAWS virtual cursor while merely reading is not possible: the page cannot see it. Added
+      after the Task 8 JAWS check
+- [x] ➕ fix: following a relative `.md` link still landed at the end of the new file. Cause:
+      the page's content was replaced in place, so JAWS kept its old offset in the virtual
+      buffer, and the host focused the view again right after posting the render, bouncing
+      the focus out of the browser and back while the page replaced its content (a UI
+      Automation probe found the focus on the document, not on the heading the page focused).
+      Now a different file gets a freshly loaded page: `LoadFile` navigates to `index.html`
+      again and the render (with its focus: the first block, or Back/Forward's saved block)
+      goes out on the new page's `ready`; a re-render of the same file stays in place.
+      `DocumentView.FocusDocument` does nothing when the document already has the focus. See
+      `docs/jaws-spike.md`
 - [ ] **ask the user** to check the list, F6 and F9 with JAWS; also: a parent task with some
       children checked reads as partially checked (Task 7a); following a `.md` link lands at
       the top of the new file (Task 7a fix)
