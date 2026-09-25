@@ -719,14 +719,17 @@ check tasks off from the document.
       `DialogHelper.Confirm`: a task dialog with Yes (default) and No, `AllowCancel`, so Escape and
       the close button answer No, mirrored right to left. Rule added to `CLAUDE.md`; tests in
       `DialogHelperTests`
-- [ ] **ask the user** to check with JAWS: an outside edit of the open file reloads it,
+- [x] **ask the user** to check with JAWS: an outside edit of the open file reloads it,
       announces "File reloaded" and keeps the reading position; deleting or renaming the file
       away is announced and the note commands are disabled; opening the same file a second time
       activates the existing window instead of opening another. Also the checks deferred from
       Task 9: the Tab cycle between the document and the notes list both ways (list shown and
       hidden); each menu's unavailable items without a file or a note, and the radio marks in the
       two language submenus; the Keyboard shortcuts dialog (list name, Escape closes) and the
-      About dialog (Copy info announced); the Delete all notes confirmation
+      About dialog (Copy info announced); the Delete all notes confirmation.
+      Results: first round passed everything but the reading position after an outside edit
+      (thrown to the top) and Escape in the confirmations; both fixed (➕ items above) and pass on
+      re-check
 - [x] validation commands pass
 
 ### ➕ Task 11: Open from the clipboard and from a link
