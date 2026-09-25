@@ -46,6 +46,12 @@ internal static class Program {
                 typeof(Program).Assembly.GetName().Version, App.IsPortable, App.DataFolder
             );
 
+            // One window per file: the window already showing it comes to the front instead.
+            if (args.Length > 0 && SingleInstance.TryActivate(args[0])) {
+                Log.Information("App startup: {Path} is open in another window, which was activated", args[0]);
+                return ExitCode.Success;
+            }
+
             // To customize application configuration such as high DPI settings or the default
             // font, see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();

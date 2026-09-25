@@ -27,6 +27,9 @@ public partial class MainWindow: Form {
     private const bool ConfirmTaskToggle = true;
     private const bool ShowNotesListByDefault = true;
 
+    // Not a const: with a constant the "ask first" branch would be unreachable code.
+    private static readonly ExternalChangeAction _externalChangeAction = ExternalChangeAction.AutoReload;
+
     /// <summary>The note markers, <c>[usernote]</c> … <c>[/usernote]</c> until Task 12 makes them a setting.</summary>
     private static readonly NoteMarkers _markers = NoteMarkers.Default;
 
@@ -103,6 +106,21 @@ public partial class MainWindow: Form {
     /// <summary>The list window and the name last given to it for MSAA.</summary>
     private (IntPtr Handle, string Name)? _notesListName;
 
+    /// <summary>Watches <see cref="_file"/> for changes made outside PlanCake.</summary>
+    private FileWatcher? _watcher;
+
+    /// <summary>This window's claim on <see cref="_file"/>: a second attempt to open it activates this window.</summary>
+    private SingleInstance? _instance;
+
+    /// <summary>
+    /// True while <see cref="_file"/> is gone from disk (deleted, or renamed or moved away): the
+    /// view stays, but nothing can be written to the file and Reload is off until it is back.
+    /// </summary>
+    private bool _fileMissing;
+
+    /// <summary>True while the window asks whether to reload a file changed outside PlanCake.</summary>
+    private bool _askingReload;
+
     public MainWindow() : this(null) { }
 
     /// <param name="initialFile">The file to open once the window is up, from the command line.</param>
@@ -161,7 +179,7 @@ public partial class MainWindow: Form {
             MenuCommand(file, _("&Open..."), HostCommand.Open);
             // Task 11: Open from clipboard, Open from link.
             file.AddSeparator();
-            EnabledWhen(MenuCommand(file, _("Open in &editor"), HostCommand.OpenInEditor), HasFile);
+            EnabledWhen(MenuCommand(file, _("Open in &editor"), HostCommand.OpenInEditor), FileIsThere);
             // Task 13: Export notes.
             file.AddSeparator();
             // Task 12: Settings.
@@ -170,10 +188,10 @@ public partial class MainWindow: Form {
         });
 
         bar.AddMenu(_("&Edit"), edit => {
-            EnabledWhen(MenuCommand(edit, _("&Undo"), HostCommand.Undo), () => _notes?.Store.CanUndo == true);
-            EnabledWhen(MenuCommand(edit, _("&Redo"), HostCommand.Redo), () => _notes?.Store.CanRedo == true);
+            EnabledWhen(MenuCommand(edit, _("&Undo"), HostCommand.Undo), () => FileIsThere() && _notes?.Store.CanUndo == true);
+            EnabledWhen(MenuCommand(edit, _("&Redo"), HostCommand.Redo), () => FileIsThere() && _notes?.Store.CanRedo == true);
             edit.AddSeparator();
-            EnabledWhen(edit.Add(_("&Delete all notes..."), null, DeleteAllNotes), HasNotes);
+            EnabledWhen(edit.Add(_("&Delete all notes..."), null, DeleteAllNotes), () => FileIsThere() && HasNotes());
         });
 
         bar.AddMenu(_("&View"), view => {
@@ -211,12 +229,12 @@ public partial class MainWindow: Form {
             view.AddSeparator();
             EnabledWhen(MenuCommand(view, _("&Back"), HostCommand.Back), () => _history.CanGoBack);
             EnabledWhen(MenuCommand(view, _("&Forward"), HostCommand.Forward), () => _history.CanGoForward);
-            EnabledWhen(MenuCommand(view, _("&Reload"), HostCommand.Reload), HasFile);
+            EnabledWhen(MenuCommand(view, _("&Reload"), HostCommand.Reload), FileIsThere);
         });
 
         bar.AddMenu(_("&Notes"), notes => {
-            EnabledWhen(notes.Add(_("&Edit note..."), null, EditCurrentNote), () => CurrentNote() is not null);
-            EnabledWhen(notes.Add(_("&Delete note"), null, DeleteCurrentNote), () => CurrentNote() is not null);
+            EnabledWhen(notes.Add(_("&Edit note..."), null, EditCurrentNote), () => FileIsThere() && CurrentNote() is not null);
+            EnabledWhen(notes.Add(_("&Delete note"), null, DeleteCurrentNote), () => FileIsThere() && CurrentNote() is not null);
             notes.AddSeparator();
             EnabledWhen(MenuCommand(notes, _("&Next note"), HostCommand.NextNote), HasNotes);
             EnabledWhen(MenuCommand(notes, _("&Previous note"), HostCommand.PreviousNote), HasNotes);
@@ -261,6 +279,9 @@ public partial class MainWindow: Form {
     }
 
     private bool HasFile() => _file is not null;
+
+    /// <summary>True when a file is open and still on disk, so it can be written, reloaded and opened elsewhere.</summary>
+    private bool FileIsThere() => _file is not null && !_fileMissing;
 
     private bool HasNotes() => _render is { Notes.Count: > 0 };
 
@@ -319,11 +340,33 @@ public partial class MainWindow: Form {
     /// Push the file being left onto the history; false when moving through the history itself.
     /// </param>
     private bool LoadFile(string path, BlockInfo? position, bool recordHistory) {
+        string fullPath;
+
+        try {
+            fullPath = Path.GetFullPath(path);
+        } catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException) {
+            Log.Error(ex, "Unable to open {Path}", path);
+            ShowError(_("Unable to open {0}: {1}", path, ex.Message));
+
+            return false;
+        }
+
+        // Opening the same file again keeps the reading position; another file starts at the top.
+        var reopened = _file is not null && String.Equals(_file.Path, fullPath, StringComparison.OrdinalIgnoreCase);
+
+        // One window per file: a file another window shows brings that window to the front, and
+        // this one stays as it is (its history too).
+        if (!reopened && SingleInstance.TryActivate(fullPath)) {
+            Log.Information("{Path} is open in another window, which was activated", fullPath);
+
+            return false;
+        }
+
         MarkdownFile file;
 
         try {
             // ConvertToUtf8 stays off (the default) until Task 12 wires the setting.
-            file = MarkdownFile.Open(Path.GetFullPath(path), MarkdownFileOptions.Default);
+            file = MarkdownFile.Open(fullPath, MarkdownFileOptions.Default);
         } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
             Log.Warning(ex, "Unable to open {Path}: not found", path);
             ShowError(_("The file {0} does not exist.", path));
@@ -335,9 +378,6 @@ public partial class MainWindow: Form {
 
             return false;
         }
-
-        // Opening the same file again keeps the reading position; another file starts at the top.
-        var reopened = _file is not null && String.Equals(_file.Path, file.Path, StringComparison.OrdinalIgnoreCase);
 
         if (!reopened) {
             if (recordHistory && _file is not null) {
@@ -351,6 +391,15 @@ public partial class MainWindow: Form {
         _file = file;
         _notes = new NoteActionRunner(new NoteStore(file, _markers));
         _draft = null;
+        _fileMissing = false;
+
+        if (!reopened || _watcher is null || _watcher.IsMissing) {
+            WatchFile(file.Path);
+        }
+
+        if (!reopened || _instance is null) {
+            RegisterWindow(file.Path);
+        }
 
         // Another file gets a fresh page, so a screen reader starts it as a new document, at the
         // top (or at the block Back returns to); the render waits for the new page's "ready".
@@ -406,6 +455,7 @@ public partial class MainWindow: Form {
         // Another file starts with nothing selected in the notes list.
         var listSelection = opened ? null : SelectedListNote();
         _renderedText = _file.Text;
+        _watcher?.Acknowledge(_renderedText);
         _render = MarkdownRenderer.Render(_renderedText, options);
         _generation++;
 
@@ -816,7 +866,7 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (notes.CannotWriteReason is { } reason) {
+        if (CannotChangeReason(notes) is { } reason) {
             _announcer.Announce(reason);
             return;
         }
@@ -834,7 +884,7 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (notes.CannotWriteReason is { } reason) {
+        if (CannotChangeReason(notes) is { } reason) {
             _announcer.Announce(reason);
             return;
         }
@@ -900,7 +950,7 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (notes.CannotWriteReason is { } reason) {
+        if (CannotChangeReason(notes) is { } reason) {
             _announcer.Announce(reason);
             return;
         }
@@ -943,7 +993,7 @@ public partial class MainWindow: Form {
         try {
             _position = item;
 
-            if (notes.CannotWriteReason is { } reason) {
+            if (CannotChangeReason(notes) is { } reason) {
                 RevertTask(item, fileState);
                 _announcer.Announce(reason);
                 return;
@@ -982,6 +1032,18 @@ public partial class MainWindow: Form {
         ) == DialogResult.Yes;
     }
 
+    /// <summary>
+    /// Why nothing can be written to the open file now, or <see langword="null"/> when it can:
+    /// it is gone from disk, or it is open read-only.
+    /// </summary>
+    private string? CannotChangeReason(NoteActionRunner notes) =>
+        _fileMissing ? MissingFileMessage() : notes.CannotWriteReason;
+
+    private string MissingFileMessage() => _(
+        "{0} is no longer there: it was deleted, renamed or moved. Notes cannot be changed until it is back.",
+        _file is null ? String.Empty : Path.GetFileName(_file.Path)
+    );
+
     /// <summary>Sets the item's check box in the page back to the file's state.</summary>
     private void RevertTask(BlockInfo item, bool fileState) {
         if (_pageReady) {
@@ -992,6 +1054,11 @@ public partial class MainWindow: Form {
     private void UndoOrRedo(bool redo) {
         if (_notes is not { } notes) {
             _announcer.Announce(redo ? _("Nothing to redo") : _("Nothing to undo"));
+            return;
+        }
+
+        if (_fileMissing) {
+            _announcer.Announce(MissingFileMessage());
             return;
         }
 
@@ -1181,6 +1248,11 @@ public partial class MainWindow: Form {
             return;
         }
 
+        if (_fileMissing) {
+            _announcer.Announce(MissingFileMessage());
+            return;
+        }
+
         ShellOpen(_file.Path);
     }
 
@@ -1189,22 +1261,164 @@ public partial class MainWindow: Form {
     /// working: each checks the file still holds the text it expects before it writes.
     /// </summary>
     private void ReloadFile() {
-        if (_file is not { } file) {
+        if (_file is null) {
             _announcer.Announce(_("No file is open."));
             return;
+        }
+
+        if (_fileMissing) {
+            _announcer.Announce(MissingFileMessage());
+            return;
+        }
+
+        if (Reload(fromOutside: false)) {
+            ReturnFocus();
+            _announcer.Announce(_("File reloaded"));
+        }
+    }
+
+    /// <summary>
+    /// Reads the open file again and renders it at the block the user was on. A reload the user
+    /// asked for reports a failure in a message box; one caused by a change outside PlanCake only
+    /// announces it, as the user may be busy elsewhere.
+    /// </summary>
+    /// <returns>True when the file was read and rendered.</returns>
+    private bool Reload(bool fromOutside) {
+        if (_file is not { } file) {
+            return false;
         }
 
         try {
             file.Reload();
         } catch (IOException ex) {
             Log.Error(ex, "Unable to reload {Path}", file.Path);
-            ShowError(_("Unable to reload {0}: {1}", file.Path, ex.Message));
-            return;
+
+            if (fromOutside) {
+                _announcer.Announce(_("Unable to reload {0}: {1}", Path.GetFileName(file.Path), ex.Message));
+            } else {
+                ShowError(_("Unable to reload {0}: {1}", file.Path, ex.Message));
+            }
+
+            return false;
         }
 
         RenderDocument();
-        ReturnFocus();
-        _announcer.Announce(_("File reloaded"));
+
+        return true;
+    }
+
+    // --- Following the file on disk ---------------------------------------------------
+
+    /// <summary>Starts watching <paramref name="path"/> for changes made outside PlanCake, instead of the previous file.</summary>
+    private void WatchFile(string path) {
+        if (_watcher is { } previous) {
+            previous.FileChanged -= OnWatchedFileChanged;
+            previous.Dispose();
+        }
+
+        _watcher = new FileWatcher(path, new UiDebounceTimer());
+        _watcher.FileChanged += OnWatchedFileChanged;
+        _watcher.Start(this);
+    }
+
+    /// <summary>
+    /// Claims <paramref name="path"/> for this window, instead of the previous file, so that
+    /// opening it again anywhere brings this window to the front.
+    /// </summary>
+    private void RegisterWindow(string path) {
+        _instance?.Dispose();
+        _instance = SingleInstance.TryRegister(path, OnActivationRequested);
+    }
+
+    /// <summary>Another attempt to open this window's file; runs on the pipe's thread.</summary>
+    private void OnActivationRequested() {
+        try {
+            if (!IsDisposed && IsHandleCreated) {
+                BeginInvoke(ActivateFromOutside);
+            }
+        } catch (Exception ex) when (ex is InvalidOperationException or ObjectDisposedException) {
+            Log.Debug(ex, "The window closed before it could be activated");
+        }
+    }
+
+    /// <summary>Restores the window if it is minimized and brings it to the front.</summary>
+    private void ActivateFromOutside() {
+        if (IsDisposed) {
+            return;
+        }
+
+        if (WindowState == FormWindowState.Minimized) {
+            WindowState = FormWindowState.Normal;
+        }
+
+        Activate();
+    }
+
+    /// <summary>The open file changed outside PlanCake, went missing, or came back.</summary>
+    private void OnWatchedFileChanged(object? sender, FileChangeEventArgs e) {
+        if (sender != _watcher || _file is null) {
+            return;
+        }
+
+        var name = Path.GetFileName(_file.Path);
+
+        switch (e.Kind) {
+            case FileChangeKind.Missing:
+                _fileMissing = true;
+                _announcer.Announce(MissingFileMessage());
+                break;
+            case FileChangeKind.Restored:
+                _fileMissing = false;
+
+                if (Reload(fromOutside: true)) {
+                    _announcer.Announce(_("{0} is back. File reloaded", name));
+                }
+
+                break;
+            case FileChangeKind.Changed when _externalChangeAction == ExternalChangeAction.Ask:
+                // Out of the watcher's event first: the question is a message box.
+                BeginInvoke(AskToReload);
+                break;
+            case FileChangeKind.Changed:
+                if (Reload(fromOutside: true)) {
+                    _announcer.Announce(_("File reloaded"));
+                }
+
+                break;
+        }
+    }
+
+    /// <summary>
+    /// The "ask first" setting: Yes reloads; No keeps the view as it is, and a note action on it
+    /// then fails as stale, since the file no longer holds what it shows.
+    /// </summary>
+    private void AskToReload() {
+        if (_askingReload || _file is null || _fileMissing) {
+            return;
+        }
+
+        _askingReload = true;
+
+        try {
+            var answer = DialogHelper.Show(
+                _("{0} was changed outside PlanCake. Reload it?", Path.GetFileName(_file.Path)),
+                _("File changed"),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (answer == DialogResult.Yes) {
+                if (Reload(fromOutside: false)) {
+                    ReturnFocus();
+                    _announcer.Announce(_("File reloaded"));
+                }
+            } else {
+                ReturnFocus();
+                _announcer.Announce(_("The file was not reloaded. Press F5 to reload it."));
+            }
+        } finally {
+            _askingReload = false;
+        }
     }
 
     /// <summary>
@@ -1236,7 +1450,7 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (notes.CannotWriteReason is { } reason) {
+        if (CannotChangeReason(notes) is { } reason) {
             _announcer.Announce(reason);
             return;
         }
@@ -1570,6 +1784,15 @@ public partial class MainWindow: Form {
         notesList.GotFocus -= OnNotesListGotFocus;
         DragEnter -= OnWindowDragEnter;
         DragDrop -= OnWindowDragDrop;
+
+        if (_watcher is { } watcher) {
+            watcher.FileChanged -= OnWatchedFileChanged;
+            watcher.Dispose();
+            _watcher = null;
+        }
+
+        _instance?.Dispose();
+        _instance = null;
 
         // Before the handles go: the menus need the windows they belong to while they are released.
         _menuBar?.Dispose();

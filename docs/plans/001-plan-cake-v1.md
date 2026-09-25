@@ -667,18 +667,20 @@ check tasks off from the document.
 
 **Files:**
 - Create: `src/PlanCake/Utils/FileWatcher.cs`, `src/PlanCake/Utils/SingleInstance.cs`,
+  `src/PlanCake/Utils/Enums/ExternalChangeAction.cs` (for Task 12's setting),
   `tests/PlanCake.Tests/FileWatcherTests.cs`, `tests/PlanCake.Tests/SingleInstanceTests.cs`
 - Modify: `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/Program.cs`
 
-- [ ] `FileWatcher`: watches the open file's folder for changes, renames and deletions of that
+- [x] `FileWatcher`: watches the open file's folder for changes, renames and deletions of that
       file (editors often save by rename), debounced 300 ms, marshaled to the UI thread;
       ignores changes whose content equals what PlanCake itself last wrote
-- [ ] external change → re-render with position restore and announce "File reloaded"; build the
+- [x] external change → re-render with position restore and announce "File reloaded"; build the
       "ask first" branch too (No keeps the view, announces that F5 reloads, and note actions
       then fail as stale) but hard-code `AutoReload` until Task 12 wires the setting
-- [ ] file deleted or renamed away → announce it, disable note commands and Reload until it
-      reappears, then reload
-- [ ] `SingleInstance`: per normalized full path, a named pipe `PlanCake-<SHA-256 of the
+- [x] file deleted or renamed away → announce it, disable note commands and Reload until it
+      reappears, then reload (announced "<name> is back. File reloaded"). Open in editor is off
+      too while the file is gone
+- [x] `SingleInstance`: per normalized full path, a named pipe `PlanCake-<SHA-256 of the
       upper-cased path>`; a second `plancake same.md` connects, calls
       `AllowSetForegroundWindow`, sends "activate", exits with `ExitCode.Success`; the first
       window restores and activates itself; `MainWindow.OpenFile` (Task 6) re-registers under
@@ -686,14 +688,22 @@ check tasks off from the document.
       (Task 6): following a link to, or going Back or Forward to, a file already open in
       another window activates that window instead; this window stays on its file and its
       history is unchanged
-- [ ] `FileWatcher` takes an injectable clock/timer so its logic is testable without real
+- [x] `FileWatcher` takes an injectable clock/timer so its logic is testable without real
       waits
-- [ ] tests: bursts of events inside 300 ms produce one reload; PlanCake's own write produces
+- [x] tests: bursts of events inside 300 ms produce one reload; PlanCake's own write produces
       none; save-by-rename (write temp, delete original, rename temp) produces one reload and
       no "deleted" state; a real delete produces the deleted state
-- [ ] tests: path normalization (case, `..`, trailing separators) gives one pipe name; a second
+- [x] tests: path normalization (case, `..`, trailing separators) gives one pipe name; a second
       registration for the same path is detected
-- [ ] validation commands pass
+- [ ] **ask the user** to check with JAWS: an outside edit of the open file reloads it,
+      announces "File reloaded" and keeps the reading position; deleting or renaming the file
+      away is announced and the note commands are disabled; opening the same file a second time
+      activates the existing window instead of opening another. Also the checks deferred from
+      Task 9: the Tab cycle between the document and the notes list both ways (list shown and
+      hidden); each menu's unavailable items without a file or a note, and the radio marks in the
+      two language submenus; the Keyboard shortcuts dialog (list name, Escape closes) and the
+      About dialog (Copy info announced); the Delete all notes confirmation
+- [x] validation commands pass
 
 ### ➕ Task 11: Open from the clipboard and from a link
 
