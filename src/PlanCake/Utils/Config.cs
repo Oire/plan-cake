@@ -1,3 +1,7 @@
+using System.Globalization;
+using System.Reflection;
+using Oire.PlanCake.Notes;
+using Oire.PlanCake.Utils.Enums;
 using Serilog;
 using SharpConfig;
 using App = Oire.PlanCake.Utils.Constants.App;
@@ -5,17 +9,37 @@ using App = Oire.PlanCake.Utils.Constants.App;
 namespace Oire.PlanCake.Utils;
 
 /// <summary>
-/// Static configuration container backed by an INI file under <see cref="App.DataFolder"/>.
-/// Call <see cref="Load"/> once at startup and <see cref="Save"/> whenever a section changes.
-/// The section properties are safe to read from any thread once <see cref="Load"/> has returned.
+/// Static configuration container backed by an INI file under <see cref="App.DataFolder"/>
+/// (<c>PlanCake.cfg</c>, sections <c>[General]</c>, <c>[Notes]</c> and <c>[Advanced]</c>; Technical
+/// details → "Settings" in the plan). Call <see cref="Load"/> once at startup and <see cref="Save"/>
+/// whenever a section changes. The section properties are safe to read from any thread once
+/// <see cref="Load"/> has returned.
 /// </summary>
 /// <remarks>
 /// Neither method throws and neither shows a dialog: configuration is a convenience, not a
 /// precondition for running. A missing file is written out with the defaults; an unreadable
-/// one is logged and the defaults are used for the session, so a hand-edited typo in the INI
-/// cannot leave the user with an app that refuses to start.
+/// one is logged and the defaults are used for the session. A value that cannot be read (a
+/// hand-edited typo, an unknown enum name, markers that cannot delimit a note, a document
+/// language PlanCake does not offer) falls back to its default alone, keeping the other settings.
 /// </remarks>
-public static class Config {
+internal static class Config {
+    static Config() {
+        // Settings hold note markers, which may contain the INI comment characters (# and ;) or
+        // look like SharpConfig's arrays ({a,b}): a value is always the whole rest of its line.
+        Configuration.IgnoreInlineComments = true;
+        Configuration.SupressArrayParsing = true;
+    }
+
+    /// <summary>
+    /// True when <paramref name="value"/> can be stored as a setting and read back unchanged.
+    /// SharpConfig strips double quotes around a value, so a value cannot start or end with one.
+    /// </summary>
+    public static bool CanStore(string value) {
+        ArgumentNullException.ThrowIfNull(value);
+
+        return !value.StartsWith('"') && !value.EndsWith('"');
+    }
+
     /// <summary>
     /// Test hook: redirects the config file away from <c>%APPDATA%</c> so a test run does not
     /// clobber the developer's real settings. Set it before calling <see cref="Load"/>.
@@ -26,17 +50,64 @@ public static class Config {
 
     public static SectionGeneral General { get; private set; } = new();
 
+    public static SectionNotes Notes { get; private set; } = new();
+
+    public static SectionAdvanced Advanced { get; private set; } = new();
+
     #region Config section classes
 
-    /// <summary>
-    /// App-level settings that apply wherever the user happens to be. Add further sections as
-    /// sibling classes plus a matching property and a line in <see cref="Load"/> / <see cref="Save"/>.
-    /// </summary>
+    /// <summary>App-level settings: languages, confirmations, the window.</summary>
     public class SectionGeneral {
-        /// <summary>A culture name such as <c>"fr-FR"</c>, or <see cref="App.SystemLanguageName"/>.</summary>
+        /// <summary>
+        /// The interface language: a culture name such as <c>"fr"</c>, or
+        /// <see cref="App.SystemLanguageName"/> for the Windows language.
+        /// </summary>
         public string Language { get; set; } = App.SystemLanguageName;
 
-        public bool ConfirmExit { get; set; } = true;
+        /// <summary>
+        /// The <c>lang</c> a newly opened document is read in (one of
+        /// <see cref="LanguageList.SupportedCodes"/>). Never follows the interface language.
+        /// </summary>
+        public string DefaultDocumentLanguage { get; set; } = LanguageList.English;
+
+        /// <summary>Ask before a note is deleted. Delete all notes always asks.</summary>
+        public bool ConfirmNoteDelete { get; set; } = true;
+
+        /// <summary>Ask before a task-list check box rewrites the file on disk.</summary>
+        public bool ConfirmTaskToggle { get; set; } = true;
+
+        /// <summary>What happens when the open file is changed outside PlanCake.</summary>
+        public ExternalChangeAction ExternalChangeAction { get; set; } = ExternalChangeAction.AutoReload;
+
+        /// <summary>Whether the notes list beside the document is shown when a window opens.</summary>
+        public bool ShowNotesList { get; set; } = true;
+    }
+
+    /// <summary>How notes are written and how the keyboard adds them.</summary>
+    public class SectionNotes {
+        /// <summary>The marker a note starts with.</summary>
+        public string OpeningMarker { get; set; } = NoteMarkers.Default.Opening;
+
+        /// <summary>The marker a note ends with; empty for single-token notes that end with their line.</summary>
+        public string ClosingMarker { get; set; } = NoteMarkers.Default.Closing;
+
+        /// <summary>What Enter on a block of the document does.</summary>
+        public BlockEnterAction BlockEnterAction { get; set; } = BlockEnterAction.AddNote;
+
+        /// <summary>What Enter does in the note dialog; Ctrl+Enter does the other.</summary>
+        public NoteEnterAction NoteEnterAction { get; set; } = NoteEnterAction.Save;
+
+        /// <summary>The configured markers as the note parser and store take them.</summary>
+        public NoteMarkers ToMarkers() => new(OpeningMarker, ClosingMarker);
+    }
+
+    /// <summary>Settings most people never need.</summary>
+    public class SectionAdvanced {
+        /// <summary>
+        /// Rewrite a file that is not UTF-8 as UTF-8 without BOM when it is opened, instead of
+        /// opening it read-only.
+        /// </summary>
+        public bool ConvertToUtf8 { get; set; }
     }
 
     #endregion
@@ -47,19 +118,19 @@ public static class Config {
     public static void Load() {
         try {
             var cfg = Configuration.LoadFromFile(FilePath);
-            General = cfg[nameof(General)].ToObject<SectionGeneral>();
-        } catch (FileNotFoundException) {
+            General = ReadSection<SectionGeneral>(cfg, nameof(General));
+            Notes = ReadSection<SectionNotes>(cfg, nameof(Notes));
+            Advanced = ReadSection<SectionAdvanced>(cfg, nameof(Advanced));
+            Normalize();
+        } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
             // First run. Not an error — write the defaults out so the user has a file to edit.
-            General = new SectionGeneral();
-            Save();
-        } catch (DirectoryNotFoundException) {
-            General = new SectionGeneral();
+            ResetToDefaults();
             Save();
         } catch (Exception ex) {
             // Malformed INI, a locked file, a permissions problem. Carry on with the defaults
             // rather than refusing to start, but say so in the log.
             Log.Warning(ex, "Config: unable to read {Path}, falling back to defaults", FilePath);
-            General = new SectionGeneral();
+            ResetToDefaults();
         }
     }
 
@@ -75,14 +146,109 @@ public static class Config {
                 Directory.CreateDirectory(folder);
             }
 
-            var cfg = new Configuration();
-            cfg.Add(Section.FromObject(nameof(General), General));
+            var cfg = new Configuration {
+                Section.FromObject(nameof(General), General),
+                Section.FromObject(nameof(Notes), Notes),
+                Section.FromObject(nameof(Advanced), Advanced),
+            };
             cfg.SaveToFile(FilePath);
 
             return true;
         } catch (Exception ex) {
             Log.Error(ex, "Config: unable to save {Path}", FilePath);
 
+            return false;
+        }
+    }
+
+    private static void ResetToDefaults() {
+        General = new SectionGeneral();
+        Notes = new SectionNotes();
+        Advanced = new SectionAdvanced();
+    }
+
+    /// <summary>
+    /// A section's settings, each read on its own: one that is missing or cannot be read keeps
+    /// its default, so a single bad value does not cost the user every other setting.
+    /// </summary>
+    private static T ReadSection<T>(Configuration cfg, string name) where T : new() {
+        var section = new T();
+
+        if (!cfg.Contains(name)) {
+            return section;
+        }
+
+        var stored = cfg[name];
+
+        foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
+            if (!property.CanWrite || !stored.Contains(property.Name)) {
+                continue;
+            }
+
+            try {
+                var value = stored[property.Name].GetValue(property.PropertyType);
+
+                if (property.PropertyType.IsEnum && (value is null || !Enum.IsDefined(property.PropertyType, value))) {
+                    throw new FormatException($"{stored[property.Name].RawValue} is not a {property.PropertyType.Name}.");
+                }
+
+                property.SetValue(section, value ?? property.GetValue(section));
+            } catch (Exception ex) {
+                Log.Warning(
+                    ex, "Config: [{Section}] {Setting} = {Value} cannot be read; using the default",
+                    name, property.Name, stored[property.Name].RawValue
+                );
+            }
+        }
+
+        return section;
+    }
+
+    /// <summary>Replaces values that were read but cannot be used with their defaults.</summary>
+    private static void Normalize() {
+        if (String.Equals(General.Language?.Trim(), App.SystemLanguageName, StringComparison.OrdinalIgnoreCase)) {
+            General.Language = App.SystemLanguageName;
+        } else if (!IsCulture(General.Language)) {
+            Log.Warning("Config: interface language {Language} is unknown; using the default", General.Language);
+            General.Language = App.SystemLanguageName;
+        }
+
+        var documentLanguage = LanguageList.SupportedCodes.FirstOrDefault(code =>
+            String.Equals(code, General.DefaultDocumentLanguage?.Trim(), StringComparison.OrdinalIgnoreCase)
+        );
+
+        if (documentLanguage is null) {
+            Log.Warning(
+                "Config: document language {Language} is not offered; using the default",
+                General.DefaultDocumentLanguage
+            );
+        }
+
+        General.DefaultDocumentLanguage = documentLanguage ?? LanguageList.English;
+
+        Notes.OpeningMarker ??= String.Empty;
+        Notes.ClosingMarker ??= String.Empty;
+
+        if (Notes.ToMarkers().Validate() is var error and not NoteMarkersError.None) {
+            Log.Warning(
+                "Config: note markers {Opening} … {Closing} are unusable ({Error}); using the defaults",
+                Notes.OpeningMarker, Notes.ClosingMarker, error
+            );
+            Notes.OpeningMarker = NoteMarkers.Default.Opening;
+            Notes.ClosingMarker = NoteMarkers.Default.Closing;
+        }
+    }
+
+    private static bool IsCulture(string? language) {
+        if (String.IsNullOrWhiteSpace(language)) {
+            return false;
+        }
+
+        try {
+            CultureInfo.GetCultureInfo(language, predefinedOnly: true);
+
+            return true;
+        } catch (CultureNotFoundException) {
             return false;
         }
     }

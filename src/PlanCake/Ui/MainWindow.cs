@@ -20,19 +20,8 @@ public partial class MainWindow: Form {
     /// <summary>The page the document view shows, from the <c>web</c> folder.</summary>
     private const string PageFile = "index.html";
 
-    // Settings that arrive with Task 12, hard-coded to their defaults until then. The document
-    // language is English by default and never follows the interface language.
-    private const string DefaultDocumentLanguage = LanguageList.English;
-    private const NoteEnterAction DocumentNoteEnterAction = NoteEnterAction.Save;
-    private const bool ConfirmNoteDelete = true;
-    private const bool ConfirmTaskToggle = true;
-    private const bool ShowNotesListByDefault = true;
-
-    // Not a const: with a constant the "ask first" branch would be unreachable code.
-    private static readonly ExternalChangeAction _externalChangeAction = ExternalChangeAction.AutoReload;
-
-    /// <summary>The note markers, <c>[usernote]</c> … <c>[/usernote]</c> until Task 12 makes them a setting.</summary>
-    private static readonly NoteMarkers _markers = NoteMarkers.Default;
+    /// <summary>The note markers from Settings, <c>[usernote]</c> … <c>[/usernote]</c> by default.</summary>
+    private NoteMarkers _markers = Config.Notes.ToMarkers();
 
     /// <summary>Downloads the files File → Open from link and a link on the clipboard open.</summary>
     private static readonly MarkdownDownloader _downloader = new();
@@ -82,9 +71,9 @@ public partial class MainWindow: Form {
 
     /// <summary>
     /// The <c>lang</c> of the open document (View → Document language); another file starts with
-    /// the default again.
+    /// the default from Settings again. English by default, and it never follows the interface language.
     /// </summary>
-    private string _documentLanguage = DefaultDocumentLanguage;
+    private string _documentLanguage = Config.General.DefaultDocumentLanguage;
 
     /// <summary>Where the page puts the virtual cursor when it shows <see cref="_render"/>.</summary>
     private PageFocus? _pendingFocus;
@@ -99,7 +88,7 @@ public partial class MainWindow: Form {
     private bool _togglingTask;
 
     /// <summary>Whether the notes list beside the document is shown (View → Notes list).</summary>
-    private bool _showNotesList = ShowNotesListByDefault;
+    private bool _showNotesList = Config.General.ShowNotesList;
 
     /// <summary>The window's menu bar, attached once the window has a handle.</summary>
     private NativeMenuBar? _menuBar;
@@ -196,7 +185,7 @@ public partial class MainWindow: Form {
             EnabledWhen(MenuCommand(file, _("Open in &editor"), HostCommand.OpenInEditor), FileIsThere);
             // Task 13: Export notes.
             file.AddSeparator();
-            // Task 12: Settings.
+            MenuCommand(file, _("&Settings..."), HostCommand.Settings);
             file.AddSeparator();
             file.Add(_("E&xit"), HostCommands.KeyText(Keys.Alt | Keys.F4), Close);
         });
@@ -379,8 +368,7 @@ public partial class MainWindow: Form {
         MarkdownFile file;
 
         try {
-            // ConvertToUtf8 stays off (the default) until Task 12 wires the setting.
-            file = MarkdownFile.Open(fullPath, MarkdownFileOptions.Default);
+            file = MarkdownFile.Open(fullPath, new MarkdownFileOptions(ConvertToUtf8: Config.Advanced.ConvertToUtf8));
         } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
             Log.Warning(ex, "Unable to open {Path}: not found", path);
             ShowError(_("The file {0} does not exist.", path));
@@ -399,7 +387,7 @@ public partial class MainWindow: Form {
             }
 
             _position = position;
-            _documentLanguage = DefaultDocumentLanguage;
+            _documentLanguage = Config.General.DefaultDocumentLanguage;
         }
 
         _file = file;
@@ -652,6 +640,9 @@ public partial class MainWindow: Form {
             case HostCommand.OpenInEditor:
                 OpenInEditor();
                 break;
+            case HostCommand.Settings:
+                ShowSettings();
+                break;
             case HostCommand.Reload:
                 ReloadFile();
                 break;
@@ -782,7 +773,14 @@ public partial class MainWindow: Form {
                 break;
             case PageMessages.Activate:
                 if (FindTarget(e.Message) is { Block: { } block } target) {
-                    BeginInvoke(WhileCurrent(target, () => AddNote(target, block)));
+                    if (Config.Notes.BlockEnterAction == BlockEnterAction.ContextMenu) {
+                        // The setting makes Enter (and a click) on a block open its menu instead.
+                        var blockRect = PageMessages.GetRect(e.Message, "rect");
+                        var blockScale = PageMessages.GetDouble(e.Message, "scale") ?? 1;
+                        BeginInvoke(WhileCurrent(target, () => ShowContextMenu(target, blockRect, blockScale)));
+                    } else {
+                        BeginInvoke(WhileCurrent(target, () => AddNote(target, block)));
+                    }
                 }
 
                 break;
@@ -943,7 +941,7 @@ public partial class MainWindow: Form {
         Func<string, NoteActionResult> save
     ) {
         while (_notes is { } notes) {
-            using (var dialog = new NoteDialog(mode, excerpt, text, notes.DescribeTextError, DocumentNoteEnterAction)) {
+            using (var dialog = new NoteDialog(mode, excerpt, text, notes.DescribeTextError, Config.Notes.NoteEnterAction)) {
                 if (dialog.ShowDialog(this) != DialogResult.OK) {
                     ReturnFocus();
                     return;
@@ -989,7 +987,7 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (ConfirmNoteDelete) {
+        if (Config.General.ConfirmNoteDelete) {
             var confirmed = DialogHelper.Confirm(
                 _("Delete this note?\n\n{0}", MarkdownRenderer.Excerpt(MarkdownRenderer.NotePlainText(note.Note.Text))),
                 _("Delete note")
@@ -1031,7 +1029,7 @@ public partial class MainWindow: Form {
                 return;
             }
 
-            if (ConfirmTaskToggle && !ConfirmToggle(item, isChecked)) {
+            if (Config.General.ConfirmTaskToggle && !ConfirmToggle(item, isChecked)) {
                 RevertTask(item, fileState);
                 FocusDocument();
                 return;
@@ -1528,7 +1526,7 @@ public partial class MainWindow: Form {
                 }
 
                 break;
-            case FileChangeKind.Changed when _externalChangeAction == ExternalChangeAction.Ask:
+            case FileChangeKind.Changed when Config.General.ExternalChangeAction == ExternalChangeAction.Ask:
                 // Out of the watcher's event first: the question is a message box.
                 BeginInvoke(AskToReload);
                 break;
@@ -1631,6 +1629,88 @@ public partial class MainWindow: Form {
     private void ShowAbout() {
         using var dialog = new AboutDialog();
         dialog.ShowDialog(this);
+        ReturnFocus();
+    }
+
+    /// <summary>
+    /// File → Settings: on OK the dialog has saved the settings; they then apply at once, without
+    /// a restart. The confirmations, the "ask first" reload and the Enter keys are read from
+    /// <see cref="Config"/> each time they are needed; the rest is applied here.
+    /// </summary>
+    private void ShowSettings() {
+        var before = new AppliedSettings(
+            Config.General.Language,
+            Config.General.DefaultDocumentLanguage,
+            Config.General.ShowNotesList,
+            Config.Notes.ToMarkers(),
+            Config.Advanced.ConvertToUtf8
+        );
+        bool saveFailed;
+
+        using (var dialog = new SettingsDialog()) {
+            if (dialog.ShowDialog(this) != DialogResult.OK) {
+                ReturnFocus();
+                return;
+            }
+
+            saveFailed = dialog.SaveFailed;
+        }
+
+        ApplySettings(before);
+
+        if (saveFailed) {
+            ShowError(_("The settings could not be saved. They apply until PlanCake is closed."));
+        }
+    }
+
+    /// <summary>Applies what Settings changed, compared with <paramref name="before"/>.</summary>
+    private void ApplySettings(AppliedSettings before) {
+        var general = Config.General;
+        var needsRender = false;
+
+        if (Config.Notes.ToMarkers() is var markers && markers != before.Markers) {
+            _markers = markers;
+
+            if (_notes is not null) {
+                _notes.Store.Markers = markers;
+            }
+
+            Log.Information("Note markers set to {Opening} … {Closing}", markers.Opening, markers.Closing);
+            needsRender = true;
+        }
+
+        // The open document follows a new default unless the user chose its language from the View menu.
+        if (general.DefaultDocumentLanguage != before.DefaultDocumentLanguage
+            && _documentLanguage == before.DefaultDocumentLanguage) {
+            _documentLanguage = general.DefaultDocumentLanguage;
+            needsRender = true;
+        }
+
+        if (general.ShowNotesList != before.ShowNotesList && general.ShowNotesList != _showNotesList) {
+            ShowNotesList(general.ShowNotesList);
+        }
+
+        // A file opened read-only because it is not UTF-8 is opened again, which converts it.
+        if (Config.Advanced.ConvertToUtf8 && !before.ConvertToUtf8
+            && _file is { IsReadOnly: true, ConvertedFrom: null } file && !_fileMissing) {
+            LoadFile(file.Path, _position, recordHistory: false);
+            needsRender = false;
+        }
+
+        if (!String.Equals(general.Language, before.Language, StringComparison.OrdinalIgnoreCase)) {
+            Utils.Localization.SetLanguage(general.Language);
+            Log.Information("Interface language set to {Language}", general.Language);
+
+            // Out of the menu command first: a switch of direction recreates the window's handle.
+            // The new render that comes with it shows the other changes too.
+            BeginInvoke(ApplyLocalization);
+            needsRender = false;
+        }
+
+        if (needsRender) {
+            RenderDocument(restorePosition: false);
+        }
+
         ReturnFocus();
     }
 
@@ -1838,9 +1918,12 @@ public partial class MainWindow: Form {
         notesList.SelectedItems.Count > 0 && notesList.SelectedItems[0].Tag is RenderedNote note ? note : null;
 
     /// <summary>View → Notes list: shows or hides the list. A hidden list is skipped by F6.</summary>
-    private void ToggleNotesList() {
+    private void ToggleNotesList() => ShowNotesList(!_showNotesList);
+
+    /// <summary>Shows or hides the notes list, and says so.</summary>
+    private void ShowNotesList(bool show) {
         var hadFocus = IsNotesListFocused;
-        _showNotesList = !_showNotesList;
+        _showNotesList = show;
         splitContainer.Panel2Collapsed = !_showNotesList;
 
         if (hadFocus) {
@@ -1962,6 +2045,15 @@ public partial class MainWindow: Form {
 /// <param name="Block">The block, or the block the note is on; <see langword="null"/> for a note at the top.</param>
 /// <param name="Note">The note, when the action is about one.</param>
 internal sealed record NoteTarget(int Generation, string RenderedText, BlockInfo? Block, RenderedNote? Note);
+
+/// <summary>The settings <c>MainWindow</c> applies itself, as they were before the Settings dialog.</summary>
+internal sealed record AppliedSettings(
+    string Language,
+    string DefaultDocumentLanguage,
+    bool ShowNotesList,
+    NoteMarkers Markers,
+    bool ConvertToUtf8
+);
 
 /// <summary>A note text kept after the file changed under it, for the next attempt on the same block or note.</summary>
 /// <param name="Mode">Whether it was a new note or an edit.</param>

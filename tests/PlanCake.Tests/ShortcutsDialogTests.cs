@@ -35,9 +35,12 @@ public class ShortcutsDialogTests {
     public void BuildRows_LeaveOutTheCommandsOfLaterTasks() {
         var commands = ShortcutsDialog.BuildRows().Select(row => row.Command).ToList();
 
-        commands.Should().NotContain(HostCommands.DisplayName(HostCommand.Settings));
         commands.Should().NotContain(HostCommands.DisplayName(HostCommand.UserManual));
     }
+
+    [Fact]
+    public void BuildRows_ListSettingsWithCtrlComma() =>
+        ShortcutsDialog.BuildRows().Should().Contain(new ShortcutRow("Settings", "Ctrl+Comma"));
 
     [Fact]
     public void BuildRows_ListTheKeysNoMenuShows() {

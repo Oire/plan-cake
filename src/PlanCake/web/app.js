@@ -99,13 +99,32 @@
         }
     }
 
+    // The element's client rectangle in CSS pixels, where the host shows a menu for it.
+    function rectOf(element) {
+        const rect = element.getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    }
+
+    // CSS pixels times this are the view's pixels; it already includes the zoom.
+    function scale() {
+        return window.devicePixelRatio || 1;
+    }
+
+    // Enter or a click. On a block it carries the block's rectangle too: a setting can make the
+    // host open the block's context menu there instead of the note dialog.
     function activate(element) {
         setCurrent(element);
 
         if (isNote(element)) {
             post({ type: "activateNote", note: noteIndex(element), generation: generation });
         } else {
-            post({ type: "activate", lines: element.getAttribute("data-lines"), generation: generation });
+            post({
+                type: "activate",
+                lines: element.getAttribute("data-lines"),
+                rect: rectOf(element),
+                scale: scale(),
+                generation: generation
+            });
         }
     }
 
@@ -425,13 +444,11 @@
 
         setCurrent(element);
 
-        const rect = element.getBoundingClientRect();
         const message = {
             type: "contextMenu",
             lines: linesOf(element),
-            rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-            // CSS pixels times this are the view's pixels; it already includes the zoom.
-            scale: window.devicePixelRatio || 1,
+            rect: rectOf(element),
+            scale: scale(),
             generation: generation
         };
 

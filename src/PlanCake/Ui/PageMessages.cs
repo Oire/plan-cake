@@ -69,7 +69,11 @@ internal static class PageMessages {
     /// <summary>The page has loaded and can take messages.</summary>
     public const string Ready = "ready";
 
-    /// <summary>Enter or a click on a block: <c>{ lines, generation }</c>.</summary>
+    /// <summary>
+    /// Enter or a click on a block: <c>{ lines, rect, scale, generation }</c>, <c>rect</c> and
+    /// <c>scale</c> as in <see cref="ContextMenu"/>, for the block's menu when the setting makes
+    /// Enter open it.
+    /// </summary>
     public const string Activate = "activate";
 
     /// <summary>Enter or a click on a note: <c>{ note, generation }</c>.</summary>

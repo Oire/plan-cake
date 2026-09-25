@@ -783,29 +783,49 @@ check tasks off from the document.
 - Create: `src/PlanCake/Ui/SettingsDialog.cs` (+ `.Designer.cs`), `src/PlanCake/Utils/Enums/ExternalChangeAction.cs`,
   `src/PlanCake/Utils/Enums/BlockEnterAction.cs`, `src/PlanCake/Utils/Enums/NoteEnterAction.cs`
 - Modify: `src/PlanCake/Utils/Config.cs`, `src/PlanCake/Ui/MainWindow.cs`,
-  `src/PlanCake/Ui/NoteDialog.cs`, `tests/PlanCake.Tests/ConfigTests.cs`
+  `src/PlanCake/Ui/NoteDialog.cs` (it already took the Enter setting), `tests/PlanCake.Tests/ConfigTests.cs`,
+  `src/PlanCake/Ui/HostCommands.cs`, `src/PlanCake/Ui/PageMessages.cs`, `src/PlanCake/web/app.js`,
+  `tests/PlanCake.Tests/HostCommandsTests.cs`, `tests/PlanCake.Tests/ShortcutsDialogTests.cs`;
+  create `tests/PlanCake.Tests/SettingsDialogTests.cs`
 
-- [ ] `Config` sections and defaults per Technical details → "Settings"; drop the template's
-      `ConfirmExit` (nothing is ever unsaved)
-- [ ] `SettingsDialog` like SIC's: a `TabControl` with General, Notes and Advanced tabs, each a flat
+- [x] `Config` sections and defaults per Technical details → "Settings"; drop the template's
+      `ConfirmExit` (nothing is ever unsaved). `CheckForUpdatesOnStartup` and
+      `UpdateCheckInterval` come with Task 14, which ports the `UpdateCheckInterval` enum.
+      Found while building it: each setting is read on its own, so one bad value falls back
+      alone and the others are kept; SharpConfig's inline comments and array parsing are off,
+      so a marker may hold `#`, `;` or `{…}`; SharpConfig strips double quotes around a value,
+      so the dialog refuses a marker that starts or ends with one (`Config.CanStore`)
+- [x] `SettingsDialog` like SIC's: a `TabControl` with General, Notes and Advanced tabs, each a flat
       `TableLayoutPanel`, real `Label`s, OK/Cancel; interface language list from
       `LanguageList` (Task 9); default document language a combo box of the six languages (native names);
       `ConfirmNoteDelete` and `ConfirmTaskToggle` as check boxes on the General tab;
       markers validated with `NoteMarkers.Validate` and the reason shown next to the field
-- [ ] File → Settings (Ctrl+comma); on OK: save, then apply live
-- [ ] wire every setting to its behavior, replacing the hard-coded defaults of earlier tasks:
+      (also given to both marker boxes as their description, and in a message box when OK is
+      pressed with unusable markers, which keeps the dialog open on the Notes tab)
+- [x] File → Settings (Ctrl+comma); on OK: save, then apply live
+- [x] wire every setting to its behavior, replacing the hard-coded defaults of earlier tasks:
       `Language` → `ApplyLocalization` (menu, list columns, page `strings`, and a re-render
       with new `RenderStrings`) and the View →
       Interface language check mark; `DefaultDocumentLanguage` → the `lang` of newly opened
-      documents; `ConfirmNoteDelete` → the confirmation in Task 7 (Delete all notes always
+      documents (and of the open one, unless its language was chosen from the View menu);
+      `ConfirmNoteDelete` → the confirmation in Task 7 (Delete all notes always
       confirms); `ConfirmTaskToggle` → the confirmation in Task 7a; `ExternalChangeAction` → Task 10's reload-or-ask branch; `ShowNotesList` →
-      the list's visibility at startup; `OpeningMarker`/`ClosingMarker` → `NoteParser`,
+      the list's visibility at startup (and at once when changed in Settings; View → Notes
+      list stays for the session); `OpeningMarker`/`ClosingMarker` → `NoteParser`,
       `NoteStore` and a re-render; `BlockEnterAction` → the page (Enter opens the context menu
-      instead of the dialog); `NoteEnterAction` → `NoteDialog`; `ConvertToUtf8` →
-      `MarkdownFile` (Task 5)
-- [ ] tests: defaults, round trip of every new setting, invalid enum, marker or document
-      language values in the file fall back to defaults
-- [ ] validation commands pass
+      instead of the dialog; the host decides, so `activate` now carries the block's `rect` and
+      `scale` like `contextMenu`); `NoteEnterAction` → `NoteDialog`; `ConvertToUtf8` →
+      `MarkdownFile` (Task 5); turning it on while a file is open read-only for its encoding
+      opens that file again, which converts it
+- [x] tests: defaults, round trip of every new setting, invalid enum, marker or document
+      language values in the file fall back to defaults (`ConfigTests`); the reasons for
+      unusable markers (`SettingsDialogTests`)
+- [ ] **ask the user** to check with JAWS: the Settings dialog tabs (Ctrl+Tab between them,
+      each control read with its real label); changing the interface language, the document
+      language, the note markers, confirm-delete, confirm-task-toggle, the external change
+      action, Enter on a block, Enter in the note dialog and ConvertToUtf8, each taking effect
+      without a restart; OK saves and Cancel / Escape discards
+- [x] validation commands pass
 
 ### Task 13: Command-line mode
 
@@ -1025,7 +1045,8 @@ JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, eac
   sets a task checkbox back after a canceled toggle). No `announce` message: the Task 2 spike
   showed that the host's UIA notifications are heard in the virtual buffer, so every
   announcement goes through `StatusAnnouncer`
-- page → host: `activate` `{ lines, generation }` (Enter or a click on a block),
+- page → host: `activate` `{ lines, rect, scale, generation }` (Enter or a click on a block; `rect` and
+  `scale` as in `contextMenu`, for the Settings option that makes Enter open the block's menu, Task 12),
   `activateNote` `{ note, generation }`, `contextMenu` `{ lines, note?, rect, scale, generation }` (`rect` in CSS pixels, `scale` the page's `devicePixelRatio`),
   `toggleTask` `{ lines, checked, generation }` (Task 7a), `position` `{ lines?, note?,
   generation }` (last block or note interacted with; the host maps a note to its block),
