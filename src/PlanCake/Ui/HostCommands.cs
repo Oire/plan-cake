@@ -38,8 +38,8 @@ internal static class HostCommands {
         [Keys.Control | Keys.Oemcomma] = HostCommand.Settings,
         [Keys.F5] = HostCommand.Reload,
         [Keys.F6] = HostCommand.SwitchPane,
-        [Keys.F8] = HostCommand.NextNote,
-        [Keys.Shift | Keys.F8] = HostCommand.PreviousNote,
+        [Keys.F9] = HostCommand.NextNote,
+        [Keys.Shift | Keys.F9] = HostCommand.PreviousNote,
         [Keys.Control | Keys.Z] = HostCommand.Undo,
         [Keys.Control | Keys.Y] = HostCommand.Redo,
         [Keys.Control | Keys.Oemplus] = HostCommand.ZoomIn,
@@ -49,7 +49,7 @@ internal static class HostCommands {
         [Keys.Control | Keys.D0] = HostCommand.ResetZoom,
         [Keys.F1] = HostCommand.UserManual,
         [Keys.Shift | Keys.F1] = HostCommand.About,
-        [Keys.F9] = HostCommand.SpikeFocusThirdParagraph,
+        [Keys.F12] = HostCommand.SpikeFocusThirdParagraph,
     };
 
     /// <summary>Every shortcut and the command it runs.</summary>

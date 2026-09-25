@@ -33,13 +33,16 @@ names; Task 1 adapts it.
 - [ ] `plancake plan.md` opens a window showing `plan.md` rendered as HTML in WebView2; JAWS
       reads it in its virtual buffer with heading, list and table navigation, and no
       Markdown punctuation is read out
-- [ ] pressing Enter (and/or the Applications key, whichever survived Task 2) on a paragraph,
-      list item, heading, table row or code block opens the note dialog; confirming writes
-      `[usernote]text[/usernote]` after that block's last source line, and the view returns to
-      the new note
+- [ ] pressing Enter on a paragraph, list item, heading, table row or code block (or clicking
+      it) opens the note dialog without switching JAWS to forms mode, and the Applications key
+      or Shift+F10 opens the context menu; confirming writes `[usernote]text[/usernote]` after
+      that block's last source line, and the view returns to the new note
 - [ ] notes show in the document after their block, as user notes (`role="note"`) or buttons
       per settings, and in a notes list beside it;
-      notes can be edited, deleted, navigated with F8 / Shift+F8, undone and redone
+      notes can be edited, deleted, navigated with F9 / Shift+F9, undone and redone
+- [ ] a task-list checkbox can be toggled from the document (Space, Enter or a click), after a
+      confirmation that can be turned off; the file on disk gets `[x]` or `[ ]` on that item's
+      line, and the toggle can be undone and redone
 - [ ] when the file changes on disk the view reloads (or asks, per settings) and keeps the
       reading position; a note is never written over a change the user has not seen
 - [ ] File → Settings changes the interface language (English, Russian, Ukrainian, French,
@@ -233,10 +236,14 @@ decide which note triggers the later tasks build.**
       `AcceleratorKeyPressed`, so `DocumentView.AcceleratorKeyDown` carries those keys and
       `MainWindow` sends both paths through `HostCommands` (`Ui/HostCommands.cs`)
 - [x] `spike.html` per Technical details → "JAWS spike page", loaded at startup for now
-- [ ] **stop and ask the user** to run the JAWS checklist in Technical details → "JAWS spike
+- [x] **stop and ask the user** to run the JAWS checklist in Technical details → "JAWS spike
       checklist" and report the answers; write them to `docs/jaws-spike.md`; then update this
       plan: mark with "⚠️" any trigger that failed and adjust Tasks 6–7 accordingly (if neither
-      Enter nor the Applications key reaches the page, stop and rethink with the user)
+      Enter nor the Applications key reaches the page, stop and rethink with the user).
+      Results: Enter and the Applications key / Shift+F10 both reach the page; Enter cannot be
+      told from a mouse click; Enter on a focusable block puts JAWS in forms mode; UIA
+      notifications are heard; F8 is taken by JAWS (note navigation moves to F9); task-list
+      checkboxes should be toggleable (new Task 7a)
 - [x] validation commands pass
 
 ### Task 3: Parse notes out of a Markdown source
@@ -284,7 +291,8 @@ decide which note triggers the later tasks build.**
       the note style) and `Export`
       (static `role="note"` element), all note text HTML-encoded
 - [ ] every block gets `dir="auto"` and no `lang` of its own (the document language is set once
-      on the container, see Task 6); task-list checkboxes stay read-only
+      on the container, see Task 6); task-list checkboxes stay as Markdig renders them
+      (disabled) until Task 7a enables them
 - [ ] raw HTML in the source is rendered (so `<details>` or `<kbd>` work); scripts are blocked
       by the page's content security policy (Task 6); `Export` mode puts a policy fit for a
       standalone file in a `<meta http-equiv="Content-Security-Policy">`: `default-src
@@ -358,8 +366,15 @@ decide which note triggers the later tasks build.**
 - [ ] `index.html` + `app.js`: a `main` element that receives rendered HTML; the message
       protocol in Technical details → "Page protocol", including the `strings` message for
       every page string; a delegated `click` listener and a `contextmenu` listener on the
-      document (only those Task 2 kept); `tabindex="-1"` on annotatable blocks so focusing them
-      moves the JAWS virtual cursor
+      document (Task 2 kept both)
+- [ ] no forms mode on Enter: the Task 2 spike found that Enter on a block with a permanent
+      `tabindex="-1"` switches JAWS to forms mode. Blocks and notes carry no `tabindex` by
+      default; when the page must move the virtual cursor (`focusLines`, `focusNote`, a new
+      note), it sets `tabindex="-1"` on that one element, focuses it, and removes the attribute
+      on `blur`. Belt and braces: a `keydown` Enter on a block or note element itself (not on a
+      link, button or form control inside it; JAWS in forms mode, or the element has real
+      focus) is handled like a click, with `preventDefault()`, so a second Enter never does
+      nothing
 - [ ] languages: `<html lang>` and `dir` follow the **interface** language (page chrome);
       `main` gets `lang` from the **document** language (hard-coded `en` until Task 12), sent
       with every `render`
@@ -391,18 +406,20 @@ decide which note triggers the later tasks build.**
       is focused by index instead
 - [ ] tests for `PositionRestorer`: same text found after lines shifted, text changed so the
       nearest line wins, block deleted at the end of the file, empty document
-- [ ] mouse, alongside the keyboard: a single click only places focus (so text can still be
-      selected), a double-click on a block adds a note, a click on a note edits it, a
-      right-click opens the same context menu as the Applications key. The page tells a JAWS
-      Enter from a mouse click the way the Task 2 spike found (`pointerType` / `detail` of the
-      `click` event); if they cannot be told apart, Enter and a single click both add a note
-      and double-click does nothing extra
+- [ ] mouse, alongside the keyboard: ⚠️ the Task 2 spike found that a JAWS Enter and a mouse
+      click cannot be told apart (JAWS emulates a mouse click, `pointerType` is `mouse` for
+      both), so the page does not try: Enter and a single click both activate (on a block: add
+      a note; on a note: edit it), a double-click does nothing extra, and a click that ends a
+      text selection (`getSelection()` not collapsed) does not activate, so text can still be
+      selected with the mouse; a right-click opens the same context menu as the Applications
+      key
 - [ ] a Markdown file dragged from Explorer onto the window opens (`AllowDrop`, first `.md` /
       `.markdown` of the drop)
 - [ ] zoom: Ctrl+Plus, Ctrl+Minus (main keyboard and numpad: `Oemplus`, `OemMinus`, `Add`,
       `Subtract`), Ctrl+0 set `ZoomFactor` in steps of 10%, 50%–300%
 - [ ] **ask the user** to check with JAWS: an 800-line plan reads with H, I, L, T and B
-      navigation, no Markdown punctuation is read, links open in the browser, zoom works
+      navigation, no Markdown punctuation is read, links open in the browser, zoom works,
+      Enter on a block does not switch JAWS to forms mode
 - [ ] validation commands pass
 
 ### Task 7: Add, edit and delete notes from the document
@@ -435,7 +452,48 @@ decide which note triggers the later tasks build.**
 - [ ] Undo (Ctrl+Z) and Redo (Ctrl+Y) through `NoteStore`, announced ("Note added undone" etc.)
 - [ ] **ask the user** to check with JAWS: add, edit, delete, undo and redo a note on a
       paragraph, a nested list item, a table row and a code block; the virtual cursor lands on
-      the new note each time
+      the new note each time; Enter on a block does not switch JAWS to forms mode, and Enter on
+      a note opens the editor every time, not only the first
+- [ ] validation commands pass
+
+### ➕ Task 7a: Toggle task-list items
+
+Added after the Task 2 spike: task-list checkboxes render disabled, and the user wants to
+check tasks off from the document.
+
+**Files:**
+- Create: `src/PlanCake/Notes/TaskToggle.cs`, `tests/PlanCake.Tests/TaskToggleTests.cs`
+- Modify: `src/PlanCake/Rendering/MarkdownRenderer.cs`, `src/PlanCake/Notes/NoteStore.cs`,
+  `src/PlanCake/Notes/NoteActionRunner.cs`, `src/PlanCake/Ui/MainWindow.cs`,
+  `src/PlanCake/web/app.js`, `tests/PlanCake.Tests/NoteStoreTests.cs`
+
+- [ ] the renderer's `Interactive` mode renders task-list checkboxes enabled (no `disabled`);
+      `Export` mode keeps them disabled
+- [ ] toggling a checkbox (Space, Enter or a mouse click) sends the host `toggleTask`
+      `{ lines, checked, generation }` (Technical details → "Page protocol"), `lines` being the
+      item's `data-lines`; the host ignores it when the generation is stale, like every other
+      page message
+- [ ] when `ConfirmTaskToggle` is on (default true, hard-coded until Task 12) the host asks
+      first, deferred with `BeginInvoke`; the question says plainly that the file on disk will
+      be changed. Cancel sends `taskState` `{ lines, checked }` back with the file's state, so
+      the checkbox reverts
+- [ ] `TaskToggle.SetChecked(source, line, isChecked)`: a pure function that rewrites the task
+      marker (`[ ]`, `[x]` or `[X]`) of the list item starting on that original line, leaving
+      everything else on the line, the line endings and every other line untouched; it throws
+      when the line holds no task marker
+- [ ] `NoteStore.ToggleTask(renderedText, line, isChecked)` writes it through the same stale-safe
+      path as the note operations (Task 5): `StaleFileException` → nothing written, re-render,
+      "The file changed. Please try again."; `IOException` and read-only files handled as in
+      `NoteActionRunner`. On success: re-render, focus stays on that checkbox (the item's
+      lines), announce "Task checked" or "Task unchecked"
+- [ ] Undo and Redo cover toggles exactly like note actions (same stacks, announced "Task
+      checked undone" and so on)
+- [ ] tests: check an unchecked item, uncheck a checked one, uncheck `[X]` (capital), a nested
+      item, an item with a note right after it (the note is untouched), a line without a task
+      marker rejected, a stale file rejected with nothing written, undo and redo of a toggle
+- [ ] **ask the user** to check with JAWS: Space toggles a task in the virtual cursor, the
+      confirmation reads well, cancel leaves the checkbox as it was, focus stays on the
+      checkbox, undo and redo work
 - [ ] validation commands pass
 
 ### Task 8: Notes list beside the document
@@ -451,11 +509,11 @@ decide which note triggers the later tasks build.**
       list (hidden list is skipped by F6)
 - [ ] Enter (`ItemActivate`) jumps to that note in the document and focuses it; Delete deletes
       it; a context menu on the list offers Edit note and Delete note
-- [ ] F8 / Shift+F8 move to the next / previous note from wherever focus is: in the document
+- [ ] F9 / Shift+F9 move to the next / previous note from wherever focus is: in the document
       they focus the note after / before the current position; in the list they move
       the selection; at the ends, announce "No more notes"
 - [ ] the list keeps its selection across re-renders when the same note still exists
-- [ ] **ask the user** to check the list, F6 and F8 with JAWS
+- [ ] **ask the user** to check the list, F6 and F9 with JAWS
 - [ ] validation commands pass
 
 ### Task 9: Menu bar and the small dialogs
@@ -487,7 +545,7 @@ decide which note triggers the later tasks build.**
       (`UseShellExecute` on the file), Exit; View → Reload
 - [ ] `ShortcutsDialog`: a `NativeListView` with "Command" and "Shortcut" columns built from the
       same command table (so it cannot drift), plus the in-document keys (Enter, Applications
-      key, F8); a Close button. It is the one place that lists every shortcut, including the
+      key, Space on a task checkbox); a Close button. It is the one place that lists every shortcut, including the
       in-document keys no menu shows
 - [ ] `AboutDialog` modeled on SIC's: product, version, copyright, repository link, "Copy info"
 - [ ] Delete all notes asks for confirmation (always), then `NoteStore.Clear`
@@ -571,6 +629,7 @@ decide which note triggers the later tasks build.**
 - [ ] `SettingsDialog` like SIC's: a `TabControl` with General, Notes and Advanced tabs, each a flat
       `TableLayoutPanel`, real `Label`s, OK/Cancel; interface language list from
       `LanguageList` (Task 9); default document language a combo box of the six languages (native names);
+      `ConfirmNoteDelete` and `ConfirmTaskToggle` as check boxes on the General tab;
       markers validated with `NoteMarkers.Validate` and the reason shown next to the field
 - [ ] File → Settings (Ctrl+comma); on OK: save, then apply live
 - [ ] wire every setting to its behavior, replacing the hard-coded defaults of earlier tasks:
@@ -578,7 +637,7 @@ decide which note triggers the later tasks build.**
       with new `RenderStrings`) and the View →
       Interface language check mark; `DefaultDocumentLanguage` → the `lang` of newly opened
       documents; `ConfirmNoteDelete` → the confirmation in Task 7 (Delete all notes always
-      confirms); `ExternalChangeAction` → Task 10's reload-or-ask branch; `ShowNotesList` →
+      confirms); `ConfirmTaskToggle` → the confirmation in Task 7a; `ExternalChangeAction` → Task 10's reload-or-ask branch; `ShowNotesList` →
       the list's visibility at startup; `OpeningMarker`/`ClosingMarker` → `NoteParser`,
       `NoteStore` and a re-render; `NoteStyle` → the renderer and a re-render; `BlockEnterAction` → the page (Enter opens the context menu
       instead of the dialog); `NoteEnterAction` → `NoteDialog`; `ConvertToUtf8` →
@@ -734,7 +793,8 @@ decide which note triggers the later tasks build.**
 ### Annotatable blocks
 
 The innermost block the user can land on carries `data-lines="start-end"` (original, 1-based,
-inclusive) and `tabindex="-1"`:
+inclusive) and no `tabindex`: a permanent one makes JAWS switch to forms mode on Enter (Task 2
+spike), so the page adds `tabindex="-1"` only while it moves focus to a block (Task 6):
 - `ParagraphBlock` (but see list items), `HeadingBlock`, `FencedCodeBlock` and `CodeBlock`
   (range includes both fences), `TableRow`; `ThematicBreakBlock` is not annotatable;
 - `ListItemBlock`: stamped with the range of its **leading paragraph only**, because in a tight
@@ -759,9 +819,10 @@ appends the `HtmlBlock` to the row's last cell (Markdig then wraps that cell's t
 which is harmless); for a list item's leading paragraph, inside the item after that paragraph.
 
 - Interactive, note style `Note` (default): `<div class="note" role="note"
-  aria-roledescription="user note" aria-brailleroledescription="unote" tabindex="-1"
-  data-note="<index>"><text></div>`; Enter or a click on it edits it (same click delegation as
-  blocks); F8 / Shift+F8 move between notes.
+  aria-roledescription="user note" aria-brailleroledescription="unote"
+  data-note="<index>"><text></div>`, with no `tabindex` of its own (like blocks, it gets one
+  only while the page focuses it); Enter or a click on it edits it (same click and `keydown`
+  Enter delegation as blocks); F9 / Shift+F9 move between notes.
 - Interactive, note style `Button`: `<button type="button" class="note" data-note="<index>">Note:
   <text></button>`; B / Shift+B also move between notes.
 - Both: "user note", "unote" and "Note:" localized; line breaks as `<br>`.
@@ -790,22 +851,27 @@ JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, eac
 - host → page: `render` `{ html, generation, documentLang, focus: { lines?, note? } }`,
   `strings` `{ uiLang, uiDir, … }` (page chrome and live messages only: the note labels are
   already in the rendered HTML, so the page never adds its own "Note:"), `focusNote` `{ note }`, `focusLines`
-  `{ lines }`, `nextNote` / `previousNote` `{}`, `announce` `{ text }` (only if Task 2 showed
-  UIA notifications are not heard in the virtual buffer)
-- page → host: `activate` `{ lines, generation }` (Enter on a block), `activateNote`
-  `{ note, generation }`, `contextMenu` `{ lines, note?, rect, generation }`, `position`
-  `{ lines }` (last block interacted with), `openLink` `{ href }`, `noMoreNotes` `{}`,
-  `ready` `{}`
+  `{ lines }`, `nextNote` / `previousNote` `{}`, `taskState` `{ lines, checked }` (Task 7a:
+  sets a task checkbox back after a canceled toggle). No `announce` message: the Task 2 spike
+  showed that the host's UIA notifications are heard in the virtual buffer, so every
+  announcement goes through `StatusAnnouncer`
+- page → host: `activate` `{ lines, generation }` (Enter or a click on a block),
+  `activateNote` `{ note, generation }`, `contextMenu` `{ lines, note?, rect, generation }`,
+  `toggleTask` `{ lines, checked, generation }` (Task 7a), `position` `{ lines }` (last block
+  interacted with), `openLink` `{ href }`, `noMoreNotes` `{}`, `ready` `{}`
 - the host ignores any message whose `generation` is not the latest render
 
 ### Keyboard
 
 Host shortcuts (must work with focus in the document and in the list): Ctrl+O, Ctrl+V, Ctrl+L,
-Ctrl+E, Ctrl+comma, F5, F6, F8, Shift+F8, Ctrl+Z, Ctrl+Y, Ctrl+Plus, Ctrl+Minus (both also on
+Ctrl+E, Ctrl+comma, F5, F6, F9, Shift+F9, Ctrl+Z, Ctrl+Y, Ctrl+Plus, Ctrl+Minus (both also on
 the numpad), Ctrl+0, F1,
 Shift+F1, Alt+F4.
-In the document: Enter on a block / note, Applications key and Shift+F10. In the list: Enter,
-Delete, Applications key.
+In the document: Enter on a block / note, Space (or Enter) on a task checkbox, Applications key
+and Shift+F10. In the list: Enter, Delete, Applications key.
+
+Note navigation is F9 / Shift+F9, not F8: the Task 2 spike found that JAWS takes F8 for its
+extended-select mode, so F8 never reaches PlanCake.
 
 ### Menus
 
@@ -818,7 +884,7 @@ Delete, Applications key.
   Українська, Français, עברית, Deutsch), separator, Zoom in (Ctrl+Plus), Zoom out
   (Ctrl+Minus), Reset zoom (Ctrl+0), separator, Reload (F5). Language names carry no
   mnemonics; the two submenus' own mnemonics must differ from every other View item's.
-- **Notes:** Edit note, Delete note, separator, Next note (F8), Previous note (Shift+F8)
+- **Notes:** Edit note, Delete note, separator, Next note (F9), Previous note (Shift+F9)
 - **Help:** User manual (F1), Keyboard shortcuts, separator, Check for updates, About PlanCake (Shift+F1)
 
 No menu may end up with a single item. No Select all: in the document JAWS handles Ctrl+A
@@ -828,7 +894,8 @@ itself.
 
 `PlanCake.cfg`, SharpConfig sections:
 - `[General]`: `Language` (interface, default `System`), `DefaultDocumentLanguage` (`en`; one
-  of `en`, `ru`, `uk`, `fr`, `he`, `de`), `ConfirmNoteDelete` (true),
+  of `en`, `ru`, `uk`, `fr`, `he`, `de`), `ConfirmNoteDelete` (true), `ConfirmTaskToggle`
+  (true: ask before a task checkbox rewrites the file, Task 7a),
   `ExternalChangeAction` (`AutoReload` | `Ask`, default `AutoReload`), `ShowNotesList` (true),
   `CheckForUpdatesOnStartup` (true), `UpdateCheckInterval` (`Weekly`)
 - `[Notes]`: `OpeningMarker` (`[usernote]`), `ClosingMarker` (`[/usernote]`, empty = single

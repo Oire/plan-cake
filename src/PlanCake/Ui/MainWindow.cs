@@ -8,7 +8,7 @@ namespace Oire.PlanCake.Ui;
 
 public partial class MainWindow: Form {
     // JAWS spike (Task 2): the page loaded at startup and the lines of its third paragraph,
-    // which F9 asks the page to focus. Both go away when the real page arrives in Task 6.
+    // which F12 asks the page to focus. Both go away when the real page arrives in Task 6.
     private const string SpikePage = "spike.html";
     private const string SpikeThirdParagraphLines = "12-12";
 

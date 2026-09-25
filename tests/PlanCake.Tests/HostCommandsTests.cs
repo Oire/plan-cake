@@ -17,8 +17,8 @@ public class HostCommandsTests {
         { Keys.Control | Keys.Oemcomma, nameof(HostCommand.Settings) },
         { Keys.F5, nameof(HostCommand.Reload) },
         { Keys.F6, nameof(HostCommand.SwitchPane) },
-        { Keys.F8, nameof(HostCommand.NextNote) },
-        { Keys.Shift | Keys.F8, nameof(HostCommand.PreviousNote) },
+        { Keys.F9, nameof(HostCommand.NextNote) },
+        { Keys.Shift | Keys.F9, nameof(HostCommand.PreviousNote) },
         { Keys.Control | Keys.Z, nameof(HostCommand.Undo) },
         { Keys.Control | Keys.Y, nameof(HostCommand.Redo) },
         { Keys.Control | Keys.Oemplus, nameof(HostCommand.ZoomIn) },
@@ -44,6 +44,8 @@ public class HostCommandsTests {
     [InlineData(Keys.Apps)] // So does the Applications key...
     [InlineData(Keys.Shift | Keys.F10)] // ...and its Shift+F10 equivalent.
     [InlineData(Keys.Control | Keys.A)] // JAWS handles Select all in the document itself.
+    [InlineData(Keys.F8)] // JAWS takes F8 for extended select (Task 2 spike): notes use F9.
+    [InlineData(Keys.Shift | Keys.F8)]
     public void TryGetCommand_LeavesOtherKeysAlone(Keys keys) {
         HostCommands.TryGetCommand(keys, out _).Should().BeFalse();
     }
