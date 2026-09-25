@@ -1,0 +1,63 @@
+# Build, format-check and test the solution.
+# See https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # GitVersion derives the version from the tag history; a shallow clone has none.
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install gettext
+        shell: pwsh
+        run: |
+          choco install gettext -y --no-progress
+          # The package deploys to C:\Program Files\gettext-iconv and edits the machine PATH,
+          # which the next step does not inherit: the runner captured its environment before the
+          # install ran. GITHUB_PATH is how a step hands PATH to the ones after it. Locate the
+          # binary rather than assuming the layout, and fail here if the package ever moves it.
+          $msgfmt = Get-ChildItem -Path "C:\Program Files\gettext-iconv" -Filter msgfmt.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $msgfmt) { throw "msgfmt.exe not found after installing gettext" }
+          $msgfmt.DirectoryName | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      # MO files are build output and are gitignored, so a clean checkout has only the PO
+      # sources. Without this the locale folders never reach the build output, and
+      # Localization.GetCurrentCulture silently falls back to en-US for every language.
+      - name: Compile translations
+        shell: pwsh
+        run: ./src/WinFormsTemplate/locale/scripts/Compile-Translations.ps1 -Strict
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Check format
+        run: dotnet format --verify-no-changes
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Test
+        run: dotnet test --no-build --verbosity normal

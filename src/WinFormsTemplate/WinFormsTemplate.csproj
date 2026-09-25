@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+    <Platform>x64</Platform>
+    <AssemblyName>WinFormsTemplate</AssemblyName>
+    <RootNamespace>Oire.WinFormsTemplate</RootNamespace>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <!-- Trims the satellite assemblies NuGet packages ship for languages we do not
+         serve. UI strings come from gettext catalogs under locale/, not from .resx, so
+         list the languages the app actually ships here as they are added. -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Product>Windows Forms Template</Product>
+    <Description>Windows Forms template for applications developed by Oire Software</Description>
+    <Company>Oire Software</Company>
+    <Copyright>Copyright © 2026 Oire Software. All rights reserved.</Copyright>
+    <!-- Version numbers come from GitVersion (see GitVersion.yml), never from a literal here.
+         The +sha suffix would otherwise end up in the informational version and in the
+         About box; GitVersion already encodes the commit distance in the fourth field. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The test project reaches into internal hooks (e.g. Config.OverrideFilePath) so it can
+         redirect file paths to a temp directory instead of writing into %APPDATA%. -->
+    <InternalsVisibleTo Include="WinFormsTemplate.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GetText.NET" Version="10.0.1" />
+    <PackageReference Include="GetText.NET.WindowsForms" Version="10.0.1" />
+    <PackageReference Include="GitVersion.MsBuild" Version="6.8.2">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.401" PrivateAssets="all" />
+    <PackageReference Include="Oire.WinForms.NativeControls" Version="1.2.0" />
+    <PackageReference Include="Serilog" Version="4.4.0" />
+    <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="sharpconfig-huanlin" Version="4.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- .mo files are build output compiled from the .po sources by
+         locale\scripts\Compile-Translations.ps1; a clean checkout has none. -->
+    <None Update="locale\**\*.mo">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,20 @@
+mode: ManualDeployment
+tag-prefix: '[vV]'
+
+# Baseline for a repository that has no release tag yet — without it a fresh clone of this
+# template versions at 0.0.0. It carries the `v` because GitVersion validates `next-version`
+# against `tag-prefix`; a bare `1.0.0` here fails with "Failed to parse into a Semantic
+# Version". Once the first `vX.Y.Z` tag exists this line stops mattering.
+next-version: 'v1.0.0'
+
+# Fourth field is the commit distance from the version source, so every build off the same
+# tag is distinguishable without hand-editing a version anywhere.
+assembly-versioning-format: '{Major}.{Minor}.{Patch}.{VersionSourceDistance}'
+assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{VersionSourceDistance}'
+assembly-informational-format: '{Major}.{Minor}.{Patch}.{VersionSourceDistance}'
+
+branches:
+  # This key matches both master and main. The release branch never auto-increments: the
+  # version comes from the tag.
+  main:
+    increment: None

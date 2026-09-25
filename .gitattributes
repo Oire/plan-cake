@@ -1,0 +1,24 @@
+# Normalize everything to LF in the repository and in the working tree.
+# Windows tooling (Visual Studio, MSBuild, PowerShell 7, dotnet format) reads LF
+# without complaint; the two exceptions below do not.
+* text=auto eol=lf
+
+# cmd.exe parses a batch file line by line as it executes it. A lone LF before a
+# label or a goto target can leave the interpreter mid-line, so these stay CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary: never touched by EOL normalization.
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.mo binary
+*.pdf binary
+*.zip binary
+*.exe binary
+*.dll binary
+
+# gettext catalogs are text, but diffing them line by line is rarely useful.
+*.po text eol=lf
+*.pot text eol=lf
