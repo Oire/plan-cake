@@ -196,9 +196,11 @@ decide which note triggers the later tasks build.**
   `src/PlanCake/Ui/MainWindow.Designer.cs`, `src/PlanCake/Program.cs`
 - Create: `src/PlanCake/Ui/DocumentView.cs`, `src/PlanCake/web/spike.html`,
   `src/PlanCake/Utils/StatusAnnouncer.cs`, `src/PlanCake/Utils/TextDirection.cs`,
-  `src/PlanCake/Utils/DialogHelper.cs`, `docs/jaws-spike.md`
+  `src/PlanCake/Utils/DialogHelper.cs`, `docs/jaws-spike.md`, `src/PlanCake/Ui/HostCommands.cs`,
+  `tests/PlanCake.Tests/HostCommandsTests.cs`, `Directory.Build.targets` (drops the WebView2
+  WPF reference, whose WindowsBase clashes with WinForms: MSB3277)
 
-- [ ] add `Microsoft.Web.WebView2`; `web\**` copied to output; confirm a
+- [x] add `Microsoft.Web.WebView2`; `web\**` copied to output; confirm a
       `dotnet publish -c Release` build starts (single-file publish leaves `WebView2Loader.dll`
       next to the exe, which the installer and the portable zip must ship). Two different
       things, not to be confused: `WebView2Loader.dll` is a small DLL from the NuGet package
@@ -206,33 +208,36 @@ decide which note triggers the later tasks build.**
       presumed present: the installer installs it through `CodeDependencies.iss` when missing
       (Task 17), and the app checks for it at startup (next item), which covers the portable
       zip
-- [ ] `DocumentView` (a `UserControl` wrapping the `WebView2` control): creates the
+- [x] `DocumentView` (a `UserControl` wrapping the `WebView2` control): creates the
       `CoreWebView2Environment` with its user data folder under `App.DataFolder\WebView2`
       (the install folder is not writable), maps the virtual host `https://app.plancake/` to
       `AppContext.BaseDirectory\web`, disables default context menus, browser accelerator keys,
       the status bar and (in Release) dev tools, and exposes `PostMessage(object)` plus a
       `MessageReceived` event over `chrome.webview` JSON messages
-- [ ] copy `TextDirection` and `DialogHelper` from SIC; missing WebView2 Runtime: before
+- [x] copy `TextDirection` and `DialogHelper` from SIC; missing WebView2 Runtime: before
       creating the window, `Program` checks
       `CoreWebView2Environment.GetAvailableBrowserVersionString()` (catching
       `WebView2RuntimeNotFoundException`), shows a `DialogHelper` message with the download link
       (`https://go.microsoft.com/fwlink/p/?LinkId=2124703`) and returns `ExitCode.Error`;
       `DocumentView` never exits the process itself (deciding to stop is `Program`'s job)
-- [ ] `StatusAnnouncer`: sets the status-strip label and raises a UI Automation notification
+- [x] `StatusAnnouncer`: sets the status-strip label and raises a UI Automation notification
       (`AccessibilityObject.RaiseAutomationNotification`, `ImportantMostRecent`) so JAWS speaks
       status messages wherever focus is
-- [ ] keys pressed while the WebView2 has focus do not pass through the host's message loop,
+- [x] keys pressed while the WebView2 has focus do not pass through the host's message loop,
       and the native menu bar's accelerator table never sees them. The WinForms `WebView2`
       control forwards accelerator keys to `ProcessCmdKey`: override `ProcessCmdKey` in
       `MainWindow` and route shortcuts to a single host command table (the same table the menu
       uses); for the spike, log each planned shortcut from Technical details → "Keyboard" to
-      the status announcer
-- [ ] `spike.html` per Technical details → "JAWS spike page", loaded at startup for now
+      the status announcer. Found while building it: the WinForms control (1.0.4191.47) does
+      not call `ProcessCmdKey`; it raises its own `KeyDown` from the browser's
+      `AcceleratorKeyPressed`, so `DocumentView.AcceleratorKeyDown` carries those keys and
+      `MainWindow` sends both paths through `HostCommands` (`Ui/HostCommands.cs`)
+- [x] `spike.html` per Technical details → "JAWS spike page", loaded at startup for now
 - [ ] **stop and ask the user** to run the JAWS checklist in Technical details → "JAWS spike
       checklist" and report the answers; write them to `docs/jaws-spike.md`; then update this
       plan: mark with "⚠️" any trigger that failed and adjust Tasks 6–7 accordingly (if neither
       Enter nor the Applications key reaches the page, stop and rethink with the user)
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 3: Parse notes out of a Markdown source
 

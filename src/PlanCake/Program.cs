@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Microsoft.Web.WebView2.Core;
 using Oire.PlanCake.Ui;
 using Oire.PlanCake.Utils;
 using Serilog;
@@ -11,6 +13,9 @@ using LogLevel = Serilog.Events.LogEventLevel;
 namespace Oire.PlanCake;
 
 internal static class Program {
+    /// <summary>Microsoft's download page for the WebView2 Runtime (Evergreen bootstrapper).</summary>
+    private const string WebView2DownloadUrl = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
+
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
@@ -45,13 +50,19 @@ internal static class Program {
             Localization.SetLanguage(Config.General.Language);
             Log.Information("App startup: config loaded, language={Language}", Config.General.Language);
 
-            Application.Run(new MainWindow());
+            if (!IsWebView2RuntimeAvailable()) {
+                ReportMissingWebView2Runtime();
+                return ExitCode.Error;
+            }
 
-            return ExitCode.Success;
+            using var mainWindow = new MainWindow();
+            Application.Run(mainWindow);
+
+            return mainWindow.StartupFailed ? ExitCode.Error : ExitCode.Success;
         } catch (Exception ex) {
             Log.Fatal(ex, "App startup: unable to initialize the application");
 
-            MessageBox.Show(
+            DialogHelper.Show(
                 _("Unable to start the program up. Please contact the developer."),
                 _("Error"),
                 MessageBoxButtons.OK,
@@ -61,6 +72,44 @@ internal static class Program {
             return ExitCode.Error;
         } finally {
             Log.CloseAndFlush();
+        }
+    }
+
+    /// <summary>
+    /// The document is shown in WebView2, whose runtime (the Edge engine) is a separate system
+    /// component. The installer installs it when missing, but the portable zip cannot, so the
+    /// app checks before creating any window.
+    /// </summary>
+    private static bool IsWebView2RuntimeAvailable() {
+        try {
+            var version = CoreWebView2Environment.GetAvailableBrowserVersionString();
+            Log.Information("App startup: WebView2 Runtime {Version}", version);
+            return !String.IsNullOrEmpty(version);
+        } catch (WebView2RuntimeNotFoundException ex) {
+            Log.Error(ex, "App startup: WebView2 Runtime not found");
+            return false;
+        }
+    }
+
+    private static void ReportMissingWebView2Runtime() {
+        var message = _("PlanCake needs the Microsoft Edge WebView2 Runtime, which is not installed on this computer.")
+            + Environment.NewLine + Environment.NewLine
+            + _("You can download it from {0}. Open the download page now?", WebView2DownloadUrl);
+        var answer = DialogHelper.Show(
+            message,
+            _("WebView2 Runtime not found"),
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Error
+        );
+
+        if (answer != DialogResult.Yes) {
+            return;
+        }
+
+        try {
+            Process.Start(new ProcessStartInfo(WebView2DownloadUrl) { UseShellExecute = true })?.Dispose();
+        } catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) {
+            Log.Error(ex, "Unable to open the WebView2 download page");
         }
     }
 

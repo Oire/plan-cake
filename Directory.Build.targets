@@ -1,0 +1,13 @@
+<Project>
+
+  <!-- Microsoft.Web.WebView2 references its WPF control assembly next to the WinForms one in
+       every .NET 5+ project. PlanCake uses WinForms only, and the WPF assembly pulls in a
+       WindowsBase version that conflicts with the WinForms one (warning MSB3277), so the
+       reference is dropped before assembly resolution. -->
+  <Target Name="RemoveWebView2WpfReference" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
+
+</Project>
