@@ -172,6 +172,53 @@ public class MarkdownRendererTests {
         Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "3-3");
     }
 
+    // Partially checked parents
+
+    private const string Unchecked = """<input class="task-list-item-checkbox" type="checkbox" />""";
+    private const string Mixed = """<input class="task-list-item-checkbox" type="checkbox" data-mixed="true" />""";
+    private const string Checked = """<input class="task-list-item-checkbox" type="checkbox" checked="checked" />""";
+
+    [Fact]
+    public void Render_TaskParentWithOneOfTwoChildrenChecked_IsMixed() {
+        var result = Render("- [ ] parent\n  - [x] one\n  - [ ] two\n");
+
+        result.Html.Should().Contain(Mixed + " parent");
+        result.Html.Should().Contain(Checked + " one").And.Contain(Unchecked + " two");
+        result.Html.Split("data-mixed").Should().HaveCount(2);
+    }
+
+    [Theory]
+    [InlineData("- [ ] parent\n  - [ ] one\n  - [ ] two\n")]
+    [InlineData("- [ ] parent\n  - [x] one\n  - [X] two\n")]
+    [InlineData("- [ ] parent\n  - plain child\n  - [x] one\n")]
+    [InlineData("- [ ] parent without task children\n  - one\n  - two\n")]
+    public void Render_TaskParentWithNoneOrAllChildrenChecked_IsNotMixed(string source) =>
+        Render(source).Html.Should().NotContain("data-mixed");
+
+    [Fact]
+    public void Render_CheckedTaskParent_StaysCheckedWhateverItsChildren() {
+        var result = Render("- [x] parent\n  - [x] one\n  - [ ] two\n");
+
+        result.Html.Should().Contain(Checked + " parent").And.NotContain("data-mixed");
+    }
+
+    [Fact]
+    public void Render_Grandchild_CountsAsADescendant() {
+        var result = Render("- [ ] parent\n  - [ ] child\n    - [x] grandchild\n");
+
+        result.Html.Should().Contain(Mixed + " parent");
+        result.Html.Should().Contain(Unchecked + " child");
+        result.Html.Split("data-mixed").Should().HaveCount(2);
+    }
+
+    [Fact]
+    public void Render_MixedParentInExport_IsAriaCheckedMixed() {
+        var result = Render("- [ ] parent\n  - [x] one\n  - [ ] two\n", RenderMode.Export);
+
+        result.Html.Should().Contain("""<input disabled="disabled" type="checkbox" aria-checked="mixed" /> parent""");
+        result.Html.Should().NotContain("data-mixed");
+    }
+
     [Fact]
     public void Render_TaskListExport_CheckboxesStayDisabled() {
         var result = Render("- [x] done\n- [ ] todo\n", RenderMode.Export);

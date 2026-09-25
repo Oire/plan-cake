@@ -152,11 +152,18 @@
         focusElement(checkbox || element);
     }
 
+    // An unchecked item some of whose nested tasks are done shows as partially checked (the
+    // host marks it data-mixed; HTML has no attribute for the indeterminate state).
+    function showMixedState(checkbox) {
+        checkbox.indeterminate = checkbox.hasAttribute("data-mixed") && !checkbox.checked;
+    }
+
     function setTaskState(lines, checked) {
         const checkbox = taskAt(lines);
 
         if (checkbox) {
             checkbox.checked = checked;
+            showMixedState(checkbox);
         }
     }
 
@@ -221,6 +228,7 @@
         // Raw HTML in the plan comes along: the content security policy keeps its scripts and
         // event handler attributes from running, and the host cancels any navigation.
         main.innerHTML = message.html;
+        main.querySelectorAll(taskSelector).forEach(showMixedState);
         main.setAttribute("lang", message.documentLang);
         document.title = message.title;
 

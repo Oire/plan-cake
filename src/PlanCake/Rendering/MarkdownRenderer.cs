@@ -58,6 +58,9 @@ internal static class MarkdownRenderer {
         .note > :last-child { margin-bottom: 0; }
         """;
 
+    /// <summary>The class the page finds a task-list check box by.</summary>
+    public const string TaskCheckboxClass = "task-list-item-checkbox";
+
     private static readonly MarkdownPipeline _pipeline = new MarkdownPipelineBuilder()
         .UseAdvancedExtensions()
         .UsePreciseSourceLocation()
@@ -94,7 +97,7 @@ internal static class MarkdownRenderer {
         walker.Walk(document);
 
         var notes = InsertNotes(document, parse.Notes, walker.Blocks, options);
-        var body = ToHtml(document, options.Mode);
+        var body = ToHtml(document, options.Mode, FindMixedTasks(document));
         var title = walker.Title;
         var html = options.Mode == RenderMode.Export
             ? ExportDocument(body, title, options.DocumentLanguage)
@@ -103,16 +106,14 @@ internal static class MarkdownRenderer {
         return new RenderResult(html, walker.Blocks.Select(block => block.Info).ToList(), notes, title, parse);
     }
 
-    private static string ToHtml(MarkdownDocument document, RenderMode mode) {
+    private static string ToHtml(MarkdownDocument document, RenderMode mode, IReadOnlySet<TaskList> mixedTasks) {
         using var writer = new StringWriter(CultureInfo.InvariantCulture);
         var renderer = new HtmlRenderer(writer);
         _pipeline.Setup(renderer);
 
         // The window's task-list check boxes can be toggled (Task 7a); an exported file's stay
-        // disabled, as Markdig renders them.
-        if (mode == RenderMode.Interactive) {
-            renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new EnabledTaskListRenderer());
-        }
+        // disabled, as Markdig renders them. Both show a partially checked parent.
+        renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListRenderer(mode, mixedTasks));
 
         // The block's attributes (data-lines, dir) belong on the <pre> the user lands on, not on
         // the <code> inside it.
@@ -253,20 +254,70 @@ internal static class MarkdownRenderer {
     }
 
     /// <summary>
-    /// A task-list check box the user can toggle: enabled, with a class the page finds it by. The
-    /// page sends the toggle to the host, which rewrites the marker in the file.
+    /// The unchecked task-list items that are partially done: some, but not all, of the task-list
+    /// items nested under them (at any depth) are checked. Markdown has no third state, so this
+    /// is shown only, never written; a checked item shows checked whatever its children say.
     /// </summary>
-    private sealed class EnabledTaskListRenderer: HtmlObjectRenderer<TaskList> {
-        /// <summary>The class the page finds a task-list check box by.</summary>
-        public const string CheckboxClass = "task-list-item-checkbox";
+    internal static HashSet<TaskList> FindMixedTasks(MarkdownDocument document) {
+        var mixed = new HashSet<TaskList>(ReferenceEqualityComparer.Instance);
 
+        foreach (var item in document.Descendants<ListItemBlock>()) {
+            if (TaskOf(item) is not { Checked: false } task) {
+                continue;
+            }
+
+            var anyChecked = false;
+            var anyUnchecked = false;
+
+            foreach (var descendant in item.Descendants<ListItemBlock>()) {
+                if (TaskOf(descendant) is { } child) {
+                    anyChecked |= child.Checked;
+                    anyUnchecked |= !child.Checked;
+                }
+            }
+
+            if (anyChecked && anyUnchecked) {
+                mixed.Add(task);
+            }
+        }
+
+        return mixed;
+    }
+
+    /// <summary>The task marker a list item starts with, or <see langword="null"/>.</summary>
+    private static TaskList? TaskOf(ListItemBlock item) =>
+        item.Count > 0 && item[0] is ParagraphBlock { Inline.FirstChild: TaskList task } ? task : null;
+
+    /// <summary>
+    /// A task-list check box. In the window it is enabled, with a class the page finds it by, and
+    /// the page sends a toggle to the host, which rewrites the marker in the file; a partially
+    /// done item carries <c>data-mixed</c>, which the page turns into the check box's
+    /// <c>indeterminate</c> state. In an exported file it stays disabled as Markdig renders it,
+    /// and a partially done item gets <c>aria-checked="mixed"</c>, since no script runs there.
+    /// </summary>
+    private sealed class TaskListRenderer(RenderMode mode, IReadOnlySet<TaskList> mixedTasks)
+        : HtmlObjectRenderer<TaskList> {
         protected override void Write(HtmlRenderer renderer, TaskList obj) {
             if (!renderer.EnableHtmlForInline) {
                 renderer.Write(obj.Checked ? "[x]" : "[ ]");
                 return;
             }
 
-            renderer.Write($"<input class=\"{CheckboxClass}\" type=\"checkbox\"");
+            var mixed = mixedTasks.Contains(obj);
+
+            if (mode == RenderMode.Interactive) {
+                renderer.Write($"<input class=\"{TaskCheckboxClass}\" type=\"checkbox\"");
+
+                if (mixed) {
+                    renderer.Write(" data-mixed=\"true\"");
+                }
+            } else {
+                renderer.Write("<input disabled=\"disabled\" type=\"checkbox\"");
+
+                if (mixed) {
+                    renderer.Write(" aria-checked=\"mixed\"");
+                }
+            }
 
             if (obj.Checked) {
                 renderer.Write(" checked=\"checked\"");
