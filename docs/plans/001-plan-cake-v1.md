@@ -278,35 +278,35 @@ decide which note triggers the later tasks build.**
   `src/PlanCake/Utils/Enums/NoteStyle.cs`, `tests/PlanCake.Tests/MarkdownRendererTests.cs`
 - Modify: `src/PlanCake/PlanCake.csproj` (Markdig)
 
-- [ ] pipeline: `UseAdvancedExtensions()` (pipe tables, task lists, auto-identifiers, …) +
+- [x] pipeline: `UseAdvancedExtensions()` (pipe tables, task lists, auto-identifiers, …) +
       `UsePreciseSourceLocation()`; parse the stripped source from `NoteParser`
-- [ ] walk the AST and stamp each annotatable block with `data-lines="start-end"` in
+- [x] walk the AST and stamp each annotatable block with `data-lines="start-end"` in
       **original** line numbers, per Technical details → "Annotatable blocks"; collect a
       `BlockInfo` per block (range, kind, full plain text, and an 80-character excerpt of it)
-- [ ] the renderer never calls `_()`: the localized strings it writes ("Note:", "user note",
+- [x] the renderer never calls `_()`: the localized strings it writes ("Note:", "user note",
       "unote") come in a `RenderStrings` record, so its tests do not touch `Localization`;
       `NoteStyle` (`Note` | `Button`) is an enum in `Utils/Enums/`
-- [ ] anchor every note to its block and insert its HTML into the AST where Technical details →
+- [x] anchor every note to its block and insert its HTML into the AST where Technical details →
       "Note placement in the view" says; two modes: `Interactive` (a user note or a button, per
       the note style) and `Export`
       (static `role="note"` element), all note text HTML-encoded
-- [ ] every block gets `dir="auto"` and no `lang` of its own (the document language is set once
+- [x] every block gets `dir="auto"` and no `lang` of its own (the document language is set once
       on the container, see Task 6); task-list checkboxes stay as Markdig renders them
       (disabled) until Task 7a enables them
-- [ ] raw HTML in the source is rendered (so `<details>` or `<kbd>` work); scripts are blocked
+- [x] raw HTML in the source is rendered (so `<details>` or `<kbd>` work); scripts are blocked
       by the page's content security policy (Task 6); `Export` mode puts a policy fit for a
       standalone file in a `<meta http-equiv="Content-Security-Policy">`: `default-src
       'none'; script-src 'none'; style-src 'unsafe-inline'; img-src * data:`
-- [ ] tests: line ranges for a paragraph, heading, tight and loose list items (a parent item's
+- [x] tests: line ranges for a paragraph, heading, tight and loose list items (a parent item's
       range excludes its nested list), a list item whose first child is a code block, table
       rows (`TableRow.Line` and `Span` are populated for pipe tables), fenced and indented code,
       a paragraph in a blockquote; ranges correct when notes sit above, inside and below
-- [ ] tests: notes land after the right block for each kind, including a table row, a
+- [x] tests: notes land after the right block for each kind, including a table row, a
       nested list item, a note before the first block and an unterminated note; note text with
       `<`, `&` and quotes is encoded; excerpt is plain text truncated to 80 characters with an
       ellipsis; export output contains the CSP meta and a raw `<script>` from the source stays
       under it
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 5: Write notes to the file safely
 
