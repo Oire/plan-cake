@@ -315,7 +315,7 @@ decide which note triggers the later tasks build.**
   `src/PlanCake/Notes/StaleFileException.cs`, `tests/PlanCake.Tests/NoteStoreTests.cs`,
   `tests/PlanCake.Tests/MarkdownFileTests.cs`
 
-- [ ] `MarkdownFile`: reads a file detecting the encoding (UTF-8 with or without BOM, UTF-16
+- [x] `MarkdownFile`: reads a file detecting the encoding (UTF-8 with or without BOM, UTF-16
       BOMs; otherwise strict UTF-8 with `throwOnInvalidBytes: true`) and the dominant line
       ending; a file that is not valid in its detected encoding (say, Windows-1251) is decoded
       with the Windows ANSI code page (`Encoding.RegisterProvider(CodePagesEncodingProvider.
@@ -329,28 +329,28 @@ decide which note triggers the later tasks build.**
       BOM and line ending, atomically (temp file in the same folder + `File.Replace`, or
       `File.Move` when the target is gone); retries a locked file 5 times over about a second,
       then throws `IOException`
-- [ ] `NoteStore` operations, each taking the text the caller last rendered and throwing
+- [x] `NoteStore` operations, each taking the text the caller last rendered and throwing
       `StaleFileException` without writing if the file differs from it: `Add(afterBlock,
       text)`, `Edit(note, text)`, `Delete(note)`, `Clear()`; placement and indentation per
       Technical details → "Note placement in the file"
-- [ ] note text validation: rejects text containing the closing marker (paired mode) or a line
+- [x] note text validation: rejects text containing the closing marker (paired mode) or a line
       break or the opening token (single-token mode, where it would split the note in two
       when read back); converts pasted line breaks to spaces in single-token mode
-- [ ] undo/redo: each operation records the file text before and after; `Undo` writes the
+- [x] undo/redo: each operation records the file text before and after; `Undo` writes the
       "before" text only if the file still equals the "after" text (otherwise
       `StaleFileException` and both stacks are cleared); `Redo` symmetric
-- [ ] tests: placement after a paragraph, a heading, a nested list item (indent), a table row, a
+- [x] tests: placement after a paragraph, a heading, a nested list item (indent), a table row, a
       fenced code block's closing fence, a paragraph inside a blockquote (no `>` written, and
       the note still anchors to that paragraph); two notes on one block stack in order;
       multi-line note; edit; delete; clear
-- [ ] tests: stale file rejected with nothing written; CRLF and LF preserved; BOM preserved and
+- [x] tests: stale file rejected with nothing written; CRLF and LF preserved; BOM preserved and
       not added; a Windows-1251 file opens read-only and every write is refused; with
       `ConvertToUtf8` on, the same file is rewritten as UTF-8 without BOM, text and line
       endings intact; closing marker in text rejected; locked file retried then failing; undo,
       redo, and undo refused after an external change
-- [ ] tests: round trip (add, parse, edit, parse) of a multi-line note inside a nested list item
+- [x] tests: round trip (add, parse, edit, parse) of a multi-line note inside a nested list item
       leaves exactly one indentation per line
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 6: Show the document and talk to the page
 

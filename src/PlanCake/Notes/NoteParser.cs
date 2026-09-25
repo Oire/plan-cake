@@ -45,7 +45,7 @@ internal sealed class NoteParseResult {
 /// </summary>
 internal static class NoteParser {
     /// <summary>A source line: content from Start to ContentEnd, then its line break up to End.</summary>
-    private readonly record struct Line(int Start, int ContentEnd, int End);
+    internal readonly record struct Line(int Start, int ContentEnd, int End);
 
     public static NoteParseResult Parse(string source, NoteMarkers markers) {
         ArgumentNullException.ThrowIfNull(source);
@@ -64,7 +64,8 @@ internal static class NoteParser {
         return new NoteParseResult(notes, stripped, lineMap);
     }
 
-    private static List<Line> SplitLines(string source) {
+    /// <summary>Splits a source into lines; a line break at the very end starts no further line.</summary>
+    internal static List<Line> SplitLines(string source) {
         var lines = new List<Line>();
         var start = 0;
         var i = 0;
