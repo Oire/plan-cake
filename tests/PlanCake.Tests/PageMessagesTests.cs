@@ -1,0 +1,83 @@
+using System.Text.Json;
+using AwesomeAssertions;
+using Oire.PlanCake.Ui;
+using Xunit;
+
+namespace Oire.PlanCake.Tests;
+
+/// <summary>
+/// app.js reads these exact property names, so a renamed property silently breaks the page.
+/// </summary>
+public class PageMessagesTests {
+    private static JsonElement Parse(string json) {
+        using var document = JsonDocument.Parse(json);
+
+        return document.RootElement.Clone();
+    }
+
+    [Fact]
+    public void Serialize_Render_UsesTheProtocolNames() {
+        var json = PageMessages.Serialize(new RenderMessage("<p>Hi</p>", 3, "en", "Plan", new PageFocus(Lines: "4-6")));
+        var message = Parse(json);
+
+        message.GetProperty("type").GetString().Should().Be("render");
+        message.GetProperty("html").GetString().Should().Be("<p>Hi</p>");
+        message.GetProperty("generation").GetInt32().Should().Be(3);
+        message.GetProperty("documentLang").GetString().Should().Be("en");
+        message.GetProperty("title").GetString().Should().Be("Plan");
+        message.GetProperty("focus").GetProperty("lines").GetString().Should().Be("4-6");
+        message.GetProperty("focus").TryGetProperty("note", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Serialize_RenderWithoutFocus_LeavesFocusOut() {
+        var message = Parse(PageMessages.Serialize(new RenderMessage("", 1, "ru", "Plan", null)));
+
+        message.TryGetProperty("focus", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Serialize_Strings_CarriesLanguageAndDirection() {
+        var message = Parse(PageMessages.Serialize(new StringsMessage("he-IL", "rtl", "אין קובץ פתוח.")));
+
+        message.GetProperty("type").GetString().Should().Be("strings");
+        message.GetProperty("uiLang").GetString().Should().Be("he-IL");
+        message.GetProperty("uiDir").GetString().Should().Be("rtl");
+        message.GetProperty("noDocument").GetString().Should().Be("אין קובץ פתוח.");
+    }
+
+    [Fact]
+    public void Serialize_FocusAndNavigationMessages_HaveTheirTypes() {
+        Parse(PageMessages.Serialize(new FocusLinesMessage("3-3"))).GetProperty("lines").GetString().Should().Be("3-3");
+        Parse(PageMessages.Serialize(new FocusNoteMessage(2))).GetProperty("note").GetInt32().Should().Be(2);
+        Parse(PageMessages.Serialize(new NextNoteMessage())).GetProperty("type").GetString().Should().Be("nextNote");
+        Parse(PageMessages.Serialize(new PreviousNoteMessage())).GetProperty("type").GetString()
+            .Should().Be("previousNote");
+    }
+
+    [Fact]
+    public void GetString_And_GetInt_ReadOnlyTheRightKinds() {
+        var message = Parse("""{ "type": "position", "lines": "5-7", "note": 1, "generation": "2", "big": 1e20 }""");
+
+        PageMessages.GetString(message, "lines").Should().Be("5-7");
+        PageMessages.GetString(message, "note").Should().BeNull();
+        PageMessages.GetString(message, "missing").Should().BeNull();
+        PageMessages.GetInt(message, "note").Should().Be(1);
+        PageMessages.GetInt(message, "generation").Should().BeNull();
+        PageMessages.GetInt(message, "big").Should().BeNull();
+        PageMessages.GetInt(Parse("[1]"), "note").Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(1.0, 1, 1.1)]
+    [InlineData(1.0, -1, 0.9)]
+    [InlineData(1.04, 1, 1.1)]
+    [InlineData(2.9, 1, 3.0)]
+    [InlineData(3.0, 1, 3.0)]
+    [InlineData(0.5, -1, 0.5)]
+    [InlineData(0.6, -1, 0.5)]
+    [InlineData(2.5, 0, 1.0)]
+    public void StepZoom_MovesInTenPercentStepsWithinLimits(double current, int direction, double expected) {
+        DocumentView.StepZoom(current, direction).Should().BeApproximately(expected, 1e-9);
+    }
+}

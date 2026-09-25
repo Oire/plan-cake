@@ -18,9 +18,6 @@ internal enum HostCommand {
     ResetZoom,
     UserManual,
     About,
-
-    /// <summary>JAWS spike only (Task 2): asks the page to focus its third paragraph.</summary>
-    SpikeFocusThirdParagraph,
 }
 
 /// <summary>
@@ -49,7 +46,6 @@ internal static class HostCommands {
         [Keys.Control | Keys.D0] = HostCommand.ResetZoom,
         [Keys.F1] = HostCommand.UserManual,
         [Keys.Shift | Keys.F1] = HostCommand.About,
-        [Keys.F12] = HostCommand.SpikeFocusThirdParagraph,
     };
 
     /// <summary>Every shortcut and the command it runs.</summary>

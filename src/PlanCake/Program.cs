@@ -19,8 +19,12 @@ internal static class Program {
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
+    /// <param name="args">
+    /// For now, the file to open, if any. The command-line mode with its subcommands replaces
+    /// this in Task 13.
+    /// </param>
     [STAThread]
-    private static int Main() {
+    private static int Main(string[] args) {
         ConfigureLogging();
 
         // Exceptions on a background thread or in a dropped Task do not reach the try/catch
@@ -55,7 +59,7 @@ internal static class Program {
                 return ExitCode.Error;
             }
 
-            using var mainWindow = new MainWindow();
+            using var mainWindow = new MainWindow(args.Length > 0 ? args[0] : null);
             Application.Run(mainWindow);
 
             return mainWindow.StartupFailed ? ExitCode.Error : ExitCode.Success;

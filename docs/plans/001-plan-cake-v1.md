@@ -52,7 +52,7 @@ names; Task 1 adapts it.
 - [ ] View → Interface language and View → Document language switch those two languages from
       the menu; JAWS reads the plan in the document language (English by default), whatever
       the interface language is
-- [ ] links and raw HTML in a plan cannot navigate the view away or run script
+- [x] links and raw HTML in a plan cannot navigate the view away or run script
 - [ ] `plancake list <file> [--json]`, `check`, `clear` and `export` work headless with the
       output and exit codes in Technical details
 - [ ] a Markdown file opens from File → Open, the command line, drag and drop, the clipboard
@@ -363,11 +363,11 @@ decide which note triggers the later tasks build.**
   `src/PlanCake/Program.cs`
 - Delete: `src/PlanCake/web/spike.html`
 
-- [ ] `index.html` + `app.js`: a `main` element that receives rendered HTML; the message
+- [x] `index.html` + `app.js`: a `main` element that receives rendered HTML; the message
       protocol in Technical details → "Page protocol", including the `strings` message for
       every page string; a delegated `click` listener and a `contextmenu` listener on the
       document (Task 2 kept both)
-- [ ] no forms mode on Enter: the Task 2 spike found that Enter on a block with a permanent
+- [x] no forms mode on Enter: the Task 2 spike found that Enter on a block with a permanent
       `tabindex="-1"` switches JAWS to forms mode. Blocks and notes carry no `tabindex` by
       default; when the page must move the virtual cursor (`focusLines`, `focusNote`, a new
       note), it sets `tabindex="-1"` on that one element, focuses it, and removes the attribute
@@ -375,22 +375,22 @@ decide which note triggers the later tasks build.**
       link, button or form control inside it; JAWS in forms mode, or the element has real
       focus) is handled like a click, with `preventDefault()`, so a second Enter never does
       nothing
-- [ ] languages: `<html lang>` and `dir` follow the **interface** language (page chrome);
+- [x] languages: `<html lang>` and `dir` follow the **interface** language (page chrome);
       `main` gets `lang` from the **document** language (hard-coded `en` until Task 12), sent
       with every `render`
-- [ ] `index.html` carries a strict content security policy: `default-src 'none'; script-src
+- [x] `index.html` carries a strict content security policy: `default-src 'none'; script-src
       https://app.plancake; style-src https://app.plancake 'unsafe-inline'; img-src
       https://app.plancake data:` (no inline script, no `eval`), so raw HTML in a plan renders
-      but cannot run script
-- [ ] `app.css`: readable defaults, visible focus outline, notes distinct from text,
+      but cannot run script; `base-uri 'none'; form-action 'none'` were added while building it
+- [x] `app.css`: readable defaults, visible focus outline, notes distinct from text,
       supports Windows high contrast (`forced-colors`) and light/dark (`prefers-color-scheme`)
-- [ ] `Program.Main()` becomes `Main(string[] args)`; for now the first argument, if any, is
+- [x] `Program.Main()` becomes `Main(string[] args)`; for now the first argument, if any, is
       the file to open (Task 13 replaces this with System.CommandLine). Every way of opening a
       file (command line, File → Open, drag and drop, `.md` links, and later the clipboard
       and links in Task 11) goes through one `MainWindow.OpenFile(path)`. It reads it
       with `MarkdownFile`, renders, posts to the page, sets the window title to
       `<file name> - PlanCake`; the page's `<title>` is the first heading
-- [ ] navigation lockdown: after the initial load of `index.html`, `NavigationStarting` cancels
+- [x] navigation lockdown: after the initial load of `index.html`, `NavigationStarting` cancels
       **every** navigation, and `NewWindowRequested` every new window. In-page anchors (`#…`)
       are handled by `app.js` (scroll and focus, no navigation). `app.js` intercepts link
       clicks and sends the host the raw `href`: absolute `http(s)`/`mailto` open with
@@ -398,29 +398,31 @@ decide which note triggers the later tasks build.**
       `.md`/`.markdown` target opens in PlanCake, anything else with `UseShellExecute`; missing
       targets are announced. The decision (external, in-page, relative `.md`, relative other,
       missing) is a pure `LinkResolver`, tested for each case
-- [ ] position restore, host side so it can be tested: the page reports only the lines of the
+- [x] position restore, host side so it can be tested: the page reports only the lines of the
       last block the user interacted with (`position`); the host looks up that block's full
       text in the previous render's `BlockInfo` list, and after a re-render
       `PositionRestorer` picks the target from the new list (a block with identical full
       text, else the block whose start line is nearest) and sends `focusLines`; a new note
       is focused by index instead
-- [ ] tests for `PositionRestorer`: same text found after lines shifted, text changed so the
+- [x] tests for `PositionRestorer`: same text found after lines shifted, text changed so the
       nearest line wins, block deleted at the end of the file, empty document
-- [ ] mouse, alongside the keyboard: ⚠️ the Task 2 spike found that a JAWS Enter and a mouse
+- [x] mouse, alongside the keyboard: ⚠️ the Task 2 spike found that a JAWS Enter and a mouse
       click cannot be told apart (JAWS emulates a mouse click, `pointerType` is `mouse` for
       both), so the page does not try: Enter and a single click both activate (on a block: add
       a note; on a note: edit it), a double-click does nothing extra, and a click that ends a
       text selection (`getSelection()` not collapsed) does not activate, so text can still be
       selected with the mouse; a right-click opens the same context menu as the Applications
       key
-- [ ] a Markdown file dragged from Explorer onto the window opens (`AllowDrop`, first `.md` /
-      `.markdown` of the drop)
-- [ ] zoom: Ctrl+Plus, Ctrl+Minus (main keyboard and numpad: `Oemplus`, `OemMinus`, `Add`,
+- [x] a Markdown file dragged from Explorer onto the window opens (`AllowDrop`, first `.md` /
+      `.markdown` of the drop). Found while building it: the browser takes drops on the
+      document itself, so `app.js` forwards them with `postMessageWithAdditionalObjects`
+      (`dropFiles`) and the host reads the paths from the `CoreWebView2File` objects
+- [x] zoom: Ctrl+Plus, Ctrl+Minus (main keyboard and numpad: `Oemplus`, `OemMinus`, `Add`,
       `Subtract`), Ctrl+0 set `ZoomFactor` in steps of 10%, 50%–300%
 - [ ] **ask the user** to check with JAWS: an 800-line plan reads with H, I, L, T and B
       navigation, no Markdown punctuation is read, links open in the browser, zoom works,
       Enter on a block does not switch JAWS to forms mode
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 7: Add, edit and delete notes from the document
 
@@ -848,7 +850,8 @@ which is harmless); for a list item's leading paragraph, inside the item after t
 ### Page protocol
 
 JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, each with a `type`:
-- host → page: `render` `{ html, generation, documentLang, focus: { lines?, note? } }`,
+- host → page: `render` `{ html, generation, documentLang, title, focus: { lines?, note? } }`
+  (`title`: the first heading, else the file name),
   `strings` `{ uiLang, uiDir, … }` (page chrome and live messages only: the note labels are
   already in the rendered HTML, so the page never adds its own "Note:"), `focusNote` `{ note }`, `focusLines`
   `{ lines }`, `nextNote` / `previousNote` `{}`, `taskState` `{ lines, checked }` (Task 7a:
@@ -857,8 +860,10 @@ JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, eac
   announcement goes through `StatusAnnouncer`
 - page → host: `activate` `{ lines, generation }` (Enter or a click on a block),
   `activateNote` `{ note, generation }`, `contextMenu` `{ lines, note?, rect, generation }`,
-  `toggleTask` `{ lines, checked, generation }` (Task 7a), `position` `{ lines }` (last block
-  interacted with), `openLink` `{ href }`, `noMoreNotes` `{}`, `ready` `{}`
+  `toggleTask` `{ lines, checked, generation }` (Task 7a), `position` `{ lines?, note?,
+  generation }` (last block or note interacted with; the host maps a note to its block),
+  `openLink` `{ href }`, `noMoreNotes` `{}`, `dropFiles` `{}` (the dropped `File` objects come
+  as additional objects), `ready` `{}`
 - the host ignores any message whose `generation` is not the latest render
 
 ### Keyboard

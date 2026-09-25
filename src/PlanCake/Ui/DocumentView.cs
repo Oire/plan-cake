@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
@@ -9,9 +10,14 @@ namespace Oire.PlanCake.Ui;
 /// <summary>A message the page sent through <c>chrome.webview.postMessage</c>.</summary>
 /// <param name="type">The message's <c>type</c> property.</param>
 /// <param name="message">The whole message, <c>type</c> included.</param>
-internal sealed class PageMessageEventArgs(string type, JsonElement message): EventArgs {
+/// <param name="files">
+/// The paths of the files the page passed along with the message
+/// (<c>postMessageWithAdditionalObjects</c>, used for files dropped on the page).
+/// </param>
+internal sealed class PageMessageEventArgs(string type, JsonElement message, IReadOnlyList<string> files): EventArgs {
     public string Type { get; } = type;
     public JsonElement Message { get; } = message;
+    public IReadOnlyList<string> Files { get; } = files;
 }
 
 /// <summary>
@@ -28,9 +34,19 @@ internal sealed class DocumentView: UserControl {
 
     public static readonly Uri BaseUri = new($"https://{HostName}/");
 
-    private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
+    /// <summary>The smallest zoom factor, 50%.</summary>
+    public const double MinZoom = 0.5;
+
+    /// <summary>The largest zoom factor, 300%.</summary>
+    public const double MaxZoom = 3.0;
 
     private readonly WebView2 _webView;
+
+    /// <summary>
+    /// The one navigation the view may make: the page <see cref="Navigate"/> asked for. Every
+    /// other navigation (a link, a form, a <c>meta refresh</c> in a plan's raw HTML) is canceled.
+    /// </summary>
+    private string? _allowedNavigation;
 
     /// <summary>
     /// Raised on the UI thread for every message the page posts. Do not open a dialog, a
@@ -94,6 +110,7 @@ internal sealed class DocumentView: UserControl {
 
         core.WebMessageReceived += OnWebMessageReceived;
         core.NavigationStarting += OnNavigationStarting;
+        core.FrameNavigationStarting += OnFrameNavigationStarting;
         core.NewWindowRequested += OnNewWindowRequested;
 
         Log.Information(
@@ -102,16 +119,43 @@ internal sealed class DocumentView: UserControl {
         );
     }
 
-    /// <summary>Loads a page from the <c>web</c> folder, such as <c>index.html</c>.</summary>
+    /// <summary>
+    /// Loads a page from the <c>web</c> folder, such as <c>index.html</c>. This is the only
+    /// navigation the view allows; links in the document are handed to the host instead.
+    /// </summary>
     public void Navigate(string page) {
         EnsureInitialized();
-        _webView.CoreWebView2.Navigate(new Uri(BaseUri, page).AbsoluteUri);
+        _allowedNavigation = new Uri(BaseUri, page).AbsoluteUri;
+        _webView.CoreWebView2.Navigate(_allowedNavigation);
     }
 
-    /// <summary>Sends <paramref name="message"/> to the page as JSON (camelCase properties).</summary>
+    /// <summary>Sends <paramref name="message"/> to the page as JSON (see <see cref="PageMessages.Serialize"/>).</summary>
     public void PostMessage(object message) {
         EnsureInitialized();
-        _webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(message, _jsonOptions));
+        _webView.CoreWebView2.PostWebMessageAsJson(PageMessages.Serialize(message));
+    }
+
+    /// <summary>The document's zoom factor, 1.0 being 100%.</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public double ZoomFactor {
+        get => _webView.ZoomFactor;
+        set => _webView.ZoomFactor = Math.Clamp(value, MinZoom, MaxZoom);
+    }
+
+    /// <summary>
+    /// The zoom factor one step (10%) in <paramref name="direction"/> from <paramref name="current"/>
+    /// (1 in, -1 out), on the 10% grid and within <see cref="MinZoom"/>–<see cref="MaxZoom"/>;
+    /// 0 resets it to 100%.
+    /// </summary>
+    internal static double StepZoom(double current, int direction) {
+        if (direction == 0) {
+            return 1.0;
+        }
+
+        var tenths = Math.Round(current * 10) + Math.Sign(direction);
+
+        return Math.Clamp(tenths / 10, MinZoom, MaxZoom);
     }
 
     /// <summary>Moves keyboard focus into the document, where the screen reader can read it.</summary>
@@ -149,16 +193,39 @@ internal sealed class DocumentView: UserControl {
             return;
         }
 
-        MessageReceived?.Invoke(this, new PageMessageEventArgs(typeProperty.GetString()!, message));
+        MessageReceived?.Invoke(this, new PageMessageEventArgs(typeProperty.GetString()!, message, FilesOf(e)));
     }
 
-    // The full lockdown (links handed to the host, in-page anchors) comes with the real page;
-    // until then nothing may take the view away from the app's own pages.
-    private void OnNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e) {
-        if (!e.Uri.StartsWith(BaseUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase)) {
-            Log.Information("Navigation away from the app blocked: {Uri}", e.Uri);
-            e.Cancel = true;
+    private static List<string> FilesOf(CoreWebView2WebMessageReceivedEventArgs e) {
+        var files = new List<string>();
+
+        if (e.AdditionalObjects is { } objects) {
+            foreach (var item in objects) {
+                if (item is CoreWebView2File file && !String.IsNullOrEmpty(file.Path)) {
+                    files.Add(file.Path);
+                }
+            }
         }
+
+        return files;
+    }
+
+    // After the page itself has loaded, nothing may take the view anywhere: app.js hands links
+    // to the host and scrolls to in-page anchors itself, so any navigation that still starts
+    // comes from something the plan's raw HTML did.
+    private void OnNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e) {
+        if (_allowedNavigation is not null && string.Equals(e.Uri, _allowedNavigation, StringComparison.Ordinal)) {
+            _allowedNavigation = null;
+            return;
+        }
+
+        Log.Information("Navigation blocked: {Uri}", e.Uri);
+        e.Cancel = true;
+    }
+
+    private void OnFrameNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e) {
+        Log.Information("Frame navigation blocked: {Uri}", e.Uri);
+        e.Cancel = true;
     }
 
     private void OnNewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e) {
@@ -171,6 +238,7 @@ internal sealed class DocumentView: UserControl {
             if (_webView.CoreWebView2 is { } core) {
                 core.WebMessageReceived -= OnWebMessageReceived;
                 core.NavigationStarting -= OnNavigationStarting;
+                core.FrameNavigationStarting -= OnFrameNavigationStarting;
                 core.NewWindowRequested -= OnNewWindowRequested;
             }
 
