@@ -6,6 +6,7 @@ using System.Text.Json;
 using GetText.WindowsForms;
 using Oire.PlanCake.Notes;
 using Oire.PlanCake.Rendering;
+using Oire.PlanCake.Services;
 using Oire.PlanCake.Utils;
 using Oire.PlanCake.Utils.Enums;
 using Oire.WinForms.NativeControls;
@@ -32,6 +33,9 @@ public partial class MainWindow: Form {
 
     /// <summary>The note markers, <c>[usernote]</c> … <c>[/usernote]</c> until Task 12 makes them a setting.</summary>
     private static readonly NoteMarkers _markers = NoteMarkers.Default;
+
+    /// <summary>Downloads the files File → Open from link and a link on the clipboard open.</summary>
+    private static readonly MarkdownDownloader _downloader = new();
 
     private readonly StatusAnnouncer _announcer;
     private readonly string? _initialFile;
@@ -121,6 +125,15 @@ public partial class MainWindow: Form {
     /// <summary>True while the window asks whether to reload a file changed outside PlanCake.</summary>
     private bool _askingReload;
 
+    /// <summary>Cancels the download in progress, if any; one at a time.</summary>
+    private CancellationTokenSource? _download;
+
+    /// <summary>
+    /// A message to announce once the page has loaded: said while a new page loads, it would be
+    /// cut off by the screen reader starting on the new document.
+    /// </summary>
+    private string? _announceWhenReady;
+
     public MainWindow() : this(null) { }
 
     /// <param name="initialFile">The file to open once the window is up, from the command line.</param>
@@ -177,7 +190,8 @@ public partial class MainWindow: Form {
 
         bar.AddMenu(_("&File"), file => {
             MenuCommand(file, _("&Open..."), HostCommand.Open);
-            // Task 11: Open from clipboard, Open from link.
+            MenuCommand(file, _("Open from &clipboard"), HostCommand.OpenFromClipboard);
+            MenuCommand(file, _("Open from &link..."), HostCommand.OpenFromLink);
             file.AddSeparator();
             EnabledWhen(MenuCommand(file, _("Open in &editor"), HostCommand.OpenInEditor), FileIsThere);
             // Task 13: Export notes.
@@ -629,6 +643,12 @@ public partial class MainWindow: Form {
             case HostCommand.Open:
                 ShowOpenDialog();
                 break;
+            case HostCommand.OpenFromClipboard:
+                OpenFromClipboard();
+                break;
+            case HostCommand.OpenFromLink:
+                ShowOpenLinkDialog();
+                break;
             case HostCommand.OpenInEditor:
                 OpenInEditor();
                 break;
@@ -747,6 +767,12 @@ public partial class MainWindow: Form {
                 PostRender();
                 PostStrings();
                 documentView.FocusDocument();
+
+                if (_announceWhenReady is { } announcement) {
+                    _announceWhenReady = null;
+                    _announcer.Announce(announcement);
+                }
+
                 break;
             case PageMessages.Position:
                 if (IsCurrentRender(e.Message)) {
@@ -1242,6 +1268,129 @@ public partial class MainWindow: Form {
             OpenFile(dialog.FileName);
         } else {
             ReturnFocus();
+        }
+    }
+
+    /// <summary>
+    /// File → Open from clipboard: files copied in Explorer, a path or a link copied as text (see
+    /// <see cref="ClipboardClassifier"/>).
+    /// </summary>
+    private void OpenFromClipboard() {
+        ClipboardContent content;
+
+        try {
+            content = ClipboardClassifier.Classify(ClipboardDropList(), Clipboard.ContainsText() ? Clipboard.GetText() : null);
+        } catch (ExternalException ex) {
+            Log.Warning(ex, "Unable to read the clipboard");
+            _announcer.Announce(_("Unable to read the clipboard."));
+
+            return;
+        }
+
+        Log.Information("Clipboard holds {Kind} {Target}", content.Kind, content.Target);
+
+        switch (content.Kind) {
+            case ClipboardContentKind.MarkdownFile:
+                OpenFile(content.Target);
+                break;
+            case ClipboardContentKind.Link:
+                DownloadAndOpen(content.Target);
+                break;
+            case ClipboardContentKind.NoMarkdownFile:
+                _announcer.Announce(_("None of the copied files is a Markdown file (.md, .markdown)."));
+                break;
+            default:
+                _announcer.Announce(_("The clipboard holds no Markdown file or link."));
+                break;
+        }
+    }
+
+    private static List<string>? ClipboardDropList() {
+        if (!Clipboard.ContainsFileDropList()) {
+            return null;
+        }
+
+        return Clipboard.GetFileDropList().Cast<string?>().OfType<string>().ToList();
+    }
+
+    /// <summary>File → Open from link: asks for a link, starting with the one on the clipboard, if any.</summary>
+    private void ShowOpenLinkDialog() {
+        if (_download is not null) {
+            _announcer.Announce(_("A download is already in progress."));
+
+            return;
+        }
+
+        string? initialUrl = null;
+
+        try {
+            if (Clipboard.ContainsText() && UrlHelper.IsValidHttpUrl(Clipboard.GetText(), out var url)) {
+                initialUrl = url;
+            }
+        } catch (ExternalException ex) {
+            Log.Debug(ex, "Unable to read the clipboard for a link");
+        }
+
+        using var dialog = new OpenLinkDialog(initialUrl);
+
+        if (dialog.ShowDialog(this) == DialogResult.OK) {
+            DownloadAndOpen(dialog.Url);
+        } else {
+            ReturnFocus();
+        }
+    }
+
+    /// <summary>
+    /// Downloads a Markdown file into the Downloads folder (see <see cref="MarkdownDownloader"/>)
+    /// and opens that local copy, which is where notes then go. Failures are announced.
+    /// </summary>
+    private async void DownloadAndOpen(string url) {
+        if (_download is not null) {
+            _announcer.Announce(_("A download is already in progress."));
+
+            return;
+        }
+
+        using var cancellation = new CancellationTokenSource();
+        _download = cancellation;
+
+        // The name the file is saved under says what is coming; a whole link is long to listen to.
+        var name = UrlHelper.IsValidHttpUrl(url, out var link)
+            ? MarkdownDownloader.FileNameFor(MarkdownDownloader.RewriteGitHubBlob(new Uri(link)))
+            : url;
+        _announcer.Announce(_("Downloading {0}...", name));
+        DownloadResult result;
+
+        try {
+            result = await _downloader.DownloadAsync(url, cancellation.Token);
+        } catch (OperationCanceledException) {
+            // The window closed.
+            return;
+        } finally {
+            _download = null;
+        }
+
+        if (IsDisposed || Disposing) {
+            return;
+        }
+
+        if (result.FilePath is not { } path) {
+            _announcer.Announce(result.Error);
+
+            return;
+        }
+
+        var saved = _("Downloaded and saved to {0}", path);
+
+        // Opening another file loads a new page, and the page's "ready" says the message; the
+        // same file again (or a failure) leaves the page as it is, so it is said now.
+        _announceWhenReady = null;
+        var opened = OpenFile(path);
+
+        if (opened && !_pageReady) {
+            _announceWhenReady = saved;
+        } else {
+            _announcer.Announce(saved);
         }
     }
 
@@ -1777,6 +1926,7 @@ public partial class MainWindow: Form {
     private NoteTarget CurrentTarget(RenderedNote note) => new(_generation, _renderedText, note.Block, note);
 
     protected override void OnFormClosed(FormClosedEventArgs e) {
+        _download?.Cancel();
         documentView.MessageReceived -= OnPageMessage;
         documentView.AcceleratorKeyDown -= OnDocumentAcceleratorKeyDown;
         notesList.ItemActivate -= OnNotesListItemActivate;

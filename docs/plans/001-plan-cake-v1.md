@@ -741,18 +741,18 @@ check tasks off from the document.
   `tests/PlanCake.Tests/ClipboardClassifierTests.cs`
 - Modify: `src/PlanCake/Ui/MainWindow.cs`
 
-- [ ] File → Open from clipboard (Ctrl+V, ported from SIC's paste handling): a file drop list
+- [x] File → Open from clipboard (Ctrl+V, ported from SIC's paste handling): a file drop list
       (files copied in Explorer) opens its first `.md` / `.markdown` file; text holding a local
       path to such a file opens it (surrounding quotes, as Explorer's "Copy as path" adds,
       are stripped); text holding an http(s) link opens it as below; anything else is
       announced ("The clipboard holds no Markdown file or link"). The decision is a pure
       `ClipboardClassifier` over the clipboard's contents (drop list, text), so it is tested
       without a real clipboard
-- [ ] port SIC's `UrlHelper.IsValidHttpUrl`; File → Open from link… (Ctrl+L) opens
+- [x] port SIC's `UrlHelper.IsValidHttpUrl`; File → Open from link… (Ctrl+L) opens
       `OpenLinkDialog`, modeled on SIC's `AddUrlDialog` (a real `Label`, a URL `TextBox`
       pre-filled from the clipboard when it holds a link, OK/Cancel, title set in the
       constructor)
-- [ ] `MarkdownDownloader`: rewrites a GitHub `github.com/<owner>/<repo>/blob/<ref>/<path>` link
+- [x] `MarkdownDownloader`: rewrites a GitHub `github.com/<owner>/<repo>/blob/<ref>/<path>` link
       to its `raw.githubusercontent.com` form; downloads with `HttpClient` (30-second timeout,
       10 MB limit); refuses a non-success HTTP status (announcing it) and an HTML page ("This
       link leads to a web page, not a Markdown file"); names the file after the last URL
@@ -760,13 +760,19 @@ check tasks off from the document.
       (`SHGetKnownFolderPath(FOLDERID_Downloads)`, which may be relocated) under that name, adding
       ` (2)`, ` (3)`… when taken, as browsers do; the window then opens that local copy, and
       notes go into it
-- [ ] tests: `UrlHelper` accepts http(s) and rejects other schemes and junk; GitHub blob links
+- [x] tests: `UrlHelper` accepts http(s) and rejects other schemes and junk; GitHub blob links
       are rewritten and other links left alone; a 404 is refused; an HTML response is refused;
       an oversized response is refused; a URL without an extension saves as `.md`; a taken file name gets ` (2)` (with an injectable `HttpMessageHandler`
       and a temp Downloads folder)
-- [ ] tests for `ClipboardClassifier`: a drop list with and without a Markdown file, a quoted
+- [x] tests for `ClipboardClassifier`: a drop list with and without a Markdown file, a quoted
       and an unquoted path, a link, other text, an empty clipboard
-- [ ] validation commands pass
+- [ ] **ask the user** to check with JAWS: Ctrl+V after copying a `.md` file in Explorer opens
+      it; Ctrl+V with a copied path ("Copy as path") or a copied http(s) link to a Markdown file
+      opens it; Ctrl+V with nothing usable (plain text, a copied non-Markdown file) announces why;
+      File → Open from link… (a real Label, Enter opens, Escape cancels) opens a GitHub blob link
+      and a raw link, announcing the download and where it was saved; an invalid link is refused
+      with the reason; a link to a web page is refused
+- [x] validation commands pass
 
 ### Task 12: Settings
 

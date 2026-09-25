@@ -68,8 +68,6 @@ internal static class HostCommands {
     /// item or shortcuts dialog row offers them yet. Each task removes its command from this set.
     /// </summary>
     private static readonly HashSet<HostCommand> _notYetAvailable = [
-        HostCommand.OpenFromClipboard, // Task 11
-        HostCommand.OpenFromLink, // Task 11
         HostCommand.Settings, // Task 12
         HostCommand.UserManual, // Task 16
     ];

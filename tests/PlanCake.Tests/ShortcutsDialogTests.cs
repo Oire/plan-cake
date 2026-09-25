@@ -35,7 +35,7 @@ public class ShortcutsDialogTests {
     public void BuildRows_LeaveOutTheCommandsOfLaterTasks() {
         var commands = ShortcutsDialog.BuildRows().Select(row => row.Command).ToList();
 
-        commands.Should().NotContain(HostCommands.DisplayName(HostCommand.OpenFromClipboard));
+        commands.Should().NotContain(HostCommands.DisplayName(HostCommand.Settings));
         commands.Should().NotContain(HostCommands.DisplayName(HostCommand.UserManual));
     }
 

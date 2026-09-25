@@ -97,11 +97,12 @@ public class HostCommandsTests {
     public void AvailableShortcuts_LeaveOutTheCommandsOfLaterTasks() {
         var commands = HostCommands.AvailableShortcuts().Select(entry => entry.Command).ToList();
 
-        // Task 11, 12 and 16 add these, with their menu items.
-        commands.Should().NotContain([
-            HostCommand.OpenFromClipboard, HostCommand.OpenFromLink, HostCommand.Settings, HostCommand.UserManual,
+        // Task 12 and 16 add these, with their menu items.
+        commands.Should().NotContain([HostCommand.Settings, HostCommand.UserManual]);
+        commands.Should().Contain([
+            HostCommand.Open, HostCommand.OpenFromClipboard, HostCommand.OpenFromLink, HostCommand.Reload,
+            HostCommand.About, HostCommand.NextNote,
         ]);
-        commands.Should().Contain([HostCommand.Open, HostCommand.Reload, HostCommand.About, HostCommand.NextNote]);
         commands.Should().OnlyHaveUniqueItems();
     }
 
