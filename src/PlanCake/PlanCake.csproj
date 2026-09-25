@@ -8,8 +8,8 @@
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
     <Platform>x64</Platform>
-    <AssemblyName>WinFormsTemplate</AssemblyName>
-    <RootNamespace>Oire.WinFormsTemplate</RootNamespace>
+    <AssemblyName>plancake</AssemblyName>
+    <RootNamespace>Oire.PlanCake</RootNamespace>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <!-- Trims the satellite assemblies NuGet packages ship for languages we do not
@@ -21,10 +21,10 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Product>Windows Forms Template</Product>
-    <Description>Windows Forms template for applications developed by Oire Software</Description>
+    <Product>PlanCake</Product>
+    <Description>Read and annotate Markdown files with a screen reader</Description>
     <Company>Oire Software</Company>
-    <Copyright>Copyright © 2026 Oire Software. All rights reserved.</Copyright>
+    <Copyright>Copyright © 2026 Oire Software SARL.</Copyright>
     <!-- Version numbers come from GitVersion (see GitVersion.yml), never from a literal here.
          The +sha suffix would otherwise end up in the informational version and in the
          About box; GitVersion already encodes the commit distance in the fourth field. -->
@@ -45,7 +45,7 @@
   <ItemGroup>
     <!-- The test project reaches into internal hooks (e.g. Config.OverrideFilePath) so it can
          redirect file paths to a temp directory instead of writing into %APPDATA%. -->
-    <InternalsVisibleTo Include="WinFormsTemplate.Tests" />
+    <InternalsVisibleTo Include="PlanCake.Tests" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,11 +1,11 @@
 using System.Globalization;
 using GetText;
-using App = Oire.WinFormsTemplate.Utils.Constants.App;
+using App = Oire.PlanCake.Utils.Constants.App;
 
-namespace Oire.WinFormsTemplate.Utils;
+namespace Oire.PlanCake.Utils;
 
 /// <summary>
-/// gettext front end. Import it as <c>using static Oire.WinFormsTemplate.Utils.Localization;</c>
+/// gettext front end. Import it as <c>using static Oire.PlanCake.Utils.Localization;</c>
 /// and wrap every user-visible literal in <see cref="_(string)"/>.
 /// </summary>
 /// <remarks>

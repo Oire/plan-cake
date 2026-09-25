@@ -1,6 +1,6 @@
 using GetText.WindowsForms;
 
-namespace Oire.WinFormsTemplate.Ui;
+namespace Oire.PlanCake.Ui;
 
 public partial class MainWindow: Form {
     public MainWindow() {

@@ -159,31 +159,31 @@ names; Task 1 adapts it.
   `src/PlanCake/PlanCake.csproj`, `src/PlanCake/locale/messages.pot`,
   `.github/workflows/dotnet.yml`, `README.md`, `CLAUDE.md`
 
-- [ ] follow the README's "Starting a new application from it" checklist in order: directories,
+- [x] follow the README's "Starting a new application from it" checklist in order: directories,
       project and solution files, `ProjectReference` and `.slnx` paths, `AssemblyName` =
       `plancake` (so the published exe is `plancake.exe`), `RootNamespace` = `Oire.PlanCake`,
       `InternalsVisibleTo` = `PlanCake.Tests`, the `Oire.WinFormsTemplate` namespace everywhere
-- [ ] `App.Name` = `PlanCake` (data folder `%APPDATA%\Oire\PlanCake`, config `PlanCake.cfg`);
+- [x] `App.Name` = `PlanCake` (data folder `%APPDATA%\Oire\PlanCake`, config `PlanCake.cfg`);
       remove the database constants (`DatabaseFileExtension`, `DatabasePath`) and the
       `AppConstantsTests` assertions on them, since PlanCake has no database; `Product` =
       `PlanCake`, `Description` = "Read and annotate Markdown files with a screen reader";
       catalog name in `messages.pot`; the translation-script path in the CI workflow
-- [ ] catalog name is `PlanCake` (`PlanCake.po` / `.mo`): `Localization` already loads
+- [x] catalog name is `PlanCake` (`PlanCake.po` / `.mo`): `Localization` already loads
       `<App.Name>.mo`, but the gettext scripts take the name from `AssemblyName` (`plancake`),
       so change `Get-CatalogName.ps1` to produce `PlanCake`; correct the template README's
       claim that `App.Name` drives the catalog, in `README.md` and `locale/README.md`
-- [ ] replace the README's template text with a short PlanCake README (what it is, build
+- [x] replace the README's template text with a short PlanCake README (what it is, build
       commands); rewrite `CLAUDE.md`'s title and structure section for PlanCake, keeping every
       convention
-- [ ] the existing tests (`AppConstantsTests`, `ConfigTests`, `LocalizationTests`) pass under
+- [x] the existing tests (`AppConstantsTests`, `ConfigTests`, `LocalizationTests`) pass under
       the new names, adjusted only where they assert on the old name
-- [ ] repository metadata: copy SIC's Apache 2.0 `LICENSE` (so GitHub detects and shows the
+- [x] repository metadata: copy SIC's Apache 2.0 `LICENSE` (so GitHub detects and shows the
       license), set the GitHub description and topics with `gh repo edit Oire/plan-cake
       --description … --add-topic …` (e.g. `markdown`, `accessibility`, `screen-reader`,
       `jaws`, `winforms`, `webview2`, `dotnet`); the README title carries a pancake emoji 🥞
       (the name plays on "pancake") and gets a "Why" section explaining why PlanCake was built
       (reading long plans with JAWS, and annotating them for Claude)
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 2: Host WebView2 and run the JAWS spike
 

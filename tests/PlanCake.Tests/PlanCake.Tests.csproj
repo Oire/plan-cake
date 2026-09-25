@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyName>WinFormsTemplate.Tests</AssemblyName>
-    <RootNamespace>Oire.WinFormsTemplate.Tests</RootNamespace>
+    <AssemblyName>PlanCake.Tests</AssemblyName>
+    <RootNamespace>Oire.PlanCake.Tests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WinFormsTemplate\WinFormsTemplate.csproj" />
+    <ProjectReference Include="..\..\src\PlanCake\PlanCake.csproj" />
   </ItemGroup>
 
 </Project>

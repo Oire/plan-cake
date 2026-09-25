@@ -1,9 +1,9 @@
 using AwesomeAssertions;
-using Oire.WinFormsTemplate.Utils;
-using Oire.WinFormsTemplate.Utils.Constants;
+using Oire.PlanCake.Utils;
+using Oire.PlanCake.Utils.Constants;
 using Xunit;
 
-namespace Oire.WinFormsTemplate.Tests;
+namespace Oire.PlanCake.Tests;
 
 /// <summary>
 /// Round-trips the configuration file through a temp directory. <c>Config.OverrideFilePath</c>
@@ -19,7 +19,7 @@ public class ConfigTests: IDisposable {
     private readonly string _tempFolder;
 
     public ConfigTests() {
-        _tempFolder = Path.Combine(Path.GetTempPath(), $"WinFormsTemplate.Tests-{Guid.NewGuid():N}");
+        _tempFolder = Path.Combine(Path.GetTempPath(), $"PlanCake.Tests-{Guid.NewGuid():N}");
         Config.OverrideFilePath = Path.Combine(_tempFolder, $"{App.Name}.{App.ConfigFileExtension}");
     }
 

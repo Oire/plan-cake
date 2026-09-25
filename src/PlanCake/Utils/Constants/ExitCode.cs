@@ -1,4 +1,4 @@
-namespace Oire.WinFormsTemplate.Utils.Constants;
+namespace Oire.PlanCake.Utils.Constants;
 
 /// <summary>
 /// Process exit codes returned from <c>Program.Main</c>.

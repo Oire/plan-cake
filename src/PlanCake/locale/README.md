@@ -17,18 +17,20 @@ dotnet tool install --global GetText.NET.Extractor
 
 ## Usage
 
-All scripts live in `scripts/` and take their catalog name from the project's `AssemblyName`,
-so nothing needs renaming when the template is adapted for a new app.
+All scripts live in `scripts/`. The catalog is `PlanCake.po` / `PlanCake.mo`: the application
+loads `<App.Name>.mo`, and `Get-CatalogName.ps1` reads the same `App.Name` constant from
+`Utils/Constants/App.cs`. The `AssemblyName` (`plancake`) names the executable only and plays no
+part in the catalog name.
 
 | Script | What it does | When to run it |
 | --- | --- | --- |
 | `Extract-Strings.ps1` | Scans the source for `_()`, `_n()`, `_p()`, `_pn()` and rewrites `messages.pot` | After adding or changing any user-visible string |
-| `New-Language.ps1 -Language fr` | Creates `fr/<App>.po` from the template | When adding a language |
+| `New-Language.ps1 -Language fr` | Creates `fr/PlanCake.po` from the template | When adding a language |
 | `Update-Translations.ps1` | Merges new strings from `messages.pot` into every existing `.po` | After `Extract-Strings.ps1` |
 | `Compile-Translations.ps1` | Compiles every `.po` to `.mo` | Before building, and in CI |
 
 ```powershell
-cd src/WinFormsTemplate/locale/scripts
+cd src/PlanCake/locale/scripts
 ./Extract-Strings.ps1
 ./Update-Translations.ps1
 ./Compile-Translations.ps1

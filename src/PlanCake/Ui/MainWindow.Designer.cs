@@ -1,4 +1,4 @@
-namespace Oire.WinFormsTemplate.Ui;
+namespace Oire.PlanCake.Ui;
 
 partial class MainWindow {
     /// <summary>
@@ -32,7 +32,7 @@ partial class MainWindow {
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(800, 450);
         Name = "MainWindow";
-        Text = "Windows Forms Template";
+        Text = "PlanCake";
         ResumeLayout(false);
     }
 

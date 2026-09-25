@@ -1,4 +1,4 @@
-namespace Oire.WinFormsTemplate.Utils.Constants;
+namespace Oire.PlanCake.Utils.Constants;
 
 /// <summary>
 /// Application-wide identity and path constants.
@@ -8,18 +8,21 @@ namespace Oire.WinFormsTemplate.Utils.Constants;
 /// <c>UseWindowsForms</c> and implicit usings, an <c>Application</c> in this
 /// namespace shadows <see cref="System.Windows.Forms.Application"/> inside every
 /// file that imports it, and the resulting errors are confusing. Import it as
-/// <c>using App = Oire.WinFormsTemplate.Utils.Constants.App;</c> where needed.
+/// <c>using App = Oire.PlanCake.Utils.Constants.App;</c> where needed.
 /// </remarks>
 public static class App {
-    public const string Name = "WinFormsTemplate";
+    /// <summary>
+    /// Product name. Drives the data folder, the config file name and the gettext catalog
+    /// name (<c>locale/&lt;code&gt;/PlanCake.mo</c>); the translation scripts read it from here.
+    /// </summary>
+    public const string Name = "PlanCake";
     public const string ManufacturerNameShort = "Oire";
     public const string ManufacturerNameFull = "Oire Software";
     public const string ConfigFileExtension = "cfg";
-    public const string DatabaseFileExtension = "oidb";
 
     /// <summary>
-    /// Subfolder of <see cref="DataFolder"/> that holds user-generated content: the
-    /// database and any binary blobs. Config files stay at the root of <see cref="DataFolder"/>
+    /// Subfolder of <see cref="DataFolder"/> that holds user-generated content.
+    /// Config files stay at the root of <see cref="DataFolder"/>
     /// so that wiping user data never takes the settings with it.
     /// </summary>
     public const string DataSubfolder = "data";
@@ -40,7 +43,6 @@ public static class App {
         );
 
     public static readonly string ConfigPath = Path.Combine(DataFolder, $"{Name}.{ConfigFileExtension}");
-    public static readonly string DatabasePath = Path.Combine(DataFolder, DataSubfolder, $"{Name}.{DatabaseFileExtension}");
 
     /// <summary>Value of <c>Config.General.Language</c> that means "follow the OS".</summary>
     public const string SystemLanguageName = "System";

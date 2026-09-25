@@ -1,4 +1,4 @@
-namespace Oire.WinFormsTemplate.Utils.Constants;
+namespace Oire.PlanCake.Utils.Constants;
 
 /// <summary>
 /// Paths and formats for the Serilog sinks configured in <c>Program.ConfigureLogging</c>.

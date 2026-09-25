@@ -1,11 +1,11 @@
-# winforms-template — Repo Conventions
+# PlanCake — Repo Conventions
 
-Template repository for Oire Software's Windows Forms applications. .NET 10, Windows x64 only.
-Everything here is meant to be copied into a new product repo and renamed; see the README for
-the rename checklist.
+PlanCake reads Markdown files (above all long implementation plans) as rendered HTML in
+WebView2 and writes the user's notes on them straight into the `.md` file. It runs as a window,
+or headless with a subcommand (`list`, `check`, `clear`, `export`). .NET 10, Windows x64 only.
 
-When adapting this template for a new application, apply every convention below to the new
-repository as well — that is the point of the file.
+The repository was created from Oire's `winforms-template`; the conventions below come from it
+and stay binding. The implementation plan is `docs/plans/001-plan-cake-v1.md`.
 
 ## Accessibility is load-bearing
 
@@ -26,13 +26,13 @@ decisions.
 
 ## Localization — GetText.NET, not .resx
 
-`.po` / `.mo` catalogs live in `src/WinFormsTemplate/locale/`. **`.resx` files are forbidden**
+`.po` / `.mo` catalogs live in `src/PlanCake/locale/`. **`.resx` files are forbidden**
 — if the WinForms designer generates one, delete it.
 
 - **`Localizer.Localize(this, Localization.Catalog)`** in a form's constructor — walks the
   control tree and translates designer-set text.
 - **`_("literal")`** for strings built at run time. Import via
-  `using static Oire.WinFormsTemplate.Utils.Localization;`. Plurals `_n`, context `_p`,
+  `using static Oire.PlanCake.Utils.Localization;`. Plurals `_n`, context `_p`,
   both `_pn`.
 - **`.mo` files are build output and are gitignored.** CI compiles them from the `.po`
   sources with `Compile-Translations.ps1 -Strict` before `dotnet build`. Skip that and the
@@ -44,7 +44,11 @@ decisions.
 - Adding a language means updating `<SatelliteResourceLanguages>` *and* the language picker in
   the settings UI. Both are easy to forget.
 
-See `src/WinFormsTemplate/locale/README.md` for the script workflow.
+- The catalog is `PlanCake.po` / `.mo`, named after `App.Name`; the executable is `plancake.exe`
+  (`AssemblyName`). The gettext scripts read `App.Name` from `Utils/Constants/App.cs`, not the
+  `AssemblyName`.
+
+See `src/PlanCake/locale/README.md` for the script workflow.
 
 ## Versioning
 
@@ -70,13 +74,18 @@ that tag. CI checks out with `fetch-depth: 0` because a shallow clone has no tag
 Single project with folder/namespace separation:
 
 ```
-src/WinFormsTemplate/
+src/PlanCake/          -- namespace Oire.PlanCake, builds plancake.exe
 ├── Ui/          -- MainWindow and dialogs
 ├── Utils/       -- Config, Localization
 │   └── Constants/  -- App, Logging, ExitCode
 └── locale/      -- .po catalogs and gettext scripts
-tests/WinFormsTemplate.Tests/
+tests/PlanCake.Tests/  -- namespace Oire.PlanCake.Tests
+PlanCake.slnx
 ```
+
+Folders the plan adds as it goes: `Notes/` (note parsing and writing), `Rendering/` (Markdig
+to HTML with source line ranges), `Cli/` (headless subcommands), `Services/` (updates,
+downloads), `web/` (the page WebView2 shows), `help/` (the user manual).
 
 Do not split into more projects for organization's sake. Something genuinely shared across
 applications belongs in a NuGet package instead.
@@ -87,9 +96,9 @@ and `UseWindowsForms`, an `Application` class in that namespace shadows
 
 ## Data locations
 
-`App.DataFolder` resolves to `%APPDATA%\Oire\<AppName>`, or to `userdata/` next to the EXE
+`App.DataFolder` resolves to `%APPDATA%\Oire\PlanCake`, or to `userdata/` next to the EXE
 when that folder exists (portable mode, detected once at static init). Config files sit at the
-root of the data folder; user content goes under the `data/` subfolder, so clearing user data
+root of the data folder (`PlanCake.cfg`); user content goes under the `data/` subfolder, so clearing user data
 never takes the settings with it.
 
 ## Error handling at startup
@@ -103,10 +112,10 @@ Deciding to stop is `Program`'s job.
 
 ## Tests
 
-xUnit + AwesomeAssertions in `tests/WinFormsTemplate.Tests`. The app project grants it
+xUnit + AwesomeAssertions in `tests/PlanCake.Tests`. The app project grants it
 `InternalsVisibleTo`, which is how `Config.OverrideFilePath` lets the config tests write to a
 temp directory instead of the developer's real `%APPDATA%`. Static state means tests that
 touch `Config` or `Localization` must not run in parallel across classes.
 
-Keep the existing tests when adapting the template: they are cheap, and they fail loudly if a
-rename breaks the data-folder layout or the localization fallback.
+Keep the tests inherited from the template: they are cheap, and they fail loudly if a rename
+breaks the data-folder layout or the localization fallback.

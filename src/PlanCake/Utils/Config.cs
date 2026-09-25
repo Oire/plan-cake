@@ -1,8 +1,8 @@
 using Serilog;
 using SharpConfig;
-using App = Oire.WinFormsTemplate.Utils.Constants.App;
+using App = Oire.PlanCake.Utils.Constants.App;
 
-namespace Oire.WinFormsTemplate.Utils;
+namespace Oire.PlanCake.Utils;
 
 /// <summary>
 /// Static configuration container backed by an INI file under <see cref="App.DataFolder"/>.

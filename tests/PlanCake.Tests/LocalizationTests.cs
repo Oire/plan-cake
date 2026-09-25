@@ -1,9 +1,9 @@
 using AwesomeAssertions;
-using Oire.WinFormsTemplate.Utils;
-using Oire.WinFormsTemplate.Utils.Constants;
+using Oire.PlanCake.Utils;
+using Oire.PlanCake.Utils.Constants;
 using Xunit;
 
-namespace Oire.WinFormsTemplate.Tests;
+namespace Oire.PlanCake.Tests;
 
 public class LocalizationTests {
     [Fact]

@@ -1,14 +1,14 @@
-using Oire.WinFormsTemplate.Ui;
-using Oire.WinFormsTemplate.Utils;
+using Oire.PlanCake.Ui;
+using Oire.PlanCake.Utils;
 using Serilog;
 using Serilog.Formatting.Compact;
-using static Oire.WinFormsTemplate.Utils.Localization;
-using App = Oire.WinFormsTemplate.Utils.Constants.App;
-using ExitCode = Oire.WinFormsTemplate.Utils.Constants.ExitCode;
-using LogConstants = Oire.WinFormsTemplate.Utils.Constants.Logging;
+using static Oire.PlanCake.Utils.Localization;
+using App = Oire.PlanCake.Utils.Constants.App;
+using ExitCode = Oire.PlanCake.Utils.Constants.ExitCode;
+using LogConstants = Oire.PlanCake.Utils.Constants.Logging;
 using LogLevel = Serilog.Events.LogEventLevel;
 
-namespace Oire.WinFormsTemplate;
+namespace Oire.PlanCake;
 
 internal static class Program {
     /// <summary>

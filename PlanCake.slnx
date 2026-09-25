@@ -3,10 +3,10 @@
     <Platform Name="x64" />
   </Configurations>
   <Folder Name="/src/">
-    <Project Path="src/WinFormsTemplate/WinFormsTemplate.csproj" />
+    <Project Path="src/PlanCake/PlanCake.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/WinFormsTemplate.Tests/WinFormsTemplate.Tests.csproj" />
+    <Project Path="tests/PlanCake.Tests/PlanCake.Tests.csproj" />
   </Folder>
   <Folder Name="/solution items/">
     <File Path=".editorconfig" />

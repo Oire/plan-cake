@@ -1,8 +1,8 @@
 using AwesomeAssertions;
-using Oire.WinFormsTemplate.Utils.Constants;
+using Oire.PlanCake.Utils.Constants;
 using Xunit;
 
-namespace Oire.WinFormsTemplate.Tests;
+namespace Oire.PlanCake.Tests;
 
 /// <summary>
 /// Smoke tests over the application identity constants. They are deliberately cheap: their
@@ -25,10 +25,5 @@ public class AppConstantsTests {
         // Config deliberately sits beside the data subfolder, not inside it, so that clearing
         // user data does not take the settings with it.
         Path.GetDirectoryName(App.ConfigPath).Should().Be(App.DataFolder);
-    }
-
-    [Fact]
-    public void DatabasePath_LivesInTheDataSubfolder() {
-        Path.GetDirectoryName(App.DatabasePath).Should().Be(Path.Combine(App.DataFolder, App.DataSubfolder));
     }
 }
