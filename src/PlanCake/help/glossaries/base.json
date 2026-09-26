@@ -1,0 +1,21 @@
+{
+  "rules": [
+    { "term": "PlanCake", "rule": "never-translate", "details": "Product name, always written as PlanCake in Latin script" },
+    { "term": "plancake", "rule": "never-translate", "details": "The command-line program name, always lowercase, in code formatting" },
+    { "term": "Oire Software", "rule": "never-translate", "details": "Company name, always written in Latin script" },
+    { "term": "Windows", "rule": "never-translate", "details": "Microsoft Windows operating system name" },
+    { "term": "Microsoft Edge WebView2 Runtime", "rule": "never-translate", "details": "Microsoft component name; WebView2 alone is also never translated" },
+    { "term": "Markdown", "rule": "always-capitalize", "details": "Markup language name, capitalized in every language" },
+    { "term": "JAWS", "rule": "never-translate", "details": "Screen reader product name, always uppercase" },
+    { "term": "NVDA", "rule": "never-translate", "details": "Screen reader product name, always uppercase" },
+    { "term": "UTF-8", "rule": "never-translate", "details": "Encoding name, always written UTF-8" },
+    { "term": "JSON", "rule": "never-translate", "details": "Data format name, always uppercase" },
+    { "term": "HTML", "rule": "never-translate", "details": "Always uppercase" },
+    { "term": "GitHub", "rule": "never-translate", "details": "Service name, always written GitHub" },
+    { "term": "PowerShell", "rule": "never-translate", "details": "Microsoft shell name" },
+    { "term": "Claude", "rule": "never-translate", "details": "AI assistant name" },
+    { "term": "Debussy", "rule": "never-translate", "details": "Claude Code plugin collection name" },
+    { "term": "[usernote]", "rule": "never-translate", "details": "Default opening note marker, literal text in code formatting" },
+    { "term": "[/usernote]", "rule": "never-translate", "details": "Default closing note marker, literal text in code formatting" }
+  ]
+}
