@@ -181,8 +181,9 @@ public partial class MainWindow: Form {
     /// arrives with a later task is added by that task; <see cref="MenuBuilder"/> drops the
     /// separators its absence leaves doubled, leading or trailing. Enabled and checked states
     /// are set again from the window's state whenever the menu bar opens (<see cref="WndProc"/>).
+    /// Internal for the tests, which check the mnemonics of every menu level in every catalog.
     /// </summary>
-    private NativeMenuSpec BuildMenuSpec() {
+    internal NativeMenuSpec BuildMenuSpec() {
         _menuEnabledWhen.Clear();
         _menuCheckedWhen.Clear();
 
@@ -606,11 +607,18 @@ public partial class MainWindow: Form {
     private static RenderStrings CurrentRenderStrings() =>
         new(_("user note"), _("unote"));
 
-    private void PostStrings() => documentView.PostMessage(new StringsMessage(
+    private void PostStrings() => documentView.PostMessage(PageStrings());
+
+    /// <summary>
+    /// The interface language and direction of the page chrome, and the page's own strings. The
+    /// rendered blocks carry <c>dir="auto"</c> of their own, so a right-to-left interface does not
+    /// turn a left-to-right plan around.
+    /// </summary>
+    internal static StringsMessage PageStrings() => new(
         Utils.Localization.GetCurrentCulture().Name,
         TextDirection.IsRightToLeft ? "rtl" : "ltr",
         _("No file is open.")
-    ));
+    );
 
     /// <summary>Tells the user what is special about the file just opened, if anything.</summary>
     private void AnnounceFileState(MarkdownFile file) {
@@ -1205,24 +1213,45 @@ public partial class MainWindow: Form {
     }
 
     /// <summary>
+    /// The items of the context menu of a block or a note: Add note, Edit note, Delete note and
+    /// Copy block text, each only when its action is given. Internal for the tests, which check
+    /// the mnemonics of the full menu in every catalog.
+    /// </summary>
+    internal static NativeMenuSpec BlockMenuSpec(Action? addNote, Action? editNote, Action? deleteNote, Action? copyText) {
+        var spec = new NativeMenuSpec();
+
+        if (addNote is not null) {
+            spec.Add(_("&Add note"), addNote);
+        }
+
+        if (editNote is not null) {
+            spec.Add(_("&Edit note"), editNote);
+        }
+
+        if (deleteNote is not null) {
+            spec.Add(_("&Delete note"), deleteNote);
+        }
+
+        if (copyText is not null) {
+            spec.Add(_("&Copy block text"), copyText);
+        }
+
+        return spec;
+    }
+
+    /// <summary>
     /// The context menu of a block or a note, at the element's position: Add note, then Edit and
     /// Delete note on a note, then Copy block text.
     /// </summary>
     private void ShowContextMenu(NoteTarget target, RectangleF? rect, double scale) {
-        var spec = new NativeMenuSpec();
-
-        if (target.Block is { } block) {
-            spec.Add(_("&Add note"), WhileCurrent(target, () => AddNote(target, block)));
-        }
-
-        if (target.Note is { } note) {
-            spec.Add(_("&Edit note"), WhileCurrent(target, () => EditNote(target, note)));
-            spec.Add(_("&Delete note"), WhileCurrent(target, () => DeleteNote(target, note)));
-        }
-
-        if (target.Block is { } copied) {
-            spec.Add(_("&Copy block text"), () => CopyBlockText(copied));
-        }
+        var block = target.Block;
+        var note = target.Note;
+        var spec = BlockMenuSpec(
+            block is null ? null : WhileCurrent(target, () => AddNote(target, block)),
+            note is null ? null : WhileCurrent(target, () => EditNote(target, note)),
+            note is null ? null : WhileCurrent(target, () => DeleteNote(target, note)),
+            block is null ? null : () => CopyBlockText(block)
+        );
 
         if (spec.Items.Count == 0) {
             return;
@@ -1885,7 +1914,7 @@ public partial class MainWindow: Form {
         TextDirection.Apply(this);
         LocalizeNotesList();
         _menuBar?.Attach(BuildMenuSpec());
-        _notesListMenu?.Rebuild(BuildNotesListMenuSpec());
+        _notesListMenu?.Rebuild(NotesListMenuSpec(EditSelectedNote, DeleteSelectedNote));
         UpdateTitle();
 
         if (_pageReady) {
@@ -1936,7 +1965,7 @@ public partial class MainWindow: Form {
         notesList.KeyDown += OnNotesListKeyDown;
         notesList.GotFocus += OnNotesListGotFocus;
 
-        _notesListMenu = new NativeContextMenu(BuildNotesListMenuSpec()) {
+        _notesListMenu = new NativeContextMenu(NotesListMenuSpec(EditSelectedNote, DeleteSelectedNote)) {
             Resolver = ResolveNotesListMenu,
         };
         _notesListMenu.AttachTo(notesList);
@@ -1982,10 +2011,13 @@ public partial class MainWindow: Form {
     // The container gets the focus first and hands it to the list window right after this.
     private void OnNotesListGotFocus(object? sender, EventArgs e) => NameNotesList();
 
-    /// <summary>The context menu of the list; its items act on the selected note.</summary>
-    private NativeMenuSpec BuildNotesListMenuSpec() => new NativeMenuSpec()
-        .Add(_("&Edit note"), EditSelectedNote)
-        .Add(_("&Delete note"), DeleteSelectedNote);
+    /// <summary>
+    /// The context menu of the list; its items act on the selected note. Internal for the tests,
+    /// which check its mnemonics in every catalog.
+    /// </summary>
+    internal static NativeMenuSpec NotesListMenuSpec(Action editNote, Action deleteNote) => new NativeMenuSpec()
+        .Add(_("&Edit note"), editNote)
+        .Add(_("&Delete note"), deleteNote);
 
     /// <summary>
     /// A right-click selects the row under the pointer first; without a selected note there is

@@ -43,9 +43,9 @@ try {
     $content = $content -replace '"Language-Team: .*\\n"', "`"Language-Team: $Language\n`""
     $content = $content -replace '"Language: .*\\n"', "`"Language: $Language\n`""
     
-    # Add language header if not present
+    # Add language header if not present, on a line of its own after Language-Team
     if ($content -notmatch '"Language:') {
-        $content = $content -replace '("Language-Team: .*\\n")', "`$1`"Language: $Language\n`""
+        $content = $content -replace '("Language-Team: .*\\n")', "`$1`n`"Language: $Language\n`""
     }
 
     Set-Content $PoFile $content -NoNewline

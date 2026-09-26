@@ -42,11 +42,10 @@ public class DialogHelperTests: IDisposable {
     public void Confirmation_InALeftToRightLanguage_IsNotMirrored() =>
         DialogHelper.ConfirmationPage("Question?", "Title", MessageBoxIcon.Question).RightToLeftLayout.Should().BeFalse();
 
-    [SkippableFact]
+    [Fact]
     public void Confirmation_InHebrew_IsMirrored() {
-        // Needs the Hebrew catalog, which Task 15 adds: without it the language falls back to English.
         Localization.SetLanguage("he-IL");
-        Skip.IfNot(TextDirection.IsRightToLeft, "No Hebrew catalog yet (Task 15).");
+        TextDirection.IsRightToLeft.Should().BeTrue("the Hebrew catalog ships");
 
         DialogHelper.ConfirmationPage("Question?", "Title", MessageBoxIcon.Question).RightToLeftLayout.Should().BeTrue();
     }

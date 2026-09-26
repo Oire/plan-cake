@@ -13,9 +13,9 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <!-- Trims the satellite assemblies NuGet packages ship for languages we do not
-         serve. UI strings come from gettext catalogs under locale/, not from .resx, so
-         list the languages the app actually ships here as they are added. -->
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+         serve. UI strings come from gettext catalogs under locale/, not from .resx; this
+         lists the languages the app ships a catalog for (LanguageList.SupportedCodes). -->
+    <SatelliteResourceLanguages>en;ru;uk;fr;he;de</SatelliteResourceLanguages>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <AnalysisLevel>latest</AnalysisLevel>

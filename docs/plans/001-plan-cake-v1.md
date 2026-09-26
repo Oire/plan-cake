@@ -961,16 +961,31 @@ check tasks off from the document.
 - Modify: `src/PlanCake/locale/messages.pot`, `src/PlanCake/PlanCake.csproj`,
   `src/PlanCake/web/app.js`
 
-- [ ] check that no user-visible literal crept into `app.js` or `index.html` (all page strings
-      come through the `strings` message since Task 6)
-- [ ] `Extract-Strings.ps1`, then `New-Language.ps1` for ru, uk, fr, he, de, then translate every
+- [x] check that no user-visible literal crept into `app.js` or `index.html` (all page strings
+      come through the `strings` message since Task 6). Checked: none did; the only text in
+      `index.html` is the product name in `<title>`, which the render replaces
+- [x] `Extract-Strings.ps1`, then `New-Language.ps1` for ru, uk, fr, he, de, then translate every
       entry; no fuzzy entries; menu mnemonics unique per menu level in every catalog (run the
-      app once in each language to prove it)
-- [ ] `SatelliteResourceLanguages` = `en;ru;uk;fr;he;de`
-- [ ] Hebrew: every form calls `TextDirection.Apply` after `Localizer.Localize`, every message
+      app once in each language to prove it). Replaced the run by tests (`MnemonicTests`): in
+      English and every catalog they build the real menu bar (`MainWindow.BuildMenuSpec`), the
+      block and notes list context menus and every dialog, and fail on a mnemonic used twice on
+      one menu level or in one dialog, or on a menu item without one. `New-Language.ps1` wrote
+      the `Language` header onto the `Language-Team` line; fixed
+- [x] `SatelliteResourceLanguages` = `en;ru;uk;fr;he;de`
+- [x] Hebrew: every form calls `TextDirection.Apply` after `Localizer.Localize`, every message
       box goes through `DialogHelper`, the page gets `dir="rtl"` on its chrome while blocks keep
-      `dir="auto"`
-- [ ] test: each shipped catalog compiles and loads (extend `LocalizationTests`)
+      `dir="auto"`. Checked in the code (no `MessageBox` or `TaskDialog` outside `DialogHelper`)
+      and by `TextDirectionTests`: every form of the application, built in Hebrew, is mirrored,
+      and in English is not; the page strings carry `rtl` in Hebrew. The Hebrew confirmation test
+      of `DialogHelperTests` no longer skips
+- [x] test: each shipped catalog compiles and loads (extend `LocalizationTests`): each loads
+      from a regional name, translates every message of `messages.pot`, and applies its plural
+      rule; the interface language list offers all six
+- [ ] **ask the user** to check with JAWS: View → Interface language → Русский applies at once
+      (menus, dialogs, the page's announcements, the notes list column headers); every menu opens
+      and its mnemonics work in Russian; Hebrew mirrors the window and the dialogs and JAWS reads
+      the Hebrew interface; the document keeps its document language whatever the interface
+      language (an English plan is still read with the English voice)
 - [ ] validation commands pass
 
 ### Task 16: User manual
