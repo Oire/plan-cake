@@ -183,7 +183,7 @@ public partial class MainWindow: Form {
             MenuCommand(file, _("Open from &link..."), HostCommand.OpenFromLink);
             file.AddSeparator();
             EnabledWhen(MenuCommand(file, _("Open in &editor"), HostCommand.OpenInEditor), FileIsThere);
-            // Task 13: Export notes.
+            EnabledWhen(file.Add(_("Export &notes..."), null, ExportNotes), HasFile);
             file.AddSeparator();
             MenuCommand(file, _("&Settings..."), HostCommand.Settings);
             file.AddSeparator();
@@ -1416,6 +1416,53 @@ public partial class MainWindow: Form {
         }
 
         ShellOpen(_file.Path);
+    }
+
+    /// <summary>
+    /// File → Export notes: the notes as JSON with their references, exactly what
+    /// <c>plancake list --json</c> prints (<see cref="NotesJson"/>). A copy for other tools;
+    /// PlanCake never reads it back.
+    /// </summary>
+    private void ExportNotes() {
+        if (_file is null || _render is null) {
+            _announcer.Announce(_("No file is open."));
+            return;
+        }
+
+        using var dialog = new SaveFileDialog {
+            Title = _("Export notes"),
+            Filter = $"{_("JSON files")} (*.json)|*.json|{_("All files")} (*.*)|*.*",
+            FileName = $"{Path.GetFileNameWithoutExtension(_file.Path)}.notes.json",
+            OverwritePrompt = true,
+            RestoreDirectory = true,
+        };
+
+        if (Path.GetDirectoryName(_file.Path) is { } folder) {
+            dialog.InitialDirectory = folder;
+        }
+
+        if (dialog.ShowDialog(this) != DialogResult.OK) {
+            ReturnFocus();
+            return;
+        }
+
+        var count = _render.Notes.Count;
+
+        try {
+            File.WriteAllBytes(dialog.FileName, NotesJson.SerializeToUtf8(_render.Notes));
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
+                                         or NotSupportedException) {
+            Log.Error(ex, "Unable to export the notes to {Path}", dialog.FileName);
+            ShowError(_("Unable to write {0}: {1}", dialog.FileName, ex.Message));
+            ReturnFocus();
+            return;
+        }
+
+        Log.Information("Exported {Count} notes of {Path} to {Output}", count, _file.Path, dialog.FileName);
+        ReturnFocus();
+        _announcer.Announce(_n(
+            "Exported {0} note to {1}.", "Exported {0} notes to {1}.", count, count, Path.GetFileName(dialog.FileName)
+        ));
     }
 
     /// <summary>

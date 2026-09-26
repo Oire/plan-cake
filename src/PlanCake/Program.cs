@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Web.WebView2.Core;
+using Oire.PlanCake.Cli;
 using Oire.PlanCake.Ui;
 using Oire.PlanCake.Utils;
 using Serilog;
@@ -20,8 +21,10 @@ internal static class Program {
     /// The main entry point for the application.
     /// </summary>
     /// <param name="args">
-    /// For now, the file to open, if any. The command-line mode with its subcommands replaces
-    /// this in Task 13.
+    /// The file to open in the window, if any; or a subcommand (<c>list</c>, <c>check</c>,
+    /// <c>clear</c>, <c>export</c>), <c>--help</c> or <c>--version</c>, which run headless
+    /// (see <see cref="CliRunner"/>). Anything the parser rejects is reported on the command
+    /// line too, never by opening the window.
     /// </param>
     [STAThread]
     private static int Main(string[] args) {
@@ -46,9 +49,13 @@ internal static class Program {
                 typeof(Program).Assembly.GetName().Version, App.IsPortable, App.DataFolder
             );
 
+            if (!CliRunner.OpensWindow(args, out var file)) {
+                return RunCli(args);
+            }
+
             // One window per file: the window already showing it comes to the front instead.
-            if (args.Length > 0 && SingleInstance.TryActivate(args[0])) {
-                Log.Information("App startup: {Path} is open in another window, which was activated", args[0]);
+            if (file is not null && SingleInstance.TryActivate(file)) {
+                Log.Information("App startup: {Path} is open in another window, which was activated", file);
                 return ExitCode.Success;
             }
 
@@ -65,7 +72,7 @@ internal static class Program {
                 return ExitCode.Error;
             }
 
-            using var mainWindow = new MainWindow(args.Length > 0 ? args[0] : null);
+            using var mainWindow = new MainWindow(file);
             Application.Run(mainWindow);
 
             return mainWindow.StartupFailed ? ExitCode.Error : ExitCode.Success;
@@ -82,6 +89,28 @@ internal static class Program {
             return ExitCode.Error;
         } finally {
             Log.CloseAndFlush();
+        }
+    }
+
+    /// <summary>
+    /// A subcommand, <c>--help</c>, <c>--version</c> or a parse error: headless, with the output
+    /// on the redirected standard output or the parent's console, never a dialog.
+    /// </summary>
+    private static int RunCli(string[] args) {
+        Log.Information("App startup: command line {Command}", args.Length > 0 ? args[0] : String.Empty);
+
+        using var console = ConsoleAttacher.Attach();
+
+        try {
+            Config.Load();
+            Localization.SetLanguage(Config.General.Language);
+
+            return new CliRunner(console.Output, console.Error).Run(args);
+        } catch (Exception ex) {
+            Log.Fatal(ex, "App startup: unable to run the command line");
+            console.Error.Write(_("Error: {0}", ex.Message) + "\n");
+
+            return ExitCode.Error;
         }
     }
 

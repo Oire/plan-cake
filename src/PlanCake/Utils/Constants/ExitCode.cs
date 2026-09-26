@@ -12,4 +12,10 @@ public static class ExitCode {
 
     /// <summary>Exit because the user canceled a required startup prompt.</summary>
     public const int Canceled = 2;
+
+    /// <summary>
+    /// <c>plancake check</c> found notes in the file. Distinct from <see cref="Error"/>, so a caller
+    /// can tell "notes left" from "could not read".
+    /// </summary>
+    public const int NotesRemain = 3;
 }

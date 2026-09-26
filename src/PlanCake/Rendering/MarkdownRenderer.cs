@@ -28,11 +28,16 @@ internal enum RenderMode {
 /// <param name="DocumentLanguage">
 /// The <c>lang</c> of an exported document. The interactive page sets it on its container instead.
 /// </param>
+/// <param name="FallbackTitle">
+/// The <c>title</c> of an exported document without a heading (the file name, say), so an
+/// exported file is never left without one.
+/// </param>
 internal sealed record RenderOptions(
     NoteMarkers Markers,
     RenderMode Mode,
     RenderStrings Strings,
-    string DocumentLanguage = "en"
+    string DocumentLanguage = "en",
+    string? FallbackTitle = null
 );
 
 /// <summary>
@@ -100,7 +105,7 @@ internal static class MarkdownRenderer {
         var body = ToHtml(document, options.Mode, FindMixedTasks(document));
         var title = walker.Title;
         var html = options.Mode == RenderMode.Export
-            ? ExportDocument(body, title, options.DocumentLanguage)
+            ? ExportDocument(body, title ?? options.FallbackTitle, options.DocumentLanguage)
             : body;
 
         return new RenderResult(html, walker.Blocks.Select(block => block.Info).ToList(), notes, title, parse);

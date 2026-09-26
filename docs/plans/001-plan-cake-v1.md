@@ -53,7 +53,7 @@ names; Task 1 adapts it.
       the menu; JAWS reads the plan in the document language (English by default), whatever
       the interface language is
 - [x] links and raw HTML in a plan cannot navigate the view away or run script
-- [ ] `plancake list <file> [--json]`, `check`, `clear` and `export` work headless with the
+- [x] `plancake list <file> [--json]`, `check`, `clear` and `export` work headless with the
       output and exit codes in Technical details
 - [ ] a Markdown file opens from File → Open, the command line, drag and drop, the clipboard
       (Ctrl+V after copying it in Explorer) and a link (downloaded to the Downloads folder)
@@ -875,31 +875,46 @@ check tasks off from the document.
 - Modify: `src/PlanCake/Program.cs`, `src/PlanCake/Utils/Constants/ExitCode.cs`,
   `src/PlanCake/PlanCake.csproj` (System.CommandLine)
 
-- [ ] System.CommandLine root command with an optional `file` argument (→ GUI, via
+- [x] System.CommandLine root command with an optional `file` argument (→ GUI, via
       `SingleInstance`) and the subcommands `list`, `check`, `clear`, `export` with the options,
-      output and exit codes in Technical details → "Command line"
-- [ ] `ConsoleAttacher`: for subcommands, `--help`, `--version` and parse errors only; calls
+      output and exit codes in Technical details → "Command line".
+      Found while building it: the parser takes an unknown option (`plancake --bogus`) for the
+      file, so a lone `file` that starts with a dash is a parse error (a file named so opens as
+      `.\-name.md`); the root's `file` argument is hidden from the help, which otherwise lists it
+      under every subcommand, and the root description says how to open the window; response
+      files are off, so `@name.md` is a file. Decided on the way: `list`, `check` and `export`
+      never write the Markdown file (a file that is not UTF-8 is read, never converted); `clear`
+      follows `ConvertToUtf8` like the window, and refuses a file open read-only for its
+      encoding, or one whose encoding is not recognized, when it has notes; `-o` naming the
+      input file itself is refused; an exported file without a heading gets the file name as
+      its `<title>`; `--single-token` together with `--close-marker` is an error; `--lang`
+      takes any language code .NET knows; `list` text lines stay untranslated (they are data),
+      the other messages follow the interface language; all output lines end in `\n`
+- [x] `ConsoleAttacher`: for subcommands, `--help`, `--version` and parse errors only; calls
       `AttachConsole(ATTACH_PARENT_PROCESS)` **only when stdout is not already redirected**
       (`GetStdHandle` + `GetFileType`), so captured output from Claude's tools or a pipe is
       never taken over; only after a successful attach does it set `Console.OutputEncoding`
       to UTF-8 (the setter fails without a console); when output is redirected, `CliRunner`
       and System.CommandLine's invocation output get `new StreamWriter(Console.
       OpenStandardOutput(), new UTF8Encoding(false))` (and the same for stderr); the GUI path
-      never touches the console
-- [ ] `NotesJson` (in `src/PlanCake/Notes/`) builds the JSON that `list --json` prints, and
+      never touches the console. A redirected stderr is opened before attaching, so
+      `2> err.txt` keeps working with the output on the console; a character device that is not
+      a console (the NUL device) counts as redirected; the console's output code page is put
+      back after the command
+- [x] `NotesJson` (in `src/PlanCake/Notes/`) builds the JSON that `list --json` prints, and
       File → Export notes… (a `SaveFileDialog`, default name `<plan name>.notes.json`) writes
       the same JSON from the window, so both stay identical
-- [ ] `CliRunner` takes `TextWriter`s for output and error so tests need no console; markers
+- [x] `CliRunner` takes `TextWriter`s for output and error so tests need no console; markers
       and the document language come from `Config` unless overridden by options
-- [ ] tests: `list` text and JSON on a file with notes of each kind; a Cyrillic and a Hebrew note
+- [x] tests: `list` text and JSON on a file with notes of each kind; a Cyrillic and a Hebrew note
       survive `list --json` byte for byte as UTF-8; `list --json -o` writes the same bytes to the
       file; `list` on a file without notes; `check` 0
       and 3; `clear` removes all notes and leaves the rest byte-identical; `export` writes
       standalone HTML with notes as `role="note"` elements, the CSP meta, and `lang` from the document
       language (not the interface language); `--single-token` switches the marker mode
-- [ ] tests: missing file, unreadable file, invalid marker options → message on stderr and
+- [x] tests: missing file, unreadable file, invalid marker options → message on stderr and
       `ExitCode.Error`
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 14: Updates
 
@@ -1163,7 +1178,9 @@ PowerShell 5.1 drops an empty `""` argument when calling an exe). Output is UTF-
 
 Caveat for the docs: interactive PowerShell and cmd do not wait for a GUI-subsystem exe, so
 attached output can appear after the prompt returns. Piped or captured output (Claude's tools,
-`| Out-Host`, bash) always waits and is always complete.
+`| Out-Host`, bash) always waits and is always complete. In PowerShell "captured" means piped:
+`$notes = plancake list plan.md` does not wait either (and leaves `$LASTEXITCODE` unset), while
+`plancake list plan.md | Out-String` and `cmd /c "plancake check plan.md"` do (checked in Task 13).
 
 ### JAWS spike page
 
