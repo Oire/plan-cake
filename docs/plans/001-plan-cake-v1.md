@@ -851,18 +851,20 @@ check tasks off from the document.
       the settings, so a setting saved in one reached another only at its next start, and that
       window's OK wrote its stale copy back. File → Settings now reads the file again before
       showing the dialog, and what another window saved applies on OK or Cancel
-- [x] ➕ a hint under the Closing marker box, a real label, always shown: "Leave empty to use a
-      single marker: a note then runs from the opening marker to the end of its line"; it is
-      also the box's description, after the refusal reason when one is shown, so JAWS reads it
-      with the box. (A `[usernote]` opening marker with an empty closing one reads notes in
-      single-token mode, text `text[/usernote]`; the user keeps that as is)
-- [ ] **ask the user** to check with JAWS: the Settings dialog tabs (Ctrl+Tab between them,
+- [x] ➕ what an empty closing marker means is in the box's own label: "Closing marker (leave
+      empty for a single marker that runs to the end of the line):". A separate hint label
+      under the box, also given as the box's description, was tried first: JAWS read neither
+      (JAWS re-check), so the user chose the label. (A `[usernote]` opening marker with an empty
+      closing one reads notes in single-token mode, text `text[/usernote]`; the user keeps that
+      as is)
+- [x] **ask the user** to check with JAWS: the Settings dialog tabs (Ctrl+Tab between them,
       each control read with its real label); changing the interface language, the document
       language, the note markers, confirm-delete, confirm-task-toggle, the external change
       action, Enter on a block, Enter in the note dialog and ConvertToUtf8, each taking effect
       without a restart; OK saves and Cancel / Escape discards.
-      Results: checks 1-13 and 15 pass. Check 14 (ConvertToUtf8) failed: the file's Cyrillic
-      was destroyed (fixed above); re-check pending, with the closing marker hint
+      Results: all pass after the encoding fix (check 14 had destroyed a Windows-1251 file's
+      Cyrillic; on re-check 1251 and 1255 files open read-only, convert intact); the closing
+      marker hint was not read and moved into the label at the user's choice
 - [x] validation commands pass
 
 ### Task 13: Command-line mode

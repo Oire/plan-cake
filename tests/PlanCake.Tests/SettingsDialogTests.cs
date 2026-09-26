@@ -30,13 +30,4 @@ public class SettingsDialogTests {
     [InlineData("\"note", "note\"", "A marker cannot start or end with a double quote.")]
     public void DescribeMarkersError_GivesTheReason(string opening, string closing, string expected) =>
         SettingsDialog.DescribeMarkersError(opening, closing).Should().Be(expected);
-
-    [Fact]
-    public void ClosingMarkerDescription_IsTheHintAlone_WhileTheMarkersAreUsable() =>
-        SettingsDialog.ClosingMarkerDescription(null, "Leave empty.").Should().Be("Leave empty.");
-
-    [Fact]
-    public void ClosingMarkerDescription_PutsTheReasonBeforeTheHint() =>
-        SettingsDialog.ClosingMarkerDescription("A marker cannot start or end with a space.", "Leave empty.")
-            .Should().Be("A marker cannot start or end with a space. Leave empty.");
 }

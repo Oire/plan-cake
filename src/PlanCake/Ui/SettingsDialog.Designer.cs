@@ -34,7 +34,6 @@ partial class SettingsDialog {
         openingMarkerTextBox = new TextBox();
         closingMarkerLabel = new Label();
         closingMarkerTextBox = new TextBox();
-        closingMarkerHintLabel = new Label();
         markersErrorLabel = new Label();
         blockEnterLabel = new Label();
         blockEnterComboBox = new ComboBox();
@@ -203,14 +202,12 @@ partial class SettingsDialog {
         notesTab.Text = "Notes";
         notesTab.UseVisualStyleBackColor = true;
         //
-        // notesLayout: the markers, the hint under the closing one, the reason they cannot be
-        // used (if any), then the Enter keys.
+        // notesLayout: the markers, the reason they cannot be used (if any), then the Enter keys.
         //
         notesLayout.ColumnCount = 2;
         notesLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         notesLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        notesLayout.RowCount = 7;
-        notesLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        notesLayout.RowCount = 6;
         notesLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         notesLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         notesLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
@@ -221,13 +218,12 @@ partial class SettingsDialog {
         notesLayout.Controls.Add(openingMarkerTextBox, 1, 0);
         notesLayout.Controls.Add(closingMarkerLabel, 0, 1);
         notesLayout.Controls.Add(closingMarkerTextBox, 1, 1);
-        notesLayout.Controls.Add(closingMarkerHintLabel, 1, 2);
-        notesLayout.Controls.Add(markersErrorLabel, 0, 3);
+        notesLayout.Controls.Add(markersErrorLabel, 0, 2);
         notesLayout.SetColumnSpan(markersErrorLabel, 2);
-        notesLayout.Controls.Add(blockEnterLabel, 0, 4);
-        notesLayout.Controls.Add(blockEnterComboBox, 1, 4);
-        notesLayout.Controls.Add(noteEnterLabel, 0, 5);
-        notesLayout.Controls.Add(noteEnterComboBox, 1, 5);
+        notesLayout.Controls.Add(blockEnterLabel, 0, 3);
+        notesLayout.Controls.Add(blockEnterComboBox, 1, 3);
+        notesLayout.Controls.Add(noteEnterLabel, 0, 4);
+        notesLayout.Controls.Add(noteEnterComboBox, 1, 4);
         notesLayout.Dock = DockStyle.Fill;
         notesLayout.Name = "notesLayout";
         notesLayout.TabIndex = 0;
@@ -252,9 +248,10 @@ partial class SettingsDialog {
         closingMarkerLabel.Anchor = AnchorStyles.Left;
         closingMarkerLabel.AutoSize = true;
         closingMarkerLabel.Margin = new Padding(3, 6, 8, 3);
+        closingMarkerLabel.MaximumSize = new Size(220, 0);
         closingMarkerLabel.Name = "closingMarkerLabel";
         closingMarkerLabel.TabIndex = 2;
-        closingMarkerLabel.Text = "Clo&sing marker:";
+        closingMarkerLabel.Text = "Clo&sing marker (leave empty for a single marker that runs to the end of the line):";
         //
         // closingMarkerTextBox
         //
@@ -262,25 +259,13 @@ partial class SettingsDialog {
         closingMarkerTextBox.Name = "closingMarkerTextBox";
         closingMarkerTextBox.TabIndex = 3;
         //
-        // closingMarkerHintLabel: what an empty closing marker means, always shown under the box.
-        //
-        closingMarkerHintLabel.Anchor = AnchorStyles.Left;
-        closingMarkerHintLabel.AutoSize = true;
-        closingMarkerHintLabel.Margin = new Padding(3, 0, 3, 3);
-        closingMarkerHintLabel.MaximumSize = new Size(360, 0);
-        closingMarkerHintLabel.Name = "closingMarkerHintLabel";
-        closingMarkerHintLabel.TabIndex = 4;
-        closingMarkerHintLabel.Text =
-            "Leave empty to use a single marker: a note then runs from the opening marker to the end of its line.";
-        closingMarkerHintLabel.UseMnemonic = false;
-        //
         // markersErrorLabel: why the markers cannot be used, next to them; empty while they can.
         //
         markersErrorLabel.Anchor = AnchorStyles.Left;
         markersErrorLabel.AutoSize = true;
         markersErrorLabel.Margin = new Padding(3, 4, 3, 3);
         markersErrorLabel.Name = "markersErrorLabel";
-        markersErrorLabel.TabIndex = 5;
+        markersErrorLabel.TabIndex = 4;
         markersErrorLabel.UseMnemonic = false;
         //
         // blockEnterLabel
@@ -289,7 +274,7 @@ partial class SettingsDialog {
         blockEnterLabel.AutoSize = true;
         blockEnterLabel.Margin = new Padding(3, 6, 8, 3);
         blockEnterLabel.Name = "blockEnterLabel";
-        blockEnterLabel.TabIndex = 6;
+        blockEnterLabel.TabIndex = 5;
         blockEnterLabel.Text = "&Enter or a click on a block:";
         //
         // blockEnterComboBox
@@ -297,7 +282,7 @@ partial class SettingsDialog {
         blockEnterComboBox.Dock = DockStyle.Fill;
         blockEnterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
         blockEnterComboBox.Name = "blockEnterComboBox";
-        blockEnterComboBox.TabIndex = 7;
+        blockEnterComboBox.TabIndex = 6;
         //
         // noteEnterLabel
         //
@@ -305,7 +290,7 @@ partial class SettingsDialog {
         noteEnterLabel.AutoSize = true;
         noteEnterLabel.Margin = new Padding(3, 6, 8, 3);
         noteEnterLabel.Name = "noteEnterLabel";
-        noteEnterLabel.TabIndex = 8;
+        noteEnterLabel.TabIndex = 7;
         noteEnterLabel.Text = "Enter in the note dialo&g:";
         //
         // noteEnterComboBox
@@ -313,7 +298,7 @@ partial class SettingsDialog {
         noteEnterComboBox.Dock = DockStyle.Fill;
         noteEnterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
         noteEnterComboBox.Name = "noteEnterComboBox";
-        noteEnterComboBox.TabIndex = 9;
+        noteEnterComboBox.TabIndex = 8;
         //
         // advancedTab
         //
@@ -421,7 +406,6 @@ partial class SettingsDialog {
     private TextBox openingMarkerTextBox;
     private Label closingMarkerLabel;
     private TextBox closingMarkerTextBox;
-    private Label closingMarkerHintLabel;
     private Label markersErrorLabel;
     private Label blockEnterLabel;
     private ComboBox blockEnterComboBox;
