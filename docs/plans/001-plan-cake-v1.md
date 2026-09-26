@@ -945,11 +945,13 @@ check tasks off from the document.
 - [x] settings: check for updates on startup, background interval (General tab); Help → Check
       for updates
 - [x] `keys/` ignored in git as in SIC
-- [ ] **ask the user** to check with JAWS: the two new settings on the General tab ("Check for
+- [x] **ask the user** to check with JAWS: the two new settings on the General tab ("Check for
       updates on startup" and "Check for updates in the background") are read with their
       labels; Help → Check for updates with no update available announces it (until the
       appcast exists at plancake.oire.dev it says "Unable to check for updates. Please try
-      again later."); the startup check does not steal the focus or interrupt reading
+      again later."); the startup check does not steal the focus or interrupt reading.
+      Results: all four pass (labels and defaults read, the manual check says it is unable to
+      check and returns to the document, the startup check leaves focus and reading alone)
 - [x] validation commands pass
 
 ### Task 15: Translations
