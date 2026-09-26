@@ -6,8 +6,8 @@ using Xunit;
 namespace Oire.PlanCake.Tests;
 
 /// <summary>
-/// The decision part of <c>web/blocks.js</c>, run in Jint: which block or note Alt+Down Arrow and
-/// Alt+Up Arrow move to (-1: none in that direction, so the host announces "No more blocks").
+/// The decision part of <c>web/blocks.js</c>, run in Jint: which block or note Alt+Shift+Down Arrow
+/// and Alt+Shift+Up Arrow move to (-1: none in that direction, so the host announces "No more blocks").
 /// Finding the blocks and focusing them needs a browser and is checked by hand.
 /// </summary>
 public class BlockPickTests {

@@ -58,8 +58,10 @@ internal static class HostCommands {
         (Keys.F5, HostCommand.Reload),
         (Keys.F9, HostCommand.NextNote),
         (Keys.Shift | Keys.F9, HostCommand.PreviousNote),
-        (Keys.Alt | Keys.Down, HostCommand.NextBlock),
-        (Keys.Alt | Keys.Up, HostCommand.PreviousBlock),
+        // Not Alt+Down and Alt+Up: screen readers take those (JAWS opens and closes a list box).
+        // JAWS passes Alt+Shift+Down and Alt+Shift+Up on unless its JAWS cursor is active.
+        (Keys.Alt | Keys.Shift | Keys.Down, HostCommand.NextBlock),
+        (Keys.Alt | Keys.Shift | Keys.Up, HostCommand.PreviousBlock),
         (Keys.F1, HostCommand.UserManual),
         (Keys.Shift | Keys.F1, HostCommand.About),
     ];
@@ -134,7 +136,8 @@ internal static class HostCommands {
     };
 
     /// <summary>
-    /// A key combination as a menu shows it: <c>Ctrl+O</c>, <c>Shift+F9</c>, <c>Alt+Left Arrow</c>.
+    /// A key combination as a menu shows it: <c>Ctrl+O</c>, <c>Shift+F9</c>, <c>Alt+Left Arrow</c>,
+    /// with the modifiers in the Windows order Ctrl, Alt, Shift (<c>Alt+Shift+Down Arrow</c>).
     /// The modifier and key names are translated (German writes <c>Strg</c>).
     /// </summary>
     public static string KeyText(Keys keyData) {
@@ -144,12 +147,12 @@ internal static class HostCommands {
             parts.Add(_("Ctrl"));
         }
 
-        if ((keyData & Keys.Shift) != 0) {
-            parts.Add(_("Shift"));
-        }
-
         if ((keyData & Keys.Alt) != 0) {
             parts.Add(_("Alt"));
+        }
+
+        if ((keyData & Keys.Shift) != 0) {
+            parts.Add(_("Shift"));
         }
 
         parts.Add(KeyName(keyData & Keys.KeyCode));

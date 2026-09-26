@@ -1,4 +1,4 @@
-// Chooses the block Alt+Down Arrow and Alt+Up Arrow move to. Tab reaches only links and check
+// Chooses the block Alt+Shift+Down Arrow and Alt+Shift+Up Arrow move to. Tab reaches only links and check
 // boxes, and F9 only notes; a block carries no tabindex (Task 2 spike), so without these keys a
 // keyboard user who does not use a screen reader could not reach an ordinary block to press
 // Enter on it. Screen reader users move with their own reading cursor instead.
@@ -25,8 +25,8 @@ var PlanCakeBlocks = (function () {
             return -1;
         }
 
-        // No position yet: Alt+Down starts at the first item that reaches into the view (or lies
-        // below it), Alt+Up at the last one that reaches into it (or lies above it).
+        // No position yet: Alt+Shift+Down starts at the first item that reaches into the view (or lies
+        // below it), Alt+Shift+Up at the last one that reaches into it (or lies above it).
         if (forward) {
             for (let index = 0; index < items.length; index++) {
                 if (items[index].shown && items[index].bottom > 0) {

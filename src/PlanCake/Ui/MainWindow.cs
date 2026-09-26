@@ -852,7 +852,7 @@ public partial class MainWindow: Form {
     }
 
     /// <summary>
-    /// Alt+Down / Alt+Up: the page moves the focus to the next or previous block (or note) from
+    /// Alt+Shift+Down / Alt+Shift+Up: the page moves the focus to the next or previous block (or note) from
     /// the current position, so a keyboard user who does not use a screen reader can reach any
     /// block and press Enter on it. From the notes list the move happens in the document, which
     /// then gets the focus.

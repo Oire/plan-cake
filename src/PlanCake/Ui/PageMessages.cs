@@ -62,14 +62,16 @@ internal sealed record PreviousNoteMessage {
 }
 
 /// <summary>
-/// Host → page: moves to the next block or note after the current position (Alt+Down Arrow), so
-/// that a keyboard user without a screen reader can reach any block to annotate it.
+/// Host → page: moves to the next block or note after the current position (Alt+Shift+Down Arrow),
+/// so that a keyboard user without a screen reader can reach any block to annotate it.
 /// </summary>
 internal sealed record NextBlockMessage {
     public string Type { get; } = "nextBlock";
 }
 
-/// <summary>Host → page: moves to the previous block or note before the current position (Alt+Up Arrow).</summary>
+/// <summary>
+/// Host → page: moves to the previous block or note before the current position (Alt+Shift+Up Arrow).
+/// </summary>
 internal sealed record PreviousBlockMessage {
     public string Type { get; } = "previousBlock";
 }
