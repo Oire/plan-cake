@@ -981,12 +981,15 @@ check tasks off from the document.
 - [x] test: each shipped catalog compiles and loads (extend `LocalizationTests`): each loads
       from a regional name, translates every message of `messages.pot`, and applies its plural
       rule; the interface language list offers all six
-- [ ] **ask the user** to check with JAWS: View → Interface language → Русский applies at once
+- [x] **ask the user** to check with JAWS: View → Interface language → Русский applies at once
       (menus, dialogs, the page's announcements, the notes list column headers); every menu opens
       and its mnemonics work in Russian; Hebrew mirrors the window and the dialogs and JAWS reads
       the Hebrew interface; the document keeps its document language whatever the interface
-      language (an English plan is still read with the English voice)
-- [ ] validation commands pass
+      language (an English plan is still read with the English voice).
+      Results: all four pass (Russian applies live, its menus and mnemonics work and read
+      naturally, Hebrew mirrors the window and dialogs and JAWS reads them, the English plan keeps
+      the English voice)
+- [x] validation commands pass
 
 ### Task 16: User manual
 
