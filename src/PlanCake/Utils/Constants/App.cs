@@ -32,11 +32,10 @@ public static class App {
     /// The private key beside it is never committed.
     /// </summary>
     /// <remarks>
-    /// PLACEHOLDER until the key pair is generated. It is not a base64 key, so
-    /// <c>UpdateService.IsUsablePublicKey</c> refuses it and every update check is off (and
-    /// logged as such) until the real key is pasted here.
+    /// A value that is not a base64 32-byte key is refused by
+    /// <c>UpdateService.IsUsablePublicKey</c>, and every update check is then off (and logged as such).
     /// </remarks>
-    public const string UpdatePublicKey = "PLACEHOLDER: paste the contents of keys/NetSparkle_Ed25519.pub here";
+    public const string UpdatePublicKey = "3grlY7WRufCg+1vbmTzxPu8uSBDDo/BV887KX0pwDfM=";
 
     /// <summary>
     /// Subfolder of <see cref="DataFolder"/> that holds user-generated content.

@@ -935,19 +935,21 @@ check tasks off from the document.
       utility shows no dialog). `App.UpdatePublicKey` is a placeholder until the key pair
       exists: while it is not base64 of 32 bytes, no check runs, the log says why, and Help →
       Check for updates says the build has no update key
-- [ ] **stop and ask the user** to generate the key pair in the repository root, giving them
+- [x] **stop and ask the user** to generate the key pair in the repository root, giving them
       the commands to paste: `dotnet tool install --global
       NetSparkleUpdater.Tools.AppCastGenerator` (once per machine), then
       `netsparkle-generate-appcast --generate-keys --key-path keys`; then set
-      `App.UpdatePublicKey` from `keys/NetSparkle_Ed25519.pub`
+      `App.UpdatePublicKey` from `keys/NetSparkle_Ed25519.pub`.
+      Done: the user generated the pair in `keys/` (gitignored); `App.UpdatePublicKey` holds
+      the public key
 - [x] settings: check for updates on startup, background interval (General tab); Help → Check
       for updates
 - [x] `keys/` ignored in git as in SIC
 - [ ] **ask the user** to check with JAWS: the two new settings on the General tab ("Check for
       updates on startup" and "Check for updates in the background") are read with their
-      labels; Help → Check for updates with no update available announces it (with the
-      placeholder key it says the build has no update key); the startup check does not steal
-      the focus or interrupt reading
+      labels; Help → Check for updates with no update available announces it (until the
+      appcast exists at plancake.oire.dev it says "Unable to check for updates. Please try
+      again later."); the startup check does not steal the focus or interrupt reading
 - [x] validation commands pass
 
 ### Task 15: Translations
