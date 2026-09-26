@@ -117,16 +117,21 @@ internal partial class SettingsDialog: Form {
 
     /// <summary>
     /// Shows why the markers cannot be used next to them, and gives it to both boxes as their
-    /// description, so a screen reader says it with the box's label.
+    /// description, so a screen reader says it with the box's label. The closing marker box
+    /// always describes itself with the hint under it too, after the reason if there is one.
     /// </summary>
     private string? ShowMarkersError() {
         var error = DescribeMarkersError(openingMarkerTextBox.Text, closingMarkerTextBox.Text);
         markersErrorLabel.Text = error ?? String.Empty;
         openingMarkerTextBox.AccessibleDescription = error;
-        closingMarkerTextBox.AccessibleDescription = error;
+        closingMarkerTextBox.AccessibleDescription = ClosingMarkerDescription(error, closingMarkerHintLabel.Text);
 
         return error;
     }
+
+    /// <summary>What the closing marker box says after its label: the refusal reason, if any, then the hint.</summary>
+    internal static string ClosingMarkerDescription(string? error, string hint) =>
+        String.IsNullOrEmpty(error) ? hint : $"{error} {hint}";
 
     /// <summary>
     /// Ctrl+Tab and Ctrl+Shift+Tab land on the first field of the tab they switch to, not on the

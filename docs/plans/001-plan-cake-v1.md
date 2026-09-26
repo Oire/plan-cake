@@ -104,7 +104,8 @@ names; Task 1 adapts it.
   `src/Oire.WinForms.NativeControls/NativeContextMenu.cs:90`, `Resolver`, `Rebuild`),
   `NativeListView` (`Columns`, `Items` of `NativeListViewItem` with `Cells`, `ItemActivate`,
   `SelectedIndexChanged`, `EnsureVisible`). Its README explains attach/dispose ordering.
-- **New dependencies:** `Microsoft.Web.WebView2` (WinForms control), `Markdig`,
+- **New dependencies:** `UTF.Unknown` (Task 12: charset detection of files that are not
+  UTF-8; MPL-1.1, used unmodified), `Microsoft.Web.WebView2` (WinForms control), `Markdig`,
   `System.CommandLine`, `NetSparkleUpdater.SparkleUpdater` +
   `NetSparkleUpdater.UI.WinForms.NetCore`: the latest stable version of each (for the last
   three, the same major version SIC uses, so its code ports as is). Markdig's
@@ -329,7 +330,20 @@ decide which note triggers the later tasks build.**
       UTF-8"); writes back with the same encoding,
       BOM and line ending, atomically (temp file in the same folder + `File.Replace`, or
       `File.Move` when the target is gone); retries a locked file 5 times over about a second,
-      then throws `IOException`
+      then throws `IOException`.
+      ➕ Found in the Task 12 JAWS check: on a machine whose ANSI code page is UTF-8 (65001,
+      Windows' "Use Unicode UTF-8 for worldwide language support"), "the ANSI code page" is no
+      legacy encoding; a Windows-1251 file decoded with it became replacement characters, and
+      Convert to UTF-8 wrote them over the file. Now the legacy encoding comes from
+      `Notes/LegacyEncoding.cs`: the UTF.Unknown charset detector (a port of Mozilla's) when it
+      is at least 0.5 confident on at least 8 non-ASCII bytes (on a few words it guesses
+      wildly), then the code page of the document language (ru/uk → 1251, he → 1255, en/fr/de →
+      1252), then the ANSI code page unless it is 65001; the first that decodes the bytes
+      cleanly (no undefined byte, no U+FFFD, no C1 control character) wins. When none does,
+      the encoding is not recognized: the text is shown with replacement characters, the file
+      is read-only, never converted and never written (`MarkdownFile.IsUnrecognized`; rule in
+      `CLAUDE.md` → "File safety"). The ANSI code page stays injectable; tests in
+      `LegacyEncodingTests` inject 65001
 - [x] `NoteStore` operations, each taking the text the caller last rendered and throwing
       `StaleFileException` without writing if the file differs from it: `Add(afterBlock,
       text)`, `Edit(note, text)`, `Delete(note)`, `Clear()`; placement and indentation per
@@ -785,8 +799,10 @@ check tasks off from the document.
 - Modify: `src/PlanCake/Utils/Config.cs`, `src/PlanCake/Ui/MainWindow.cs`,
   `src/PlanCake/Ui/NoteDialog.cs` (it already took the Enter setting), `tests/PlanCake.Tests/ConfigTests.cs`,
   `src/PlanCake/Ui/HostCommands.cs`, `src/PlanCake/Ui/PageMessages.cs`, `src/PlanCake/web/app.js`,
-  `tests/PlanCake.Tests/HostCommandsTests.cs`, `tests/PlanCake.Tests/ShortcutsDialogTests.cs`;
-  create `tests/PlanCake.Tests/SettingsDialogTests.cs`
+  `tests/PlanCake.Tests/HostCommandsTests.cs`, `tests/PlanCake.Tests/ShortcutsDialogTests.cs`,
+  `src/PlanCake/Notes/MarkdownFile.cs`, `src/PlanCake/PlanCake.csproj` (UTF.Unknown), `CLAUDE.md`;
+  create `tests/PlanCake.Tests/SettingsDialogTests.cs`, `src/PlanCake/Notes/LegacyEncoding.cs`,
+  `tests/PlanCake.Tests/LegacyEncodingTests.cs`
 
 - [x] `Config` sections and defaults per Technical details → "Settings"; drop the template's
       `ConfirmExit` (nothing is ever unsaved). `CheckForUpdatesOnStartup` and
@@ -820,11 +836,33 @@ check tasks off from the document.
 - [x] tests: defaults, round trip of every new setting, invalid enum, marker or document
       language values in the file fall back to defaults (`ConfigTests`); the reasons for
       unusable markers (`SettingsDialogTests`)
+- [x] ➕ fix, found in the JAWS check (check 14): converting a Windows-1251 file destroyed its
+      Cyrillic on a machine whose ANSI code page is UTF-8. Legacy encodings are now detected
+      (Task 5's ➕ note) and a lossy decode is never written. Also: View → Document language
+      reads a file open read-only for its encoding again, since the new language's code page
+      may fit it
+- [x] ➕ from the logs of the JAWS check (each window is a process with a log of its own):
+      Convert to UTF-8 had been saved on in the settings-check window before windows-1251.md
+      was opened from the command line, so the second window converted it the moment it opened
+      it (logged as opened converted). The Settings dialog opened afterwards was the
+      settings-check window's, where the box was ticked because it had been saved so; nothing
+      but the dialog's OK sets it. That window had opened one file only, hence no previous or
+      next file; the log shows no reopen. Fixed on the way: every window keeps its own copy of
+      the settings, so a setting saved in one reached another only at its next start, and that
+      window's OK wrote its stale copy back. File → Settings now reads the file again before
+      showing the dialog, and what another window saved applies on OK or Cancel
+- [x] ➕ a hint under the Closing marker box, a real label, always shown: "Leave empty to use a
+      single marker: a note then runs from the opening marker to the end of its line"; it is
+      also the box's description, after the refusal reason when one is shown, so JAWS reads it
+      with the box. (A `[usernote]` opening marker with an empty closing one reads notes in
+      single-token mode, text `text[/usernote]`; the user keeps that as is)
 - [ ] **ask the user** to check with JAWS: the Settings dialog tabs (Ctrl+Tab between them,
       each control read with its real label); changing the interface language, the document
       language, the note markers, confirm-delete, confirm-task-toggle, the external change
       action, Enter on a block, Enter in the note dialog and ConvertToUtf8, each taking effect
-      without a restart; OK saves and Cancel / Escape discards
+      without a restart; OK saves and Cancel / Escape discards.
+      Results: checks 1-13 and 15 pass. Check 14 (ConvertToUtf8) failed: the file's Cyrillic
+      was destroyed (fixed above); re-check pending, with the closing marker hint
 - [x] validation commands pass
 
 ### Task 13: Command-line mode

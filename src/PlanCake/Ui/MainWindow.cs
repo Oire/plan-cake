@@ -367,8 +367,14 @@ public partial class MainWindow: Form {
 
         MarkdownFile file;
 
+        // The document language helps recognize the encoding of a file that is not UTF-8.
+        var documentLanguage = reopened ? _documentLanguage : Config.General.DefaultDocumentLanguage;
+
         try {
-            file = MarkdownFile.Open(fullPath, new MarkdownFileOptions(ConvertToUtf8: Config.Advanced.ConvertToUtf8));
+            file = MarkdownFile.Open(fullPath, new MarkdownFileOptions(
+                ConvertToUtf8: Config.Advanced.ConvertToUtf8,
+                DocumentLanguage: documentLanguage
+            ));
         } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
             Log.Warning(ex, "Unable to open {Path}: not found", path);
             ShowError(_("The file {0} does not exist.", path));
@@ -387,7 +393,7 @@ public partial class MainWindow: Form {
             }
 
             _position = position;
-            _documentLanguage = Config.General.DefaultDocumentLanguage;
+            _documentLanguage = documentLanguage;
         }
 
         _file = file;
@@ -417,8 +423,9 @@ public partial class MainWindow: Form {
         UpdateTitle();
 
         Log.Information(
-            "Opened {Path}: encoding={Encoding} bom={Bom} readOnly={ReadOnly} convertedFrom={ConvertedFrom} notes={Notes}",
-            file.Path, file.Encoding.WebName, file.HasBom, file.IsReadOnly, file.ConvertedFrom?.WebName, _render?.Notes.Count
+            "Opened {Path}: encoding={Encoding} bom={Bom} readOnly={ReadOnly} unrecognized={Unrecognized} convertedFrom={ConvertedFrom} notes={Notes}",
+            file.Path, file.Encoding.WebName, file.HasBom, file.IsReadOnly, file.IsUnrecognized, file.ConvertedFrom?.WebName,
+            _render?.Notes.Count
         );
 
         AnnounceFileState(file);
@@ -534,6 +541,10 @@ public partial class MainWindow: Form {
 
         if (file.ConvertedFrom is { } convertedFrom) {
             messages.Add(_("Converted from {0} to UTF-8.", EncodingName(convertedFrom)));
+        } else if (file.IsUnrecognized) {
+            messages.Add(_(
+                "The encoding of this file could not be recognized, so it was opened read-only and is never changed. Notes cannot be added to it."
+            ));
         } else if (file.IsReadOnly) {
             messages.Add(_(
                 "This file is not in UTF-8, so it was opened read-only as {0}. Notes cannot be added to it.",
@@ -1645,17 +1656,19 @@ public partial class MainWindow: Form {
             Config.Notes.ToMarkers(),
             Config.Advanced.ConvertToUtf8
         );
-        bool saveFailed;
+        var saveFailed = false;
+
+        // Every window is a process of its own with its own copy of the settings: read the file
+        // again, so the dialog shows (and OK keeps) what another window saved since.
+        Config.Load();
 
         using (var dialog = new SettingsDialog()) {
-            if (dialog.ShowDialog(this) != DialogResult.OK) {
-                ReturnFocus();
-                return;
+            if (dialog.ShowDialog(this) == DialogResult.OK) {
+                saveFailed = dialog.SaveFailed;
             }
-
-            saveFailed = dialog.SaveFailed;
         }
 
+        // After Cancel too: what another window saved applies here as well.
         ApplySettings(before);
 
         if (saveFailed) {
@@ -1692,7 +1705,7 @@ public partial class MainWindow: Form {
 
         // A file opened read-only because it is not UTF-8 is opened again, which converts it.
         if (Config.Advanced.ConvertToUtf8 && !before.ConvertToUtf8
-            && _file is { IsReadOnly: true, ConvertedFrom: null } file && !_fileMissing) {
+            && _file is { IsReadOnly: true, IsUnrecognized: false, ConvertedFrom: null } file && !_fileMissing) {
             LoadFile(file.Path, _position, recordHistory: false);
             needsRender = false;
         }
@@ -1764,7 +1777,15 @@ public partial class MainWindow: Form {
         }
 
         _documentLanguage = code;
-        RenderDocument(restorePosition: false);
+
+        // A file open read-only in a legacy encoding is read again: the new language may pick
+        // the right code page for it.
+        if (_file is { IsReadOnly: true } file && !_fileMissing) {
+            LoadFile(file.Path, _position, recordHistory: false);
+        } else {
+            RenderDocument(restorePosition: false);
+        }
+
         ReturnFocus();
         _announcer.Announce(_("Document language: {0}", LanguageList.NativeName(code)));
     }

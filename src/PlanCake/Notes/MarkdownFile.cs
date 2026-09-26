@@ -8,16 +8,21 @@ namespace Oire.PlanCake.Notes;
 /// instead of opening it read-only (the Advanced setting of the same name).
 /// </param>
 /// <param name="AnsiEncoding">
-/// The encoding that decodes such a file; <see langword="null"/> for the Windows ANSI code page.
-/// Tests pass Windows-1251 explicitly, whatever the machine's code page is.
+/// The Windows ANSI code page, the last encoding tried for such a file (see
+/// <see cref="LegacyEncoding"/>); <see langword="null"/> for the machine's. Tests inject it, so they
+/// do not depend on the machine: a code page of 65001 (UTF-8) is never used as a legacy encoding.
 /// </param>
 /// <param name="Retries">How many times a locked file is retried after the first attempt.</param>
 /// <param name="RetryDelay">The wait between two attempts; <see langword="null"/> for 200 ms.</param>
+/// <param name="DocumentLanguage">
+/// The document language, whose code page is tried when the charset detector is not sure.
+/// </param>
 internal sealed record MarkdownFileOptions(
     bool ConvertToUtf8 = false,
     Encoding? AnsiEncoding = null,
     int Retries = 5,
-    TimeSpan? RetryDelay = null
+    TimeSpan? RetryDelay = null,
+    string? DocumentLanguage = null
 ) {
     public static MarkdownFileOptions Default { get; } = new();
 }
@@ -28,9 +33,11 @@ internal sealed record MarkdownFileOptions(
 /// </summary>
 /// <remarks>
 /// A file is decoded from its BOM (UTF-8, UTF-16 LE or BE) or else as strict UTF-8. A file that
-/// is not valid in that encoding is decoded with the Windows ANSI code page and is then either
-/// read-only, so PlanCake cannot damage it, or, with <see cref="MarkdownFileOptions.ConvertToUtf8"/>,
-/// rewritten once as UTF-8 without BOM.
+/// is not valid in that encoding is decoded with the legacy encoding <see cref="LegacyEncoding"/>
+/// finds and is then either read-only, so PlanCake cannot damage it, or, with
+/// <see cref="MarkdownFileOptions.ConvertToUtf8"/>, rewritten once as UTF-8 without BOM. When no
+/// legacy encoding decodes it without loss, its encoding is not recognized: the text shown has
+/// replacement characters, and the file is never written, whatever the options say.
 /// </remarks>
 internal sealed class MarkdownFile {
     private static readonly byte[] _utf8Bom = [0xEF, 0xBB, 0xBF];
@@ -72,10 +79,17 @@ internal sealed class MarkdownFile {
     public string LineEnding { get; private set; } = "\n";
 
     /// <summary>
-    /// True when the file is not valid in its detected encoding and was decoded with the ANSI code
-    /// page without being converted: it is never written.
+    /// True when the file is not valid in its detected encoding and was decoded with a legacy
+    /// encoding without being converted, or its encoding was not recognized: it is never written.
     /// </summary>
     public bool IsReadOnly { get; private set; }
+
+    /// <summary>
+    /// True when no encoding decodes the file without loss: <see cref="Text"/> holds replacement
+    /// characters, and writing it would destroy what they stand for, so the file is read-only
+    /// and is never converted.
+    /// </summary>
+    public bool IsUnrecognized { get; private set; }
 
     /// <summary>
     /// The encoding the file was converted from when it was last read, or <see langword="null"/>;
@@ -102,16 +116,18 @@ internal sealed class MarkdownFile {
     public string Reload() {
         var bytes = WithRetries(() => ReadAllBytes(Path));
         var ansi = _options.AnsiEncoding ?? _systemAnsi.Value;
-        var decoded = Decode(bytes, ansi);
+        var decoded = Decode(bytes, ansi, _options.DocumentLanguage);
 
         Text = decoded.Text;
         Encoding = decoded.Encoding;
         HasBom = decoded.HasBom;
         LineEnding = DominantLineEnding(decoded.Text);
         IsReadOnly = decoded.IsFallback;
+        IsUnrecognized = decoded.IsLossy;
         ConvertedFrom = null;
 
-        if (decoded.IsFallback && _options.ConvertToUtf8) {
+        // Never a lossy decode: the replacement characters would be written over the original bytes.
+        if (decoded.IsFallback && !decoded.IsLossy && _options.ConvertToUtf8) {
             ConvertedFrom = decoded.Encoding;
             Encoding = new UTF8Encoding(false);
             HasBom = false;
@@ -131,7 +147,7 @@ internal sealed class MarkdownFile {
     public void Write(string text) {
         ArgumentNullException.ThrowIfNull(text);
 
-        if (IsReadOnly) {
+        if (IsReadOnly || IsUnrecognized) {
             throw new ReadOnlyFileException(
                 $"{Path} is not valid {Encoding.WebName} and is open read-only; it is never written."
             );
@@ -153,10 +169,19 @@ internal sealed class MarkdownFile {
     }
 
     /// <summary>The result of decoding a file's bytes.</summary>
-    /// <param name="IsFallback">True when the bytes were not valid and were decoded as ANSI.</param>
-    internal readonly record struct DecodedText(string Text, Encoding Encoding, bool HasBom, bool IsFallback);
+    /// <param name="IsFallback">True when the bytes were not valid in their Unicode encoding and were decoded with a legacy one.</param>
+    /// <param name="IsLossy">
+    /// True when no encoding decoded them without loss: the text holds replacement characters.
+    /// </param>
+    internal readonly record struct DecodedText(
+        string Text,
+        Encoding Encoding,
+        bool HasBom,
+        bool IsFallback,
+        bool IsLossy = false
+    );
 
-    internal static DecodedText Decode(byte[] bytes, Encoding ansiEncoding) {
+    internal static DecodedText Decode(byte[] bytes, Encoding ansiEncoding, string? documentLanguage = null) {
         var (encoding, bomLength) = bytes.AsSpan() switch {
             var span when span.StartsWith(_utf8Bom) => ((Encoding)new UTF8Encoding(true, true), _utf8Bom.Length),
             var span when span.StartsWith(_utf16LeBom) => (new UnicodeEncoding(false, true, true), _utf16LeBom.Length),
@@ -169,7 +194,16 @@ internal sealed class MarkdownFile {
 
             return new DecodedText(text, encoding, bomLength > 0, false);
         } catch (DecoderFallbackException) {
-            return new DecodedText(ansiEncoding.GetString(bytes), ansiEncoding, false, true);
+            foreach (var candidate in LegacyEncoding.Candidates(bytes, documentLanguage, ansiEncoding)) {
+                if (LegacyEncoding.TryDecodeCleanly(bytes, candidate) is { } legacyText) {
+                    return new DecodedText(legacyText, candidate, false, true);
+                }
+            }
+
+            // Shown with replacement characters so the user sees something, never written.
+            var lossy = new UTF8Encoding(false, false);
+
+            return new DecodedText(lossy.GetString(bytes), lossy, false, true, IsLossy: true);
         }
     }
 

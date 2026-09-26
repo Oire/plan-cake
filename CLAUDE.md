@@ -111,6 +111,15 @@ when that folder exists (portable mode, detected once at static init). Config fi
 root of the data folder (`PlanCake.cfg`); user content goes under the `data/` subfolder, so clearing user data
 never takes the settings with it.
 
+## File safety
+
+PlanCake never writes a file whose text came from a lossy decode (replacement characters,
+U+FFFD, introduced by decoding): it would destroy what they stand for. A file that is not UTF-8
+is decoded only with a legacy encoding that decodes it cleanly (`Notes/LegacyEncoding.cs`: the
+charset detector, then the document language's code page, then the ANSI code page unless that
+is UTF-8, 65001); when none does, the file stays read-only and is never converted, whatever
+the settings say. Tests inject the ANSI code page, so they never depend on the machine's.
+
 ## Error handling at startup
 
 `Program.Main` returns an `ExitCode` and installs handlers for `AppDomain.UnhandledException`

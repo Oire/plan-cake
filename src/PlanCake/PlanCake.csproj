@@ -63,6 +63,7 @@
     <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="sharpconfig-huanlin" Version="4.2.0" />
+    <PackageReference Include="UTF.Unknown" Version="2.7.0" />
   </ItemGroup>
 
   <ItemGroup>
