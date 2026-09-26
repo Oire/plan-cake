@@ -213,6 +213,8 @@ public partial class MainWindow: Form {
         bar.AddMenu(_("&View"), view => {
             CheckedWhen(view.AddCheckable(_("&Notes list"), _showNotesList, null, ToggleNotesList), () => _showNotesList);
             MenuCommand(view, _("&Switch pane"), HostCommand.SwitchPane);
+            EnabledWhen(view.Add(_("&Wider notes list"), null, () => ResizeNotesList(larger: true)), () => IsNotesListVisible);
+            EnabledWhen(view.Add(_("N&arrower notes list"), null, () => ResizeNotesList(larger: false)), () => IsNotesListVisible);
             view.AddSeparator();
 
             // Language names carry no mnemonics: each is written in its own language.
@@ -2165,6 +2167,28 @@ public partial class MainWindow: Form {
         }
 
         _announcer.Announce(_showNotesList ? _("Notes list shown") : _("Notes list hidden"));
+    }
+
+    /// <summary>
+    /// View → Wider notes list / Narrower notes list: the keyboard's way to move the splitter,
+    /// which is not a tab stop (Tab goes straight between the document and the list). Moves it a
+    /// step (<see cref="PaneSplit"/>) and says the list's new share.
+    /// </summary>
+    private void ResizeNotesList(bool larger) {
+        if (!IsNotesListVisible) {
+            return;
+        }
+
+        var total = splitContainer.Orientation == Orientation.Vertical ? splitContainer.Width : splitContainer.Height;
+        var available = total - splitContainer.SplitterWidth;
+        var list = available - splitContainer.SplitterDistance;
+        var size = PaneSplit.Resize(available, list, splitContainer.Panel2MinSize, splitContainer.Panel1MinSize, larger);
+
+        if (size != list) {
+            splitContainer.SplitterDistance = available - size;
+        }
+
+        _announcer.Announce(_("Notes list {0}%", PaneSplit.Percent(available, size)));
     }
 
     /// <summary>F6: from the document to the notes list and back; to the document while the list is hidden.</summary>

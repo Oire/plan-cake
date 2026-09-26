@@ -999,7 +999,8 @@ while PlanCake itself focuses it (Task 2 spike). Screen reader users are not aff
 reach every block with their own reading cursor.
 
 **Files:**
-- Create: `src/PlanCake/web/blocks.js`, `tests/PlanCake.Tests/BlockPickTests.cs`
+- Create: `src/PlanCake/web/blocks.js`, `tests/PlanCake.Tests/BlockPickTests.cs`,
+  `src/PlanCake/Ui/PaneSplit.cs`, `tests/PlanCake.Tests/PaneSplitTests.cs`
 - Modify: `src/PlanCake/Ui/HostCommands.cs`, `src/PlanCake/Ui/PageMessages.cs`,
   `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/web/app.js`, `src/PlanCake/web/index.html`,
   `src/PlanCake/locale/**`, `tests/PlanCake.Tests/HostCommandsTests.cs`,
@@ -1038,6 +1039,16 @@ reach every block with their own reading cursor.
       keys break nothing (whether JAWS passes them on or keeps them), JAWS stays out of forms
       mode, and reading with the virtual cursor works as before
 - [x] validation commands pass
+- [x] ➕ resize the panes without a mouse: the splitter between the document and the notes list
+      could only be dragged. View → Wider notes list / Narrower notes list (no shortcut keys:
+      new combinations keep colliding with screen readers), enabled while the list is shown,
+      move it a step of 10% of the room both panes share, snapped to whole steps, and never
+      below either pane's minimum size (the notes list 150 px, the document 200 px), and
+      announce the list's share, "Notes list 40%". The splitter stays out of the Tab order, so
+      Tab still goes straight between the document and the list. Not remembered across
+      sessions: the window size is not either. The step and the clamping are a pure function
+      (`Ui/PaneSplit.cs`, tested in `tests/PlanCake.Tests/PaneSplitTests.cs`); translated in
+      ru, uk, fr, he, de; mnemonics unique in every catalog (`MnemonicTests`)
 
 ### Task 16: User manual
 
@@ -1218,7 +1229,8 @@ instead, and Enter works on whatever block it is on.
   Open in editor (Ctrl+E), Export notes…, separator, Settings… (Ctrl+comma), separator,
   Exit (Alt+F4, display only)
 - **Edit:** Undo (Ctrl+Z), Redo (Ctrl+Y), separator, Delete all notes…
-- **View:** Notes list (checkable), Switch pane (F6), separator, Interface language ▸ (System
+- **View:** Notes list (checkable), Switch pane (F6), Wider notes list, Narrower notes list
+  (both enabled while the list is shown, Task 15a), separator, Interface language ▸ (System
   default, then each shipped language by native name), Document language ▸ (English, Русский,
   Українська, Français, עברית, Deutsch), separator, Zoom in (Ctrl+Plus), Zoom out
   (Ctrl+Minus), Reset zoom (Ctrl+0), separator, Back (Alt+Left), Forward (Alt+Right), Reload
