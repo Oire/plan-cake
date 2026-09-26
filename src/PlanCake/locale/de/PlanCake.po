@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-09-27 01:06:51+0200\n"
+"POT-Creation-Date: 2026-09-27 01:09:22+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:58+02:00\n"
 "Last-Translator: \n"
 "Language-Team: de\n"
@@ -101,7 +101,7 @@ msgstr "Nach &Updates suchen"
 msgid "&Copy block text"
 msgstr "Blocktext &kopieren"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:113
+#: ..\..\Ui\AboutDialog.Designer.cs:115
 msgid "&Copy info"
 msgstr "Info &kopieren"
 
@@ -454,7 +454,7 @@ msgstr "Eingabetaste im Noti&zdialog:"
 msgid "Error"
 msgstr "Fehler"
 
-#: ..\..\Program.cs:111 ..\..\Cli\CliRunner.cs:100
+#: ..\..\Cli\CliRunner.cs:100 ..\..\Program.cs:111
 #, csharp-format
 msgid "Error: {0}"
 msgstr "Fehler: {0}"
@@ -537,8 +537,8 @@ msgstr "Ungültiger Link"
 msgid "JSON files"
 msgstr "JSON-Dateien"
 
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:45 ..\..\Ui\ShortcutsDialog.cs:27
-#: ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.cs:27 ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:45
 msgid "Keyboard shortcuts"
 msgstr "Tastenkombinationen"
 
@@ -709,7 +709,7 @@ msgstr "Plus (Ziffernblock)"
 msgid "O&pening marker:"
 msgstr "An&fangsmarkierung:"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:132
+#: ..\..\Ui\AboutDialog.Designer.cs:134
 msgid "OK"
 msgstr "OK"
 
@@ -785,7 +785,7 @@ msgstr ""
 "PlanCake benötigt die Microsoft Edge WebView2-Runtime, die auf diesem "
 "Computer nicht installiert ist."
 
-#: ..\..\Ui\AboutDialog.Designer.cs:103
+#: ..\..\Ui\AboutDialog.Designer.cs:105
 msgid "PlanCake on GitHub"
 msgstr "PlanCake auf GitHub"
 
@@ -837,9 +837,9 @@ msgstr "Die Notizen als JSON ausgeben"
 msgid "R&eset zoom"
 msgstr "Zoom zu&rücksetzen"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:74
-msgid "Read and annotate Markdown files with a screen reader"
-msgstr "Markdown-Dateien mit einem Screenreader lesen und mit Notizen versehen"
+#: ..\..\Ui\AboutDialog.Designer.cs:75
+msgid "Read Markdown files comfortably and leave notes right where they belong"
+msgstr "Markdown-Dateien bequem lesen und Notizen genau dort hinterlassen, wo sie hingehören"
 
 #: ..\..\Ui\MainWindow.Designer.cs:122
 msgid "Ready"

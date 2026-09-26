@@ -22,7 +22,7 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Product>PlanCake</Product>
-    <Description>Read and annotate Markdown files with a screen reader</Description>
+    <Description>Read Markdown files comfortably and leave notes right where they belong</Description>
     <Company>Oire Software</Company>
     <Copyright>Copyright © 2026 Oire Software SARL.</Copyright>
     <!-- Version numbers come from GitVersion (see GitVersion.yml), never from a literal here.

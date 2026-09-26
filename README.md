@@ -1,6 +1,6 @@
 # 🥞 PlanCake
 
-Read and annotate Markdown files with a screen reader.
+Read Markdown files comfortably and leave notes right where they belong.
 
 PlanCake is a Windows desktop application that shows a Markdown file as properly rendered HTML,
 so a screen reader such as JAWS reads it with heading, list and table navigation instead of

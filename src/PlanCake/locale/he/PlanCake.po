@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-09-27 01:06:51+0200\n"
+"POT-Creation-Date: 2026-09-27 01:09:22+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:58+02:00\n"
 "Last-Translator: \n"
 "Language-Team: he\n"
@@ -99,7 +99,7 @@ msgstr "בדוק &עדכונים"
 msgid "&Copy block text"
 msgstr "העתק &טקסט של הבלוק"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:113
+#: ..\..\Ui\AboutDialog.Designer.cs:115
 msgid "&Copy info"
 msgstr "&העתק מידע"
 
@@ -446,7 +446,7 @@ msgstr "Enter ב&חלון ההערה:"
 msgid "Error"
 msgstr "שגיאה"
 
-#: ..\..\Program.cs:111 ..\..\Cli\CliRunner.cs:100
+#: ..\..\Cli\CliRunner.cs:100 ..\..\Program.cs:111
 #, csharp-format
 msgid "Error: {0}"
 msgstr "שגיאה: {0}"
@@ -527,8 +527,8 @@ msgstr "קישור לא תקין"
 msgid "JSON files"
 msgstr "קובצי JSON"
 
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:45 ..\..\Ui\ShortcutsDialog.cs:27
-#: ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.cs:27 ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:45
 msgid "Keyboard shortcuts"
 msgstr "קיצורי מקלדת"
 
@@ -697,7 +697,7 @@ msgstr "פלוס במקלדת הנומרית"
 msgid "O&pening marker:"
 msgstr "סמן &פתיחה:"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:132
+#: ..\..\Ui\AboutDialog.Designer.cs:134
 msgid "OK"
 msgstr "אישור"
 
@@ -773,7 +773,7 @@ msgstr ""
 "כדי לפעול, PlanCake זקוק ל-Microsoft Edge WebView2 Runtime, שאינו מותקן "
 "במחשב זה."
 
-#: ..\..\Ui\AboutDialog.Designer.cs:103
+#: ..\..\Ui\AboutDialog.Designer.cs:105
 msgid "PlanCake on GitHub"
 msgstr "PlanCake ב-GitHub"
 
@@ -821,9 +821,9 @@ msgstr "הצגת ההערות כ-JSON"
 msgid "R&eset zoom"
 msgstr "א&פס גודל תצוגה"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:74
-msgid "Read and annotate Markdown files with a screen reader"
-msgstr "קריאה של קובצי Markdown והוספת הערות אליהם בעזרת קורא מסך"
+#: ..\..\Ui\AboutDialog.Designer.cs:75
+msgid "Read Markdown files comfortably and leave notes right where they belong"
+msgstr "קריאה נוחה של קובצי Markdown והוספת הערות בדיוק במקום הנכון"
 
 #: ..\..\Ui\MainWindow.Designer.cs:122
 msgid "Ready"

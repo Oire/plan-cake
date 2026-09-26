@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-09-27 01:06:51+0200\n"
+"POT-Creation-Date: 2026-09-27 01:09:22+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: uk\n"
@@ -103,7 +103,7 @@ msgstr "Перевірити &оновлення"
 msgid "&Copy block text"
 msgstr "&Копіювати текст блоку"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:113
+#: ..\..\Ui\AboutDialog.Designer.cs:115
 msgid "&Copy info"
 msgstr "&Копіювати інформацію"
 
@@ -454,7 +454,7 @@ msgstr "Enter у вікні но&татки:"
 msgid "Error"
 msgstr "Помилка"
 
-#: ..\..\Program.cs:111 ..\..\Cli\CliRunner.cs:100
+#: ..\..\Cli\CliRunner.cs:100 ..\..\Program.cs:111
 #, csharp-format
 msgid "Error: {0}"
 msgstr "Помилка: {0}"
@@ -536,8 +536,8 @@ msgstr "Недопустиме посилання"
 msgid "JSON files"
 msgstr "Файли JSON"
 
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:45 ..\..\Ui\ShortcutsDialog.cs:27
-#: ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.cs:27 ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:45
 msgid "Keyboard shortcuts"
 msgstr "Комбінації клавіш"
 
@@ -706,7 +706,7 @@ msgstr "Плюс на цифровій клавіатурі"
 msgid "O&pening marker:"
 msgstr "Відкривальний &маркер:"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:132
+#: ..\..\Ui\AboutDialog.Designer.cs:134
 msgid "OK"
 msgstr "ОК"
 
@@ -782,7 +782,7 @@ msgstr ""
 "Для роботи PlanCake потрібне середовище виконання Microsoft Edge WebView2, а "
 "його не встановлено на цьому комп'ютері."
 
-#: ..\..\Ui\AboutDialog.Designer.cs:103
+#: ..\..\Ui\AboutDialog.Designer.cs:105
 msgid "PlanCake on GitHub"
 msgstr "PlanCake на GitHub"
 
@@ -831,10 +831,9 @@ msgstr "Вивести нотатки у форматі JSON"
 msgid "R&eset zoom"
 msgstr "Скину&ти масштаб"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:74
-msgid "Read and annotate Markdown files with a screen reader"
-msgstr ""
-"Читання файлів Markdown з програмою зчитування екрана та нотатки до них"
+#: ..\..\Ui\AboutDialog.Designer.cs:75
+msgid "Read Markdown files comfortably and leave notes right where they belong"
+msgstr "Зручне читання файлів Markdown і нотатки саме там, де вони потрібні"
 
 #: ..\..\Ui\MainWindow.Designer.cs:122
 msgid "Ready"

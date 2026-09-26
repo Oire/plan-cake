@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-09-27 01:06:51+0200\n"
+"POT-Creation-Date: 2026-09-27 01:09:22+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: ru\n"
@@ -103,7 +103,7 @@ msgstr "Проверить наличие о&бновлений"
 msgid "&Copy block text"
 msgstr "&Копировать текст блока"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:113
+#: ..\..\Ui\AboutDialog.Designer.cs:115
 msgid "&Copy info"
 msgstr "&Копировать информацию"
 
@@ -456,7 +456,7 @@ msgstr "Enter в диало&ге заметки:"
 msgid "Error"
 msgstr "Ошибка"
 
-#: ..\..\Program.cs:111 ..\..\Cli\CliRunner.cs:100
+#: ..\..\Cli\CliRunner.cs:100 ..\..\Program.cs:111
 #, csharp-format
 msgid "Error: {0}"
 msgstr "Ошибка: {0}"
@@ -538,8 +538,8 @@ msgstr "Недопустимая ссылка"
 msgid "JSON files"
 msgstr "Файлы JSON"
 
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:45 ..\..\Ui\ShortcutsDialog.cs:27
-#: ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.cs:27 ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:45
 msgid "Keyboard shortcuts"
 msgstr "Сочетания клавиш"
 
@@ -709,7 +709,7 @@ msgstr "Плюс на цифровой клавиатуре"
 msgid "O&pening marker:"
 msgstr "Открывающий &маркер:"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:132
+#: ..\..\Ui\AboutDialog.Designer.cs:134
 msgid "OK"
 msgstr "ОК"
 
@@ -785,7 +785,7 @@ msgstr ""
 "Для работы PlanCake нужна среда выполнения Microsoft Edge WebView2, а она не "
 "установлена на этом компьютере."
 
-#: ..\..\Ui\AboutDialog.Designer.cs:103
+#: ..\..\Ui\AboutDialog.Designer.cs:105
 msgid "PlanCake on GitHub"
 msgstr "PlanCake на GitHub"
 
@@ -835,9 +835,9 @@ msgstr "Вывести заметки в формате JSON"
 msgid "R&eset zoom"
 msgstr "С&бросить масштаб"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:74
-msgid "Read and annotate Markdown files with a screen reader"
-msgstr "Чтение файлов Markdown с программой экранного доступа и заметки к ним"
+#: ..\..\Ui\AboutDialog.Designer.cs:75
+msgid "Read Markdown files comfortably and leave notes right where they belong"
+msgstr "Удобное чтение файлов Markdown и заметки прямо там, где они нужны"
 
 #: ..\..\Ui\MainWindow.Designer.cs:122
 msgid "Ready"

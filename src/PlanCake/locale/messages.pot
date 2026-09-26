@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-09-27 01:06:51+0200\n"
-"PO-Revision-Date: 2026-09-27 01:06:51+0200\n"
+"POT-Creation-Date: 2026-09-27 01:09:22+0200\n"
+"PO-Revision-Date: 2026-09-27 01:09:22+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -93,7 +93,7 @@ msgstr ""
 msgid "&Copy block text"
 msgstr ""
 
-#: ..\..\Ui\AboutDialog.Designer.cs:113
+#: ..\..\Ui\AboutDialog.Designer.cs:115
 msgid "&Copy info"
 msgstr ""
 
@@ -447,8 +447,8 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
-#: ..\..\Program.cs:111
 #: ..\..\Cli\CliRunner.cs:100
+#: ..\..\Program.cs:111
 #, csharp-format
 msgid "Error: {0}"
 msgstr ""
@@ -530,9 +530,9 @@ msgstr ""
 msgid "JSON files"
 msgstr ""
 
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:45
 #: ..\..\Ui\ShortcutsDialog.cs:27
 #: ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:45
 msgid "Keyboard shortcuts"
 msgstr ""
 
@@ -702,7 +702,7 @@ msgstr ""
 msgid "O&pening marker:"
 msgstr ""
 
-#: ..\..\Ui\AboutDialog.Designer.cs:132
+#: ..\..\Ui\AboutDialog.Designer.cs:134
 msgid "OK"
 msgstr ""
 
@@ -776,7 +776,7 @@ msgid ""
 "this computer."
 msgstr ""
 
-#: ..\..\Ui\AboutDialog.Designer.cs:103
+#: ..\..\Ui\AboutDialog.Designer.cs:105
 msgid "PlanCake on GitHub"
 msgstr ""
 
@@ -823,8 +823,8 @@ msgstr ""
 msgid "R&eset zoom"
 msgstr ""
 
-#: ..\..\Ui\AboutDialog.Designer.cs:74
-msgid "Read and annotate Markdown files with a screen reader"
+#: ..\..\Ui\AboutDialog.Designer.cs:75
+msgid "Read Markdown files comfortably and leave notes right where they belong"
 msgstr ""
 
 #: ..\..\Ui\MainWindow.Designer.cs:122

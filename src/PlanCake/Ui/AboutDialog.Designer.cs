@@ -68,10 +68,12 @@ partial class AboutDialog {
         //
         descriptionLabel.Anchor = AnchorStyles.None;
         descriptionLabel.AutoSize = true;
+        descriptionLabel.MaximumSize = new Size(400, 0);
         descriptionLabel.Name = "descriptionLabel";
         descriptionLabel.Padding = new Padding(0, 0, 0, 8);
         descriptionLabel.TabIndex = 1;
-        descriptionLabel.Text = "Read and annotate Markdown files with a screen reader";
+        descriptionLabel.Text = "Read Markdown files comfortably and leave notes right where they belong";
+        descriptionLabel.TextAlign = ContentAlignment.TopCenter;
         descriptionLabel.UseMnemonic = false;
         //
         // versionLabel
