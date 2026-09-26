@@ -120,6 +120,24 @@ charset detector, then the document language's code page, then the ANSI code pag
 is UTF-8, 65001); when none does, the file stays read-only and is never converted, whatever
 the settings say. Tests inject the ANSI code page, so they never depend on the machine's.
 
+## Updates
+
+`Services/UpdateService.cs` (ported from SIC!) checks `App.AppcastUrl` with NetSparkle, and
+verifies the appcast and the download with the Ed25519 public key in `App.UpdatePublicKey`.
+While that constant is not a base64 32-byte key (the placeholder), every update check is off
+and the log says why; Help → Check for updates says so too. Every window is a process: only
+the first one still open does the startup and background checks (a named `Local\` mutex).
+
+The key pair lives in `keys/` at the repository root, which is gitignored: **never commit
+`keys/NetSparkle_Ed25519.priv`**. To make it (once, or when forking):
+
+```
+dotnet tool install --global NetSparkleUpdater.Tools.AppCastGenerator
+netsparkle-generate-appcast --generate-keys --key-path keys
+```
+
+then paste the contents of `keys/NetSparkle_Ed25519.pub` into `App.UpdatePublicKey`.
+
 ## Error handling at startup
 
 `Program.Main` returns an `ExitCode` and installs handlers for `AppDomain.UnhandledException`

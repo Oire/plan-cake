@@ -426,3 +426,6 @@ FodyWeavers.xsd
 
 # msgmerge backups
 *.bak
+
+# NetSparkle signing keys: the private key must never be committed (see "Updates" in CLAUDE.md).
+keys/

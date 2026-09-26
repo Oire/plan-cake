@@ -58,6 +58,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.401" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
+    <PackageReference Include="NetSparkleUpdater.SparkleUpdater" Version="3.1.0" />
+    <PackageReference Include="NetSparkleUpdater.UI.WinForms.NetCore" Version="3.1.0" />
     <PackageReference Include="Oire.WinForms.NativeControls" Version="1.2.0" />
     <PackageReference Include="Serilog" Version="4.4.0" />
     <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />

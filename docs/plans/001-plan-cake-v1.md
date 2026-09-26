@@ -919,21 +919,36 @@ check tasks off from the document.
 ### Task 14: Updates
 
 **Files:**
-- Create: `src/PlanCake/Services/UpdateService.cs`, `src/PlanCake/Utils/Enums/UpdateCheckInterval.cs`
+- Create: `src/PlanCake/Services/UpdateService.cs`, `src/PlanCake/Utils/Enums/UpdateCheckInterval.cs`,
+  `src/PlanCake/Services/UpdateCheckOutcome.cs`, `tests/PlanCake.Tests/UpdateServiceTests.cs`
 - Modify: `src/PlanCake/Utils/Constants/App.cs`, `src/PlanCake/Utils/Config.cs`,
-  `src/PlanCake/Ui/SettingsDialog.cs`, `src/PlanCake/Ui/MainWindow.cs`, `.gitignore`
+  `src/PlanCake/Ui/SettingsDialog.cs`, `src/PlanCake/Ui/MainWindow.cs`, `.gitignore`,
+  `src/PlanCake/PlanCake.csproj` (NetSparkle 3.1.0), `CLAUDE.md`, `tests/PlanCake.Tests/ConfigTests.cs`,
+  `tests/PlanCake.Tests/SettingsDialogTests.cs`
 
-- [ ] port SIC's `UpdateService` and `UpdateCheckInterval`; `App.AppcastUrl` =
-      `https://plancake.oire.dev/appcast.xml`
+- [x] port SIC's `UpdateService` and `UpdateCheckInterval`; `App.AppcastUrl` =
+      `https://plancake.oire.dev/appcast.xml`.
+      Found while building it: every window is a process, so only the first one still open
+      does the startup and background checks (a named `Local\` mutex); otherwise opening five
+      plans checked five times and could offer one update five times. Help → Check for updates
+      works in every window. The service returns the outcome and `MainWindow` says it (a
+      utility shows no dialog). `App.UpdatePublicKey` is a placeholder until the key pair
+      exists: while it is not base64 of 32 bytes, no check runs, the log says why, and Help →
+      Check for updates says the build has no update key
 - [ ] **stop and ask the user** to generate the key pair in the repository root, giving them
       the commands to paste: `dotnet tool install --global
       NetSparkleUpdater.Tools.AppCastGenerator` (once per machine), then
       `netsparkle-generate-appcast --generate-keys --key-path keys`; then set
       `App.UpdatePublicKey` from `keys/NetSparkle_Ed25519.pub`
-- [ ] settings: check for updates on startup, background interval (General tab); Help → Check
+- [x] settings: check for updates on startup, background interval (General tab); Help → Check
       for updates
-- [ ] `keys/` ignored in git as in SIC
-- [ ] validation commands pass
+- [x] `keys/` ignored in git as in SIC
+- [ ] **ask the user** to check with JAWS: the two new settings on the General tab ("Check for
+      updates on startup" and "Check for updates in the background") are read with their
+      labels; Help → Check for updates with no update available announces it (with the
+      placeholder key it says the build has no update key); the startup check does not steal
+      the focus or interrupt reading
+- [x] validation commands pass
 
 ### Task 15: Translations
 

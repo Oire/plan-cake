@@ -83,7 +83,23 @@ internal partial class SettingsDialog: Form {
             new Choice<NoteEnterAction>(NoteEnterAction.Save, _("Saves the note ({0} starts a new line)", ctrlEnter)),
             new Choice<NoteEnterAction>(NoteEnterAction.NewLine, _("Starts a new line ({0} saves the note)", ctrlEnter)),
         ]);
+
+        updateIntervalComboBox.Items.AddRange([
+            .. UpdateIntervalOptions().Select(option => new Choice<UpdateCheckInterval>(option.Interval, option.Text)),
+        ]);
     }
+
+    /// <summary>
+    /// The background update check intervals the dialog offers, in the order of
+    /// <see cref="UpdateCheckInterval"/> (most frequent first, never last), in the interface language.
+    /// </summary>
+    internal static IReadOnlyList<(UpdateCheckInterval Interval, string Text)> UpdateIntervalOptions() => [
+        (UpdateCheckInterval.Daily, _("Once a day")),
+        (UpdateCheckInterval.EveryThreeDays, _("Every 3 days")),
+        (UpdateCheckInterval.Weekly, _("Once a week")),
+        (UpdateCheckInterval.Monthly, _("Once a month")),
+        (UpdateCheckInterval.Never, _("Never")),
+    ];
 
     private void LoadSettings() {
         var general = Config.General;
@@ -95,6 +111,8 @@ internal partial class SettingsDialog: Form {
         confirmNoteDeleteCheckBox.Checked = general.ConfirmNoteDelete;
         confirmTaskToggleCheckBox.Checked = general.ConfirmTaskToggle;
         showNotesListCheckBox.Checked = general.ShowNotesList;
+        checkUpdatesOnStartupCheckBox.Checked = general.CheckForUpdatesOnStartup;
+        Select(updateIntervalComboBox, general.UpdateCheckInterval);
 
         openingMarkerTextBox.Text = notes.OpeningMarker;
         closingMarkerTextBox.Text = notes.ClosingMarker;
@@ -171,6 +189,8 @@ internal partial class SettingsDialog: Form {
         general.ConfirmNoteDelete = confirmNoteDeleteCheckBox.Checked;
         general.ConfirmTaskToggle = confirmTaskToggleCheckBox.Checked;
         general.ShowNotesList = showNotesListCheckBox.Checked;
+        general.CheckForUpdatesOnStartup = checkUpdatesOnStartupCheckBox.Checked;
+        general.UpdateCheckInterval = Selected<UpdateCheckInterval>(updateIntervalComboBox);
 
         notes.OpeningMarker = openingMarkerTextBox.Text;
         notes.ClosingMarker = closingMarkerTextBox.Text;

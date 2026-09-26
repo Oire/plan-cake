@@ -56,7 +56,7 @@ internal static class Config {
 
     #region Config section classes
 
-    /// <summary>App-level settings: languages, confirmations, the window.</summary>
+    /// <summary>App-level settings: languages, confirmations, the window, updates.</summary>
     public class SectionGeneral {
         /// <summary>
         /// The interface language: a culture name such as <c>"fr"</c>, or
@@ -81,6 +81,16 @@ internal static class Config {
 
         /// <summary>Whether the notes list beside the document is shown when a window opens.</summary>
         public bool ShowNotesList { get; set; } = true;
+
+        /// <summary>Check for updates once when PlanCake starts, silently unless there is one.</summary>
+        public bool CheckForUpdatesOnStartup { get; set; } = true;
+
+        /// <summary>
+        /// How often to check for updates in the background while PlanCake runs;
+        /// <see cref="UpdateCheckInterval.Never"/> turns it off. Independent of
+        /// <see cref="CheckForUpdatesOnStartup"/>.
+        /// </summary>
+        public UpdateCheckInterval UpdateCheckInterval { get; set; } = UpdateCheckInterval.Weekly;
     }
 
     /// <summary>How notes are written and how the keyboard adds them.</summary>

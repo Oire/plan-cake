@@ -73,6 +73,8 @@ public class ConfigTests: IDisposable {
         general.ConfirmTaskToggle.Should().BeTrue();
         general.ExternalChangeAction.Should().Be(ExternalChangeAction.AutoReload);
         general.ShowNotesList.Should().BeTrue();
+        general.CheckForUpdatesOnStartup.Should().BeTrue();
+        general.UpdateCheckInterval.Should().Be(UpdateCheckInterval.Weekly);
         notes.OpeningMarker.Should().Be("[usernote]");
         notes.ClosingMarker.Should().Be("[/usernote]");
         notes.BlockEnterAction.Should().Be(BlockEnterAction.AddNote);
@@ -90,6 +92,8 @@ public class ConfigTests: IDisposable {
         Config.General.ConfirmTaskToggle = false;
         Config.General.ExternalChangeAction = ExternalChangeAction.Ask;
         Config.General.ShowNotesList = false;
+        Config.General.CheckForUpdatesOnStartup = false;
+        Config.General.UpdateCheckInterval = UpdateCheckInterval.Never;
         Config.Notes.OpeningMarker = "<<note>>";
         Config.Notes.ClosingMarker = "<</note>>";
         Config.Notes.BlockEnterAction = BlockEnterAction.ContextMenu;
@@ -105,6 +109,8 @@ public class ConfigTests: IDisposable {
         Config.General.ConfirmTaskToggle.Should().BeFalse();
         Config.General.ExternalChangeAction.Should().Be(ExternalChangeAction.Ask);
         Config.General.ShowNotesList.Should().BeFalse();
+        Config.General.CheckForUpdatesOnStartup.Should().BeFalse();
+        Config.General.UpdateCheckInterval.Should().Be(UpdateCheckInterval.Never);
         Config.Notes.OpeningMarker.Should().Be("<<note>>");
         Config.Notes.ClosingMarker.Should().Be("<</note>>");
         Config.Notes.BlockEnterAction.Should().Be(BlockEnterAction.ContextMenu);
@@ -167,6 +173,19 @@ public class ConfigTests: IDisposable {
         Config.General.Language.Should().Be("ru");
         Config.General.ConfirmNoteDelete.Should().BeFalse();
         Config.Notes.NoteEnterAction.Should().Be(NoteEnterAction.NewLine);
+    }
+
+    [Theory]
+    [InlineData("Hourly")]
+    [InlineData("99")]
+    [InlineData("")]
+    public void Load_WithAnInvalidUpdateCheckInterval_FallsBackToWeekly(string interval) {
+        WriteFile($"[General]\nUpdateCheckInterval = {interval}\nCheckForUpdatesOnStartup = False\n");
+
+        Config.Load();
+
+        Config.General.UpdateCheckInterval.Should().Be(UpdateCheckInterval.Weekly);
+        Config.General.CheckForUpdatesOnStartup.Should().BeFalse();
     }
 
     [Fact]
@@ -243,6 +262,8 @@ public class ConfigTests: IDisposable {
         Config.General.ConfirmTaskToggle.Should().BeTrue();
         Config.General.ExternalChangeAction.Should().Be(ExternalChangeAction.AutoReload);
         Config.General.ShowNotesList.Should().BeTrue();
+        Config.General.CheckForUpdatesOnStartup.Should().BeTrue();
+        Config.General.UpdateCheckInterval.Should().Be(UpdateCheckInterval.Weekly);
         Config.Notes.ToMarkers().Should().Be(NoteMarkers.Default);
         Config.Notes.BlockEnterAction.Should().Be(BlockEnterAction.AddNote);
         Config.Notes.NoteEnterAction.Should().Be(NoteEnterAction.Save);

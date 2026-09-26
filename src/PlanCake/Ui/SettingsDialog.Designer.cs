@@ -27,6 +27,9 @@ partial class SettingsDialog {
         confirmNoteDeleteCheckBox = new CheckBox();
         confirmTaskToggleCheckBox = new CheckBox();
         showNotesListCheckBox = new CheckBox();
+        checkUpdatesOnStartupCheckBox = new CheckBox();
+        updateIntervalLabel = new Label();
+        updateIntervalComboBox = new ComboBox();
 
         notesTab = new TabPage();
         notesLayout = new TableLayoutPanel();
@@ -95,7 +98,9 @@ partial class SettingsDialog {
         generalLayout.ColumnCount = 2;
         generalLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         generalLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        generalLayout.RowCount = 7;
+        generalLayout.RowCount = 9;
+        generalLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        generalLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         generalLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         generalLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         generalLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
@@ -115,6 +120,10 @@ partial class SettingsDialog {
         generalLayout.SetColumnSpan(confirmTaskToggleCheckBox, 2);
         generalLayout.Controls.Add(showNotesListCheckBox, 0, 5);
         generalLayout.SetColumnSpan(showNotesListCheckBox, 2);
+        generalLayout.Controls.Add(checkUpdatesOnStartupCheckBox, 0, 6);
+        generalLayout.SetColumnSpan(checkUpdatesOnStartupCheckBox, 2);
+        generalLayout.Controls.Add(updateIntervalLabel, 0, 7);
+        generalLayout.Controls.Add(updateIntervalComboBox, 1, 7);
         generalLayout.Dock = DockStyle.Fill;
         generalLayout.Name = "generalLayout";
         generalLayout.TabIndex = 0;
@@ -193,6 +202,31 @@ partial class SettingsDialog {
         showNotesListCheckBox.Name = "showNotesListCheckBox";
         showNotesListCheckBox.TabIndex = 8;
         showNotesListCheckBox.Text = "Show the notes &list";
+        //
+        // checkUpdatesOnStartupCheckBox
+        //
+        checkUpdatesOnStartupCheckBox.Anchor = AnchorStyles.Left;
+        checkUpdatesOnStartupCheckBox.AutoSize = true;
+        checkUpdatesOnStartupCheckBox.Margin = new Padding(3, 8, 3, 3);
+        checkUpdatesOnStartupCheckBox.Name = "checkUpdatesOnStartupCheckBox";
+        checkUpdatesOnStartupCheckBox.TabIndex = 9;
+        checkUpdatesOnStartupCheckBox.Text = "Check for &updates on startup";
+        //
+        // updateIntervalLabel
+        //
+        updateIntervalLabel.Anchor = AnchorStyles.Left;
+        updateIntervalLabel.AutoSize = true;
+        updateIntervalLabel.Margin = new Padding(3, 6, 8, 3);
+        updateIntervalLabel.Name = "updateIntervalLabel";
+        updateIntervalLabel.TabIndex = 10;
+        updateIntervalLabel.Text = "Check for updates in the &background:";
+        //
+        // updateIntervalComboBox
+        //
+        updateIntervalComboBox.Dock = DockStyle.Fill;
+        updateIntervalComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        updateIntervalComboBox.Name = "updateIntervalComboBox";
+        updateIntervalComboBox.TabIndex = 11;
         //
         // notesTab
         //
@@ -358,7 +392,7 @@ partial class SettingsDialog {
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         CancelButton = cancelButton;
-        ClientSize = new Size(520, 340);
+        ClientSize = new Size(520, 390);
         Controls.Add(mainLayout);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -399,6 +433,9 @@ partial class SettingsDialog {
     private CheckBox confirmNoteDeleteCheckBox;
     private CheckBox confirmTaskToggleCheckBox;
     private CheckBox showNotesListCheckBox;
+    private CheckBox checkUpdatesOnStartupCheckBox;
+    private Label updateIntervalLabel;
+    private ComboBox updateIntervalComboBox;
 
     private TabPage notesTab;
     private TableLayoutPanel notesLayout;

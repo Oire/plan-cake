@@ -1,11 +1,15 @@
 using AwesomeAssertions;
 using Oire.PlanCake.Ui;
 using Oire.PlanCake.Utils;
+using Oire.PlanCake.Utils.Enums;
 using Xunit;
 
 namespace Oire.PlanCake.Tests;
 
-/// <summary>The reason the Settings dialog shows next to markers that cannot be used.</summary>
+/// <summary>
+/// The reason the Settings dialog shows next to markers that cannot be used, and the choices it
+/// offers.
+/// </summary>
 [Collection(LocalizationCollection.Name)]
 public class SettingsDialogTests {
     public SettingsDialogTests() {
@@ -30,4 +34,13 @@ public class SettingsDialogTests {
     [InlineData("\"note", "note\"", "A marker cannot start or end with a double quote.")]
     public void DescribeMarkersError_GivesTheReason(string opening, string closing, string expected) =>
         SettingsDialog.DescribeMarkersError(opening, closing).Should().Be(expected);
+
+    [Fact]
+    public void UpdateIntervalOptions_OfferEveryIntervalOnceMostFrequentFirst() {
+        var options = SettingsDialog.UpdateIntervalOptions();
+
+        options.Select(option => option.Interval).Should().Equal(Enum.GetValues<UpdateCheckInterval>());
+        options.Select(option => option.Text).Should()
+            .Equal("Once a day", "Every 3 days", "Once a week", "Once a month", "Never");
+    }
 }

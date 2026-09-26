@@ -23,6 +23,21 @@ public static class App {
     /// <summary>The source repository, linked from the About dialog.</summary>
     public const string RepoUrl = "https://github.com/Oire/plan-cake";
 
+    /// <summary>The NetSparkle appcast the update checks read.</summary>
+    public const string AppcastUrl = "https://plancake.oire.dev/appcast.xml";
+
+    /// <summary>
+    /// The Ed25519 public key the appcast and the downloads are verified with: the contents of
+    /// <c>keys/NetSparkle_Ed25519.pub</c> (base64 of 32 bytes; see "Updates" in <c>CLAUDE.md</c>).
+    /// The private key beside it is never committed.
+    /// </summary>
+    /// <remarks>
+    /// PLACEHOLDER until the key pair is generated. It is not a base64 key, so
+    /// <c>UpdateService.IsUsablePublicKey</c> refuses it and every update check is off (and
+    /// logged as such) until the real key is pasted here.
+    /// </remarks>
+    public const string UpdatePublicKey = "PLACEHOLDER: paste the contents of keys/NetSparkle_Ed25519.pub here";
+
     /// <summary>
     /// Subfolder of <see cref="DataFolder"/> that holds user-generated content.
     /// Config files stay at the root of <see cref="DataFolder"/>

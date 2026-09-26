@@ -123,6 +123,18 @@ public partial class MainWindow: Form {
     /// </summary>
     private string? _announceWhenReady;
 
+    /// <summary>
+    /// The update checks, created once the window is shown (NetSparkle's windows need the UI
+    /// thread); <see langword="null"/> before that, and in a build without an update key.
+    /// </summary>
+    private UpdateService? _updateService;
+
+    /// <summary>True once <see cref="_updateService"/> has been set up (or found impossible).</summary>
+    private bool _updatesInitialized;
+
+    /// <summary>True while Help → Check for updates is checking: a second request is ignored.</summary>
+    private bool _checkingUpdates;
+
     public MainWindow() : this(null) { }
 
     /// <param name="initialFile">The file to open once the window is up, from the command line.</param>
@@ -247,7 +259,7 @@ public partial class MainWindow: Form {
             // Task 16: User manual.
             help.Add(_("&Keyboard shortcuts"), null, ShowShortcuts);
             help.AddSeparator();
-            // Task 14: Check for updates.
+            help.Add(_("&Check for updates"), null, CheckForUpdates);
             MenuCommand(help, _("&About PlanCake"), HostCommand.About);
         });
 
@@ -300,6 +312,71 @@ public partial class MainWindow: Form {
         }
 
         base.WndProc(ref m);
+    }
+
+    /// <summary>
+    /// Sets up the update checks once the window is visible: the silent startup check and the
+    /// background checks, each as Settings says, in the first PlanCake window only
+    /// (<see cref="UpdateService.DoesBackgroundChecks"/>).
+    /// </summary>
+    protected override void OnShown(EventArgs e) {
+        base.OnShown(e);
+        InitializeUpdates();
+    }
+
+    private void InitializeUpdates() {
+        if (_updatesInitialized || StartupFailed || IsDisposed) {
+            return;
+        }
+
+        _updatesInitialized = true;
+        _updateService = UpdateService.Create();
+
+        if (_updateService is not { DoesBackgroundChecks: true } updates) {
+            return;
+        }
+
+        updates.ConfigurePeriodicChecks(Config.General.UpdateCheckInterval);
+
+        if (Config.General.CheckForUpdatesOnStartup) {
+            // Fire and forget: the check never throws, says nothing unless there is an update,
+            // and never takes the focus otherwise. A named local, since _ is the gettext method here.
+            var startupCheck = updates.CheckForUpdatesAsync();
+            GC.KeepAlive(startupCheck);
+        }
+    }
+
+    /// <summary>
+    /// Help → Check for updates: an available update shows NetSparkle's window; every other
+    /// outcome (up to date, skipped, no network, a build without an update key) is said in a
+    /// message box.
+    /// </summary>
+    private async void CheckForUpdates() {
+        if (_checkingUpdates) {
+            return;
+        }
+
+        _checkingUpdates = true;
+
+        try {
+            var outcome = _updateService is { } updates
+                ? await updates.CheckForUpdatesAsync()
+                : UpdateCheckOutcome.NotConfigured;
+
+            if (IsDisposed) {
+                return;
+            }
+
+            if (UpdateService.Describe(outcome) is { } message) {
+                var icon = outcome is UpdateCheckOutcome.UpToDate or UpdateCheckOutcome.Skipped
+                    ? MessageBoxIcon.Information
+                    : MessageBoxIcon.Warning;
+                DialogHelper.Show(message, _("Check for updates"), MessageBoxButtons.OK, icon);
+                ReturnFocus();
+            }
+        } finally {
+            _checkingUpdates = false;
+        }
     }
 
     protected override async void OnLoad(EventArgs e) {
@@ -1767,6 +1844,10 @@ public partial class MainWindow: Form {
             needsRender = false;
         }
 
+        // Does nothing when the interval has not changed, or in a window that does not do the
+        // background checks.
+        _updateService?.ConfigurePeriodicChecks(general.UpdateCheckInterval);
+
         if (needsRender) {
             RenderDocument(restorePosition: false);
         }
@@ -2094,6 +2175,8 @@ public partial class MainWindow: Form {
 
         _instance?.Dispose();
         _instance = null;
+        _updateService?.Dispose();
+        _updateService = null;
 
         // Before the handles go: the menus need the windows they belong to while they are released.
         _menuBar?.Dispose();
