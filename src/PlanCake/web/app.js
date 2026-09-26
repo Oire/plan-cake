@@ -228,6 +228,64 @@
         focusElement(next);
     }
 
+    // The places Alt+Down and Alt+Up stop at: every block and note, except a block that only
+    // repeats the one around it (the <p> of a loose list item carries the item's own lines).
+    function blockStops() {
+        return Array.from(main.querySelectorAll(targetSelector)).filter(function (element) {
+            if (isNote(element) || !element.parentElement) {
+                return true;
+            }
+
+            const outer = element.parentElement.closest(blockSelector);
+            return !outer || !main.contains(outer) || isNote(outer)
+                || outer.getAttribute("data-lines") !== element.getAttribute("data-lines");
+        });
+    }
+
+    // The index in `stops` of the stop the current position is (or sits in), or -1.
+    function currentStop(stops) {
+        let element = current !== null && main.contains(current) ? current : null;
+
+        while (element) {
+            const index = stops.indexOf(element);
+
+            if (index >= 0) {
+                return index;
+            }
+
+            element = element.parentElement ? element.parentElement.closest(targetSelector) : null;
+
+            if (element && !main.contains(element)) {
+                element = null;
+            }
+        }
+
+        return -1;
+    }
+
+    // Alt+Down / Alt+Up: the next or previous block or note from the current position (the one
+    // the user last acted on or the page last focused), or, with none, from the view. It gets
+    // the focus the way F9 gives it to a note, which also scrolls it into view and shows the
+    // focus outline, so Enter and the Applications key then act on it.
+    function moveToBlock(forward) {
+        const stops = blockStops();
+        const items = stops.map(function (element) {
+            const shown = element.getClientRects().length > 0;
+            const rect = shown ? element.getBoundingClientRect() : null;
+            return { top: rect ? rect.top : 0, bottom: rect ? rect.bottom : 0, shown: shown };
+        });
+        const index = PlanCakeBlocks.pick(items, currentStop(stops), forward, window.innerHeight);
+
+        if (index < 0) {
+            post({ type: "noMoreBlocks" });
+            return;
+        }
+
+        const next = stops[index];
+        setCurrent(next);
+        focusElement(next);
+    }
+
     function showNoDocument() {
         main.textContent = "";
         main.removeAttribute("lang");
@@ -508,6 +566,12 @@
                     break;
                 case "previousNote":
                     moveToNote(false);
+                    break;
+                case "nextBlock":
+                    moveToBlock(true);
+                    break;
+                case "previousBlock":
+                    moveToBlock(false);
                     break;
             }
         });

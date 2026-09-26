@@ -62,6 +62,19 @@ internal sealed record PreviousNoteMessage {
 }
 
 /// <summary>
+/// Host → page: moves to the next block or note after the current position (Alt+Down Arrow), so
+/// that a keyboard user without a screen reader can reach any block to annotate it.
+/// </summary>
+internal sealed record NextBlockMessage {
+    public string Type { get; } = "nextBlock";
+}
+
+/// <summary>Host → page: moves to the previous block or note before the current position (Alt+Up Arrow).</summary>
+internal sealed record PreviousBlockMessage {
+    public string Type { get; } = "previousBlock";
+}
+
+/// <summary>
 /// The page protocol of Technical details → "Page protocol" in the PlanCake plan: the names of
 /// the messages the page sends, reading their properties, and the JSON the host sends.
 /// </summary>
@@ -100,6 +113,9 @@ internal static class PageMessages {
 
     /// <summary><c>nextNote</c> or <c>previousNote</c> found no note in that direction.</summary>
     public const string NoMoreNotes = "noMoreNotes";
+
+    /// <summary><c>nextBlock</c> or <c>previousBlock</c> found no block in that direction.</summary>
+    public const string NoMoreBlocks = "noMoreBlocks";
 
     /// <summary>
     /// Backspace in the page, outside any text field: go back to the previous file. Covers the

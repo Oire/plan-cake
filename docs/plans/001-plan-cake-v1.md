@@ -991,6 +991,54 @@ check tasks off from the document.
       the English voice)
 - [x] validation commands pass
 
+### ➕ Task 15a: Move from block to block with the keyboard
+
+A sighted user with only a keyboard could not reach an ordinary block to annotate it: Tab
+reaches only links and check boxes, F9 only notes, and a block carries `tabindex="-1"` only
+while PlanCake itself focuses it (Task 2 spike). Screen reader users are not affected: they
+reach every block with their own reading cursor.
+
+**Files:**
+- Create: `src/PlanCake/web/blocks.js`, `tests/PlanCake.Tests/BlockPickTests.cs`
+- Modify: `src/PlanCake/Ui/HostCommands.cs`, `src/PlanCake/Ui/PageMessages.cs`,
+  `src/PlanCake/Ui/MainWindow.cs`, `src/PlanCake/web/app.js`, `src/PlanCake/web/index.html`,
+  `src/PlanCake/locale/**`, `tests/PlanCake.Tests/HostCommandsTests.cs`,
+  `tests/PlanCake.Tests/PageMessagesTests.cs`
+
+- [x] check the keys are free: Alt+Down Arrow and Alt+Up Arrow have no default action on an
+      element that is not a form control, the page never sees them anyway (the host handles
+      them as accelerator keys, as it does Alt+Left Arrow), and the native menu bar opens only
+      on an Alt released without another key. JAWS's default key map binds them to
+      `OpenListBox` / `CloseListBox`, scripts that send the same keys on to the application;
+      screen readers may still keep them, which is acceptable (Technical details → Keyboard)
+- [x] host commands `NextBlock` (Alt+Down Arrow) and `PreviousBlock` (Alt+Up Arrow) in
+      `HostCommands`, so they work with the focus in the document and in the notes list (from
+      the list the move happens in the document, which gets the focus); the shortcuts dialog
+      lists them from the table
+- [x] page messages `nextBlock` / `previousBlock` (host → page) and `noMoreBlocks` (page →
+      host), which the host announces as "No more blocks"; also announced when no document is
+      shown
+- [x] the page moves from the current position (the block or note last acted on or focused,
+      which a focused block always is), or, with none, from the view: Alt+Down to the first
+      block that reaches into it, Alt+Up to the last. Stops: every block and note in document
+      order, except a loose list item's `<p>`, which repeats its item's lines; blocks that are
+      not rendered (inside a closed `<details>`) are skipped. The block gets the focus the way
+      F9 gives it to a note (temporary `tabindex="-1"`, removed on blur), which scrolls it into
+      view and shows the focus outline of `app.css`; Enter and the Applications key then act on
+      it as usual. The choice is a pure function in `web/blocks.js`
+- [x] menu: Notes → Next block (Alt+Down Arrow), Previous block (Alt+Up Arrow), after a
+      separator, enabled while a file is open; mnemonics unique in every catalog
+- [x] translations: extracted, translated in ru, uk, fr, he, de, no fuzzy entries
+- [x] test: the host-command table (both keys, their menu text), the page messages, the
+      choice of block in Jint (`BlockPickTests`: next and previous, the ends, hidden blocks,
+      no position yet, an empty document), mnemonics (`MnemonicTests`)
+- [ ] **ask the user** to check without a screen reader: Alt+Down and Alt+Up move block to
+      block with a visible focus outline, scrolling the block into view; Enter then adds a note
+      to that block; at either end "No more blocks" shows in the status bar. And with JAWS: the
+      keys break nothing (whether JAWS passes them on or keeps them), JAWS stays out of forms
+      mode, and reading with the virtual cursor works as before
+- [x] validation commands pass
+
 ### Task 16: User manual
 
 **Files:**
@@ -1133,7 +1181,7 @@ JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, eac
   inside the `lines` block, Task 7a),
   `strings` `{ uiLang, uiDir, … }` (page chrome and live messages only: the note role
   descriptions are already in the rendered HTML), `focusNote` `{ note }`, `focusLines`
-  `{ lines }`, `nextNote` / `previousNote` `{}`, `taskState` `{ lines, checked }` (Task 7a:
+  `{ lines }`, `nextNote` / `previousNote` `{}`, `nextBlock` / `previousBlock` `{}` (Task 15a), `taskState` `{ lines, checked }` (Task 7a:
   sets a task checkbox back after a canceled toggle). No `announce` message: the Task 2 spike
   showed that the host's UIA notifications are heard in the virtual buffer, so every
   announcement goes through `StatusAnnouncer`
@@ -1142,21 +1190,27 @@ JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, eac
   `activateNote` `{ note, generation }`, `contextMenu` `{ lines, note?, rect, scale, generation }` (`rect` in CSS pixels, `scale` the page's `devicePixelRatio`),
   `toggleTask` `{ lines, checked, generation }` (Task 7a), `position` `{ lines?, note?,
   generation }` (last block or note interacted with; the host maps a note to its block),
-  `openLink` `{ href }`, `noMoreNotes` `{}`, `dropFiles` `{}` (the dropped `File` objects come
+  `openLink` `{ href }`, `noMoreNotes` `{}`, `noMoreBlocks` `{}` (Task 15a), `dropFiles` `{}` (the dropped `File` objects come
   as additional objects), `goBack` `{}` (Backspace in the page, outside any text field), `ready` `{}`
 - the host ignores any message whose `generation` is not the latest render
 
 ### Keyboard
 
 Host shortcuts (must work with focus in the document and in the list): Ctrl+O, Ctrl+V, Ctrl+L,
-Ctrl+E, Ctrl+comma, F5, F6, F9, Shift+F9, Ctrl+Z, Ctrl+Y, Ctrl+Plus, Ctrl+Minus (both also on
-the numpad), Ctrl+0, Alt+Left Arrow and Backspace (back to the previous file), Alt+Right
-Arrow (forward), F1, Shift+F1, Alt+F4. Backspace never fires from a text box.
+Ctrl+E, Ctrl+comma, F5, F6, F9, Shift+F9, Alt+Down Arrow, Alt+Up Arrow, Ctrl+Z, Ctrl+Y,
+Ctrl+Plus, Ctrl+Minus (both also on the numpad), Ctrl+0, Alt+Left Arrow and Backspace (back to
+the previous file), Alt+Right Arrow (forward), F1, Shift+F1, Alt+F4. Backspace never fires from
+a text box.
 In the document: Enter on a block / note, Space (or Enter) on a task checkbox, Applications key
 and Shift+F10. In the list: Enter, Delete, Applications key.
 
 Note navigation is F9 / Shift+F9, not F8: the Task 2 spike found that JAWS takes F8 for its
 extended-select mode, so F8 never reaches PlanCake.
+
+Alt+Down Arrow / Alt+Up Arrow move to the next / previous block or note (Task 15a), for a
+keyboard user without a screen reader: Tab reaches only links and check boxes, and blocks carry
+no `tabindex`. Screen readers may take these keys; their users move with the reading cursor
+instead, and Enter works on whatever block it is on.
 
 ### Menus
 
@@ -1171,7 +1225,8 @@ extended-select mode, so F8 never reaches PlanCake.
   (F5). Backspace is not shown on any menu item. Language names carry no mnemonics; the two
   submenus' own mnemonics must differ from every other View item's, and every View item's
   mnemonic is unique within View.
-- **Notes:** Edit note, Delete note, separator, Next note (F9), Previous note (Shift+F9)
+- **Notes:** Edit note, Delete note, separator, Next note (F9), Previous note (Shift+F9),
+  separator, Next block (Alt+Down Arrow), Previous block (Alt+Up Arrow)
 - **Help:** User manual (F1), Keyboard shortcuts, separator, Check for updates, About PlanCake (Shift+F1)
 
 No menu may end up with a single item. No Select all: in the document JAWS handles Ctrl+A

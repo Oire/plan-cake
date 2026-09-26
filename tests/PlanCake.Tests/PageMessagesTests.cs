@@ -55,6 +55,9 @@ public class PageMessagesTests {
         Parse(PageMessages.Serialize(new NextNoteMessage())).GetProperty("type").GetString().Should().Be("nextNote");
         Parse(PageMessages.Serialize(new PreviousNoteMessage())).GetProperty("type").GetString()
             .Should().Be("previousNote");
+        Parse(PageMessages.Serialize(new NextBlockMessage())).GetProperty("type").GetString().Should().Be("nextBlock");
+        Parse(PageMessages.Serialize(new PreviousBlockMessage())).GetProperty("type").GetString()
+            .Should().Be("previousBlock");
     }
 
     [Fact]

@@ -254,6 +254,9 @@ public partial class MainWindow: Form {
             notes.AddSeparator();
             EnabledWhen(MenuCommand(notes, _("&Next note"), HostCommand.NextNote), HasNotes);
             EnabledWhen(MenuCommand(notes, _("&Previous note"), HostCommand.PreviousNote), HasNotes);
+            notes.AddSeparator();
+            EnabledWhen(MenuCommand(notes, _("Next &block"), HostCommand.NextBlock), HasFile);
+            EnabledWhen(MenuCommand(notes, _("Previous b&lock"), HostCommand.PreviousBlock), HasFile);
         });
 
         bar.AddMenu(_("&Help"), help => {
@@ -772,6 +775,12 @@ public partial class MainWindow: Form {
             case HostCommand.PreviousNote:
                 MoveToNote(forward: false);
                 break;
+            case HostCommand.NextBlock:
+                MoveToBlock(forward: true);
+                break;
+            case HostCommand.PreviousBlock:
+                MoveToBlock(forward: false);
+                break;
             case HostCommand.Undo:
                 UndoOrRedo(redo: false);
                 break;
@@ -838,6 +847,22 @@ public partial class MainWindow: Form {
         }
 
         documentView.PostMessage(forward ? new NextNoteMessage() : new PreviousNoteMessage());
+    }
+
+    /// <summary>
+    /// Alt+Down / Alt+Up: the page moves the focus to the next or previous block (or note) from
+    /// the current position, so a keyboard user who does not use a screen reader can reach any
+    /// block and press Enter on it. From the notes list the move happens in the document, which
+    /// then gets the focus.
+    /// </summary>
+    private void MoveToBlock(bool forward) {
+        if (!_pageReady || _render is null) {
+            _announcer.Announce(_("No more blocks"));
+            return;
+        }
+
+        documentView.PostMessage(forward ? new NextBlockMessage() : new PreviousBlockMessage());
+        FocusDocument();
     }
 
     /// <summary>
@@ -913,6 +938,9 @@ public partial class MainWindow: Form {
                 break;
             case PageMessages.NoMoreNotes:
                 _announcer.Announce(_("No more notes"));
+                break;
+            case PageMessages.NoMoreBlocks:
+                _announcer.Announce(_("No more blocks"));
                 break;
             case PageMessages.DropFiles:
                 var files = e.Files;

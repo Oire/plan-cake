@@ -30,6 +30,8 @@ public class HostCommandsTests {
         { Keys.F6, nameof(HostCommand.SwitchPane) },
         { Keys.F9, nameof(HostCommand.NextNote) },
         { Keys.Shift | Keys.F9, nameof(HostCommand.PreviousNote) },
+        { Keys.Alt | Keys.Down, nameof(HostCommand.NextBlock) },
+        { Keys.Alt | Keys.Up, nameof(HostCommand.PreviousBlock) },
         { Keys.Control | Keys.Z, nameof(HostCommand.Undo) },
         { Keys.Control | Keys.Y, nameof(HostCommand.Redo) },
         { Keys.Control | Keys.Oemplus, nameof(HostCommand.ZoomIn) },
@@ -58,6 +60,9 @@ public class HostCommandsTests {
     [InlineData(Keys.F8)] // JAWS takes F8 for extended select (Task 2 spike): notes use F9.
     [InlineData(Keys.Shift | Keys.F8)]
     [InlineData(Keys.Left)] // Plain arrows move the virtual cursor.
+    [InlineData(Keys.Down)] // So do Down and Up: only Alt+Down and Alt+Up move from block to block.
+    [InlineData(Keys.Up)]
+    [InlineData(Keys.Shift | Keys.Alt | Keys.Down)] // JAWS's mouse-down command.
     [InlineData(Keys.Control | Keys.Back)] // Deletes a word in a text box.
     public void TryGetCommand_LeavesOtherKeysAlone(Keys keys) {
         HostCommands.TryGetCommand(keys, out _).Should().BeFalse();
@@ -82,6 +87,8 @@ public class HostCommandsTests {
     [InlineData(nameof(HostCommand.Back), "Alt+Left Arrow")] // Backspace is never shown on a menu.
     [InlineData(nameof(HostCommand.ZoomIn), "Ctrl+Plus")] // The numpad key is listed in the dialog only.
     [InlineData(nameof(HostCommand.PreviousNote), "Shift+F9")]
+    [InlineData(nameof(HostCommand.NextBlock), "Alt+Down Arrow")]
+    [InlineData(nameof(HostCommand.PreviousBlock), "Alt+Up Arrow")]
     public void MenuShortcut_ShowsTheCommandsFirstKey(string command, string expected) =>
         HostCommands.MenuShortcut(Enum.Parse<HostCommand>(command)).Should().Be(expected);
 
