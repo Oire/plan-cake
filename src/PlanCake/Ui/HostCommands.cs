@@ -67,9 +67,7 @@ internal static class HostCommands {
     /// Commands whose feature arrives with a later task: their keys are reserved here, but no menu
     /// item or shortcuts dialog row offers them yet. Each task removes its command from this set.
     /// </summary>
-    private static readonly HashSet<HostCommand> _notYetAvailable = [
-        HostCommand.UserManual, // Task 16
-    ];
+    private static readonly HashSet<HostCommand> _notYetAvailable = [];
 
     /// <summary>Every shortcut and the command it runs.</summary>
     public static IReadOnlyDictionary<Keys, HostCommand> Shortcuts => _shortcuts;

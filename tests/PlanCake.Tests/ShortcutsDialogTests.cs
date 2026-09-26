@@ -32,11 +32,8 @@ public class ShortcutsDialogTests {
     }
 
     [Fact]
-    public void BuildRows_LeaveOutTheCommandsOfLaterTasks() {
-        var commands = ShortcutsDialog.BuildRows().Select(row => row.Command).ToList();
-
-        commands.Should().NotContain(HostCommands.DisplayName(HostCommand.UserManual));
-    }
+    public void BuildRows_ListTheUserManualWithF1() =>
+        ShortcutsDialog.BuildRows().Should().Contain(new ShortcutRow("User manual", "F1"));
 
     [Fact]
     public void BuildRows_ListSettingsWithCtrlComma() =>

@@ -997,7 +997,7 @@ check tasks off from the document.
 - Create: `src/PlanCake/help/{en,ru,uk,fr,he,de}/manual.html`
 - Modify: `src/PlanCake/PlanCake.csproj`, `src/PlanCake/Ui/MainWindow.cs`
 
-- [ ] Help → User manual (F1) opens `help\<culture>\manual.html` with SIC's fallback chain;
+- [x] Help → User manual (F1) opens `help\<culture>\manual.html` with SIC's fallback chain;
       `help\**` copied to output
 - [ ] write the manual with the `write-manual` skill (English first, then the five
       translations): reading with JAWS, adding and editing notes, the notes list, settings

@@ -257,7 +257,7 @@ public partial class MainWindow: Form {
         });
 
         bar.AddMenu(_("&Help"), help => {
-            // Task 16: User manual.
+            MenuCommand(help, _("&User manual"), HostCommand.UserManual);
             help.Add(_("&Keyboard shortcuts"), null, ShowShortcuts);
             help.AddSeparator();
             help.Add(_("&Check for updates"), null, CheckForUpdates);
@@ -741,6 +741,9 @@ public partial class MainWindow: Form {
                 break;
             case HostCommand.Reload:
                 ReloadFile();
+                break;
+            case HostCommand.UserManual:
+                ShowUserManual();
                 break;
             case HostCommand.About:
                 ShowAbout();
@@ -1780,6 +1783,28 @@ public partial class MainWindow: Form {
         }
 
         ShowNoteResult(notes.Clear(_renderedText));
+    }
+
+    /// <summary>
+    /// Help → User manual: the manual in the interface language (<see cref="HelpLocator"/>),
+    /// opened in the default browser. A missing manual is said in a message box.
+    /// </summary>
+    private void ShowUserManual() {
+        var culture = Localization.GetCurrentCulture();
+
+        if (HelpLocator.FindManual(App.HelpFolder, culture) is { } manual) {
+            ShellOpen(manual);
+            return;
+        }
+
+        Log.Warning("No user manual for {Culture} under {Folder}", culture.Name, App.HelpFolder);
+        DialogHelper.Show(
+            _("The user manual could not be found."),
+            _("User manual"),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning
+        );
+        ReturnFocus();
     }
 
     /// <summary>Help → Keyboard shortcuts.</summary>

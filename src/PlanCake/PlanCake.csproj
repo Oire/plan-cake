@@ -81,6 +81,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
+    <!-- The user manual, help\<language>\manual.html, opened by F1 in the default browser:
+         it has to be a real file on disk, not a part of the single-file bundle. -->
+    <None Update="help\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-09-26 18:53:23+0200\n"
+"POT-Creation-Date: 2026-09-26 20:34:10+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: uk\n"
@@ -10,24 +10,25 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: GetText.NET Extractor\n"
 
 #: ..\..\Cli\CliRunner.cs:300
 msgid "--single-token and --close-marker cannot be used together."
 msgstr "--single-token і --close-marker не можна використовувати разом."
 
-#: ..\..\Ui\MainWindow.cs:1338
+#: ..\..\Ui\MainWindow.cs:1370
 #, csharp-format
 msgid "{0} - {1}"
 msgstr "{0} - {1}"
 
-#: ..\..\Ui\MainWindow.cs:1660
+#: ..\..\Ui\MainWindow.cs:1692
 #, csharp-format
 msgid "{0} is back. File reloaded"
 msgstr "Файл {0} знову доступний і перезавантажений"
 
-#: ..\..\Ui\MainWindow.cs:1159
+#: ..\..\Ui\MainWindow.cs:1170
 #, csharp-format
 msgid ""
 "{0} is no longer there: it was deleted, renamed or moved. Notes cannot be "
@@ -51,7 +52,7 @@ msgstr ""
 "змінює. Щоб перетворити його, увімкніть у налаштуваннях PlanCake "
 "перетворення файлів, записаних не в UTF-8."
 
-#: ..\..\Ui\MainWindow.cs:798
+#: ..\..\Ui\MainWindow.cs:809
 #, csharp-format
 msgid "{0} no longer exists and was removed from the history."
 msgstr "Файлу {0} більше немає, і його вилучено з історії."
@@ -72,20 +73,20 @@ msgstr[0] "Видалено {0} нотатку"
 msgstr[1] "Видалено всі {0} нотатки"
 msgstr[2] "Видалено всі {0} нотаток"
 
-#: ..\..\Ui\MainWindow.cs:1690
+#: ..\..\Ui\MainWindow.cs:1722
 #, csharp-format
 msgid "{0} was changed outside PlanCake. Reload it?"
 msgstr "Файл {0} змінено поза PlanCake. Перезавантажити його?"
 
-#: ..\..\Ui\MainWindow.cs:263
+#: ..\..\Ui\MainWindow.cs:264
 msgid "&About PlanCake"
 msgstr "&Про PlanCake"
 
-#: ..\..\Ui\MainWindow.cs:1215
+#: ..\..\Ui\MainWindow.cs:1227
 msgid "&Add note"
 msgstr "&Додати нотатку"
 
-#: ..\..\Ui\MainWindow.cs:245
+#: ..\..\Ui\MainWindow.cs:246
 msgid "&Back"
 msgstr "&Назад"
 
@@ -94,11 +95,11 @@ msgstr "&Назад"
 msgid "&Cancel"
 msgstr "С&касувати"
 
-#: ..\..\Ui\MainWindow.cs:262
+#: ..\..\Ui\MainWindow.cs:263
 msgid "&Check for updates"
 msgstr "Перевірити &оновлення"
 
-#: ..\..\Ui\MainWindow.cs:1224
+#: ..\..\Ui\MainWindow.cs:1239
 msgid "&Copy block text"
 msgstr "&Копіювати текст блоку"
 
@@ -106,16 +107,16 @@ msgstr "&Копіювати текст блоку"
 msgid "&Copy info"
 msgstr "&Копіювати інформацію"
 
-#: ..\..\Ui\MainWindow.cs:209
+#: ..\..\Ui\MainWindow.cs:210
 msgid "&Delete all notes..."
 msgstr "&Видалити всі нотатки..."
 
-#: ..\..\Ui\MainWindow.cs:252 ..\..\Ui\MainWindow.cs:1220
-#: ..\..\Ui\MainWindow.cs:1988
+#: ..\..\Ui\MainWindow.cs:253 ..\..\Ui\MainWindow.cs:1235
+#: ..\..\Ui\MainWindow.cs:2045
 msgid "&Delete note"
 msgstr "&Видалити нотатку"
 
-#: ..\..\Ui\MainWindow.cs:230
+#: ..\..\Ui\MainWindow.cs:231
 msgid "&Document language"
 msgstr "Мова &документа"
 
@@ -123,15 +124,15 @@ msgstr "Мова &документа"
 msgid "&Document language:"
 msgstr "Мова &документа:"
 
-#: ..\..\Ui\MainWindow.cs:205
+#: ..\..\Ui\MainWindow.cs:206
 msgid "&Edit"
 msgstr "&Редагування"
 
-#: ..\..\Ui\MainWindow.cs:1219 ..\..\Ui\MainWindow.cs:1987
+#: ..\..\Ui\MainWindow.cs:1231 ..\..\Ui\MainWindow.cs:2044
 msgid "&Edit note"
 msgstr "&Редагувати нотатку"
 
-#: ..\..\Ui\MainWindow.cs:251
+#: ..\..\Ui\MainWindow.cs:252
 msgid "&Edit note..."
 msgstr "&Редагувати нотатку..."
 
@@ -139,19 +140,19 @@ msgstr "&Редагувати нотатку..."
 msgid "&Enter or a click on a block:"
 msgstr "Enter або клацання на &блоці:"
 
-#: ..\..\Ui\MainWindow.cs:192
+#: ..\..\Ui\MainWindow.cs:193
 msgid "&File"
 msgstr "&Файл"
 
-#: ..\..\Ui\MainWindow.cs:246
+#: ..\..\Ui\MainWindow.cs:247
 msgid "&Forward"
 msgstr "&Уперед"
 
-#: ..\..\Ui\MainWindow.cs:258
+#: ..\..\Ui\MainWindow.cs:259
 msgid "&Help"
 msgstr "&Довідка"
 
-#: ..\..\Ui\MainWindow.cs:218
+#: ..\..\Ui\MainWindow.cs:219
 msgid "&Interface language"
 msgstr "Мова &інтерфейсу"
 
@@ -159,7 +160,7 @@ msgstr "Мова &інтерфейсу"
 msgid "&Interface language:"
 msgstr "Мова &інтерфейсу:"
 
-#: ..\..\Ui\MainWindow.cs:260
+#: ..\..\Ui\MainWindow.cs:261
 msgid "&Keyboard shortcuts"
 msgstr "&Комбінації клавіш"
 
@@ -167,7 +168,7 @@ msgstr "&Комбінації клавіш"
 msgid "&Link:"
 msgstr "&Посилання:"
 
-#: ..\..\Ui\MainWindow.cs:254
+#: ..\..\Ui\MainWindow.cs:255
 msgid "&Next note"
 msgstr "&Наступна нотатка"
 
@@ -175,11 +176,11 @@ msgstr "&Наступна нотатка"
 msgid "&Note:"
 msgstr "&Нотатка:"
 
-#: ..\..\Ui\MainWindow.cs:250
+#: ..\..\Ui\MainWindow.cs:251
 msgid "&Notes"
 msgstr "&Нотатки"
 
-#: ..\..\Ui\MainWindow.cs:213
+#: ..\..\Ui\MainWindow.cs:214
 msgid "&Notes list"
 msgstr "&Список нотаток"
 
@@ -188,35 +189,39 @@ msgstr "&Список нотаток"
 msgid "&OK"
 msgstr "&ОК"
 
-#: ..\..\Ui\MainWindow.cs:193
+#: ..\..\Ui\MainWindow.cs:194
 msgid "&Open..."
 msgstr "&Відкрити..."
 
-#: ..\..\Ui\MainWindow.cs:255
+#: ..\..\Ui\MainWindow.cs:256
 msgid "&Previous note"
 msgstr "&Попередня нотатка"
 
-#: ..\..\Ui\MainWindow.cs:207
+#: ..\..\Ui\MainWindow.cs:208
 msgid "&Redo"
 msgstr "&Повторити"
 
-#: ..\..\Ui\MainWindow.cs:247
+#: ..\..\Ui\MainWindow.cs:248
 msgid "&Reload"
 msgstr "Перезавантаж&ити"
 
-#: ..\..\Ui\MainWindow.cs:200
+#: ..\..\Ui\MainWindow.cs:201
 msgid "&Settings..."
 msgstr "&Налаштування..."
 
-#: ..\..\Ui\MainWindow.cs:214
+#: ..\..\Ui\MainWindow.cs:215
 msgid "&Switch pane"
 msgstr "&Перемкнути панель"
 
-#: ..\..\Ui\MainWindow.cs:206
+#: ..\..\Ui\MainWindow.cs:207
 msgid "&Undo"
 msgstr "&Скасувати"
 
-#: ..\..\Ui\MainWindow.cs:212
+#: ..\..\Ui\MainWindow.cs:260
+msgid "&User manual"
+msgstr "По&сібник користувача"
+
+#: ..\..\Ui\MainWindow.cs:213
 msgid "&View"
 msgstr "&Вигляд"
 
@@ -224,7 +229,7 @@ msgstr "&Вигляд"
 msgid "&When the file changes on disk:"
 msgstr "Ко&ли файл змінюється на диску:"
 
-#: ..\..\Ui\MainWindow.cs:241
+#: ..\..\Ui\MainWindow.cs:242
 msgid "&Zoom in"
 msgstr "&Збільшити масштаб"
 
@@ -233,7 +238,7 @@ msgstr "&Збільшити масштаб"
 msgid "© {0} {1}"
 msgstr "© {0} {1}"
 
-#: ..\..\Ui\MainWindow.cs:1405 ..\..\Ui\MainWindow.cs:1435
+#: ..\..\Ui\MainWindow.cs:1437 ..\..\Ui\MainWindow.cs:1467
 msgid "A download is already in progress."
 msgstr "Завантаження вже триває."
 
@@ -253,11 +258,11 @@ msgstr "Маркер не може починатися або закінчув�
 msgid "A note has no closing marker and ends with its line"
 msgstr "Нотатка не має закривального маркера й закінчується разом із рядком"
 
-#: ..\..\Ui\MainWindow.cs:633
+#: ..\..\Ui\MainWindow.cs:641
 msgid "A note has no closing marker, so it runs to the end of the file."
 msgstr "Нотатка не має закривального маркера, тому триває до кінця файлу."
 
-#: ..\..\Ui\AboutDialog.cs:24 ..\..\Ui\HostCommands.cs:128
+#: ..\..\Ui\AboutDialog.cs:24 ..\..\Ui\HostCommands.cs:126
 msgid "About PlanCake"
 msgstr "Про PlanCake"
 
@@ -273,7 +278,7 @@ msgstr "Додає нотатку"
 msgid "Advanced"
 msgstr "Додатково"
 
-#: ..\..\Ui\MainWindow.cs:1344 ..\..\Ui\MainWindow.cs:1511
+#: ..\..\Ui\MainWindow.cs:1376 ..\..\Ui\MainWindow.cs:1543
 msgid "All files"
 msgstr "Усі файли"
 
@@ -285,11 +290,11 @@ msgstr "Видалення всіх нотаток повторено"
 msgid "All notes deleted undone"
 msgstr "Видалення всіх нотаток скасовано"
 
-#: ..\..\Ui\HostCommands.cs:148
+#: ..\..\Ui\HostCommands.cs:146
 msgid "Alt"
 msgstr "Alt"
 
-#: ..\..\Ui\HostCommands.cs:169
+#: ..\..\Ui\HostCommands.cs:167
 msgid "Applications"
 msgstr "Клавіша програм"
 
@@ -305,19 +310,19 @@ msgstr "Запитувати перед &видаленням нотатки"
 msgid "Ask before reloading it"
 msgstr "Запитувати, чи перезавантажити його"
 
-#: ..\..\Ui\HostCommands.cs:117
+#: ..\..\Ui\HostCommands.cs:115
 msgid "Back to the previous file"
 msgstr "Назад до попереднього файлу"
 
-#: ..\..\Ui\HostCommands.cs:164
+#: ..\..\Ui\HostCommands.cs:162
 msgid "Backspace"
 msgstr "Backspace"
 
-#: ..\..\Ui\MainWindow.cs:1956
+#: ..\..\Ui\MainWindow.cs:2010
 msgid "Block"
 msgstr "Блок"
 
-#: ..\..\Ui\MainWindow.cs:1247
+#: ..\..\Ui\MainWindow.cs:1279
 msgid "Block text copied"
 msgstr "Текст блоку скопійовано"
 
@@ -325,7 +330,7 @@ msgstr "Текст блоку скопійовано"
 msgid "Check for &updates on startup"
 msgstr "Перевіряти о&новлення під час запуску"
 
-#: ..\..\Ui\MainWindow.cs:374
+#: ..\..\Ui\MainWindow.cs:375
 msgid "Check for updates"
 msgstr "Перевірка оновлень"
 
@@ -333,14 +338,14 @@ msgstr "Перевірка оновлень"
 msgid "Check for updates in the &background:"
 msgstr "Перевіряти оновлення у &фоні:"
 
-#: ..\..\Ui\MainWindow.cs:1147
+#: ..\..\Ui\MainWindow.cs:1158
 msgid "Check task"
 msgstr "Позначити завдання"
 
 #: ..\..\Ui\SettingsDialog.Designer.cs:288
 msgid ""
-"Clo&sing marker (leave empty for a single marker that runs to the end of the"
-" line):"
+"Clo&sing marker (leave empty for a single marker that runs to the end of the "
+"line):"
 msgstr ""
 "Зак&ривальний маркер (залиште порожнім, щоб використовувати один маркер, "
 "який діє до кінця рядка):"
@@ -349,7 +354,7 @@ msgstr ""
 msgid "Close"
 msgstr "Закрити"
 
-#: ..\..\Ui\HostCommands.cs:170
+#: ..\..\Ui\HostCommands.cs:168
 msgid "Comma"
 msgstr "Кома"
 
@@ -365,7 +370,7 @@ msgstr ""
 "&Перетворювати файли не в UTF-8 на UTF-8 (без BOM) під час відкриття. Файл "
 "на диску перезаписується."
 
-#: ..\..\Cli\CliRunner.cs:187 ..\..\Ui\MainWindow.cs:620
+#: ..\..\Cli\CliRunner.cs:187 ..\..\Ui\MainWindow.cs:628
 #, csharp-format
 msgid "Converted from {0} to UTF-8."
 msgstr "Перетворено з {0} на UTF-8."
@@ -374,23 +379,23 @@ msgstr "Перетворено з {0} на UTF-8."
 msgid "Copied"
 msgstr "Скопійовано"
 
-#: ..\..\Ui\HostCommands.cs:140
+#: ..\..\Ui\HostCommands.cs:138
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: ..\..\Ui\HostCommands.cs:165
+#: ..\..\Ui\HostCommands.cs:163
 msgid "Delete"
 msgstr "Delete"
 
-#: ..\..\Ui\MainWindow.cs:1745
+#: ..\..\Ui\MainWindow.cs:1777
 msgid "Delete all notes"
 msgstr "Видалення всіх нотаток"
 
-#: ..\..\Ui\MainWindow.cs:1081
+#: ..\..\Ui\MainWindow.cs:1092
 msgid "Delete note"
 msgstr "Видалення нотатки"
 
-#: ..\..\Ui\MainWindow.cs:1744
+#: ..\..\Ui\MainWindow.cs:1776
 #, csharp-format
 msgid "Delete the note in this file?"
 msgid_plural "Delete all {0} notes in this file?"
@@ -398,7 +403,7 @@ msgstr[0] "Видалити {0} нотатку в цьому файлі?"
 msgstr[1] "Видалити всі {0} нотатки в цьому файлі?"
 msgstr[2] "Видалити всі {0} нотаток у цьому файлі?"
 
-#: ..\..\Ui\MainWindow.cs:1080
+#: ..\..\Ui\MainWindow.cs:1091
 #, csharp-format
 msgid ""
 "Delete this note?\n"
@@ -409,26 +414,26 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:1918
+#: ..\..\Ui\MainWindow.cs:1972
 #, csharp-format
 msgid "Document language: {0}"
 msgstr "Мова документа: {0}"
 
-#: ..\..\Ui\HostCommands.cs:163
+#: ..\..\Ui\HostCommands.cs:161
 msgid "Down Arrow"
 msgstr "Стрілка вниз"
 
-#: ..\..\Ui\MainWindow.cs:1469
+#: ..\..\Ui\MainWindow.cs:1501
 #, csharp-format
 msgid "Downloaded and saved to {0}"
 msgstr "Завантажено й збережено в {0}"
 
-#: ..\..\Ui\MainWindow.cs:1447
+#: ..\..\Ui\MainWindow.cs:1479
 #, csharp-format
 msgid "Downloading from {0}..."
 msgstr "Завантаження з {0}..."
 
-#: ..\..\Ui\MainWindow.cs:202
+#: ..\..\Ui\MainWindow.cs:203
 msgid "E&xit"
 msgstr "В&ихід"
 
@@ -436,7 +441,7 @@ msgstr "В&ихід"
 msgid "Edit note"
 msgstr "Редагувати нотатку"
 
-#: ..\..\Ui\HostCommands.cs:166
+#: ..\..\Ui\HostCommands.cs:164
 msgid "Enter"
 msgstr "Enter"
 
@@ -444,8 +449,8 @@ msgstr "Enter"
 msgid "Enter in the note dialo&g:"
 msgstr "Enter у вікні но&татки:"
 
-#: ..\..\Program.cs:84 ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:394
-#: ..\..\Ui\MainWindow.cs:648
+#: ..\..\Program.cs:84 ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:395
+#: ..\..\Ui\MainWindow.cs:656
 msgid "Error"
 msgstr "Помилка"
 
@@ -462,7 +467,7 @@ msgstr "Раз на 3 дні"
 msgid "Exit"
 msgstr "Вихід"
 
-#: ..\..\Ui\MainWindow.cs:198
+#: ..\..\Ui\MainWindow.cs:199
 msgid "Export &notes..."
 msgstr "&Експортувати нотатки..."
 
@@ -470,11 +475,11 @@ msgstr "&Експортувати нотатки..."
 msgid "Export a file as standalone HTML with its notes"
 msgstr "Експортувати файл в окремий HTML-файл разом із нотатками"
 
-#: ..\..\Ui\MainWindow.cs:1510
+#: ..\..\Ui\MainWindow.cs:1542
 msgid "Export notes"
 msgstr "Експорт нотаток"
 
-#: ..\..\Ui\MainWindow.cs:1541
+#: ..\..\Ui\MainWindow.cs:1573
 #, csharp-format
 msgid "Exported {0} note to {1}."
 msgid_plural "Exported {0} notes to {1}."
@@ -482,16 +487,16 @@ msgstr[0] "Експортовано {0} нотатку до {1}."
 msgstr[1] "Експортовано {0} нотатки до {1}."
 msgstr[2] "Експортовано {0} нотаток до {1}."
 
-#: ..\..\Ui\MainWindow.cs:1691
+#: ..\..\Ui\MainWindow.cs:1723
 msgid "File changed"
 msgstr "Файл змінено"
 
-#: ..\..\Ui\MainWindow.cs:1562 ..\..\Ui\MainWindow.cs:1670
-#: ..\..\Ui\MainWindow.cs:1697
+#: ..\..\Ui\MainWindow.cs:1594 ..\..\Ui\MainWindow.cs:1702
+#: ..\..\Ui\MainWindow.cs:1729
 msgid "File reloaded"
 msgstr "Файл перезавантажено"
 
-#: ..\..\Ui\HostCommands.cs:118
+#: ..\..\Ui\HostCommands.cs:116
 msgid "Forward to the next file"
 msgstr "Уперед до наступного файлу"
 
@@ -527,7 +532,7 @@ msgstr "У списку нотаток: меню нотатки"
 msgid "Invalid link"
 msgstr "Недопустиме посилання"
 
-#: ..\..\Ui\MainWindow.cs:1511
+#: ..\..\Ui\MainWindow.cs:1543
 msgid "JSON files"
 msgstr "Файли JSON"
 
@@ -536,11 +541,11 @@ msgstr "Файли JSON"
 msgid "Keyboard shortcuts"
 msgstr "Комбінації клавіш"
 
-#: ..\..\Ui\HostCommands.cs:160
+#: ..\..\Ui\HostCommands.cs:158
 msgid "Left Arrow"
 msgstr "Стрілка вліво"
 
-#: ..\..\Ui\MainWindow.cs:1955
+#: ..\..\Ui\MainWindow.cs:2009
 msgid "Lines"
 msgstr "Рядки"
 
@@ -548,7 +553,7 @@ msgstr "Рядки"
 msgid "List the notes of a file with the blocks they follow"
 msgstr "Вивести нотатки файлу разом із блоками, після яких вони стоять"
 
-#: ..\..\Ui\MainWindow.cs:1142
+#: ..\..\Ui\MainWindow.cs:1153
 #, csharp-format
 msgid ""
 "Mark this task as done? The file on disk will be changed.\n"
@@ -559,7 +564,7 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:1143
+#: ..\..\Ui\MainWindow.cs:1154
 #, csharp-format
 msgid ""
 "Mark this task as not done? The file on disk will be changed.\n"
@@ -570,11 +575,11 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:1344
+#: ..\..\Ui\MainWindow.cs:1376
 msgid "Markdown files"
 msgstr "Файли Markdown"
 
-#: ..\..\Ui\HostCommands.cs:172
+#: ..\..\Ui\HostCommands.cs:170
 msgid "Minus"
 msgstr "Мінус"
 
@@ -582,37 +587,37 @@ msgstr "Мінус"
 msgid "Never"
 msgstr "Ніколи"
 
-#: ..\..\Ui\HostCommands.cs:120
+#: ..\..\Ui\HostCommands.cs:118
 msgid "Next note"
 msgstr "Наступна нотатка"
 
-#: ..\..\Ui\MainWindow.cs:612 ..\..\Ui\MainWindow.cs:1486
-#: ..\..\Ui\MainWindow.cs:1505 ..\..\Ui\MainWindow.cs:1551
+#: ..\..\Ui\MainWindow.cs:620 ..\..\Ui\MainWindow.cs:1518
+#: ..\..\Ui\MainWindow.cs:1537 ..\..\Ui\MainWindow.cs:1583
 msgid "No file is open."
 msgstr "Жоден файл не відкрито."
 
-#: ..\..\Ui\MainWindow.cs:825 ..\..\Ui\MainWindow.cs:904
-#: ..\..\Ui\MainWindow.cs:2113
+#: ..\..\Ui\MainWindow.cs:836 ..\..\Ui\MainWindow.cs:915
+#: ..\..\Ui\MainWindow.cs:2170
 msgid "No more notes"
 msgstr "Більше нотаток немає"
 
-#: ..\..\Ui\MainWindow.cs:802
+#: ..\..\Ui\MainWindow.cs:813
 msgid "No next file"
 msgstr "Наступного файлу немає"
 
-#: ..\..\Ui\MainWindow.cs:2100
+#: ..\..\Ui\MainWindow.cs:2157
 msgid "No notes"
 msgstr "Нотаток немає"
 
-#: ..\..\Ui\MainWindow.cs:802
+#: ..\..\Ui\MainWindow.cs:813
 msgid "No previous file"
 msgstr "Попереднього файлу немає"
 
-#: ..\..\Ui\MainWindow.cs:1386
+#: ..\..\Ui\MainWindow.cs:1418
 msgid "None of the copied files is a Markdown file (.md, .markdown)."
 msgstr "Жоден зі скопійованих файлів не є файлом Markdown (.md, .markdown)."
 
-#: ..\..\Ui\MainWindow.cs:1957
+#: ..\..\Ui\MainWindow.cs:2011
 msgid "Note"
 msgstr "Нотатка"
 
@@ -657,31 +662,31 @@ msgid "Note on:"
 msgstr "Нотатка до:"
 
 #: ..\..\Ui\MainWindow.Designer.cs:101 ..\..\Ui\SettingsDialog.Designer.cs:236
-#: ..\..\Ui\MainWindow.cs:1958
+#: ..\..\Ui\MainWindow.cs:2012
 msgid "Notes"
 msgstr "Нотатки"
 
-#: ..\..\Ui\MainWindow.cs:2082
+#: ..\..\Ui\MainWindow.cs:2139
 msgid "Notes list hidden"
 msgstr "Список нотаток приховано"
 
-#: ..\..\Ui\MainWindow.cs:2082
+#: ..\..\Ui\MainWindow.cs:2139
 msgid "Notes list shown"
 msgstr "Список нотаток показано"
 
-#: ..\..\Notes\NoteActionRunner.cs:180 ..\..\Ui\MainWindow.cs:1172
+#: ..\..\Notes\NoteActionRunner.cs:180 ..\..\Ui\MainWindow.cs:1183
 msgid "Nothing to redo"
 msgstr "Нічого повторювати"
 
-#: ..\..\Notes\NoteActionRunner.cs:162 ..\..\Ui\MainWindow.cs:1172
+#: ..\..\Notes\NoteActionRunner.cs:162 ..\..\Ui\MainWindow.cs:1183
 msgid "Nothing to undo"
 msgstr "Нічого скасовувати"
 
-#: ..\..\Ui\HostCommands.cs:174
+#: ..\..\Ui\HostCommands.cs:172
 msgid "Numpad Minus"
 msgstr "Мінус на цифровій клавіатурі"
 
-#: ..\..\Ui\HostCommands.cs:173
+#: ..\..\Ui\HostCommands.cs:171
 msgid "Numpad Plus"
 msgstr "Плюс на цифровій клавіатурі"
 
@@ -705,27 +710,27 @@ msgstr "Раз на місяць"
 msgid "Once a week"
 msgstr "Раз на тиждень"
 
-#: ..\..\Ui\MainWindow.cs:1314
+#: ..\..\Ui\MainWindow.cs:1346
 msgid "Only Markdown files (.md, .markdown) can be opened."
 msgstr "Відкривати можна лише файли Markdown (.md, .markdown)."
 
-#: ..\..\Ui\MainWindow.cs:1343
+#: ..\..\Ui\MainWindow.cs:1375
 msgid "Open"
 msgstr "Відкрити"
 
-#: ..\..\Ui\HostCommands.cs:111
+#: ..\..\Ui\HostCommands.cs:109
 msgid "Open a file"
 msgstr "Відкрити файл"
 
-#: ..\..\Ui\MainWindow.cs:194
+#: ..\..\Ui\MainWindow.cs:195
 msgid "Open from &clipboard"
 msgstr "Відкрити з &буфера обміну"
 
-#: ..\..\Ui\MainWindow.cs:195
+#: ..\..\Ui\MainWindow.cs:196
 msgid "Open from &link..."
 msgstr "Відкрити за &посиланням..."
 
-#: ..\..\Ui\HostCommands.cs:113
+#: ..\..\Ui\HostCommands.cs:111
 msgid "Open from a link"
 msgstr "Відкрити за посиланням"
 
@@ -733,15 +738,15 @@ msgstr "Відкрити за посиланням"
 msgid "Open from link"
 msgstr "Відкрити за посиланням"
 
-#: ..\..\Ui\HostCommands.cs:112
+#: ..\..\Ui\HostCommands.cs:110
 msgid "Open from the clipboard"
 msgstr "Відкрити з буфера обміну"
 
-#: ..\..\Ui\MainWindow.cs:197
+#: ..\..\Ui\MainWindow.cs:198
 msgid "Open in &editor"
 msgstr "Відкрити в &редакторі"
 
-#: ..\..\Ui\HostCommands.cs:114
+#: ..\..\Ui\HostCommands.cs:112
 msgid "Open in the editor"
 msgstr "Відкрити в редакторі"
 
@@ -762,8 +767,8 @@ msgid ""
 "PlanCake needs the Microsoft Edge WebView2 Runtime, which is not installed "
 "on this computer."
 msgstr ""
-"Для роботи PlanCake потрібне середовище виконання Microsoft Edge WebView2, а"
-" його не встановлено на цьому комп'ютері."
+"Для роботи PlanCake потрібне середовище виконання Microsoft Edge WebView2, а "
+"його не встановлено на цьому комп'ютері."
 
 #: ..\..\Ui\AboutDialog.Designer.cs:103
 msgid "PlanCake on GitHub"
@@ -772,8 +777,7 @@ msgstr "PlanCake на GitHub"
 #: ..\..\Cli\CliRunner.cs:55
 msgid ""
 "PlanCake: read and annotate Markdown files with a screen reader. Without a "
-"command, \"plancake [file]\" opens the window, with the file if one is "
-"given."
+"command, \"plancake [file]\" opens the window, with the file if one is given."
 msgstr ""
 "PlanCake: читання файлів Markdown з програмою зчитування екрана та нотатки "
 "до них. Без команди \"plancake [file]\" відкриває вікно — з файлом, якщо "
@@ -787,11 +791,11 @@ msgstr "Будь ласка, введіть посилання."
 msgid "Please enter a valid link starting with http:// or https://."
 msgstr "Введіть допустиме посилання, що починається з http:// або https://."
 
-#: ..\..\Ui\HostCommands.cs:171
+#: ..\..\Ui\HostCommands.cs:169
 msgid "Plus"
 msgstr "Плюс"
 
-#: ..\..\Ui\HostCommands.cs:121
+#: ..\..\Ui\HostCommands.cs:119
 msgid "Previous note"
 msgstr "Попередня нотатка"
 
@@ -803,7 +807,7 @@ msgstr "Вивести кількість нотаток у файлі; код �
 msgid "Print the notes as JSON"
 msgstr "Вивести нотатки у форматі JSON"
 
-#: ..\..\Ui\MainWindow.cs:243
+#: ..\..\Ui\MainWindow.cs:244
 msgid "R&eset zoom"
 msgstr "Скину&ти масштаб"
 
@@ -816,7 +820,7 @@ msgstr ""
 msgid "Ready"
 msgstr "Готово"
 
-#: ..\..\Ui\HostCommands.cs:123
+#: ..\..\Ui\HostCommands.cs:121
 msgid "Redo"
 msgstr "Повторити"
 
@@ -824,7 +828,7 @@ msgstr "Повторити"
 msgid "Reload it"
 msgstr "Перезавантажувати його"
 
-#: ..\..\Ui\HostCommands.cs:116
+#: ..\..\Ui\HostCommands.cs:114
 msgid "Reload the file"
 msgstr "Перезавантажити файл"
 
@@ -840,11 +844,11 @@ msgstr[0] "Видалено {0} нотатку."
 msgstr[1] "Видалено {0} нотатки."
 msgstr[2] "Видалено {0} нотаток."
 
-#: ..\..\Ui\HostCommands.cs:126
+#: ..\..\Ui\HostCommands.cs:124
 msgid "Reset zoom"
 msgstr "Скинути масштаб"
 
-#: ..\..\Ui\HostCommands.cs:161
+#: ..\..\Ui\HostCommands.cs:159
 msgid "Right Arrow"
 msgstr "Стрілка вправо"
 
@@ -853,11 +857,11 @@ msgstr "Стрілка вправо"
 msgid "Saves the note ({0} starts a new line)"
 msgstr "Зберігає нотатку ({0} починає новий рядок)"
 
-#: ..\..\Ui\HostCommands.cs:115 ..\..\Ui\SettingsDialog.cs:23
+#: ..\..\Ui\HostCommands.cs:113 ..\..\Ui\SettingsDialog.cs:23
 msgid "Settings"
 msgstr "Налаштування"
 
-#: ..\..\Ui\HostCommands.cs:144
+#: ..\..\Ui\HostCommands.cs:142
 msgid "Shift"
 msgstr "Shift"
 
@@ -869,7 +873,7 @@ msgstr "Комбінація клавіш"
 msgid "Show the notes &list"
 msgstr "Показувати &список нотаток"
 
-#: ..\..\Ui\HostCommands.cs:167
+#: ..\..\Ui\HostCommands.cs:165
 msgid "Space"
 msgstr "Пробіл"
 
@@ -878,15 +882,15 @@ msgstr "Пробіл"
 msgid "Starts a new line ({0} saves the note)"
 msgstr "Починає новий рядок ({0} зберігає нотатку)"
 
-#: ..\..\Ui\HostCommands.cs:119
+#: ..\..\Ui\HostCommands.cs:117
 msgid "Switch between the document and the notes list"
 msgstr "Перемкнутися між документом і списком нотаток"
 
-#: ..\..\Ui\SettingsDialog.cs:65 ..\..\Ui\MainWindow.cs:219
+#: ..\..\Ui\SettingsDialog.cs:65 ..\..\Ui\MainWindow.cs:220
 msgid "System default"
 msgstr "Мова системи"
 
-#: ..\..\Ui\HostCommands.cs:168
+#: ..\..\Ui\HostCommands.cs:166
 msgid "Tab"
 msgstr "Tab"
 
@@ -914,11 +918,11 @@ msgstr "Зняття позначки із завдання повторено"
 msgid "Task unchecked undone"
 msgstr "Зняття позначки із завдання скасовано"
 
-#: ..\..\Ui\MainWindow.cs:1241
+#: ..\..\Ui\MainWindow.cs:1273
 msgid "The block has no text to copy."
 msgstr "У блоці немає тексту для копіювання."
 
-#: ..\..\Ui\MainWindow.cs:1389
+#: ..\..\Ui\MainWindow.cs:1421
 msgid "The clipboard holds no Markdown file or link."
 msgstr "У буфері обміну немає файлу Markdown чи посилання."
 
@@ -949,7 +953,7 @@ msgstr ""
 "Не вдалося розпізнати кодування файлу {0}, тому PlanCake ніколи його не "
 "змінює."
 
-#: ..\..\Ui\MainWindow.cs:623
+#: ..\..\Ui\MainWindow.cs:631
 msgid ""
 "The encoding of this file could not be recognized, so it was opened read-"
 "only and is never changed. Notes cannot be added to it."
@@ -957,7 +961,7 @@ msgstr ""
 "Не вдалося розпізнати кодування цього файлу, тому його відкрито лише для "
 "читання, і він ніколи не змінюється. Додавати до нього нотатки не можна."
 
-#: ..\..\Cli\CliRunner.cs:337 ..\..\Ui\MainWindow.cs:457
+#: ..\..\Cli\CliRunner.cs:337 ..\..\Ui\MainWindow.cs:458
 #, csharp-format
 msgid "The file {0} does not exist."
 msgstr "Файл {0} не існує."
@@ -977,7 +981,7 @@ msgid "The file is larger than {0} MB, the most PlanCake downloads."
 msgstr ""
 "Файл більший за {0} МБ, а це найбільший розмір, який завантажує PlanCake."
 
-#: ..\..\Ui\MainWindow.cs:1701
+#: ..\..\Ui\MainWindow.cs:1733
 msgid "The file was not reloaded. Press F5 to reload it."
 msgstr "Файл не перезавантажено. Натисніть F5, щоб перезавантажити його."
 
@@ -997,7 +1001,7 @@ msgstr ""
 msgid "The latest version of PlanCake is one you chose to skip."
 msgstr "Остання версія PlanCake — та, яку ви вирішили пропустити."
 
-#: ..\..\Ui\MainWindow.cs:1292
+#: ..\..\Ui\MainWindow.cs:1324
 #, csharp-format
 msgid "The link target does not exist: {0}"
 msgstr "Ціль посилання не існує: {0}"
@@ -1061,16 +1065,19 @@ msgstr "Відкривальний маркер не може бути поро�
 msgid "The output file cannot be the file itself: {0}"
 msgstr "Вихідний файл не може збігатися з початковим: {0}"
 
-#: ..\..\Ui\MainWindow.cs:1799
+#: ..\..\Ui\MainWindow.cs:1853
 msgid "The settings could not be saved. They apply until PlanCake is closed."
-msgstr ""
-"Не вдалося зберегти налаштування. Вони діятимуть до закриття PlanCake."
+msgstr "Не вдалося зберегти налаштування. Вони діятимуть до закриття PlanCake."
 
-#: ..\..\Ui\MainWindow.cs:1256 ..\..\Ui\MainWindow.cs:2009
+#: ..\..\Ui\MainWindow.cs:1288 ..\..\Ui\MainWindow.cs:2066
 msgid "The start of the document"
 msgstr "Початок документа"
 
-#: ..\..\Notes\NoteActionRunner.cs:130 ..\..\Ui\MainWindow.cs:1733
+#: ..\..\Ui\MainWindow.cs:1802
+msgid "The user manual could not be found."
+msgstr "Посібник користувача не знайдено."
+
+#: ..\..\Notes\NoteActionRunner.cs:130 ..\..\Ui\MainWindow.cs:1765
 msgid "There are no notes to delete."
 msgstr "Немає нотаток для видалення."
 
@@ -1087,10 +1094,10 @@ msgid ""
 "This file is not in UTF-8, so it is open read-only. Notes cannot be written "
 "to it."
 msgstr ""
-"Цей файл не в UTF-8, тому його відкрито лише для читання. Записувати в нього"
-" нотатки не можна."
+"Цей файл не в UTF-8, тому його відкрито лише для читання. Записувати в нього "
+"нотатки не можна."
 
-#: ..\..\Ui\MainWindow.cs:627
+#: ..\..\Ui\MainWindow.cs:635
 #, csharp-format
 msgid ""
 "This file is not in UTF-8, so it was opened read-only as {0}. Notes cannot "
@@ -1099,7 +1106,7 @@ msgstr ""
 "Цей файл не в UTF-8, тому його відкрито лише для читання в кодуванні {0}. "
 "Додавати до нього нотатки не можна."
 
-#: ..\..\Ui\MainWindow.cs:1295
+#: ..\..\Ui\MainWindow.cs:1327
 #, csharp-format
 msgid "This link cannot be opened: {0}"
 msgstr "Не вдається відкрити це посилання: {0}"
@@ -1112,26 +1119,26 @@ msgstr "Це посилання веде на вебсторінку, а не н
 msgid "Unable to check for updates. Please try again later."
 msgstr "Неможливо перевірити оновлення. Спробуйте пізніше."
 
-#: ..\..\Ui\AboutDialog.cs:62 ..\..\Ui\MainWindow.cs:1250
+#: ..\..\Ui\AboutDialog.cs:62 ..\..\Ui\MainWindow.cs:1282
 msgid "Unable to copy to the clipboard."
 msgstr "Не вдалося скопіювати в буфер обміну."
 
-#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:1305
+#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:1337
 #, csharp-format
 msgid "Unable to open {0}"
 msgstr "Не вдалося відкрити {0}"
 
-#: ..\..\Cli\CliRunner.cs:343 ..\..\Ui\MainWindow.cs:429
-#: ..\..\Ui\MainWindow.cs:462
+#: ..\..\Cli\CliRunner.cs:343 ..\..\Ui\MainWindow.cs:430
+#: ..\..\Ui\MainWindow.cs:463
 #, csharp-format
 msgid "Unable to open {0}: {1}"
 msgstr "Не вдалося відкрити {0}: {1}"
 
-#: ..\..\Ui\MainWindow.cs:1371
+#: ..\..\Ui\MainWindow.cs:1403
 msgid "Unable to read the clipboard."
 msgstr "Не вдалося прочитати буфер обміну."
 
-#: ..\..\Ui\MainWindow.cs:1583 ..\..\Ui\MainWindow.cs:1585
+#: ..\..\Ui\MainWindow.cs:1615 ..\..\Ui\MainWindow.cs:1617
 #, csharp-format
 msgid "Unable to reload {0}: {1}"
 msgstr "Не вдалося перезавантажити {0}: {1}"
@@ -1141,7 +1148,7 @@ msgstr "Не вдалося перезавантажити {0}: {1}"
 msgid "Unable to save the file to {0}: {1}"
 msgstr "Не вдалося зберегти файл у {0}: {1}"
 
-#: ..\..\Ui\MainWindow.cs:393
+#: ..\..\Ui\MainWindow.cs:394
 #, csharp-format
 msgid "Unable to start the document view: {0}"
 msgstr "Не вдалося запустити перегляд документа: {0}"
@@ -1151,7 +1158,7 @@ msgid "Unable to start the program up. Please contact the developer."
 msgstr "Не вдалося запустити програму. Будь ласка, зверніться до розробника."
 
 #: ..\..\Cli\CliRunner.cs:212 ..\..\Cli\CliRunner.cs:410
-#: ..\..\Ui\MainWindow.cs:1533
+#: ..\..\Ui\MainWindow.cs:1565
 #, csharp-format
 msgid "Unable to write {0}: {1}"
 msgstr "Не вдалося записати {0}: {1}"
@@ -1161,15 +1168,15 @@ msgstr "Не вдалося записати {0}: {1}"
 msgid "Unable to write the file: {0}"
 msgstr "Не вдалося записати файл: {0}"
 
-#: ..\..\Ui\MainWindow.cs:1147
+#: ..\..\Ui\MainWindow.cs:1158
 msgid "Uncheck task"
 msgstr "Зняти позначку із завдання"
 
-#: ..\..\Ui\HostCommands.cs:122
+#: ..\..\Ui\HostCommands.cs:120
 msgid "Undo"
 msgstr "Скасувати"
 
-#: ..\..\Cli\CliRunner.cs:362 ..\..\Ui\MainWindow.cs:607
+#: ..\..\Cli\CliRunner.cs:362 ..\..\Ui\MainWindow.cs:608
 msgid "unote"
 msgstr "пнот"
 
@@ -1178,15 +1185,15 @@ msgstr "пнот"
 msgid "Unrecognized option: {0}"
 msgstr "Невідомий параметр: {0}"
 
-#: ..\..\Ui\HostCommands.cs:162
+#: ..\..\Ui\HostCommands.cs:160
 msgid "Up Arrow"
 msgstr "Стрілка вгору"
 
-#: ..\..\Ui\HostCommands.cs:127
+#: ..\..\Ui\HostCommands.cs:125 ..\..\Ui\MainWindow.cs:1803
 msgid "User manual"
 msgstr "Посібник користувача"
 
-#: ..\..\Cli\CliRunner.cs:362 ..\..\Ui\MainWindow.cs:607
+#: ..\..\Cli\CliRunner.cs:362 ..\..\Ui\MainWindow.cs:608
 msgid "user note"
 msgstr "нотатка користувача"
 
@@ -1226,19 +1233,19 @@ msgstr "Записати в цей файл (UTF-8 без BOM) замість с
 msgid "You can download it from {0}. Open the download page now?"
 msgstr "Його можна завантажити з {0}. Відкрити сторінку завантаження зараз?"
 
-#: ..\..\Ui\MainWindow.cs:783
+#: ..\..\Ui\MainWindow.cs:794
 #, csharp-format
 msgid "Zoom {0}%"
 msgstr "Масштаб {0}%"
 
-#: ..\..\Ui\MainWindow.cs:242
+#: ..\..\Ui\MainWindow.cs:243
 msgid "Zoom &out"
 msgstr "З&меншити масштаб"
 
-#: ..\..\Ui\HostCommands.cs:124
+#: ..\..\Ui\HostCommands.cs:122
 msgid "Zoom in"
 msgstr "Збільшити масштаб"
 
-#: ..\..\Ui\HostCommands.cs:125
+#: ..\..\Ui\HostCommands.cs:123
 msgid "Zoom out"
 msgstr "Зменшити масштаб"

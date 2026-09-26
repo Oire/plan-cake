@@ -70,4 +70,10 @@ public static class App {
     /// or a file association can start the process anywhere.
     /// </summary>
     public static readonly string LocalesFolder = Path.Combine(AppContext.BaseDirectory, "locale");
+
+    /// <summary>
+    /// Where the user manual lives at run time, one <c>&lt;language&gt;\manual.html</c> per
+    /// language; resolved against <see cref="AppContext.BaseDirectory"/> like <see cref="LocalesFolder"/>.
+    /// </summary>
+    public static readonly string HelpFolder = Path.Combine(AppContext.BaseDirectory, "help");
 }
