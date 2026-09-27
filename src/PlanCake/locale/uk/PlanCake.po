@@ -460,7 +460,7 @@ msgstr "Enter"
 
 #: ..\..\Ui\SettingsDialog.Designer.cs:328
 msgid "Enter in the note dialo&g:"
-msgstr "Enter у вікні но&татки:"
+msgstr "Enter у діалозі но&татки:"
 
 #: ..\..\Program.cs:90 ..\..\Ui\AboutDialog.cs:52 ..\..\Program.cs:113
 #: ..\..\Ui\MainWindow.cs:400 ..\..\Ui\MainWindow.cs:692

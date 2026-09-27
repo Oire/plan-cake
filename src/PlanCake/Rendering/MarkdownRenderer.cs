@@ -17,7 +17,7 @@ internal enum RenderMode {
     /// <summary>The window's document view: notes are user notes the page can activate.</summary>
     Interactive,
 
-    /// <summary>A standalone HTML file: notes are static <c>role="note"</c> elements.</summary>
+    /// <summary>A standalone HTML file: notes are static <c>role="region"</c> elements.</summary>
     Export,
 }
 
@@ -212,7 +212,7 @@ internal static class MarkdownRenderer {
     }
 
     /// <summary>
-    /// A note's text rendered as Markdown for a <c>role="note"</c> element: every block gets
+    /// A note's text rendered as Markdown for a <c>role="region"</c> element: every block gets
     /// <c>dir="auto"</c>, none gets <c>data-lines</c>, and a heading becomes a bold paragraph so
     /// that it never joins the document's heading navigation.
     /// </summary>

@@ -17,12 +17,12 @@
     "Right Arrow": "Стрілка вправо",
     "Up Arrow": "Стрілка вгору",
     "Down Arrow": "Стрілка вниз",
-    "Applications": "Клавіша програм",
+    "Applications": "Клавіша контекстного меню",
     "Comma": "Кома",
     "Plus": "Плюс",
     "Minus": "Мінус",
-    "Numpad Plus": "Плюс на цифровій клавіатурі",
-    "Numpad Minus": "Мінус на цифровій клавіатурі",
+    "Numpad Plus": "Плюс на додатковому цифровому блоці",
+    "Numpad Minus": "Мінус на додатковому цифровому блоці",
     "Home": "Home",
     "End": "End",
     "Page Up": "Page Up",
@@ -59,9 +59,9 @@
     },
     {
       "term": "screen reader",
-      "translation": "програма зчитування екрана",
+      "translation": "програма читання з екрана",
       "context": "Assistive technology, as in the 'Using a screen reader' section heading",
-      "notes": "Rendered as a descriptive phrase ('program for reading the screen'), not a loanword like 'скринридер'; declines by case as needed ('вашою програмою зчитування екрана')"
+      "notes": "Rendered as a descriptive phrase ('program for reading from the screen'), not a loanword like 'скринридер' or 'програма зчитування екрана'; declines by case as needed ('вашою програмою читання з екрана')"
     },
     {
       "term": "marker",
@@ -87,9 +87,9 @@
     },
     {
       "term": "dialog",
-      "translation": "вікно",
+      "translation": "діалог",
       "context": "Generic word for a dialog box, e.g. the Open dialog or a confirmation dialog",
-      "notes": "PlanCake has no separate word for 'dialog box' distinct from 'window'; both are 'вікно' ('вікно «Відкрити»', 'стандартне вікно відкриття Windows')"
+      "notes": "Masculine noun ('діалог «Відкрити»', 'стандартний діалог відкриття Windows', 'Enter у діалозі нотатки'); 'вікно' is only the main window, never a dialog"
     },
     {
       "term": "Yes / No buttons",
@@ -103,14 +103,21 @@
     },
     {
       "term": "Downloads folder",
-      "translation": "тека «Завантаження»",
+      "translation": "папка «Завантаження»",
       "context": "The Windows Downloads folder where files opened from a link are saved",
-      "notes": "Manual text: 'до вашої теки Windows Завантаження'; 'тека' is PlanCake's word for 'folder'"
+      "notes": "The folder's name as Windows shows it, in « » because it does not decline with 'папка' ('до вашої папки «Завантаження»')"
+    },
+    {
+      "term": "folder",
+      "translation": "папка",
+      "context": "Any folder on disk, e.g. the userdata folder of the portable version",
+      "notes": "The word Ukrainian Windows uses; never 'тека'"
     },
     {
       "term": "Start menu",
-      "translation": "меню Пуск",
-      "context": "Windows Start menu, used to launch PlanCake"
+      "translation": "меню «Пуск»",
+      "context": "Windows Start menu, used to launch PlanCake",
+      "notes": "The menu's name in « », as with every name after a generic noun: меню «Файл», кнопка «Скасувати», діалог «Додати нотатку»"
     },
     {
       "term": "Command Prompt",

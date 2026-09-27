@@ -474,7 +474,7 @@ public class CliRunnerTests: IDisposable {
             .And.Contain("<html lang=\"fr\">")
             .And.Contain("<meta http-equiv=\"Content-Security-Policy\"")
             .And.Contain("<title>Le plan</title>")
-            .And.Contain("role=\"note\"")
+            .And.Contain("role=\"region\"")
             .And.Contain("aria-roledescription=\"user note\"")
             .And.Contain("<em>note</em>")
             .And.NotContain("<script")

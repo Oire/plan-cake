@@ -17,12 +17,12 @@
     "Right Arrow": "Стрелка вправо",
     "Up Arrow": "Стрелка вверх",
     "Down Arrow": "Стрелка вниз",
-    "Applications": "Клавиша приложений",
+    "Applications": "Клавиша контекстного меню",
     "Comma": "Запятая",
     "Plus": "Плюс",
     "Minus": "Минус",
-    "Numpad Plus": "Плюс на цифровой клавиатуре",
-    "Numpad Minus": "Минус на цифровой клавиатуре",
+    "Numpad Plus": "Плюс на дополнительном цифровом блоке",
+    "Numpad Minus": "Минус на дополнительном цифровом блоке",
     "Home": "Home",
     "End": "End",
     "Page Up": "Page Up",
@@ -108,15 +108,15 @@
     },
     {
       "term": "Downloads folder",
-      "translation": "папка Загрузки",
+      "translation": "папка «Загрузки»",
       "context": "The Windows Downloads folder where PlanCake saves files opened from a link",
-      "notes": "'Загрузки' is capitalized as the folder's proper name, 'папка' stays lowercase; rendered as 'вашу папку Загрузки Windows'"
+      "notes": "The folder's name as Windows shows it, in « » because it does not decline with 'папка' ('в вашу папку «Загрузки»'); without the quotes, decline it instead: 'папка загрузок'"
     },
     {
       "term": "Start menu",
-      "translation": "меню Пуск",
+      "translation": "меню «Пуск»",
       "context": "Launching PlanCake from the Windows Start menu",
-      "notes": "'Пуск' capitalized as the Windows menu's proper name"
+      "notes": "The menu's name in « », as with every name after a generic noun: меню «Файл», кнопка «Отмена», диалог «Добавить заметку»"
     },
     {
       "term": "Command Prompt",
@@ -132,9 +132,9 @@
     },
     {
       "term": "issue",
-      "translation": "issue",
+      "translation": "обращение",
       "context": "A GitHub issue, as in 'paste them into a new issue on PlanCake's GitHub page'",
-      "notes": "Left untranslated, in Latin script, as is common Russian developer usage; not 'проблема' or 'обращение'"
+      "notes": "Neuter noun ('новое обращение'). Not the Latin 'issue', which a Russian voice mangles; not 'задача', which is the glossary's word for a task; not 'проблема'"
     },
     {
       "term": "Raw",

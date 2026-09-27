@@ -22,7 +22,7 @@ public class MarkdownRendererTests {
         result.Blocks.Where(block => block.Kind == kind).Select(block => block.Lines);
 
     private const string NoteRoles =
-        "role=\"note\" aria-roledescription=\"user note\" aria-brailleroledescription=\"unote\"";
+        "role=\"region\" aria-roledescription=\"user note\" aria-brailleroledescription=\"unote\"";
 
     /// <summary>A user note whose text renders as one paragraph.</summary>
     private static string NoteDiv(int index, string text) => NoteDivHtml(index, $"""<p dir="auto">{text}</p>""");

@@ -147,7 +147,7 @@ map.
   writes through a temporary file and `File.Replace`.
 - **Rendering/** renders the stripped source with Markdig (`UseAdvancedExtensions`). Every block
   the user can land on (paragraph, heading, a list item's leading paragraph, code block, table
-  row) carries `data-lines="start-end"` in original lines, and each note is a `role="note"`
+  row) carries `data-lines="start-end"` in original lines, and each note is a `role="region"`
   element after its block. Line numbers are **1-based** wherever a user, a CLI consumer or
   `data-lines` sees them; Markdig's 0-based lines are converted at the boundary. The strings the
   renderer writes come in through `RenderStrings`, so it never touches the catalog.
@@ -247,8 +247,9 @@ In short:
 - **JAWS keeps its virtual cursor on DOM nodes.** Replacing the page's content throws it to the
   top, hence `morph.js`; and a different file must be a fresh page load, or JAWS keeps its old
   offset.
-- **Notes are `role="note"` elements** with the role descriptions "user note" and, for braille,
-  "unote" (localized). A button style was tried and dropped: long labels are hard to listen to.
+- **Notes are `role="region"` elements** (not `role="note"`, which JAWS navigates worse) with the
+  role descriptions "user note" and, for braille, "unote" (localized). A button style was tried
+  and dropped: long labels are hard to listen to.
 
 ### One window per file
 
