@@ -827,7 +827,8 @@ check tasks off from the document.
       `ConfirmNoteDelete` → the confirmation in Task 7 (Delete all notes always
       confirms); `ConfirmTaskToggle` → the confirmation in Task 7a; `ExternalChangeAction` → Task 10's reload-or-ask branch; `ShowNotesList` →
       the list's visibility at startup (and at once when changed in Settings; View → Notes
-      list stays for the session); `OpeningMarker`/`ClosingMarker` → `NoteParser`,
+      list stays for the session — superseded, see the ➕ note on View → Notes list below);
+      `OpeningMarker`/`ClosingMarker` → `NoteParser`,
       `NoteStore` and a re-render; `BlockEnterAction` → the page (Enter opens the context menu
       instead of the dialog; the host decides, so `activate` now carries the block's `rect` and
       `scale` like `contextMenu`); `NoteEnterAction` → `NoteDialog`; `ConvertToUtf8` →
@@ -863,6 +864,15 @@ check tasks off from the document.
       (JAWS re-check), so the user chose the label. (A `[usernote]` opening marker with an empty
       closing one reads notes in single-token mode, text `text[/usernote]`; the user keeps that
       as is)
+- [x] ➕ View → Notes list is the `ShowNotesList` setting itself (user decision after a live
+      test, superseding the decision above that the menu item changes the current window for
+      the session only: toggled from the menu in one window, the other window and Settings did
+      not follow, which was confusing). Toggling it saves the setting through
+      `Config.SaveShowNotesList`, which reads the file again first like `Config.SaveLanguage`,
+      and shows or hides the list in this window at once, with the same announcements; other
+      windows follow when activated (`ReloadSettingsIfChanged`), and Settings shows the same
+      value. A failed save shows "The settings could not be saved. They apply until PlanCake is
+      closed." and the list still changes in this window. Tests in `ConfigTests`
 - [x] **ask the user** to check with JAWS: the Settings dialog tabs (Ctrl+Tab between them,
       each control read with its real label); changing the interface language, the document
       language, the note markers, confirm-delete, confirm-task-toggle, the external change
@@ -1285,8 +1295,9 @@ each name translated.
   Open in editor (Ctrl+E), Export notes…, separator, Settings… (Ctrl+comma), separator,
   Exit (Alt+F4, display only)
 - **Edit:** Undo (Ctrl+Z), Redo (Ctrl+Y), separator, Delete all notes…
-- **View:** Notes list (checkable), Switch pane (F6), Wider notes list, Narrower notes list
-  (both enabled while the list is shown, Task 15a), separator, Interface language ▸ (System
+- **View:** Notes list (checkable; saves `ShowNotesList`, the same setting as Settings, Task
+  12), Switch pane (F6), Wider notes list, Narrower notes list (both enabled while the list is
+  shown, Task 15a), separator, Interface language ▸ (System
   default, then each shipped language by native name), Document language ▸ (English, Русский,
   Українська, Français, עברית, Deutsch), separator, Zoom in (Ctrl+Plus), Zoom out
   (Ctrl+Minus), Reset zoom (Ctrl+0), separator, Back (Alt+Left), Forward (Alt+Right), Reload
@@ -1306,7 +1317,8 @@ itself.
 - `[General]`: `Language` (interface, default `System`), `DefaultDocumentLanguage` (`en`; one
   of `en`, `ru`, `uk`, `fr`, `he`, `de`), `ConfirmNoteDelete` (true), `ConfirmTaskToggle`
   (true: ask before a task checkbox rewrites the file, Task 7a),
-  `ExternalChangeAction` (`AutoReload` | `Ask`, default `AutoReload`), `ShowNotesList` (true),
+  `ExternalChangeAction` (`AutoReload` | `Ask`, default `AutoReload`), `ShowNotesList` (true;
+  View → Notes list saves it too),
   `CheckForUpdatesOnStartup` (true), `UpdateCheckInterval` (`Weekly`)
 - `[Notes]`: `OpeningMarker` (`[usernote]`), `ClosingMarker` (`[/usernote]`, empty = single
   token), `BlockEnterAction` (`AddNote` | `ContextMenu`, default `AddNote`), `NoteEnterAction`

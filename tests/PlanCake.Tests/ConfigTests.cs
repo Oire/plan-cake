@@ -295,6 +295,43 @@ public class ConfigTests: IDisposable {
     }
 
     [Fact]
+    public void SaveShowNotesList_SavesTheSettingAndKeepsWhatAnotherWindowSavedSince() {
+        Config.Load();
+        Config.General.ShowNotesList.Should().BeTrue();
+
+        // Another window (another process with its own copy) changed and saved other settings.
+        WriteFile("[General]\nLanguage = fr\n[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n");
+
+        Config.SaveShowNotesList(false).Should().BeTrue();
+
+        Config.General.ShowNotesList.Should().BeFalse();
+        Config.General.Language.Should().Be("fr");
+
+        Config.Load();
+        Config.General.ShowNotesList.Should().BeFalse();
+        Config.General.Language.Should().Be("fr");
+        Config.Notes.OpeningMarker.Should().Be("<<");
+
+        Config.SaveShowNotesList(true).Should().BeTrue();
+        Config.Load();
+        Config.General.ShowNotesList.Should().BeTrue();
+    }
+
+    [Fact]
+    public void SaveShowNotesList_WhenTheFileCannotBeRead_SetsItWithoutOverwritingTheFile() {
+        WriteFile("[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n");
+        Config.Load();
+
+        WriteFile(UnparsableFile);
+
+        Config.SaveShowNotesList(false).Should().BeFalse();
+
+        Config.General.ShowNotesList.Should().BeFalse();
+        Config.Notes.OpeningMarker.Should().Be("<<");
+        File.ReadAllText(FilePath).Should().Be(UnparsableFile);
+    }
+
+    [Fact]
     public void Reload_WhenTheFileWasDeleted_WritesTheDefaultsOut() {
         WriteFile("[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n");
         Config.Load();

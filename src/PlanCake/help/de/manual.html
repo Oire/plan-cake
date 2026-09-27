@@ -388,7 +388,7 @@ footer {
 <dd>Der Text der Notiz in einer Zeile, ohne Markdown-Zeichensetzung.</dd>
 </dl>
 <p>Um im Dokument zu einer Notiz zu springen, drücken Sie <kbd>Eingabe</kbd> auf ihrer Zeile oder doppelklicken Sie sie; der Fokus springt zur Notiz. Um eine Notiz zu löschen, wählen Sie sie aus und drücken <kbd>Entf</kbd>; die Auswahl springt dann zur nächstgelegenen verbleibenden Notiz, sodass Sie Ihre Stelle in der Liste nie verlieren. Klicken Sie eine Zeile mit der rechten Maustaste an, oder drücken Sie die <kbd>Anwendungstaste</kbd> oder <kbd>Umschalt+F10</kbd>, für ein Menü mit <strong>Notiz bearbeiten</strong> und <strong>Notiz löschen</strong>.</p>
-<p>Wenn Sie lieber das ganze Fenster für das Dokument hätten, wählen Sie <strong>Notizliste</strong> im Menü <strong>Ansicht</strong>. Das blendet die Liste aus, und erneutes Wählen zeigt sie wieder; die Statusleiste zeigt „Notizliste ausgeblendet“ oder „Notizliste eingeblendet“. Das gilt, bis Sie das Fenster schließen. Damit jedes Fenster ohne die Liste startet, schalten Sie <strong>Notizliste anzeigen</strong> in den <a href="#settings-general">Einstellungen</a> aus.</p>
+<p>Wenn Sie lieber das ganze Fenster für das Dokument hätten, wählen Sie <strong>Notizliste</strong> im Menü <strong>Ansicht</strong>. Das blendet die Liste aus, und erneutes Wählen zeigt sie wieder; die Statusleiste zeigt „Notizliste ausgeblendet“ oder „Notizliste eingeblendet“. PlanCake merkt sich die Wahl: Es ist dieselbe Einstellung wie <strong>Notizliste anzeigen</strong> in den <a href="#settings-general">Einstellungen</a>, sodass neue Fenster genauso öffnen und andere offene Fenster folgen, sobald Sie zu ihnen wechseln.</p>
 
 <h3 id="moving-around">Zwischen Dokument und Notizliste wechseln</h3>
 <p>Klicken Sie, wo Sie arbeiten möchten, oder drücken Sie <kbd>F6</kbd>, um zwischen Dokument und Notizliste zu wechseln. Wenn die Liste keine Notizen enthält, zeigt die Statusleiste „Keine Notizen“.</p>
@@ -566,7 +566,7 @@ footer {
 <dt>Vor dem Abhaken einer Aufgabe oder dem Entfernen des Häkchens fragen</dt>
 <dd>Standardmäßig eingeschaltet. Schalten Sie sie aus, um Aufgaben mit einem einzigen Klick oder Tastendruck abzuhaken.</dd>
 <dt>Notizliste anzeigen</dt>
-<dd>Standardmäßig eingeschaltet. Schalten Sie sie aus, um jedes Fenster mit ausgeblendeter Notizliste zu öffnen. Sie können sie für das aktuelle Fenster weiterhin über das Menü <strong>Ansicht</strong> anzeigen.</dd>
+<dd>Standardmäßig eingeschaltet. Schalten Sie sie aus, um die Notizliste in diesem und in allen anderen Fenstern auszublenden. Es ist dieselbe Einstellung wie <strong>Notizliste</strong> im Menü <strong>Ansicht</strong>: Wenn Sie das eine ändern, ändert sich auch das andere.</dd>
 <dt>Beim Start nach Updates suchen</dt>
 <dd>Standardmäßig eingeschaltet. PlanCake prüft einmal beim Start und bleibt still, sofern es keine neue Version gibt.</dd>
 <dt>Im Hintergrund nach Updates suchen</dt>
@@ -783,7 +783,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><th scope="col">Befehl</th><th scope="col">Tastenkombination</th><th scope="col">Was er tut</th></tr>
 </thead>
 <tbody>
-<tr><td><strong>Notizliste</strong></td><td>Keine</td><td>Zeigt oder verbirgt die Notizliste in diesem Fenster. Angehakt, während die Liste angezeigt wird.</td></tr>
+<tr><td><strong>Notizliste</strong></td><td>Keine</td><td>Zeigt oder verbirgt die Notizliste. Angehakt, während die Liste angezeigt wird. Die Wahl wird gespeichert, wie <strong>Notizliste anzeigen</strong> in den Einstellungen.</td></tr>
 <tr><td><strong>Bereich wechseln</strong></td><td><kbd>F6</kbd></td><td>Bewegt den Fokus zwischen Dokument und Notizliste.</td></tr>
 <tr><td><strong>Notizliste verbreitern</strong></td><td>Keine</td><td>Gibt der Notizliste ein Zehntel mehr von der Breite, die sie sich mit dem Dokument teilt. Nicht verfügbar, während die Liste ausgeblendet ist.</td></tr>
 <tr><td><strong>Notizliste verschmälern</strong></td><td>Keine</td><td>Gibt dem Dokument ein Zehntel mehr von dieser Breite. Nicht verfügbar, während die Liste ausgeblendet ist.</td></tr>

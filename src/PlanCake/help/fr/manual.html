@@ -388,7 +388,7 @@ footer {
 <dd>Le texte de la note sur une seule ligne, sans la ponctuation Markdown.</dd>
 </dl>
 <p>Pour aller à une note dans le document, appuyez sur <kbd>Entrée</kbd> sur sa ligne ou double-cliquez dessus&nbsp;; le focus se déplace vers la note. Pour supprimer une note, sélectionnez-la et appuyez sur <kbd>Suppr</kbd>&nbsp;; la sélection se déplace alors vers la note restante la plus proche, afin que vous ne perdiez jamais votre place dans la liste. Faites un clic droit sur une ligne, ou appuyez sur la touche <kbd>Applications</kbd> ou <kbd>Maj+F10</kbd>, pour obtenir un menu avec <strong>Modifier la note</strong> et <strong>Supprimer la note</strong>.</p>
-<p>Si vous préférez disposer de toute la fenêtre pour le document, choisissez <strong>Liste des notes</strong> dans le menu <strong>Affichage</strong>. Cela masque la liste, et le choisir à nouveau la réaffiche&nbsp;; la barre d’état affiche « Liste des notes masquée » ou « Liste des notes affichée ». Cela dure jusqu’à la fermeture de la fenêtre. Pour que chaque fenêtre démarre sans la liste, désactivez <strong>Afficher la liste des notes</strong> dans <a href="#settings-general">les paramètres</a>.</p>
+<p>Si vous préférez disposer de toute la fenêtre pour le document, choisissez <strong>Liste des notes</strong> dans le menu <strong>Affichage</strong>. Cela masque la liste, et le choisir à nouveau la réaffiche&nbsp;; la barre d’état affiche « Liste des notes masquée » ou « Liste des notes affichée ». PlanCake retient ce choix&nbsp;: c’est le même réglage que <strong>Afficher la liste des notes</strong> dans <a href="#settings-general">les paramètres</a>, si bien que les nouvelles fenêtres s’ouvrent de la même façon, et que les autres fenêtres ouvertes suivent dès que vous passez à l’une d’elles.</p>
 
 <h3 id="moving-around">Se déplacer entre le document et la liste</h3>
 <p>Cliquez là où vous voulez travailler, ou appuyez sur <kbd>F6</kbd> pour basculer entre le document et la liste des notes. Si la liste ne contient aucune note, la barre d’état affiche « Aucune note ».</p>
@@ -566,7 +566,7 @@ footer {
 <dt>Demander avant de cocher ou de décocher une tâche</dt>
 <dd>Activé par défaut. Désactivez-le pour cocher les tâches d’un simple clic ou d’une simple pression de touche.</dd>
 <dt>Afficher la liste des notes</dt>
-<dd>Activé par défaut. Désactivez-le pour que chaque fenêtre s’ouvre avec la liste des notes masquée. Vous pouvez toujours l’afficher pour la fenêtre en cours depuis le menu <strong>Affichage</strong>.</dd>
+<dd>Activé par défaut. Désactivez-le pour masquer la liste des notes dans cette fenêtre comme dans toutes les autres. C’est le même réglage que <strong>Liste des notes</strong> dans le menu <strong>Affichage</strong>&nbsp;: modifier l’un modifie l’autre.</dd>
 <dt>Rechercher les mises à jour au démarrage</dt>
 <dd>Activé par défaut. PlanCake vérifie une fois à son démarrage et reste silencieux à moins qu’une nouvelle version existe.</dd>
 <dt>Rechercher les mises à jour en arrière-plan</dt>
@@ -783,7 +783,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
 </thead>
 <tbody>
-<tr><td><strong>Liste des notes</strong></td><td>Aucun</td><td>Affiche ou masque la liste des notes dans cette fenêtre. Coché tant que la liste est affichée.</td></tr>
+<tr><td><strong>Liste des notes</strong></td><td>Aucun</td><td>Affiche ou masque la liste des notes. Coché tant que la liste est affichée. Le choix est enregistré, comme <strong>Afficher la liste des notes</strong> dans les paramètres.</td></tr>
 <tr><td><strong>Changer de volet</strong></td><td><kbd>F6</kbd></td><td>Déplace le focus entre le document et la liste des notes.</td></tr>
 <tr><td><strong>Élargir la liste des notes</strong></td><td>Aucun</td><td>Donne à la liste des notes un dixième de plus de la largeur qu’elle partage avec le document. Indisponible tant que la liste est masquée.</td></tr>
 <tr><td><strong>Rétrécir la liste des notes</strong></td><td>Aucun</td><td>Donne au document un dixième de plus de cette largeur. Indisponible tant que la liste est masquée.</td></tr>

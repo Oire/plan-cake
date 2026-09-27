@@ -257,8 +257,26 @@ internal static class Config {
     public static bool SaveLanguage(string language) {
         ArgumentException.ThrowIfNullOrWhiteSpace(language);
 
+        return SaveGeneral(general => general.Language = language);
+    }
+
+    /// <summary>
+    /// View → Notes list: the same setting as Settings → Show the notes list. Reads the file
+    /// again, sets it and saves, as <see cref="SaveLanguage"/> does; when the file cannot be read,
+    /// it is set for this session only and the file is left alone.
+    /// </summary>
+    /// <returns><c>true</c> when the file was written.</returns>
+    public static bool SaveShowNotesList(bool show) => SaveGeneral(general => general.ShowNotesList = show);
+
+    /// <summary>
+    /// A setting changed from the menu: reads the file again (another window may have saved other
+    /// settings since this one read it), applies <paramref name="change"/>, and saves. When the
+    /// file cannot be read, the change applies to the settings in memory only: saving them could
+    /// overwrite what the file holds.
+    /// </summary>
+    private static bool SaveGeneral(Action<SectionGeneral> change) {
         var read = Reload();
-        General.Language = language;
+        change(General);
 
         return read && Save();
     }

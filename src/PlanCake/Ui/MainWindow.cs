@@ -87,7 +87,10 @@ public partial class MainWindow: Form {
     /// </summary>
     private bool _togglingTask;
 
-    /// <summary>Whether the notes list beside the document is shown (View → Notes list).</summary>
+    /// <summary>
+    /// Whether the notes list beside the document is shown here: View → Notes list and Settings
+    /// save it, and it follows another window's save when this one is activated.
+    /// </summary>
     private bool _showNotesList = Config.General.ShowNotesList;
 
     /// <summary>The window's menu bar, attached once the window has a handle.</summary>
@@ -2335,8 +2338,26 @@ public partial class MainWindow: Form {
     private RenderedNote? SelectedListNote() =>
         notesList.SelectedItems.Count > 0 && notesList.SelectedItems[0].Tag is RenderedNote note ? note : null;
 
-    /// <summary>View → Notes list: shows or hides the list. A hidden list is skipped by F6.</summary>
-    private void ToggleNotesList() => ShowNotesList(!_showNotesList);
+    /// <summary>
+    /// View → Notes list: shows or hides the list. A hidden list is skipped by F6. This is the
+    /// setting Settings → Show the notes list holds, and is saved as such
+    /// (<see cref="Config.SaveShowNotesList"/>, which reads the file again first, as View →
+    /// Interface language does); other windows follow when they are activated. A failed save
+    /// says so, and the list is shown or hidden here all the same.
+    /// </summary>
+    private void ToggleNotesList() {
+        var show = !_showNotesList;
+        var before = CurrentSettings();
+
+        if (!Config.SaveShowNotesList(show)) {
+            ShowError(_("The settings could not be saved. They apply until PlanCake is closed."));
+        }
+
+        ShowNotesList(show);
+
+        // Whatever else the file read again changed applies too; the focus stays where it is.
+        ApplySettings(before, returnFocus: false);
+    }
 
     /// <summary>Shows or hides the notes list, and says so.</summary>
     private void ShowNotesList(bool show) {

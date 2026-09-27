@@ -388,7 +388,7 @@ footer {
 <dd>The text of the note on one line, without Markdown punctuation.</dd>
 </dl>
 <p>To go to a note in the document, press <kbd>Enter</kbd> on its row or double-click it; focus moves to the note. To delete a note, select it and press <kbd>Delete</kbd>; the selection then moves to the nearest remaining note, so you never lose your place in the list. Right-click a row, or press the <kbd>Applications</kbd> key or <kbd>Shift+F10</kbd>, for a menu with <strong>Edit note</strong> and <strong>Delete note</strong>.</p>
-<p>If you would rather have the whole window for the document, choose <strong>Notes list</strong> in the <strong>View</strong> menu. It hides the list, and choosing it again shows it; the status bar says “Notes list hidden” or “Notes list shown”. This lasts until you close the window. To start every window without the list, turn off <strong>Show the notes list</strong> in <a href="#settings-general">Settings</a>.</p>
+<p>If you would rather have the whole window for the document, choose <strong>Notes list</strong> in the <strong>View</strong> menu. It hides the list, and choosing it again shows it; the status bar says “Notes list hidden” or “Notes list shown”. PlanCake remembers the choice: this is the same switch as <strong>Show the notes list</strong> in <a href="#settings-general">Settings</a>, so new windows open the same way, and other open windows follow as soon as you switch to them.</p>
 
 <h3 id="moving-around">Moving between the document and the list</h3>
 <p>Click wherever you want to work, or press <kbd>F6</kbd> to jump between the document and the notes list. If the list has no notes, the status bar says “No notes”.</p>
@@ -566,7 +566,7 @@ footer {
 <dt>Ask before checking or unchecking a task</dt>
 <dd>On by default. Turn it off to check tasks with a single click or key press.</dd>
 <dt>Show the notes list</dt>
-<dd>On by default. Turn it off to open every window with the notes list hidden. You can still show it for the current window from the <strong>View</strong> menu.</dd>
+<dd>On by default. Turn it off to hide the notes list in this window and in every other one. It is the same switch as <strong>Notes list</strong> in the <strong>View</strong> menu: changing one changes the other.</dd>
 <dt>Check for updates on startup</dt>
 <dd>On by default. PlanCake checks once when it starts and stays silent unless there is a new version.</dd>
 <dt>Check for updates in the background</dt>
@@ -783,7 +783,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><th scope="col">Command</th><th scope="col">Shortcut</th><th scope="col">What it does</th></tr>
 </thead>
 <tbody>
-<tr><td><strong>Notes list</strong></td><td>None</td><td>Shows or hides the notes list in this window. Checked while the list is shown.</td></tr>
+<tr><td><strong>Notes list</strong></td><td>None</td><td>Shows or hides the notes list. Checked while the list is shown. The choice is saved, the same as <strong>Show the notes list</strong> in Settings.</td></tr>
 <tr><td><strong>Switch pane</strong></td><td><kbd>F6</kbd></td><td>Moves focus between the document and the notes list.</td></tr>
 <tr><td><strong>Wider notes list</strong></td><td>None</td><td>Gives the notes list a tenth more of the width it shares with the document. Unavailable while the list is hidden.</td></tr>
 <tr><td><strong>Narrower notes list</strong></td><td>None</td><td>Gives the document a tenth more of that width. Unavailable while the list is hidden.</td></tr>
