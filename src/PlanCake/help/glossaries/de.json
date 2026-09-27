@@ -69,7 +69,7 @@
       "term": "marker",
       "translation": "Markierung",
       "context": "The note markers, e.g. [usernote]/[/usernote]; \"changing the markers hides existing notes\"",
-      "notes": "Plural Markierungen, used throughout the note-markers settings and warning text."
+      "notes": "Plural Markierungen; the pair is Anfangsmarkierung / Endmarkierung, as in the settings, never \"öffnende\" or \"schließende Markierung\". Markierung only ever means a note marker: a text selection is \"markieren\" (verb) or \"Auswahl\", never \"Markierung\"."
     },
     {
       "term": "task",
@@ -98,8 +98,7 @@
     {
       "term": "Yes / No buttons",
       "translation": "Ja / Nein",
-      "context": "The confirmation dialog buttons, e.g. \"Delete this note?\" answered with Yes or No",
-      "notes": "Not capitalized as buttons beyond normal sentence case; matches the German words for yes and no exactly."
+      "context": "The confirmation dialog buttons, e.g. \"Delete this note?\" answered with Yes or No"
     },
     {
       "term": "File Explorer",
@@ -109,9 +108,9 @@
     },
     {
       "term": "Downloads folder",
-      "translation": "Windows-Ordner Downloads",
+      "translation": "Ordner Downloads",
       "context": "The Windows Downloads folder where PlanCake saves a plan downloaded from a link",
-      "notes": "The manual phrases this as \"Ihrem Windows-Ordner Downloads\" rather than a \"Downloads-Ordner\" compound; the folder's own name, Downloads, stays untranslated since it is the real Windows folder name."
+      "notes": "\"in Ihrem Ordner Downloads\", with the folder name in bold like other interface names and no quotes; never \"Windows-Ordner Downloads\". Downloads stays untranslated: it is the real Windows folder name."
     },
     {
       "term": "Start menu",

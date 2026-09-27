@@ -109,7 +109,7 @@
       "term": "Downloads folder",
       "translation": "dossier Téléchargements",
       "context": "The Windows Downloads folder that downloaded plans are saved to",
-      "notes": "\"Téléchargements\" kept capitalized as the actual French Windows folder name."
+      "notes": "\"Téléchargements\" kept capitalized as the actual French Windows folder name, no quotes; \"votre dossier Téléchargements\", never \"votre dossier Windows Téléchargements\"."
     },
     {
       "term": "Start menu",
