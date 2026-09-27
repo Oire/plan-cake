@@ -180,15 +180,25 @@ public class MarkdownFileTests: IDisposable {
     [Fact]
     public void Write_FileUnlockedDuringTheRetries_Succeeds() {
         var path = WriteBytes(Utf8("a\n"));
-        var file = MarkdownFile.Open(
-            path,
-            new MarkdownFileOptions(AnsiEncoding: _windows1251, RetryDelay: TimeSpan.FromMilliseconds(100))
-        );
-        var locked = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-        using var release = new System.Threading.Timer(_ => locked.Dispose(), null, 150, Timeout.Infinite);
+        var failedAttempts = new List<int>();
+        FileStream? locked = null;
 
-        file.Write("b\n");
+        // The lock goes when the first attempt has failed on it: no timer racing the retries.
+        var file = MarkdownFile.Open(path, Options() with {
+            OnRetry = attempt => {
+                failedAttempts.Add(attempt);
+                locked?.Dispose();
+            },
+        });
+        locked = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
 
+        try {
+            file.Write("b\n");
+        } finally {
+            locked.Dispose();
+        }
+
+        failedAttempts.Should().Equal(0);
         File.ReadAllText(path).Should().Be("b\n");
     }
 

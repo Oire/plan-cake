@@ -41,16 +41,26 @@ internal sealed class SingleInstance: IDisposable {
 
     private readonly NamedPipeServerStream _server;
     private readonly Action _onActivate;
+    private readonly ListenerHooks? _hooks;
     private readonly CancellationTokenSource _cancellation = new();
     private readonly Task _listening;
     private bool _disposed;
 
-    private SingleInstance(string path, NamedPipeServerStream server, Action onActivate) {
+    private SingleInstance(string path, NamedPipeServerStream server, Action onActivate, ListenerHooks? hooks) {
         Path = path;
         _server = server;
         _onActivate = onActivate;
+        _hooks = hooks;
         _listening = Task.Run(ListenAsync);
     }
+
+    /// <summary>
+    /// Points in the listener's loop where tests step in, so they know which state the pipe is in
+    /// instead of guessing it with a sleep.
+    /// </summary>
+    /// <param name="BeforeWait">Runs on the listener just before each wait for a connection.</param>
+    /// <param name="Waiting">Runs on the listener once each wait for a connection has begun.</param>
+    internal sealed record ListenerHooks(Action? BeforeWait = null, Action? Waiting = null);
 
     /// <summary>The full path of the file this registration is for.</summary>
     public string Path { get; }
@@ -75,7 +85,13 @@ internal sealed class SingleInstance: IDisposable {
     /// file asks this window to come to the front.
     /// </summary>
     /// <returns>The registration, or <see langword="null"/> when another window already holds it.</returns>
-    public static SingleInstance? TryRegister(string path, Action onActivate) {
+    public static SingleInstance? TryRegister(string path, Action onActivate) => TryRegister(path, onActivate, null);
+
+    /// <inheritdoc cref="TryRegister(String, Action)"/>
+    /// <param name="path">The file to register.</param>
+    /// <param name="onActivate">Runs when another attempt to open the file asks this window to come to the front.</param>
+    /// <param name="hooks">Where tests step into the listener; <see langword="null"/> outside tests.</param>
+    internal static SingleInstance? TryRegister(string path, Action onActivate, ListenerHooks? hooks) {
         ArgumentNullException.ThrowIfNull(onActivate);
         string name;
 
@@ -96,7 +112,7 @@ internal sealed class SingleInstance: IDisposable {
                 PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly | PipeOptions.FirstPipeInstance
             );
 
-            return new SingleInstance(NormalizePath(path), server, onActivate);
+            return new SingleInstance(NormalizePath(path), server, onActivate, hooks);
         } catch (Exception ex) when (ex is UnauthorizedAccessException or IOException) {
             Log.Information("{Path} is already registered by another window", path);
             return null;
@@ -168,22 +184,33 @@ internal sealed class SingleInstance: IDisposable {
             return false;
         }
 
-        // Off the calling thread: the UI thread's synchronization context must not be captured.
-        return Task.Run(() => ActivateAsync(name, wait)).GetAwaiter().GetResult();
-    }
-
-    private static async Task<bool> ActivateAsync(string name, TimeSpan timeout) {
-        using var cancellation = new CancellationTokenSource(timeout);
+        using var cancellation = new CancellationTokenSource(wait);
+        var client = new NamedPipeClientStream(
+            ".",
+            name,
+            PipeDirection.InOut,
+            PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly
+        );
 
         try {
-            await using var client = new NamedPipeClientStream(
-                ".",
-                name,
-                PipeDirection.InOut,
-                PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly
-            );
-            await client.ConnectAsync(cancellation.Token).ConfigureAwait(false);
+            // Here, on the calling thread, which waits anyway: ConnectAsync would block a thread
+            // pool thread for the wait, and the window answering may be in this process and need it.
+            client.Connect(wait);
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or TimeoutException) {
+            client.Dispose();
+            Log.Warning(ex, "The window showing {Path} did not take the connection", path);
+            return false;
+        }
 
+        // Off the calling thread: the UI thread's synchronization context must not be captured.
+        return Task.Run(() => ActivateAsync(client, cancellation.Token)).GetAwaiter().GetResult();
+    }
+
+    /// <summary>Asks the window at the other end of <paramref name="client"/> to come to the front; disposes the client.</summary>
+    private static async Task<bool> ActivateAsync(NamedPipeClientStream client, CancellationToken token) {
+        await using var connection = client;
+
+        try {
             // The owner may take the foreground only if the process that has it allows so.
             if (NativeMethods.GetNamedPipeServerProcessId(client.SafePipeHandle, out var processId)) {
                 NativeMethods.AllowSetForegroundWindow(processId);
@@ -191,8 +218,8 @@ internal sealed class SingleInstance: IDisposable {
 
             await using var writer = new StreamWriter(client, _utf8, leaveOpen: true) { AutoFlush = true };
             using var reader = new StreamReader(client, _utf8, false, leaveOpen: true);
-            await writer.WriteLineAsync(ActivateRequest.AsMemory(), cancellation.Token).ConfigureAwait(false);
-            var answer = await reader.ReadLineAsync(cancellation.Token).ConfigureAwait(false);
+            await writer.WriteLineAsync(ActivateRequest.AsMemory(), token).ConfigureAwait(false);
+            var answer = await reader.ReadLineAsync(token).ConfigureAwait(false);
 
             return answer == Acknowledgement;
         } catch (Exception ex) when (ex is IOException or OperationCanceledException or UnauthorizedAccessException or TimeoutException) {
@@ -209,7 +236,10 @@ internal sealed class SingleInstance: IDisposable {
             var connected = false;
 
             try {
-                await _server.WaitForConnectionAsync(token).ConfigureAwait(false);
+                _hooks?.BeforeWait?.Invoke();
+                var waiting = _server.WaitForConnectionAsync(token);
+                _hooks?.Waiting?.Invoke();
+                await waiting.ConfigureAwait(false);
                 connected = true;
                 await ServeAsync(token).ConfigureAwait(false);
                 failures = 0;
@@ -237,19 +267,24 @@ internal sealed class SingleInstance: IDisposable {
                 }
             }
 
-            if (failures > 0 && !await BackOffAsync(failures, token).ConfigureAwait(false)) {
+            // A single failure is a client that left without a word, and the next client may be
+            // waiting already: listen again at once, on this thread. Only failures in a row mean a
+            // pipe that is stuck, and only those wait.
+            if (failures > 1 && !await BackOffAsync(failures - 1, token).ConfigureAwait(false)) {
                 break;
             }
         }
     }
 
     /// <summary>
-    /// Waits a little longer after each failure in a row (up to a second), so that a pipe in a
-    /// state it cannot leave never turns the listener into a busy loop.
+    /// Waits a little longer after each repeated failure in a row (up to a second), so that a pipe
+    /// in a state it cannot leave never turns the listener into a busy loop.
     /// </summary>
+    /// <param name="repeats">The failures in a row after the first one, from 1.</param>
+    /// <param name="token">Stops the wait when the registration is being disposed.</param>
     /// <returns>False when the registration is being disposed.</returns>
-    private static async Task<bool> BackOffAsync(int failures, CancellationToken token) {
-        var delay = TimeSpan.FromMilliseconds(Math.Min(1000, 50 * (1 << Math.Min(failures - 1, 5))));
+    private static async Task<bool> BackOffAsync(int repeats, CancellationToken token) {
+        var delay = TimeSpan.FromMilliseconds(Math.Min(1000, 50 * (1 << Math.Min(repeats - 1, 5))));
 
         try {
             await Task.Delay(delay, token).ConfigureAwait(false);
@@ -277,8 +312,16 @@ internal sealed class SingleInstance: IDisposable {
         await using var writer = new StreamWriter(_server, _utf8, leaveOpen: true) { AutoFlush = true };
         await writer.WriteLineAsync(Acknowledgement.AsMemory(), timeout.Token).ConfigureAwait(false);
 
-        // Disconnecting throws away what the client has not read yet.
-        _server.WaitForPipeDrain();
+        // Disconnecting throws away what the client has not read yet, so wait for the client to
+        // close its end, which it does once it has read the answer. Not with WaitForPipeDrain:
+        // it blocks a thread pool thread, and a client in this same process (another window)
+        // needs one to read the answer at all; on a small or busy pool the two then wait on each
+        // other until the client gives up.
+        try {
+            await reader.ReadLineAsync(timeout.Token).ConfigureAwait(false);
+        } catch (OperationCanceledException) when (!token.IsCancellationRequested) {
+            Log.Debug("The client on the pipe of {Path} kept it open after the answer", Path);
+        }
     }
 
     /// <summary>

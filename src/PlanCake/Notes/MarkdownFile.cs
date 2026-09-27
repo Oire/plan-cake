@@ -18,12 +18,18 @@ namespace Oire.PlanCake.Notes;
 /// <param name="DocumentLanguage">
 /// The document language, whose code page is tried when the charset detector is not sure.
 /// </param>
+/// <param name="OnRetry">
+/// Called on the calling thread after an attempt that is going to be retried, before the wait, with
+/// the number of the attempt that failed (0 for the first). Lets tests free a locked file between
+/// two attempts without racing the retries with a timer.
+/// </param>
 internal sealed record MarkdownFileOptions(
     bool ConvertToUtf8 = false,
     Encoding? AnsiEncoding = null,
     int Retries = 5,
     TimeSpan? RetryDelay = null,
-    string? DocumentLanguage = null
+    string? DocumentLanguage = null,
+    Action<int>? OnRetry = null
 ) {
     public static MarkdownFileOptions Default { get; } = new();
 }
@@ -340,6 +346,7 @@ internal sealed class MarkdownFile {
             try {
                 return action();
             } catch (Exception ex) when (IsRetryable(ex) && attempt < _options.Retries) {
+                _options.OnRetry?.Invoke(attempt);
                 Thread.Sleep(delay);
             } catch (UnauthorizedAccessException ex) {
                 throw new IOException(ex.Message, ex);

@@ -5,10 +5,40 @@ using Xunit;
 
 namespace Oire.PlanCake.Tests;
 
+/// <remarks>
+/// These tests talk through real pipes, within the two seconds a real client waits for an answer,
+/// and the listener answers on thread pool threads. xUnit runs tests on thread pool threads too, so
+/// a test blocked in a call, or blocking tests running beside these (sleeps, waits, retries), can
+/// hold every thread the pool starts with and leave the listener waiting for the pool to grow. So
+/// these tests run apart, and make the calls that block on a thread of their own, as the app makes
+/// them on the window's thread.
+/// </remarks>
+[Collection(PipeCollection.Name)]
 public class SingleInstanceTests {
+    private static readonly TimeSpan _patience = TimeSpan.FromSeconds(10);
+
     /// <summary>A path of its own for each test, so no test (and no running PlanCake) shares a pipe.</summary>
     private static string UniquePath() =>
         Path.Combine(Path.GetTempPath(), $"PlanCake.Tests-{Guid.NewGuid():N}", "plan.md");
+
+    /// <summary>Runs <paramref name="call"/> on a new thread, leaving the thread pool to the listener.</summary>
+    private static Task<T> OnOwnThread<T>(Func<T> call) {
+        var result = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var thread = new Thread(() => {
+            try {
+                result.SetResult(call());
+            } catch (Exception ex) {
+                result.SetException(ex);
+            }
+        }) {
+            IsBackground = true,
+        };
+        thread.Start();
+
+        return result.Task;
+    }
+
+    private static Task<bool> TryActivateOnOwnThread(string path) => OnOwnThread(() => SingleInstance.TryActivate(path));
 
     [Fact]
     public void PipeName_IsPlanCakeAndTheSha256OfTheNormalizedPath() {
@@ -69,34 +99,44 @@ public class SingleInstanceTests {
     }
 
     [Fact]
-    public void TryActivate_ActivatesTheWindowShowingTheFile() {
+    public async Task TryActivate_ActivatesTheWindowShowingTheFile() {
         var path = UniquePath();
         using var activated = new ManualResetEventSlim();
         using var registration = SingleInstance.TryRegister(path, activated.Set);
 
-        SingleInstance.TryActivate(path.ToLowerInvariant()).Should().BeTrue();
-        activated.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
+        (await TryActivateOnOwnThread(path.ToLowerInvariant())).Should().BeTrue();
+        activated.IsSet.Should().BeTrue("the window is activated before it answers");
     }
 
     [Fact]
-    public void TryActivate_WorksAgainAfterAFirstRequest() {
+    public async Task TryActivate_WorksAgainAfterAFirstRequest() {
         var path = UniquePath();
         var count = 0;
         using var registration = SingleInstance.TryRegister(path, () => Interlocked.Increment(ref count));
 
-        SingleInstance.TryActivate(path).Should().BeTrue();
-        SingleInstance.TryActivate(path).Should().BeTrue();
+        (await TryActivateOnOwnThread(path)).Should().BeTrue();
+        (await TryActivateOnOwnThread(path)).Should().BeTrue();
         Volatile.Read(ref count).Should().Be(2);
     }
 
     [Theory]
-    [InlineData(0)] // The client comes and goes before the window waits for it.
-    [InlineData(300)] // The window is waiting: the client leaves the pipe broken.
-    public void TryActivate_WorksAfterAClientLeftWithoutAsking(int delayMilliseconds) {
+    [InlineData(false)] // The client comes and goes before the window waits for it.
+    [InlineData(true)] // The window is waiting: the client leaves the pipe broken.
+    public async Task TryActivate_WorksAfterAClientLeftWithoutAsking(bool windowWaiting) {
         var path = UniquePath();
         using var activated = new ManualResetEventSlim();
-        using var registration = SingleInstance.TryRegister(path, activated.Set);
-        Thread.Sleep(delayMilliseconds);
+        using var clientLeft = new ManualResetEventSlim();
+        var waiting = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        // The listener's hooks, not a sleep, put the client before or during the window's wait.
+        var hooks = windowWaiting
+            ? new SingleInstance.ListenerHooks(Waiting: () => waiting.TrySetResult())
+            : new SingleInstance.ListenerHooks(BeforeWait: () => clientLeft.Wait(_patience));
+        using var registration = SingleInstance.TryRegister(path, activated.Set, hooks);
+
+        if (windowWaiting) {
+            await waiting.Task.WaitAsync(_patience);
+        }
 
         // Connects and closes without a word, as a process killed while it activates would.
         using (var client = new NamedPipeClientStream(
@@ -108,8 +148,10 @@ public class SingleInstanceTests {
             client.Connect(TimeSpan.FromSeconds(5));
         }
 
-        SingleInstance.TryActivate(path).Should().BeTrue();
-        activated.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
+        clientLeft.Set();
+
+        (await TryActivateOnOwnThread(path)).Should().BeTrue();
+        activated.IsSet.Should().BeTrue("the window is activated before it answers");
     }
 
     [Fact]
@@ -133,19 +175,24 @@ public class SingleInstanceTests {
     }
 
     [Fact]
-    public void TryClaim_OfAFileAnotherWindowShows_ActivatesThatWindowAndRegistersNothing() {
+    public async Task TryClaim_OfAFileAnotherWindowShows_ActivatesThatWindowAndRegistersNothing() {
         var path = UniquePath();
         using var activated = new ManualResetEventSlim();
         using var owner = SingleInstance.TryRegister(path, activated.Set);
 
-        SingleInstance.TryClaim(path, () => { }, out var registration).Should().Be(ClaimOutcome.ActivatedOther);
+        var (outcome, registration) = await OnOwnThread(() => {
+            var claimed = SingleInstance.TryClaim(path, () => { }, out var registered);
 
+            return (claimed, registered);
+        });
+
+        outcome.Should().Be(ClaimOutcome.ActivatedOther);
         registration.Should().BeNull();
-        activated.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
+        activated.IsSet.Should().BeTrue("the window is activated before it answers");
     }
 
     [Fact]
-    public void TryClaim_ByWindowsOpeningTheSameFileAtOnce_RegistersExactlyOne() {
+    public async Task TryClaim_ByWindowsOpeningTheSameFileAtOnce_RegistersExactlyOne() {
         const int windows = 4;
         var path = UniquePath();
         var activations = 0;
@@ -153,17 +200,16 @@ public class SingleInstanceTests {
         var registrations = new SingleInstance?[windows];
         using var start = new Barrier(windows);
 
-        var threads = Enumerable.Range(0, windows).Select(i => new Thread(() => {
+        await Task.WhenAll(Enumerable.Range(0, windows).Select(i => OnOwnThread(() => {
             start.SignalAndWait();
             outcomes[i] = SingleInstance.TryClaim(
                 path,
                 () => Interlocked.Increment(ref activations),
                 out registrations[i]
             );
-        })).ToList();
 
-        threads.ForEach(thread => thread.Start());
-        threads.ForEach(thread => thread.Join());
+            return true;
+        })));
 
         try {
             outcomes.Count(outcome => outcome == ClaimOutcome.Registered).Should().Be(1);
