@@ -1064,12 +1064,15 @@ reach every block with their own reading cursor.
 
 - [x] Help → User manual (F1) opens `help\<culture>\manual.html` with SIC's fallback chain;
       `help\**` copied to output
-- [ ] write the manual with the `write-manual` skill (English first, then the five
+- [x] write the manual with the `write-manual` skill (English first, then the five
       translations): reading with JAWS, adding and editing notes, the notes list, settings
       (including what changing markers does to existing notes), opening from the clipboard
       and from a link, the mouse alongside the keyboard, the command line, the `pk`
       alias, and how PlanCake fits the plan-make manual-review step
-- [ ] validation commands pass
+      (done; at the user's review the manual was rewritten for a general audience, with
+      screen readers mentioned only where needed, and it prompted ➕ Task 15a. Glossaries
+      live in `help/glossaries/` and are kept out of the build output)
+- [x] validation commands pass
 
 ### Task 17: Installer, portable zip, winget
 
