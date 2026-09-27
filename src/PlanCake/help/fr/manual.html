@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manuel utilisateur de PlanCake</title>
+<style>
+:root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1b1b1b;
+    --muted: #4a4a4a;
+    --link: #0a58ca;
+    --border: #b8bcc2;
+    --code-bg: #f3f4f6;
+    --kbd-bg: #f0f0f0;
+    --kbd-border: #8a8a8a;
+    --th-bg: #eef1f4;
+    --tip-bg: #eaf2fc;
+    --tip-border: #0a58ca;
+    --warn-bg: #fdf1e3;
+    --warn-border: #a14a00;
+    --focus: #0a58ca;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #16181b;
+        --fg: #e8e8e8;
+        --muted: #c4c4c4;
+        --link: #8ab4f8;
+        --border: #50555c;
+        --code-bg: #24272b;
+        --kbd-bg: #2c3035;
+        --kbd-border: #8a9099;
+        --th-bg: #23272c;
+        --tip-bg: #1a2a3d;
+        --tip-border: #8ab4f8;
+        --warn-bg: #35240f;
+        --warn-border: #f0a35a;
+        --focus: #8ab4f8;
+    }
+}
+
+html {
+    background: var(--bg);
+    color: var(--fg);
+}
+
+body {
+    margin: 0;
+    padding: 1rem;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    background: var(--bg);
+    color: var(--fg);
+}
+
+header, main, footer {
+    max-width: 52rem;
+    margin-inline: auto;
+}
+
+header {
+    padding-block: 1rem 0.5rem;
+    border-block-end: 2px solid var(--border);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.2rem;
+}
+
+header p {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--muted);
+}
+
+h2 {
+    margin-block-start: 2.5rem;
+    padding-block-end: 0.25rem;
+    border-block-end: 1px solid var(--border);
+    font-size: 1.6rem;
+}
+
+h3 {
+    margin-block-start: 1.8rem;
+    font-size: 1.3rem;
+}
+
+h4 {
+    margin-block-start: 1.4rem;
+    font-size: 1.1rem;
+}
+
+a {
+    color: var(--link);
+    text-decoration: underline;
+}
+
+a:focus-visible, summary:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+}
+
+nav ol {
+    padding-inline-start: 1.5rem;
+}
+
+nav ol ol {
+    margin-block: 0.2rem;
+}
+
+kbd {
+    display: inline-block;
+    padding: 0.05em 0.4em;
+    font-size: 0.9em;
+    font-weight: 600;
+    font-family: inherit;
+    background: var(--kbd-bg);
+    color: var(--fg);
+    border: 1px solid var(--kbd-border);
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+code {
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: 0.95em;
+    background: var(--code-bg);
+    padding: 0.05em 0.3em;
+    border-radius: 3px;
+}
+
+pre {
+    background: var(--code-bg);
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    text-align: start;
+}
+
+pre code {
+    padding: 0;
+    background: none;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-block: 1rem;
+}
+
+caption {
+    text-align: start;
+    font-weight: 600;
+    padding-block-end: 0.4rem;
+}
+
+th, td {
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.6rem;
+    text-align: start;
+    vertical-align: top;
+}
+
+th {
+    background: var(--th-bg);
+}
+
+dt {
+    font-weight: 600;
+    margin-block-start: 0.9rem;
+}
+
+dd {
+    margin-inline-start: 1.5rem;
+}
+
+aside[role="note"] {
+    margin-block: 1rem;
+    padding: 0.6rem 1rem;
+    background: var(--tip-bg);
+    border-inline-start: 4px solid var(--tip-border);
+    border-radius: 3px;
+}
+
+aside[role="note"].warning {
+    background: var(--warn-bg);
+    border-inline-start-color: var(--warn-border);
+}
+
+aside[role="note"] p {
+    margin-block: 0.4rem;
+}
+
+details {
+    margin-block: 0.6rem;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+summary {
+    font-weight: 600;
+    cursor: pointer;
+}
+
+footer {
+    margin-block-start: 3rem;
+    padding-block: 1rem;
+    border-block-start: 1px solid var(--border);
+    color: var(--muted);
+}
+</style>
+</head>
+<body>
+<header>
+<h1 id="product-name">PlanCake</h1>
+<p>Manuel utilisateur</p>
+</header>
+<main>
+<nav aria-label="Table des matières">
+<h2 id="contents">Table des matières</h2>
+<ol>
+<li><a href="#welcome">Bienvenue dans PlanCake</a></li>
+<li><a href="#quick-start">Démarrage rapide</a></li>
+<li><a href="#installing">Installer PlanCake</a>
+<ol>
+<li><a href="#installer">Avec le programme d’installation</a></li>
+<li><a href="#portable">La version portable</a></li>
+<li><a href="#pk-alias">Une commande plus courte&nbsp;: pk</a></li>
+</ol>
+</li>
+<li><a href="#main-window">La fenêtre principale</a>
+<ol>
+<li><a href="#document-view">Le document</a></li>
+<li><a href="#notes-list">La liste des notes</a></li>
+<li><a href="#moving-around">Se déplacer entre le document et la liste</a></li>
+<li><a href="#status-bar">Messages d’état</a></li>
+<li><a href="#questions">Les questions posées par PlanCake</a></li>
+<li><a href="#screen-readers">Utiliser un lecteur d’écran</a></li>
+</ol>
+</li>
+<li><a href="#opening-files">Ouvrir un fichier</a>
+<ol>
+<li><a href="#open-command-line">Depuis la ligne de commande</a></li>
+<li><a href="#open-dialog">Depuis la boîte de dialogue Ouvrir ou par glisser-déposer</a></li>
+<li><a href="#open-clipboard">Depuis le presse-papiers</a></li>
+<li><a href="#open-link">Depuis un lien sur le web</a></li>
+<li><a href="#one-window">Une fenêtre par fichier</a></li>
+</ol>
+</li>
+<li><a href="#reading">Lire un document</a>
+<ol>
+<li><a href="#reading-basics">Se déplacer</a></li>
+<li><a href="#following-links">Suivre des liens, revenir en arrière</a></li>
+<li><a href="#zoom">Zoomer</a></li>
+<li><a href="#document-language">La langue du document</a></li>
+</ol>
+</li>
+<li><a href="#notes">Laisser des notes</a>
+<ol>
+<li><a href="#adding-note">Ajouter une note</a></li>
+<li><a href="#editing-note">Modifier une note</a></li>
+<li><a href="#deleting-notes">Supprimer des notes</a></li>
+<li><a href="#finding-notes">Se déplacer de note en note</a></li>
+<li><a href="#undo">Annuler une modification</a></li>
+<li><a href="#note-markdown">Mise en forme à l’intérieur d’une note</a></li>
+<li><a href="#notes-in-file">À quoi ressemble une note dans le fichier</a></li>
+<li><a href="#copy-block">Copier le texte d’un bloc</a></li>
+</ol>
+</li>
+<li><a href="#tasks">Cocher des tâches</a></li>
+<li><a href="#outside-changes">Quand le fichier change en dehors de PlanCake</a></li>
+<li><a href="#encodings">Les fichiers qui ne sont pas en UTF-8</a></li>
+<li><a href="#settings">Paramètres</a>
+<ol>
+<li><a href="#settings-general">Général</a></li>
+<li><a href="#settings-notes">Notes</a></li>
+<li><a href="#settings-advanced">Avancé</a></li>
+</ol>
+</li>
+<li><a href="#command-line">Travailler depuis la ligne de commande</a>
+<ol>
+<li><a href="#cli-list">Lister les notes</a></li>
+<li><a href="#cli-check">Vérifier s’il reste des notes</a></li>
+<li><a href="#cli-clear">Supprimer toutes les notes</a></li>
+<li><a href="#cli-export">Exporter en HTML</a></li>
+<li><a href="#cli-markers">Utiliser d’autres marqueurs pour une seule exécution</a></li>
+<li><a href="#cli-waiting">PowerShell et l’invite de commandes n’attendent pas</a></li>
+<li><a href="#claude">Relire un plan avec Claude</a></li>
+</ol>
+</li>
+<li><a href="#keyboard">Référence clavier et souris</a>
+<ol>
+<li><a href="#keys-window">N’importe où dans la fenêtre</a></li>
+<li><a href="#keys-document">Dans le document</a></li>
+<li><a href="#keys-list">Dans la liste des notes</a></li>
+<li><a href="#keys-dialog">Dans la boîte de dialogue de note</a></li>
+</ol>
+</li>
+<li><a href="#menus">Référence des menus</a>
+<ol>
+<li><a href="#menu-file">Fichier</a></li>
+<li><a href="#menu-edit">Édition</a></li>
+<li><a href="#menu-view">Affichage</a></li>
+<li><a href="#menu-notes">Notes</a></li>
+<li><a href="#menu-help">Aide</a></li>
+<li><a href="#menu-context">Menus contextuels</a></li>
+</ol>
+</li>
+<li><a href="#updates">Garder PlanCake à jour</a></li>
+<li><a href="#data">Vos données et votre confidentialité</a>
+<ol>
+<li><a href="#data-notes">Vos notes sont dans vos fichiers</a></li>
+<li><a href="#data-settings">Paramètres et journaux</a></li>
+<li><a href="#data-privacy">Ce qui transite sur le réseau</a></li>
+</ol>
+</li>
+<li><a href="#troubleshooting">Dépannage</a></li>
+</ol>
+</nav>
+
+<article aria-labelledby="welcome">
+<h2 id="welcome">Bienvenue dans PlanCake</h2>
+<p>PlanCake vous permet de lire des fichiers Markdown confortablement et d’y laisser des notes exactement là où elles doivent être. Il affiche un fichier tel qu’il est censé être lu&nbsp;: de vrais titres, des listes, des tableaux et des blocs de code, au lieu de dièses et d’astérisques. Il a été conçu pour les longs plans d’implémentation que rédigent les assistants de codage IA — souvent 800 lignes et plus — mais il fonctionne avec n’importe quel fichier Markdown.</p>
+<p>Lire n’est que la moitié de la relecture. L’autre moitié consiste à dire ce que vous en pensez&nbsp;: « cette étape est incorrecte », « faites d’abord celle-ci ». Dans PlanCake, vous cliquez sur le paragraphe, l’élément de liste, le titre, la ligne de tableau ou le bloc de code que vous voulez commenter, ou vous appuyez sur <kbd>Entrée</kbd> dessus, puis vous tapez votre note. PlanCake l’écrit directement dans le fichier Markdown, juste après ce bloc, entre une paire de marqueurs. Vous n’avez jamais à compter les lignes ni à déterminer où la note doit aller — PlanCake sait de quelles lignes du fichier provient chaque bloc. Quiconque lit le fichier ensuite, un collègue ou un assistant IA comme Claude, retrouve vos notes exactement là où elles doivent être.</p>
+<p>Quelques points à connaître d’emblée. PlanCake n’est pas un éditeur de texte&nbsp;: à part vos notes et les cases à cocher des listes de tâches, il ne modifie jamais le texte d’un document. Il n’y a rien à enregistrer — chaque note se trouve dans le fichier dès que vous la confirmez. PlanCake fonctionne sous Windows 10 et 11 (64 bits), et tout y fonctionne aussi bien à la souris, au clavier seul, qu’avec un lecteur d’écran.</p>
+</article>
+
+<article aria-labelledby="quick-start">
+<h2 id="quick-start">Démarrage rapide</h2>
+<ol>
+<li>Ouvrez un plan&nbsp;: lancez PlanCake depuis le menu Démarrer et faites glisser un fichier Markdown sur sa fenêtre, ou appuyez sur <kbd>Ctrl+O</kbd> et choisissez le fichier. Depuis une invite de commandes, <code>plancake plan.md</code> fait la même chose.</li>
+<li>Lisez-le. Les titres, les listes, les tableaux et le code s’affichent mis en forme&nbsp;; faites défiler avec la molette de la souris ou les touches fléchées et de pagination.</li>
+<li>Lorsque vous atteignez un élément que vous voulez commenter, cliquez dessus. Depuis le clavier, appuyez sur <kbd>Alt+Maj+Flèche bas</kbd> ou <kbd>Alt+Maj+Flèche haut</kbd> pour vous déplacer de bloc en bloc jusqu’à ce qu’il soit entouré, puis appuyez sur <kbd>Entrée</kbd>. La boîte de dialogue <strong>Ajouter une note</strong> s’ouvre avec le curseur dans la zone de note.</li>
+<li>Tapez votre note et appuyez sur <kbd>Entrée</kbd>, ou cliquez sur <strong>OK</strong>. La note apparaît juste après le bloc, et la barre d’état affiche « Note ajoutée ». Elle se trouve déjà dans le fichier.</li>
+<li>Continuez à lire et à ajouter des notes. Une fois terminé, fermez la fenêtre — il n’y a rien à enregistrer.</li>
+</ol>
+<aside role="note">
+<p><strong>Astuce&nbsp;:</strong> Appuyez sur <kbd>F9</kbd> pour passer à la note suivante et sur <kbd>Maj+F9</kbd> pour revenir à la précédente. Cela fonctionne aussi bien dans le document que dans la liste des notes, et c’est le moyen le plus rapide de repasser en revue tout ce que vous avez écrit avant de rendre le plan.</p>
+</aside>
+</article>
+
+<article aria-labelledby="installing">
+<h2 id="installing">Installer PlanCake</h2>
+<p>PlanCake se présente sous deux formes&nbsp;: un programme d’installation, qui configure tout pour vous, et une version portable, qui s’exécute depuis n’importe quel dossier, y compris une clé USB. Les deux fonctionnent de la même façon une fois lancées&nbsp;; elles ne diffèrent que par l’endroit où PlanCake conserve ses paramètres. Téléchargez l’une ou l’autre depuis le <a href="https://plancake.oire.dev">site web de PlanCake</a>.</p>
+
+<h3 id="installer">Avec le programme d’installation</h3>
+<p>Exécutez le programme d’installation et suivez ses étapes. Outre PlanCake lui-même, il s’occupe de ce dont PlanCake a besoin pour fonctionner&nbsp;: il installe le .NET 10 Desktop Runtime et le Microsoft Edge WebView2 Runtime si votre ordinateur ne les possède pas encore. Il ajoute aussi PlanCake à votre PATH, de sorte que la commande <code>plancake</code> fonctionne dans toute nouvelle fenêtre PowerShell ou invite de commandes.</p>
+<p>Vos paramètres sont conservés dans <code>%APPDATA%\Oire\PlanCake</code>.</p>
+
+<h3 id="portable">La version portable</h3>
+<p>Décompressez le fichier zip dans n’importe quel dossier et exécutez <code>plancake.exe</code> depuis cet endroit. Le zip comprend un dossier vide nommé <code>userdata</code> à côté de <code>plancake.exe</code>&nbsp;; tant que ce dossier est présent, PlanCake y conserve ses paramètres et n’écrit rien dans votre profil utilisateur. Supprimez ou renommez le dossier <code>userdata</code> et PlanCake revient à l’utilisation de <code>%APPDATA%\Oire\PlanCake</code>.</p>
+<p>La version portable n’installe rien, votre ordinateur doit donc déjà disposer du <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> et du <a href="https://developer.microsoft.com/microsoft-edge/webview2/">Microsoft Edge WebView2 Runtime</a>. Windows 11 est livré avec WebView2&nbsp;; s’il est absent, PlanCake vous le signale à son démarrage et propose d’ouvrir la page de téléchargement.</p>
+<p>Pour utiliser la commande <code>plancake</code> avec la version portable, tapez son chemin complet ou ajoutez vous-même son dossier à votre PATH.</p>
+
+<h3 id="pk-alias">Une commande plus courte&nbsp;: pk</h3>
+<p>Si vous ouvrez des plans depuis la ligne de commande toute la journée, vous pouvez donner à PlanCake un nom de deux lettres. PlanCake ne fait pas cela pour vous&nbsp;; c’est une ligne à ajouter dans votre propre profil de shell.</p>
+<ul>
+<li>Dans PowerShell, ajoutez cette ligne à votre profil (le fichier dont <code>$PROFILE</code> contient le chemin)&nbsp;:
+<pre><code>Set-Alias pk plancake</code></pre></li>
+<li>Dans bash, ajoutez cette ligne à votre <code>.bashrc</code>&nbsp;:
+<pre><code>alias pk=plancake</code></pre></li>
+</ul>
+<p>Ensuite, <code>pk plan.md</code> ouvre un plan, et toutes les commandes de <a href="#command-line">Travailler depuis la ligne de commande</a> fonctionnent avec <code>pk</code> à la place de <code>plancake</code>.</p>
+</article>
+
+<article aria-labelledby="main-window">
+<h2 id="main-window">La fenêtre principale</h2>
+<p>La fenêtre comporte une barre de menus en haut, le document à gauche, la liste des notes à droite, et une barre d’état tout en bas. La barre de titre affiche le nom du fichier ouvert, par exemple <strong>plan.md - PlanCake</strong>.</p>
+<p>Pour donner plus de place au document ou à la liste des notes, faites glisser la bordure qui les sépare. Depuis le clavier, choisissez <strong>Élargir la liste des notes</strong> ou <strong>Rétrécir la liste des notes</strong> dans le menu <strong>Affichage</strong>&nbsp;: chacune déplace la bordure d’un dixième de la largeur partagée par les deux, jusqu’à un chiffre rond — à partir de 32&nbsp;%, par exemple, la liste passe à 40&nbsp;% de large, ou à 30&nbsp;%. La barre d’état vous indique la nouvelle répartition, par exemple « Liste des notes 40&nbsp;% ». Aucun des deux côtés ne peut disparaître&nbsp;: la liste reste large d’au moins 150&nbsp;pixels environ, et le document d’environ 200. À cette limite, la bordure reste immobile, et la barre d’état répète la répartition actuelle. Les deux commandes sont indisponibles tant que la liste des notes est masquée.</p>
+
+<h3 id="document-view">Le document</h3>
+<p>C’est votre fichier Markdown, mis en forme. Quand PlanCake ouvre un fichier, il commence en haut. Vos notes apparaissent aussi à l’intérieur du document, chacune juste après le bloc auquel elle appartient et distincte du texte du plan, afin que vous puissiez voir d’un coup d’œil ce qui vous appartient.</p>
+
+<h3 id="notes-list">La liste des notes</h3>
+<p>La liste des notes rassemble toutes les notes du fichier en un seul endroit, dans l’ordre où elles apparaissent. Elle comporte trois colonnes&nbsp;:</p>
+<dl>
+<dt>Lignes</dt>
+<dd>L’emplacement de la note dans le fichier&nbsp;: <code>12</code> pour une note d’une seule ligne, <code>12-14</code> pour une note plus longue.</dd>
+<dt>Bloc</dt>
+<dd>Le début du bloc que suit la note, pour savoir de quoi il s’agit sans avoir à s’y rendre.</dd>
+<dt>Note</dt>
+<dd>Le texte de la note sur une seule ligne, sans la ponctuation Markdown.</dd>
+</dl>
+<p>Pour aller à une note dans le document, appuyez sur <kbd>Entrée</kbd> sur sa ligne ou double-cliquez dessus&nbsp;; le focus se déplace vers la note. Pour supprimer une note, sélectionnez-la et appuyez sur <kbd>Suppr</kbd>&nbsp;; la sélection se déplace alors vers la note restante la plus proche, afin que vous ne perdiez jamais votre place dans la liste. Faites un clic droit sur une ligne, ou appuyez sur la touche <kbd>Applications</kbd> ou <kbd>Maj+F10</kbd>, pour obtenir un menu avec <strong>Modifier la note</strong> et <strong>Supprimer la note</strong>.</p>
+<p>Si vous préférez disposer de toute la fenêtre pour le document, choisissez <strong>Liste des notes</strong> dans le menu <strong>Affichage</strong>. Cela masque la liste, et le choisir à nouveau la réaffiche&nbsp;; la barre d’état affiche « Liste des notes masquée » ou « Liste des notes affichée ». Cela dure jusqu’à la fermeture de la fenêtre. Pour que chaque fenêtre démarre sans la liste, désactivez <strong>Afficher la liste des notes</strong> dans <a href="#settings-general">les paramètres</a>.</p>
+
+<h3 id="moving-around">Se déplacer entre le document et la liste</h3>
+<p>Cliquez là où vous voulez travailler, ou appuyez sur <kbd>F6</kbd> pour basculer entre le document et la liste des notes. Si la liste ne contient aucune note, la barre d’état affiche « Aucune note ».</p>
+<p><kbd>Tab</kbd> fonctionne aussi&nbsp;: appuyer sur <kbd>Tab</kbd> après le dernier lien ou la dernière case à cocher du document vous amène dans la liste des notes, et <kbd>Maj+Tab</kbd> depuis le premier élément fait de même. Depuis la liste, <kbd>Tab</kbd> et <kbd>Maj+Tab</kbd> vous ramènent au document.</p>
+<p>Quand la liste des notes est masquée, <kbd>F6</kbd> comme <kbd>Tab</kbd> vous maintiennent dans le document. <kbd>F6</kbd> déplace le focus&nbsp;; il ne réaffiche pas une liste masquée. Utilisez pour cela <strong>Affichage</strong>, <strong>Liste des notes</strong>.</p>
+
+<h3 id="status-bar">Messages d’état</h3>
+<p>Rien de ce que fait PlanCake ne se passe en silence. Chaque changement — une note ajoutée, une tâche cochée, un fichier rechargé, un téléchargement terminé — est confirmé par un court message dans la barre d’état, en bas de la fenêtre, tel que « Note ajoutée » ou « Fichier rechargé ». Le message y reste jusqu’à ce que le suivant le remplace.</p>
+
+<h3 id="questions">Les questions posées par PlanCake</h3>
+<p>Quand PlanCake vous pose une question par oui ou non — supprimer cette note&nbsp;? cocher cette tâche&nbsp;? recharger ce fichier&nbsp;? — appuyer sur <kbd>Échap</kbd> répond <strong>Non</strong>, tout comme fermer la question avec son bouton de fermeture. Vous pouvez toujours vous retirer sans rien choisir.</p>
+<p>Dans les autres boîtes de dialogue — <strong>Ajouter une note</strong>, <strong>Paramètres</strong>, <strong>Ouvrir depuis un lien</strong> — <kbd>Échap</kbd> équivaut au bouton <strong>Annuler</strong>&nbsp;: il ferme la boîte de dialogue et abandonne ce que vous avez tapé. Dans <strong>Raccourcis clavier</strong> et <strong>À propos de PlanCake</strong>, <kbd>Échap</kbd> les ferme simplement.</p>
+
+<h3 id="screen-readers">Utiliser un lecteur d’écran</h3>
+<p>PlanCake a été conçu en pensant aux lecteurs d’écran, et quelques détails méritent d’être connus si vous en utilisez un&nbsp;:</p>
+<ul>
+<li>Le document est une page web, vous le lisez donc avec les touches de navigation web habituelles de votre lecteur d’écran — par titre, par liste, par tableau, etc. Pour commenter un bloc, déplacez-vous dessus et appuyez sur <kbd>Entrée</kbd>&nbsp;; vous restez dans votre mode de lecture, au même endroit. Une fois enregistré, vous atterrissez sur la nouvelle note.</li>
+<li>Chaque message d’état est annoncé quel que soit l’endroit où se trouve votre focus, si bien que vous entendez « Note ajoutée », « Plus de notes » ou « Fichier rechargé » sans avoir à chercher la barre d’état. Si vous en manquez un, la commande de votre lecteur d’écran pour lire la barre d’état, ou pour répéter le dernier message, vous le relit.</li>
+<li>Les notes du document sont annoncées comme « note de l’utilisateur », et sur un afficheur braille elles sont marquées « noteu », afin que vous puissiez les distinguer du texte propre au plan.</li>
+<li>Le paramètre <strong>Langue du document</strong> indique à votre lecteur d’écran avec quelle voix lire le plan, indépendamment de la langue de l’interface&nbsp;: un plan en anglais est lu avec une voix anglaise même si Windows et PlanCake sont en russe.</li>
+<li>Quand le fichier est rechargé après une modification extérieure, la page est mise à jour sur place, de sorte que votre position de lecture reste où elle était.</li>
+<li><kbd>Ctrl+A</kbd> ne sélectionne pas tout le document, volontairement&nbsp;: la sélection de texte est laissée aux propres commandes de votre lecteur d’écran.</li>
+</ul>
+</article>
+
+<article aria-labelledby="opening-files">
+<h2 id="opening-files">Ouvrir un fichier</h2>
+<p>Les plans vous parviennent de multiples façons&nbsp;: un fichier sur le disque, un chemin collé par quelqu’un dans une discussion, un lien vers GitHub. PlanCake peut tous les ouvrir directement, sans que vous ayez à enregistrer quoi que ce soit au préalable. Quelle que soit la méthode utilisée, un fichier nouvellement ouvert commence toujours en haut.</p>
+
+<h3 id="open-command-line">Depuis la ligne de commande</h3>
+<p>Tapez <code>plancake</code> suivi du fichier&nbsp;:</p>
+<pre><code>plancake docs\plans\001-plan.md</code></pre>
+<p>Une fenêtre s’ouvre avec ce fichier. Tapez simplement <code>plancake</code> pour une fenêtre vide. Vous pouvez aussi faire glisser un fichier Markdown sur <code>plancake.exe</code> ou sur un raccourci vers celui-ci.</p>
+
+<h3 id="open-dialog">Depuis la boîte de dialogue Ouvrir ou par glisser-déposer</h3>
+<p>Faites glisser un fichier Markdown depuis l’Explorateur de fichiers et déposez-le sur la fenêtre de PlanCake. Ou appuyez sur <kbd>Ctrl+O</kbd>, ou choisissez <strong>Ouvrir</strong> dans le menu <strong>Fichier</strong>&nbsp;: la boîte de dialogue Ouvrir standard de Windows affiche les fichiers Markdown (<code>.md</code> et <code>.markdown</code>)&nbsp;; passez le type de fichier à <strong>Tous les fichiers</strong> pour tout voir.</p>
+
+<h3 id="open-clipboard">Depuis le presse-papiers</h3>
+<p>Appuyez sur <kbd>Ctrl+V</kbd> dans la fenêtre de PlanCake, ou choisissez <strong>Ouvrir depuis le presse-papiers</strong> dans le menu <strong>Fichier</strong>. PlanCake examine ce que vous avez copié&nbsp;:</p>
+<ul>
+<li>Un fichier copié dans l’Explorateur de fichiers&nbsp;: PlanCake l’ouvre. Si vous en avez copié plusieurs, il ouvre le premier fichier Markdown parmi eux.</li>
+<li>Un chemin copié sous forme de texte, avec ou sans guillemets (la commande <strong>Copier en tant que chemin d’accès</strong> de l’Explorateur de fichiers les ajoute)&nbsp;: PlanCake ouvre ce fichier.</li>
+<li>Un lien web commençant par <code>http://</code> ou <code>https://</code>&nbsp;: PlanCake télécharge le fichier et l’ouvre, comme décrit dans la section suivante.</li>
+</ul>
+<p>Si le presse-papiers contient autre chose, la barre d’état affiche « Le presse-papiers ne contient ni fichier Markdown ni lien. »</p>
+
+<h3 id="open-link">Depuis un lien sur le web</h3>
+<p>Supposons qu’un collègue vous envoie un lien vers un plan sur GitHub. Appuyez sur <kbd>Ctrl+L</kbd>, ou choisissez <strong>Ouvrir depuis un lien</strong> dans le menu <strong>Fichier</strong>. La zone <strong>Lien</strong> est déjà remplie si le presse-papiers contient un lien&nbsp;; sinon, collez-le ou tapez-le. Appuyez sur <kbd>Entrée</kbd> ou cliquez sur <strong>OK</strong> pour télécharger&nbsp;; appuyez sur <kbd>Échap</kbd> ou cliquez sur <strong>Annuler</strong> pour renoncer.</p>
+<p>La barre d’état affiche « Téléchargement depuis github.com... » puis, une fois le téléchargement terminé, l’endroit où le fichier a été enregistré&nbsp;; le plan s’ouvre ensuite. Les téléchargements vont dans votre dossier Windows <strong>Téléchargements</strong>, sous le nom même du fichier&nbsp;; si un fichier de ce nom s’y trouve déjà, PlanCake ajoute un numéro, comme <code>plan (2).md</code>, à la manière d’un navigateur. Comme le fichier téléchargé est un fichier ordinaire sur votre disque, vos notes y sont enregistrées comme dans n’importe quel autre.</p>
+<p>Quelques points à connaître sur les liens&nbsp;:</p>
+<ul>
+<li>Vous pouvez coller un lien normal vers une page GitHub d’un fichier&nbsp;; PlanCake récupère le Markdown brut qui se trouve derrière.</li>
+<li>Un lien vers une page web ordinaire plutôt que vers un fichier Markdown est refusé&nbsp;: « Ce lien mène à une page web, pas à un fichier Markdown. »</li>
+<li>Un téléchargement s’arrête au bout de 30 secondes, et les fichiers de plus de 10&nbsp;Mo ne sont pas téléchargés.</li>
+</ul>
+
+<h3 id="one-window">Une fenêtre par fichier</h3>
+<p>Chaque fichier dispose de sa propre fenêtre, et un fichier n’est jamais ouvert dans deux fenêtres à la fois. Si vous ouvrez un fichier déjà ouvert dans une autre fenêtre de PlanCake — depuis la ligne de commande, le presse-papiers, n’importe où — PlanCake ramène cette fenêtre au premier plan plutôt que d’en ouvrir une seconde. Ainsi, deux fenêtres ne peuvent jamais écrire des notes contradictoires dans le même fichier.</p>
+</article>
+
+<article aria-labelledby="reading">
+<h2 id="reading">Lire un document</h2>
+
+<h3 id="reading-basics">Se déplacer</h3>
+<p>Faites défiler avec la molette de la souris ou la barre de défilement, ou utilisez les touches fléchées, <kbd>Page précédente</kbd>, <kbd>Page suivante</kbd>, <kbd>Origine</kbd> et <kbd>Fin</kbd>. <kbd>Tab</kbd> déplace de lien en lien et de case à cocher en case à cocher. Sélectionnez du texte avec la souris et copiez-le avec <kbd>Ctrl+C</kbd> comme dans tout autre programme&nbsp;; terminer une sélection n’ouvre jamais la boîte de dialogue de note.</p>
+<p>Pour travailler sur un bloc particulier depuis le clavier — un paragraphe, un titre, un élément de liste, une ligne de tableau, un bloc de code ou une note — appuyez sur <kbd>Alt+Maj+Flèche bas</kbd> pour le bloc suivant et sur <kbd>Alt+Maj+Flèche haut</kbd> pour le précédent, ou choisissez <strong>Bloc suivant</strong> et <strong>Bloc précédent</strong> dans le menu <strong>Notes</strong>. Le bloc reçoit un contour et défile pour devenir visible. Appuyez sur <kbd>Entrée</kbd> pour lui ajouter une note (ou la modifier, s’il s’agit d’une note), ou sur la touche <kbd>Applications</kbd> pour son menu. Au début ou à la fin du document, la barre d’état affiche « Plus de blocs ».</p>
+<p>Le déplacement part du bloc ou de la note sur lequel vous avez travaillé ou vous êtes déplacé en dernier. S’il n’y en a pas encore, <kbd>Alt+Maj+Flèche bas</kbd> va au premier bloc visible et <kbd>Alt+Maj+Flèche haut</kbd> au dernier. Dans la liste des notes, ces touches déplacent vers un bloc du document et vous y placent.</p>
+
+<h3 id="following-links">Suivre des liens, revenir en arrière</h3>
+<p>Cliquez sur un lien, ou appuyez sur <kbd>Entrée</kbd> dessus, et PlanCake fait ce qui a du sens selon ce vers quoi il pointe&nbsp;:</p>
+<ul>
+<li>Un lien web s’ouvre dans votre navigateur par défaut.</li>
+<li>Un lien vers un autre fichier Markdown situé à côté de celui-ci ouvre ce fichier dans PlanCake, dans la même fenêtre.</li>
+<li>Un lien vers tout autre type de fichier l’ouvre avec le programme que Windows lui associe.</li>
+<li>Un lien vers un titre du même document vous y amène.</li>
+<li>Si un lien pointe vers un fichier qui n’existe pas, la barre d’état le signale et affiche le chemin.</li>
+</ul>
+<p>PlanCake se souvient des fichiers que vous avez ouverts dans une fenêtre et de l’endroit où vous en étiez dans chacun, comme l’historique d’un navigateur. Appuyez sur <kbd>Alt+Flèche gauche</kbd> ou <kbd>Retour arrière</kbd>, ou choisissez <strong>Précédent</strong> dans le menu <strong>Affichage</strong>, pour revenir au fichier précédent, exactement à l’endroit où vous l’avez laissé. <kbd>Alt+Flèche droite</kbd> ou <strong>Suivant</strong> avance de nouveau. Aux extrémités de l’historique, la barre d’état affiche « Aucun fichier précédent » ou « Aucun fichier suivant ». Si un fichier de l’historique a depuis été supprimé, PlanCake le signale et le saute.</p>
+<p>Ouvrir un fichier de toute autre manière — avec <kbd>Ctrl+O</kbd>, par glisser-déposer, depuis le presse-papiers, depuis un lien — l’ajoute aussi à l’historique, de sorte que <strong>Précédent</strong> vous ramène toujours à ce que vous lisiez auparavant.</p>
+
+<h3 id="zoom">Zoomer</h3>
+<p>Pour agrandir le texte, appuyez sur <kbd>Ctrl+Plus</kbd>&nbsp;; pour le réduire, appuyez sur <kbd>Ctrl+Moins</kbd>. Les touches du pavé numérique fonctionnent aussi, tout comme <strong>Zoom avant</strong> et <strong>Zoom arrière</strong> dans le menu <strong>Affichage</strong>. Chaque étape change la taille de 10&nbsp;%, entre 50 et 300&nbsp;%, et la barre d’état affiche la nouvelle taille, par exemple « Zoom 120&nbsp;% ». Appuyez sur <kbd>Ctrl+0</kbd> pour revenir à 100&nbsp;%.</p>
+
+<h3 id="document-language">La langue du document</h3>
+<p>PlanCake distingue deux langues&nbsp;: la langue de ses menus et boîtes de dialogue, et la langue dans laquelle le document est rédigé. Passer l’interface en français ne rend pas français un plan en anglais. La langue du document compte lorsque le plan est lu à voix haute (voir <a href="#screen-readers">Utiliser un lecteur d’écran</a>) et aide PlanCake à reconnaître les anciens encodages de fichiers (voir <a href="#encodings">Les fichiers qui ne sont pas en UTF-8</a>).</p>
+<p>Les nouveaux documents utilisent la <strong>Langue du document</strong> définie dans les paramètres, l’anglais à moins que vous ne la changiez. Pour définir une autre langue pour un fichier particulier, choisissez <strong>Langue du document</strong> dans le menu <strong>Affichage</strong> et sélectionnez-la. Cela ne s’applique qu’au fichier ouvert&nbsp;; le prochain fichier que vous ouvrirez utilisera de nouveau la langue des paramètres.</p>
+</article>
+
+<article aria-labelledby="notes">
+<h2 id="notes">Laisser des notes</h2>
+
+<h3 id="adding-note">Ajouter une note</h3>
+<ol>
+<li>Cliquez sur le paragraphe, le titre, l’élément de liste, la ligne de tableau ou le bloc de code que vous voulez commenter. Depuis le clavier, déplacez-vous dessus avec <kbd>Alt+Maj+Flèche bas</kbd> ou <kbd>Alt+Maj+Flèche haut</kbd> (voir <a href="#reading-basics">Se déplacer</a>) et appuyez sur <kbd>Entrée</kbd>. La boîte de dialogue <strong>Ajouter une note</strong> s’ouvre. Elle affiche le début du bloc sous <strong>Note sur</strong>, afin que vous puissiez vérifier que vous avez choisi le bon, et place le curseur dans la zone <strong>Note</strong>.</li>
+<li>Tapez votre note. Pour y commencer une nouvelle ligne, appuyez sur <kbd>Ctrl+Entrée</kbd>.</li>
+<li>Appuyez sur <kbd>Entrée</kbd> ou cliquez sur <strong>OK</strong> pour enregistrer&nbsp;; appuyez sur <kbd>Échap</kbd> ou cliquez sur <strong>Annuler</strong> pour renoncer. <strong>OK</strong> reste indisponible tant que la zone est vide.</li>
+</ol>
+<p>PlanCake écrit aussitôt la note dans le fichier, juste après le bloc. Le document se met à jour, la barre d’état affiche « Note ajoutée », et la nouvelle note se trouve là où vous êtes désormais. Elle apparaît aussi dans la liste des notes.</p>
+<p>Un simple clic suffit&nbsp;; un double-clic ne fait rien de plus qu’un simple clic. Sélectionner du texte avec la souris n’ouvre pas la boîte de dialogue, vous pouvez donc toujours sélectionner et copier du texte comme d’habitude.</p>
+<p>Si vous préférez que <kbd>Entrée</kbd> crée une nouvelle ligne et que <kbd>Ctrl+Entrée</kbd> enregistre, changez <strong>Entrée dans la boîte de dialogue de note</strong> dans les paramètres. Si vous préférez qu’un clic ou <kbd>Entrée</kbd> sur un bloc ouvre un menu plutôt que la boîte de dialogue — par exemple parce que vous cliquez souvent pour vous positionner et ajoutez des notes par accident — changez <strong>Entrée ou clic sur un bloc</strong>. Les deux sont décrits dans <a href="#settings-notes">les paramètres de Notes</a>.</p>
+<p>Vous pouvez aussi ajouter une note via le menu contextuel&nbsp;: faites un clic droit sur un bloc, ou appuyez sur la touche <kbd>Applications</kbd> ou <kbd>Maj+F10</kbd> dessus, et choisissez <strong>Ajouter une note</strong>.</p>
+
+<h3 id="editing-note">Modifier une note</h3>
+<p>Cliquez sur la note dans le document, ou déplacez-vous dessus avec <kbd>F9</kbd> ou <kbd>Alt+Maj+Flèche bas</kbd> puis appuyez sur <kbd>Entrée</kbd>. La même boîte de dialogue s’ouvre, intitulée <strong>Modifier la note</strong> et remplie avec le texte de la note. Modifiez-la et enregistrez&nbsp;; la barre d’état affiche « Note modifiée ».</p>
+<p>Vous pouvez aussi ouvrir une note pour la modifier depuis la liste des notes, via le menu contextuel, ou avec <strong>Modifier la note</strong> dans le menu <strong>Notes</strong>.</p>
+
+<h3 id="deleting-notes">Supprimer des notes</h3>
+<p>Pour supprimer une note, sélectionnez-la dans la liste des notes et appuyez sur <kbd>Suppr</kbd>. Ou faites un clic droit sur la note, dans le document ou dans la liste, ou appuyez sur la touche <kbd>Applications</kbd> ou <kbd>Maj+F10</kbd> dessus, et choisissez <strong>Supprimer la note</strong>. PlanCake demande « Supprimer cette note&nbsp;? » et affiche son texte&nbsp;; cliquez sur <strong>Oui</strong> ou appuyez sur <kbd>Entrée</kbd>. La barre d’état affiche « Note supprimée ». Si vous préférez ne pas être sollicité à chaque fois, désactivez <strong>Demander avant de supprimer une note</strong> dans les paramètres.</p>
+<p>Pour supprimer toutes les notes du fichier en une seule fois — par exemple après que l’auteur du plan les a toutes traitées — choisissez <strong>Supprimer toutes les notes</strong> dans le menu <strong>Édition</strong>. PlanCake demande toujours confirmation au préalable, avec le nombre de notes, quel que soit le paramètre.</p>
+
+<h3 id="finding-notes">Se déplacer de note en note</h3>
+<p>Appuyez sur <kbd>F9</kbd> pour la note suivante et sur <kbd>Maj+F9</kbd> pour la précédente, ou utilisez <strong>Note suivante</strong> et <strong>Note précédente</strong> dans le menu <strong>Notes</strong>. Dans le document, cela vous amène à la note&nbsp;; dans la liste des notes, cela déplace la sélection. Après la dernière note ou avant la première, la barre d’état affiche « Plus de notes ».</p>
+
+<h3 id="undo">Annuler une modification</h3>
+<p>Appuyez sur <kbd>Ctrl+Z</kbd> pour annuler et sur <kbd>Ctrl+Y</kbd> pour rétablir, ou utilisez <strong>Annuler</strong> et <strong>Rétablir</strong> dans le menu <strong>Édition</strong>. Cela couvre tout ce que PlanCake écrit&nbsp;: ajouter, modifier et supprimer des notes, supprimer toutes les notes, et cocher ou décocher des tâches. La barre d’état vous indique ce qui a été annulé ou rétabli, par exemple « Ajout de la note annulé » ou « Cochage de la tâche rétabli », et « Rien à annuler » quand il ne reste plus rien.</p>
+<p>Annuler ne fonctionne que tant que le fichier contient encore ce que PlanCake a écrit en dernier. Si autre chose a modifié le fichier depuis, PlanCake n’annule pas par-dessus ce changement&nbsp;; il affiche « Le fichier a changé, il n’y a donc plus rien à annuler ni à rétablir. »</p>
+
+<h3 id="note-markdown">Mise en forme à l’intérieur d’une note</h3>
+<p>Vous pouvez utiliser Markdown dans une note&nbsp;: emphase, <code>code en ligne</code>, liens, listes, même un bloc de code. Dans le document, la note s’affiche mise en forme, tandis que le fichier conserve exactement ce que vous avez tapé.</p>
+<p>Deux exceptions préservent l’intégrité de la structure du plan. Un titre que vous tapez dans une note s’affiche en texte gras, et non comme un véritable titre, afin que vos notes ne se mélangent jamais avec les titres propres au plan. Et les balises HTML que vous tapez s’affichent comme du texte brut.</p>
+<p>Une note ne peut pas contenir son propre marqueur de fermeture, <code>[/usernote]</code> par défaut, car cela y mettrait fin prématurément. Si vous utilisez un marqueur unique sans marqueur de fermeture (voir <a href="#settings-notes">les paramètres de Notes</a>), une note ne peut pas contenir ce marqueur, car cela démarrerait une seconde note. Si vous en tapez un, PlanCake garde la boîte de dialogue ouverte et vous indique pourquoi.</p>
+
+<h3 id="notes-in-file">À quoi ressemble une note dans le fichier</h3>
+<p>Les notes sont du texte brut dans votre fichier Markdown, encadré par deux marqueurs. Une note sur un paragraphe ressemble à ceci&nbsp;:</p>
+<pre><code>Sauvegardez la base de données avant d’exécuter la migration.
+[usernote]Sauvegardez aussi le dossier des téléversements.[/usernote]</code></pre>
+<p>Quiconque ouvre le fichier dans un éditeur de texte, et tout outil qui le lit, voit vos notes. Vous pouvez même écrire des notes à la main sous la même forme, et PlanCake les affiche comme les siennes. Pour utiliser des marqueurs différents, voir <a href="#settings-notes">les paramètres de Notes</a>.</p>
+
+<h3 id="copy-block">Copier le texte d’un bloc</h3>
+<p>Pour copier un paragraphe, un élément de liste ou un autre bloc sans sa ponctuation Markdown, faites un clic droit dessus, ou appuyez sur la touche <kbd>Applications</kbd> ou <kbd>Maj+F10</kbd> dessus, et choisissez <strong>Copier le texte du bloc</strong>. La barre d’état affiche « Texte du bloc copié ».</p>
+</article>
+
+<article aria-labelledby="tasks">
+<h2 id="tasks">Cocher des tâches</h2>
+<p>De nombreux plans contiennent des listes de contrôle — des lignes telles que <code>- [ ] Écrire les tests</code> dans le fichier. PlanCake les affiche comme de vraies cases à cocher, afin que vous puissiez cocher les étapes au fur et à mesure sans ouvrir d’éditeur.</p>
+<ol>
+<li>Cliquez sur la case à cocher, ou appuyez sur <kbd>Espace</kbd> ou <kbd>Entrée</kbd> dessus.</li>
+<li>PlanCake demande « Marquer cette tâche comme terminée&nbsp;? Le fichier sur le disque sera modifié. » (ou « Marquer cette tâche comme non terminée&nbsp;? Le fichier sur le disque sera modifié. » pour une tâche cochée) et affiche la tâche. Cliquez sur <strong>Oui</strong> ou appuyez sur <kbd>Entrée</kbd>. Si vous répondez Non, la case à cocher reste exactement comme elle était.</li>
+<li>PlanCake écrit <code>[x]</code> ou <code>[ ]</code> sur cette seule ligne du fichier. Vous restez sur la case à cocher, et la barre d’état affiche « Tâche cochée » ou « Tâche décochée ».</li>
+</ol>
+<p>Si vous cochez souvent des tâches et n’avez pas besoin de la question, désactivez <strong>Demander avant de cocher ou de décocher une tâche</strong> dans les paramètres. <kbd>Ctrl+Z</kbd> annule un cochage comme tout autre changement.</p>
+<p>Une tâche comportant des sous-tâches, certaines terminées et d’autres non, s’affiche partiellement cochée. Il ne s’agit que d’un affichage&nbsp;: Markdown n’a pas de troisième état, donc rien n’est écrit pour cela. Cocher une telle tâche ne marque comme terminée que cette tâche elle-même — les lignes de ses sous-tâches ne sont jamais touchées.</p>
+</article>
+
+<article aria-labelledby="outside-changes">
+<h2 id="outside-changes">Quand le fichier change en dehors de PlanCake</h2>
+<p>Un plan en cours de relecture reste rarement figé&nbsp;: un assistant IA le met à jour, un collègue le modifie, le contrôle de version apporte une nouvelle révision. PlanCake remarque quand le fichier ouvert change sur le disque et le recharge aussitôt. La barre d’état affiche « Fichier rechargé », et vous restez où vous en étiez dans votre lecture — la page est mise à jour sur place plutôt que de revenir en haut.</p>
+<p>Si vous préférez décider vous-même, réglez <strong>Quand le fichier change sur le disque</strong> sur <strong>Demander avant de le recharger</strong> dans les paramètres. PlanCake demande alors s’il faut recharger. Si vous répondez Non, il vous indique que <kbd>F5</kbd> recharge le fichier dès que vous êtes prêt.</p>
+<p>Si le fichier est supprimé, renommé ou déplacé ailleurs, PlanCake vous le signale, et les commandes de notes deviennent indisponibles jusqu’à ce que le fichier soit de retour. Quand il réapparaît au même endroit, PlanCake indique qu’il est de retour et le recharge.</p>
+<p>PlanCake n’écrase jamais un changement qu’il n’a pas vu. Supposons que le fichier change pendant que vous tapez une note. Quand vous enregistrez, PlanCake refuse d’écrire, affiche le fichier tel qu’il est maintenant, et indique « Le fichier a changé. Veuillez réessayer. » Rien n’est perdu d’un côté comme de l’autre&nbsp;: ajoutez de nouveau votre note, et elle ira dans la version actuelle du fichier.</p>
+</article>
+
+<article aria-labelledby="encodings">
+<h2 id="encodings">Les fichiers qui ne sont pas en UTF-8</h2>
+<p>Presque tous les fichiers Markdown sont aujourd’hui en UTF-8. Les fichiers plus anciens, notamment dans des langues telles que le russe ou l’hébreu, sont parfois enregistrés dans un ancien encodage Windows à la place. PlanCake les ouvre et les affiche correctement, mais par défaut il n’y écrit pas&nbsp;: le fichier s’ouvre en lecture seule, et PlanCake vous le signale, en nommant l’encodage, par exemple « Ce fichier n’est pas en UTF-8, il a donc été ouvert en lecture seule en tant que Windows-1251. Impossible d’y ajouter des notes. »</p>
+<p>Pour ajouter des notes à de tels fichiers, activez <strong>Convertir en UTF-8 les fichiers qui ne sont pas en UTF-8</strong> dans les <a href="#settings-advanced">paramètres avancés</a>. PlanCake convertit alors chaque fichier de ce type en UTF-8 dès que vous l’ouvrez et vous le signale, par exemple « Converti de Windows-1251 en UTF-8. » Seul l’encodage change&nbsp;; le texte et les fins de ligne restent les mêmes.</p>
+<p>Parfois, PlanCake ne peut pas déterminer avec certitude quel encodage un fichier utilise. Un tel fichier reste toujours en lecture seule, quel que soit le paramètre&nbsp;: « L’encodage de ce fichier n’a pas pu être reconnu, il a donc été ouvert en lecture seule et ne sera jamais modifié. Impossible d’y ajouter des notes. » C’est une règle stricte. Écrire dans un fichier qui n’a pas été lu correctement détruirait les caractères que PlanCake n’a pas pu déchiffrer, et PlanCake ne fait jamais cela.</p>
+<p>Le paramètre <strong>Langue du document</strong> est l’un des indices que PlanCake utilise pour reconnaître un ancien encodage&nbsp;; le régler sur la langue dans laquelle vos anciens fichiers sont écrits est donc utile.</p>
+</article>
+
+<article aria-labelledby="settings">
+<h2 id="settings">Paramètres</h2>
+<p>Appuyez sur <kbd>Ctrl+Virgule</kbd>, ou choisissez <strong>Paramètres</strong> dans le menu <strong>Fichier</strong>. Les paramètres se répartissent sur trois onglets, <strong>Général</strong>, <strong>Notes</strong> et <strong>Avancé</strong>&nbsp;; cliquez sur un onglet, ou passez de l’un à l’autre avec <kbd>Ctrl+Tab</kbd> et <kbd>Ctrl+Maj+Tab</kbd>. Cliquez sur <strong>OK</strong> pour appliquer vos changements — ils prennent effet immédiatement, sans redémarrer PlanCake — ou sur <strong>Annuler</strong> (<kbd>Échap</kbd>) pour les abandonner.</p>
+
+<h3 id="settings-general">Général</h3>
+<dl>
+<dt>Langue de l’interface</dt>
+<dd>La langue des menus, des boîtes de dialogue et des messages&nbsp;: anglais, Русский (russe), Українська (ukrainien), français, עברית (hébreu) ou Deutsch (allemand). <strong>Langue du système</strong>, la valeur par défaut, suit la langue de Windows, et utilise l’anglais si Windows est dans une langue que PlanCake ne possède pas. En hébreu, toute la fenêtre est disposée de droite à gauche. Vous pouvez aussi la changer depuis <strong>Langue de l’interface</strong> dans le menu <strong>Affichage</strong>. Ce paramètre ne change pas la langue du document.</dd>
+<dt>Langue du document</dt>
+<dd>La langue dans laquelle PlanCake suppose qu’un document nouvellement ouvert est rédigé. Par défaut&nbsp;: anglais. Elle ne suit jamais la langue de l’interface ni celle de Windows. Voir <a href="#document-language">La langue du document</a>.</dd>
+<dt>Quand le fichier change sur le disque</dt>
+<dd><strong>Le recharger</strong> (par défaut) recharge le fichier dès qu’autre chose le modifie. <strong>Demander avant de le recharger</strong> vous le demande d’abord. Voir <a href="#outside-changes">Quand le fichier change en dehors de PlanCake</a>.</dd>
+<dt>Demander avant de supprimer une note</dt>
+<dd>Activé par défaut. Désactivez-le pour supprimer des notes individuelles sans question. <strong>Supprimer toutes les notes</strong> demande toujours confirmation.</dd>
+<dt>Demander avant de cocher ou de décocher une tâche</dt>
+<dd>Activé par défaut. Désactivez-le pour cocher les tâches d’un simple clic ou d’une simple pression de touche.</dd>
+<dt>Afficher la liste des notes</dt>
+<dd>Activé par défaut. Désactivez-le pour que chaque fenêtre s’ouvre avec la liste des notes masquée. Vous pouvez toujours l’afficher pour la fenêtre en cours depuis le menu <strong>Affichage</strong>.</dd>
+<dt>Rechercher les mises à jour au démarrage</dt>
+<dd>Activé par défaut. PlanCake vérifie une fois à son démarrage et reste silencieux à moins qu’une nouvelle version existe.</dd>
+<dt>Rechercher les mises à jour en arrière-plan</dt>
+<dd>La fréquence à laquelle PlanCake vérifie de nouveau pendant qu’il continue de s’exécuter&nbsp;: <strong>Une fois par jour</strong>, <strong>Tous les 3 jours</strong>, <strong>Une fois par semaine</strong> (par défaut), <strong>Une fois par mois</strong> ou <strong>Jamais</strong>. <strong>Jamais</strong> ne désactive que ces vérifications répétées, pas celle du démarrage.</dd>
+</dl>
+
+<h3 id="settings-notes">Notes</h3>
+<dl>
+<dt>Marqueur d’ouverture</dt>
+<dd>Le texte par lequel une note commence dans le fichier. Par défaut&nbsp;: <code>[usernote]</code>. Il ne peut être vide, ne peut ni commencer ni se terminer par une espace ou un guillemet double, et ne peut contenir de saut de ligne.</dd>
+<dt>Marqueur de fermeture (laisser vide pour un marqueur unique qui s’étend jusqu’à la fin de la ligne)</dt>
+<dd>Le texte par lequel une note se termine. Par défaut&nbsp;: <code>[/usernote]</code>. Il suit les mêmes règles et doit être différent du marqueur d’ouverture. Si vous le laissez vide, une note s’étend du marqueur d’ouverture jusqu’à la fin de sa ligne&nbsp;; les notes ne font alors toujours qu’une seule ligne, et tout saut de ligne que vous tapez dans une note devient une espace.</dd>
+<dt>Entrée ou clic sur un bloc</dt>
+<dd><strong>Ajoute une note</strong> (par défaut) ouvre la boîte de dialogue <strong>Ajouter une note</strong>. <strong>Ouvre le menu contextuel</strong> affiche à la place le menu du bloc, où vous choisissez <strong>Ajouter une note</strong> ou <strong>Copier le texte du bloc</strong>&nbsp;; choisissez cette option si vous vous surprenez à ajouter des notes par accident. Un clic ou <kbd>Entrée</kbd> sur une note existante l’ouvre toujours pour la modifier, et un clic droit, la touche <kbd>Applications</kbd> et <kbd>Maj+F10</kbd> ouvrent toujours le menu.</dd>
+<dt>Entrée dans la boîte de dialogue de note</dt>
+<dd><strong>Enregistre la note (Ctrl+Entrée commence une nouvelle ligne)</strong> est le réglage par défaut. <strong>Commence une nouvelle ligne (Ctrl+Entrée enregistre la note)</strong> convient aux notes longues à plusieurs paragraphes. Quel que soit votre choix, <kbd>Ctrl+Entrée</kbd> fait l’autre action.</dd>
+</dl>
+<aside role="note" class="warning">
+<p><strong>Avertissement&nbsp;: changer les marqueurs masque les notes existantes.</strong> PlanCake ne lit que les marqueurs définis en ce moment. Les notes déjà présentes dans un fichier et écrites avec d’autres marqueurs s’affichent comme du texte ordinaire&nbsp;: elles ne sont plus dans la liste des notes, <kbd>F9</kbd> les saute, et la ligne de commande ne les compte pas. Rien ne change dans le fichier, et rien n’est perdu. Rétablissez les marqueurs d’origine, et ces notes redeviennent des notes.</p>
+<p>Choisissez donc vos marqueurs avant de commencer une relecture, et évitez de les changer tant qu’un plan contient encore des notes.</p>
+</aside>
+
+<h3 id="settings-advanced">Avancé</h3>
+<dl>
+<dt>Convertir en UTF-8 (sans BOM) les fichiers qui ne sont pas en UTF-8 à leur ouverture. Le fichier sur le disque est réécrit.</dt>
+<dd>Désactivé par défaut, de sorte que les fichiers dans d’anciens encodages s’ouvrent en lecture seule et ne sont jamais modifiés. Activez-le pour que PlanCake convertisse ces fichiers en UTF-8 à leur ouverture, afin que vous puissiez y ajouter des notes. Un fichier dont PlanCake ne peut pas reconnaître l’encodage n’est jamais converti. Voir <a href="#encodings">Les fichiers qui ne sont pas en UTF-8</a>.</dd>
+</dl>
+</article>
+
+<article aria-labelledby="command-line">
+<h2 id="command-line">Travailler depuis la ligne de commande</h2>
+<p>PlanCake peut aussi fonctionner sans fenêtre. Quatre commandes permettent de lire les notes d’un fichier, de vérifier s’il en reste, de toutes les supprimer, ou d’exporter le fichier en HTML. Elles sont conçues pour les scripts et pour les assistants IA&nbsp;: Claude les utilise pour lire vos notes sur un plan et confirmer qu’elles ont toutes été traitées.</p>
+<p>Chaque commande suit le même modèle&nbsp;:</p>
+<pre><code>plancake &lt;command&gt; &lt;file&gt; [options]</code></pre>
+<p>Tapez <code>plancake --help</code> pour la liste des commandes, ou <code>plancake list --help</code> pour les options d’une commande. La sortie est en UTF-8 sans marque d’ordre des octets. Les erreurs vont vers la sortie d’erreur, avec le code de sortie 1.</p>
+<table>
+<caption>Codes de sortie</caption>
+<thead>
+<tr><th scope="col">Code</th><th scope="col">Signification</th></tr>
+</thead>
+<tbody>
+<tr><td>0</td><td>La commande a réussi. Pour <code>check</code>&nbsp;: le fichier n’a aucune note.</td></tr>
+<tr><td>1</td><td>Quelque chose s’est mal passé&nbsp;: le fichier est manquant ou illisible, une option est incorrecte, la sortie ne peut pas être écrite.</td></tr>
+<tr><td>3</td><td>Uniquement depuis <code>check</code>&nbsp;: le fichier contient encore des notes.</td></tr>
+</tbody>
+</table>
+<p>Les commandes <code>list</code>, <code>check</code> et <code>export</code> ne modifient jamais votre fichier Markdown. Seule <code>clear</code> le fait.</p>
+
+<h3 id="cli-list">Lister les notes</h3>
+<pre><code>plancake list plan.md</code></pre>
+<p>Cela affiche une ligne par note&nbsp;: les lignes de la note, les lignes du bloc qu’elle suit, le début de ce bloc, et la note elle-même. Les sauts de ligne à l’intérieur d’une note sont représentés par une barre oblique.</p>
+<pre><code>43-43 after 41-42 "Back up the database before you run the migration.": Also back up the uploads folder.</code></pre>
+<p>Ce format est destiné aux scripts, ses mots fixes et sa ponctuation — « after », le tiret, les guillemets — restent donc en anglais quelle que soit votre langue d’interface.</p>
+<p>Ajoutez <code>--json</code> pour du JSON&nbsp;: une liste d’objets avec les champs <code>noteStartLine</code>, <code>noteEndLine</code>, <code>blockStartLine</code>, <code>blockEndLine</code>, <code>blockKind</code>, <code>blockExcerpt</code> et <code>text</code>. Ajoutez <code>-o</code> (ou <code>--output</code>) suivi d’un nom de fichier pour écrire le résultat dans un fichier plutôt qu’à l’écran&nbsp;:</p>
+<pre><code>plancake list plan.md --json -o notes.json</code></pre>
+<p><strong>Exporter les notes</strong> dans le menu <strong>Fichier</strong> enregistre le même JSON depuis la fenêtre.</p>
+
+<h3 id="cli-check">Vérifier s’il reste des notes</h3>
+<pre><code>plancake check plan.md</code></pre>
+<p>Cela affiche le nombre de notes, tel que <code>2 notes</code>, et se termine avec le code de sortie 0 s’il n’y en a aucune, 3 s’il y en a, et 1 si le fichier n’a pas pu être lu. Un script peut ainsi distinguer les trois cas&nbsp;: terminé, notes encore ouvertes, quelque chose s’est mal passé.</p>
+
+<h3 id="cli-clear">Supprimer toutes les notes</h3>
+<pre><code>plancake clear plan.md</code></pre>
+<p>Cela supprime toutes les notes du fichier et affiche combien il en a supprimé, par exemple <code>2 notes supprimées.</code> Pour un fichier dans un ancien encodage, <code>clear</code> suit <a href="#settings-advanced">le paramètre de conversion</a>&nbsp;: quand la conversion est désactivée, ou que l’encodage ne peut pas être reconnu, il refuse de modifier un fichier qui contient des notes et explique pourquoi.</p>
+
+<h3 id="cli-export">Exporter en HTML</h3>
+<pre><code>plancake export plan.md -o plan.html</code></pre>
+<p>Cela écrit une page web autonome du document avec ses notes clairement signalées, à partager avec quelqu’un qui n’utilise pas PlanCake. La page intègre ses styles et ne contient aucun script. L’option <code>-o</code> est obligatoire. La langue de la page est la <strong>Langue du document</strong> définie dans les paramètres&nbsp;; pour en utiliser une autre, ajoutez <code>--lang</code> suivi d’un code de langue, tel que <code>--lang fr</code>. Le titre de la page est le premier titre du document, ou le nom du fichier s’il n’en a aucun.</p>
+
+<h3 id="cli-markers">Utiliser d’autres marqueurs pour une seule exécution</h3>
+<p>Par défaut, les commandes utilisent les marqueurs des paramètres. Pour en utiliser d’autres pour une seule exécution, ajoutez&nbsp;:</p>
+<dl>
+<dt><code>--open-marker &lt;text&gt;</code></dt>
+<dd>Le marqueur par lequel une note commence.</dd>
+<dt><code>--close-marker &lt;text&gt;</code></dt>
+<dd>Le marqueur par lequel une note se termine.</dd>
+<dt><code>--single-token</code></dt>
+<dd>Les notes n’ont pas de marqueur de fermeture et se terminent avec leur ligne. Cela ne peut pas être combiné avec <code>--close-marker</code>.</dd>
+</dl>
+<pre><code>plancake check plan.md --open-marker "!NOTE!" --single-token</code></pre>
+
+<h3 id="cli-waiting">PowerShell et l’invite de commandes n’attendent pas</h3>
+<p>PlanCake est un programme Windows avec une fenêtre, et un PowerShell ou une invite de commandes interactifs n’attendent pas la fin de tels programmes. Quand vous tapez une commande à l’invite, celle-ci peut réapparaître avant que la sortie ne s’affiche&nbsp;; la sortie apparaît alors en dessous. Elle est complète — simplement en retard.</p>
+<p>La sortie redirigée par un tube ou capturée est toujours complète, car le shell l’attend. C’est le cas dans bash, quand vous la redirigez vers une autre commande, et dans les propres appels d’outils de Claude.</p>
+<p>Dans les scripts PowerShell, il y a un piège&nbsp;: affecter la sortie à une variable n’est pas la rediriger par un tube. <code>$notes = plancake list plan.md</code> n’attend pas, et laisse <code>$LASTEXITCODE</code> vide. Redirigez plutôt la commande par un tube, ou exécutez-la via cmd&nbsp;:</p>
+<pre><code>$notes = plancake list plan.md | Out-String
+plancake check plan.md | Out-Host
+$LASTEXITCODE
+
+cmd /c "plancake check plan.md"</code></pre>
+
+<h3 id="claude">Relire un plan avec Claude</h3>
+<p>Voici comment les éléments s’articulent quand Claude rédige un plan et vous demande de le relire. Vous ouvrez le plan avec <code>pk plan.md</code>, vous le lisez, et vous laissez des notes partout où vous n’êtes pas d’accord ou souhaitez des changements. Quand vous dites à Claude que vous avez terminé, il exécute <code>plancake list plan.md --json</code> pour lire vos notes avec les blocs exacts auxquels elles se rapportent, retravaille le plan, et supprime les notes qu’il a traitées. <code>plancake check plan.md</code> confirme qu’il n’en reste aucune.</p>
+<p>Si vous utilisez les plugins Debussy pour Claude Code, leur étape de relecture manuelle lit les notes marquées avec les marqueurs du paramètre <code>noteMarkers</code> de Debussy, où une paire de marqueurs s’écrit <code>open...close</code>. Les marqueurs par défaut de PlanCake, <code>[usernote]</code> et <code>[/usernote]</code>, correspondent déjà à cette convention. Voir <a href="https://debussy.oire.dev/">la documentation de Debussy</a> pour savoir comment la configurer&nbsp;; son code source est <a href="https://github.com/Oire/debussy">sur GitHub</a>.</p>
+</article>
+
+<article aria-labelledby="keyboard">
+<h2 id="keyboard">Référence clavier et souris</h2>
+<p>Ces raccourcis sont fixes&nbsp;; ils ne peuvent pas être modifiés. Vous pouvez aussi tous les consulter dans PlanCake lui-même&nbsp;: choisissez <strong>Raccourcis clavier</strong> dans le menu <strong>Aide</strong>.</p>
+
+<h3 id="keys-window">N’importe où dans la fenêtre</h3>
+<table>
+<caption>Raccourcis qui fonctionnent dans le document et dans la liste des notes</caption>
+<thead>
+<tr><th scope="col">Action</th><th scope="col">Raccourci</th></tr>
+</thead>
+<tbody>
+<tr><td>Ouvrir un fichier</td><td><kbd>Ctrl+O</kbd></td></tr>
+<tr><td>Ouvrir depuis le presse-papiers</td><td><kbd>Ctrl+V</kbd></td></tr>
+<tr><td>Ouvrir depuis un lien</td><td><kbd>Ctrl+L</kbd></td></tr>
+<tr><td>Ouvrir le fichier dans votre éditeur de texte</td><td><kbd>Ctrl+E</kbd></td></tr>
+<tr><td>Paramètres</td><td><kbd>Ctrl+Virgule</kbd></td></tr>
+<tr><td>Annuler</td><td><kbd>Ctrl+Z</kbd></td></tr>
+<tr><td>Rétablir</td><td><kbd>Ctrl+Y</kbd></td></tr>
+<tr><td>Basculer entre le document et la liste des notes</td><td><kbd>F6</kbd></td></tr>
+<tr><td>Note suivante</td><td><kbd>F9</kbd></td></tr>
+<tr><td>Note précédente</td><td><kbd>Maj+F9</kbd></td></tr>
+<tr><td>Bloc suivant dans le document</td><td><kbd>Alt+Maj+Flèche bas</kbd></td></tr>
+<tr><td>Bloc précédent dans le document</td><td><kbd>Alt+Maj+Flèche haut</kbd></td></tr>
+<tr><td>Zoom avant</td><td><kbd>Ctrl+Plus</kbd> ou <kbd>Ctrl+Plus du pavé numérique</kbd></td></tr>
+<tr><td>Zoom arrière</td><td><kbd>Ctrl+Moins</kbd> ou <kbd>Ctrl+Moins du pavé numérique</kbd></td></tr>
+<tr><td>Réinitialiser le zoom</td><td><kbd>Ctrl+0</kbd></td></tr>
+<tr><td>Revenir au fichier précédent</td><td><kbd>Alt+Flèche gauche</kbd>, ou <kbd>Retour arrière</kbd> en dehors d’une zone de texte</td></tr>
+<tr><td>Avancer au fichier suivant</td><td><kbd>Alt+Flèche droite</kbd></td></tr>
+<tr><td>Recharger le fichier</td><td><kbd>F5</kbd></td></tr>
+<tr><td>Manuel utilisateur</td><td><kbd>F1</kbd></td></tr>
+<tr><td>À propos de PlanCake</td><td><kbd>Maj+F1</kbd></td></tr>
+<tr><td>Fermer la fenêtre</td><td><kbd>Alt+F4</kbd></td></tr>
+</tbody>
+</table>
+
+<h3 id="keys-document">Dans le document</h3>
+<table>
+<caption>Touches et actions de la souris dans le document</caption>
+<thead>
+<tr><th scope="col">Action</th><th scope="col">Clavier</th><th scope="col">Souris</th></tr>
+</thead>
+<tbody>
+<tr><td>Se déplacer vers le bloc suivant ou précédent</td><td><kbd>Alt+Maj+Flèche bas</kbd>, <kbd>Alt+Maj+Flèche haut</kbd></td><td>Inutile&nbsp;: cliquez sur le bloc</td></tr>
+<tr><td>Ajouter une note après un bloc, ou modifier une note</td><td><kbd>Entrée</kbd></td><td>Clic (un double-clic ne fait rien de plus)</td></tr>
+<tr><td>Ouvrir le menu d’un bloc ou d’une note</td><td><kbd>Applications</kbd> ou <kbd>Maj+F10</kbd></td><td>Clic droit</td></tr>
+<tr><td>Cocher ou décocher une tâche</td><td><kbd>Espace</kbd> ou <kbd>Entrée</kbd></td><td>Cliquez sur la case à cocher</td></tr>
+<tr><td>Suivre un lien</td><td><kbd>Entrée</kbd></td><td>Clic</td></tr>
+</tbody>
+</table>
+
+<h3 id="keys-list">Dans la liste des notes</h3>
+<table>
+<caption>Touches et actions de la souris dans la liste des notes</caption>
+<thead>
+<tr><th scope="col">Action</th><th scope="col">Clavier</th><th scope="col">Souris</th></tr>
+</thead>
+<tbody>
+<tr><td>Aller à la note dans le document</td><td><kbd>Entrée</kbd></td><td>Double-clic</td></tr>
+<tr><td>Supprimer la note</td><td><kbd>Suppr</kbd></td><td>Clic droit, puis <strong>Supprimer la note</strong></td></tr>
+<tr><td>Se déplacer vers le bloc suivant ou précédent dans le document</td><td><kbd>Alt+Maj+Flèche bas</kbd>, <kbd>Alt+Maj+Flèche haut</kbd></td><td>Inutile&nbsp;: cliquez sur le bloc</td></tr>
+<tr><td>Ouvrir le menu de la note</td><td><kbd>Applications</kbd> ou <kbd>Maj+F10</kbd></td><td>Clic droit</td></tr>
+</tbody>
+</table>
+
+<h3 id="keys-dialog">Dans la boîte de dialogue de note</h3>
+<table>
+<caption>Touches dans la boîte de dialogue Ajouter une note et Modifier la note, avec le réglage par défaut</caption>
+<thead>
+<tr><th scope="col">Action</th><th scope="col">Raccourci</th></tr>
+</thead>
+<tbody>
+<tr><td>Enregistrer la note</td><td><kbd>Entrée</kbd>, ou cliquez sur <strong>OK</strong></td></tr>
+<tr><td>Commencer une nouvelle ligne</td><td><kbd>Ctrl+Entrée</kbd></td></tr>
+<tr><td>Annuler</td><td><kbd>Échap</kbd>, ou cliquez sur <strong>Annuler</strong></td></tr>
+</tbody>
+</table>
+<p>Si vous réglez <strong>Entrée dans la boîte de dialogue de note</strong> sur <strong>Commence une nouvelle ligne</strong>, <kbd>Entrée</kbd> et <kbd>Ctrl+Entrée</kbd> échangent leurs rôles.</p>
+</article>
+
+<article aria-labelledby="menus">
+<h2 id="menus">Référence des menus</h2>
+<p>Cliquez sur un nom de menu, appuyez sur <kbd>Alt</kbd> pour atteindre la barre de menus, ou ouvrez un menu directement&nbsp;: <kbd>Alt+F</kbd> pour Fichier, <kbd>Alt+D</kbd> pour Édition, <kbd>Alt+A</kbd> pour Affichage, <kbd>Alt+N</kbd> pour Notes, <kbd>Alt+E</kbd> pour Aide. Les commandes qui ne s’appliquent pas pour le moment — <strong>Annuler</strong> sans rien à annuler, <strong>Note suivante</strong> dans un fichier sans notes — sont indisponibles.</p>
+
+<h3 id="menu-file">Fichier</h3>
+<table>
+<caption>Menu Fichier</caption>
+<thead>
+<tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Ouvrir</strong></td><td><kbd>Ctrl+O</kbd></td><td>Ouvre un fichier Markdown depuis votre disque.</td></tr>
+<tr><td><strong>Ouvrir depuis le presse-papiers</strong></td><td><kbd>Ctrl+V</kbd></td><td>Ouvre le fichier, le chemin ou le lien que vous avez copié.</td></tr>
+<tr><td><strong>Ouvrir depuis un lien</strong></td><td><kbd>Ctrl+L</kbd></td><td>Télécharge un fichier Markdown depuis le web et l’ouvre.</td></tr>
+<tr><td><strong>Ouvrir dans l’éditeur</strong></td><td><kbd>Ctrl+E</kbd></td><td>Ouvre le fichier dans le programme que Windows associe aux fichiers Markdown, quand vous voulez modifier le texte même du plan.</td></tr>
+<tr><td><strong>Exporter les notes</strong></td><td>Aucun</td><td>Enregistre toutes les notes du fichier, avec les blocs qu’elles suivent, sous forme de fichier JSON. PlanCake ne le relit jamais&nbsp;; c’est une copie destinée à d’autres outils.</td></tr>
+<tr><td><strong>Paramètres</strong></td><td><kbd>Ctrl+Virgule</kbd></td><td>Ouvre les paramètres.</td></tr>
+<tr><td><strong>Quitter</strong></td><td><kbd>Alt+F4</kbd></td><td>Ferme la fenêtre.</td></tr>
+</tbody>
+</table>
+
+<h3 id="menu-edit">Édition</h3>
+<table>
+<caption>Menu Édition</caption>
+<thead>
+<tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Annuler</strong></td><td><kbd>Ctrl+Z</kbd></td><td>Annule la dernière modification de note ou de tâche.</td></tr>
+<tr><td><strong>Rétablir</strong></td><td><kbd>Ctrl+Y</kbd></td><td>Refait le changement annulé.</td></tr>
+<tr><td><strong>Supprimer toutes les notes</strong></td><td>Aucun</td><td>Supprime toutes les notes du fichier, après confirmation.</td></tr>
+</tbody>
+</table>
+
+<h3 id="menu-view">Affichage</h3>
+<table>
+<caption>Menu Affichage</caption>
+<thead>
+<tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Liste des notes</strong></td><td>Aucun</td><td>Affiche ou masque la liste des notes dans cette fenêtre. Coché tant que la liste est affichée.</td></tr>
+<tr><td><strong>Changer de volet</strong></td><td><kbd>F6</kbd></td><td>Déplace le focus entre le document et la liste des notes.</td></tr>
+<tr><td><strong>Élargir la liste des notes</strong></td><td>Aucun</td><td>Donne à la liste des notes un dixième de plus de la largeur qu’elle partage avec le document. Indisponible tant que la liste est masquée.</td></tr>
+<tr><td><strong>Rétrécir la liste des notes</strong></td><td>Aucun</td><td>Donne au document un dixième de plus de cette largeur. Indisponible tant que la liste est masquée.</td></tr>
+<tr><td><strong>Langue de l’interface</strong></td><td>Aucun</td><td>Un sous-menu pour changer la langue des menus et boîtes de dialogue de PlanCake. Le choix est enregistré.</td></tr>
+<tr><td><strong>Langue du document</strong></td><td>Aucun</td><td>Un sous-menu pour définir la langue du document ouvert, pour ce fichier uniquement.</td></tr>
+<tr><td><strong>Zoom avant</strong></td><td><kbd>Ctrl+Plus</kbd></td><td>Agrandit le texte.</td></tr>
+<tr><td><strong>Zoom arrière</strong></td><td><kbd>Ctrl+Moins</kbd></td><td>Réduit le texte.</td></tr>
+<tr><td><strong>Réinitialiser le zoom</strong></td><td><kbd>Ctrl+0</kbd></td><td>Revient à 100&nbsp;%.</td></tr>
+<tr><td><strong>Précédent</strong></td><td><kbd>Alt+Flèche gauche</kbd></td><td>Revient au fichier précédent, à l’endroit où vous l’avez laissé.</td></tr>
+<tr><td><strong>Suivant</strong></td><td><kbd>Alt+Flèche droite</kbd></td><td>Avance au fichier suivant.</td></tr>
+<tr><td><strong>Recharger</strong></td><td><kbd>F5</kbd></td><td>Relit le fichier depuis le disque.</td></tr>
+</tbody>
+</table>
+
+<h3 id="menu-notes">Notes</h3>
+<table>
+<caption>Menu Notes</caption>
+<thead>
+<tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Modifier la note</strong></td><td>Aucun</td><td>Ouvre pour la modifier la note sur laquelle vous êtes, dans le document ou dans la liste.</td></tr>
+<tr><td><strong>Supprimer la note</strong></td><td>Aucun</td><td>Supprime la note sur laquelle vous êtes.</td></tr>
+<tr><td><strong>Note suivante</strong></td><td><kbd>F9</kbd></td><td>Se déplace vers la note suivante.</td></tr>
+<tr><td><strong>Note précédente</strong></td><td><kbd>Maj+F9</kbd></td><td>Se déplace vers la note précédente.</td></tr>
+<tr><td><strong>Bloc suivant</strong></td><td><kbd>Alt+Maj+Flèche bas</kbd></td><td>Se déplace vers le bloc ou la note suivant dans le document.</td></tr>
+<tr><td><strong>Bloc précédent</strong></td><td><kbd>Alt+Maj+Flèche haut</kbd></td><td>Se déplace vers le bloc ou la note précédent dans le document.</td></tr>
+</tbody>
+</table>
+
+<h3 id="menu-help">Aide</h3>
+<table>
+<caption>Menu Aide</caption>
+<thead>
+<tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Manuel utilisateur</strong></td><td><kbd>F1</kbd></td><td>Ouvre ce manuel dans votre navigateur web, dans votre langue d’interface quand elle est disponible.</td></tr>
+<tr><td><strong>Raccourcis clavier</strong></td><td>Aucun</td><td>Répertorie tous les raccourcis.</td></tr>
+<tr><td><strong>Vérifier les mises à jour</strong></td><td>Aucun</td><td>Vérifie s’il existe une nouvelle version, tout de suite.</td></tr>
+<tr><td><strong>À propos de PlanCake</strong></td><td><kbd>Maj+F1</kbd></td><td>Affiche la version, avec un lien vers PlanCake sur GitHub et un bouton <strong>Copier les infos</strong>.</td></tr>
+</tbody>
+</table>
+
+<h3 id="menu-context">Menus contextuels</h3>
+<p>Ouvrez un menu contextuel par un clic droit, ou avec la touche <kbd>Applications</kbd> ou <kbd>Maj+F10</kbd>.</p>
+<table>
+<caption>Commandes des menus contextuels</caption>
+<thead>
+<tr><th scope="col">Où</th><th scope="col">Commandes</th></tr>
+</thead>
+<tbody>
+<tr><td>Sur un bloc dans le document</td><td><strong>Ajouter une note</strong>, <strong>Copier le texte du bloc</strong></td></tr>
+<tr><td>Sur une note dans le document</td><td><strong>Modifier la note</strong>, <strong>Supprimer la note</strong></td></tr>
+<tr><td>Sur une note dans la liste des notes</td><td><strong>Modifier la note</strong>, <strong>Supprimer la note</strong></td></tr>
+</tbody>
+</table>
+</article>
+
+<article aria-labelledby="updates">
+<h2 id="updates">Garder PlanCake à jour</h2>
+<p>PlanCake recherche de nouvelles versions à son démarrage puis une fois par semaine, et reste discret sauf s’il en trouve une. Quand une nouvelle version existe, une fenêtre la décrit et propose de l’installer&nbsp;; vous pouvez aussi ignorer cette version ou être rappelé plus tard. Vous pouvez changer la fréquence des vérifications de PlanCake, ou les désactiver, dans les <a href="#settings-general">paramètres généraux</a>.</p>
+<p>Si vous avez plusieurs plans ouverts, une seule fenêtre effectue ces vérifications automatiques, afin que la même mise à jour ne vous soit pas proposée plusieurs fois.</p>
+<p>Pour vérifier immédiatement, choisissez <strong>Vérifier les mises à jour</strong> dans le menu <strong>Aide</strong>. PlanCake vous indique le résultat, par exemple « PlanCake est à jour. »</p>
+</article>
+
+<article aria-labelledby="data">
+<h2 id="data">Vos données et votre confidentialité</h2>
+<h3 id="data-notes">Vos notes sont dans vos fichiers</h3>
+<p>PlanCake n’a ni base de données ni fichiers cachés pour vos notes&nbsp;: chaque note est du texte brut à l’intérieur du fichier Markdown auquel elle appartient. Tout ce qui sauvegarde vos fichiers — contrôle de version, synchronisation dans le cloud, copie sur une clé USB — sauvegarde vos notes avec eux. Pour donner vos notes à quelqu’un, donnez-lui le fichier.</p>
+<h3 id="data-settings">Paramètres et journaux</h3>
+<p>Vos paramètres se trouvent dans un seul fichier texte, <code>PlanCake.cfg</code>&nbsp;:</p>
+<ul>
+<li>Avec le programme d’installation&nbsp;: <code>%APPDATA%\Oire\PlanCake\PlanCake.cfg</code></li>
+<li>Portable&nbsp;: <code>userdata\PlanCake.cfg</code>, à côté de <code>plancake.exe</code></li>
+</ul>
+<p>Pour emporter vos paramètres sur un autre ordinateur, copiez ce fichier au même endroit là-bas. Ce même dossier contient un dossier <code>logs</code>, qui enregistre ce qu’a fait PlanCake et aide quand vous signalez un problème, ainsi que quelques fichiers de travail de l’affichage du document. Supprimer ce dossier réinitialise PlanCake à ses valeurs par défaut et ne touche jamais à vos fichiers Markdown ni aux notes qu’ils contiennent.</p>
+<h3 id="data-privacy">Ce qui transite sur le réseau</h3>
+<p>PlanCake ne se connecte à internet que pour deux choses&nbsp;: télécharger un fichier quand vous en ouvrez un depuis un lien, et vérifier les mises à jour. Il n’envoie aucune donnée d’utilisation où que ce soit.</p>
+</article>
+
+<article aria-labelledby="troubleshooting">
+<h2 id="troubleshooting">Dépannage</h2>
+
+<details>
+<summary>Mes notes ont disparu, ou elles s’affichent en texte brut</summary>
+<p>Cela se produit quand les marqueurs de notes des paramètres ne correspondent plus à ceux avec lesquels les notes ont été écrites. PlanCake ne lit que les marqueurs définis actuellement, les anciennes notes ressemblent donc à du texte ordinaire. Elles restent dans le fichier, inchangées. Rétablissez les marqueurs utilisés par les notes — <code>[usernote]</code> et <code>[/usernote]</code> par défaut — et elles redeviennent des notes.</p>
+</details>
+
+<details>
+<summary>Je ne peux pas ajouter de notes&nbsp;: le fichier est en lecture seule</summary>
+<p>Le fichier n’est pas en UTF-8. Activez <strong>Convertir en UTF-8 les fichiers qui ne sont pas en UTF-8</strong> dans les paramètres avancés et rouvrez le fichier. Si PlanCake indique que l’encodage n’a pas pu être reconnu, le fichier reste en lecture seule quoi que vous fassiez&nbsp;; ouvrez-le dans un éditeur de texte, enregistrez-le en UTF-8, puis rouvrez-le dans PlanCake.</p>
+<p>Si PlanCake indique à la place que le fichier n’est plus là, c’est qu’il a été supprimé, renommé ou déplacé pendant qu’il était ouvert. Remettez-le en place, ou ouvrez-le depuis son nouvel emplacement.</p>
+</details>
+
+<details>
+<summary>PlanCake affiche « Le fichier a changé. Veuillez réessayer. »</summary>
+<p>Autre chose a modifié le fichier entre le moment où vous avez commencé et celui où PlanCake s’apprêtait à écrire. PlanCake a refusé d’écraser ce changement et affiche maintenant la version actuelle. Refaites ce que vous étiez en train de faire.</p>
+</details>
+
+<details>
+<summary>J’ajoute sans cesse des notes par accident en cliquant</summary>
+<p>Réglez <strong>Entrée ou clic sur un bloc</strong> sur <strong>Ouvre le menu contextuel</strong> dans les paramètres de Notes. Un clic sur un bloc affiche alors son menu, et vous n’ajoutez une note que lorsque vous choisissez <strong>Ajouter une note</strong>. Si vous en avez déjà ajouté une par accident, appuyez sur <kbd>Ctrl+Z</kbd>.</p>
+</details>
+
+<details>
+<summary>F6 ne fait rien</summary>
+<p>La liste des notes est masquée. <kbd>F6</kbd> se déplace entre le document et la liste, mais n’affiche pas la liste. Choisissez d’abord <strong>Liste des notes</strong> dans le menu <strong>Affichage</strong>.</p>
+</details>
+
+<details>
+<summary>PlanCake indique qu’il a besoin du Microsoft Edge WebView2 Runtime</summary>
+<p>PlanCake utilise WebView2 pour afficher les documents. S’il est absent, PlanCake vous le signale à son démarrage et demande s’il faut ouvrir la page de téléchargement. Répondez Oui, installez l’Evergreen Runtime depuis cette page, puis redémarrez PlanCake. La version avec programme d’installation de PlanCake installe WebView2 pour vous, ce qui concerne donc généralement la version portable sous Windows 10.</p>
+</details>
+
+<details>
+<summary>Ouvrir un fichier fait apparaître une autre fenêtre à la place</summary>
+<p>Ce fichier est déjà ouvert dans une autre fenêtre de PlanCake, et PlanCake ne garde qu’une fenêtre par fichier. La fenêtre existante revient au premier plan, avec votre position inchangée.</p>
+</details>
+
+<details>
+<summary>Un lien ne s’ouvre pas</summary>
+<p>PlanCake n’ouvre que des fichiers Markdown. S’il indique que le lien mène à une page web, trouvez le lien vers le fichier lui-même — sur la plupart des sites, un lien <strong>Raw</strong>. Les liens de fichiers GitHub fonctionnent tels quels. Les téléchargements s’arrêtent aussi au bout de 30 secondes et sont limités à 10&nbsp;Mo.</p>
+</details>
+
+<details>
+<summary>PlanCake indique qu’une note s’étend jusqu’à la fin du fichier</summary>
+<p>Une note du fichier possède un marqueur d’ouverture mais pas de marqueur de fermeture — généralement une note tapée à la main. PlanCake considère tout ce qui suit le marqueur comme faisant partie de cette note. Appuyez sur <kbd>Ctrl+E</kbd> pour ouvrir le fichier dans votre éditeur et ajouter le marqueur de fermeture.</p>
+</details>
+
+<details>
+<summary>La sortie de la ligne de commande apparaît après l’invite, ou $LASTEXITCODE est vide</summary>
+<p>PowerShell et cmd interactifs n’attendent pas la fin de PlanCake. Redirigez la commande par un tube, par exemple <code>plancake check plan.md | Out-Host</code>, ou exécutez-la avec <code>cmd /c</code>. Voir <a href="#cli-waiting">PowerShell et l’invite de commandes n’attendent pas</a>.</p>
+</details>
+
+<details>
+<summary>PlanCake indique que les paramètres n’ont pas pu être enregistrés</summary>
+<p>PlanCake n’a pas pu écrire son fichier de paramètres, par exemple parce que le dossier est en lecture seule ou qu’un autre programme a le fichier ouvert. Vos changements s’appliquent quand même jusqu’à ce que vous fermiez PlanCake. Une fois la cause disparue, modifiez de nouveau les paramètres.</p>
+</details>
+
+<details>
+<summary>Comment signaler un problème&nbsp;?</summary>
+<p>Ouvrez <strong>À propos de PlanCake</strong> avec <kbd>Maj+F1</kbd> ou depuis le menu <strong>Aide</strong>, puis cliquez sur <strong>Copier les infos</strong>&nbsp;; la boîte de dialogue affiche « Copié ». Cela place votre version de PlanCake et les détails de Windows dans le presse-papiers. Collez-les dans un nouveau ticket sur <a href="https://github.com/Oire/plan-cake/issues">la page GitHub de PlanCake</a>, avec ce que vous avez fait et ce qui s’est passé.</p>
+</details>
+</article>
+</main>
+<footer>
+<p>© 2026 Oire Software SARL. PlanCake est open source sous licence Apache 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake sur GitHub</a>.</p>
+</footer>
+</body>
+</html>
