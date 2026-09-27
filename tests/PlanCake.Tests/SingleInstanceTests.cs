@@ -89,6 +89,29 @@ public class SingleInstanceTests {
         Volatile.Read(ref count).Should().Be(2);
     }
 
+    [Theory]
+    [InlineData(0)] // The client comes and goes before the window waits for it.
+    [InlineData(300)] // The window is waiting: the client leaves the pipe broken.
+    public void TryActivate_WorksAfterAClientLeftWithoutAsking(int delayMilliseconds) {
+        var path = UniquePath();
+        using var activated = new ManualResetEventSlim();
+        using var registration = SingleInstance.TryRegister(path, activated.Set);
+        Thread.Sleep(delayMilliseconds);
+
+        // Connects and closes without a word, as a process killed while it activates would.
+        using (var client = new NamedPipeClientStream(
+            ".",
+            SingleInstance.PipeName(path),
+            PipeDirection.InOut,
+            PipeOptions.CurrentUserOnly
+        )) {
+            client.Connect(TimeSpan.FromSeconds(5));
+        }
+
+        SingleInstance.TryActivate(path).Should().BeTrue();
+        activated.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
+    }
+
     [Fact]
     public void TryActivate_AfterTheWindowMovedToAnotherFile_ReturnsFalse() {
         var path = UniquePath();

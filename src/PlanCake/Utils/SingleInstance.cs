@@ -203,20 +203,59 @@ internal sealed class SingleInstance: IDisposable {
 
     private async Task ListenAsync() {
         var token = _cancellation.Token;
+        var failures = 0;
 
         while (!token.IsCancellationRequested) {
+            var connected = false;
+
             try {
                 await _server.WaitForConnectionAsync(token).ConfigureAwait(false);
+                connected = true;
                 await ServeAsync(token).ConfigureAwait(false);
+                failures = 0;
             } catch (OperationCanceledException) when (token.IsCancellationRequested) {
                 break;
             } catch (ObjectDisposedException) when (token.IsCancellationRequested) {
                 break;
             } catch (Exception ex) when (ex is IOException or OperationCanceledException or InvalidOperationException) {
-                Log.Warning(ex, "A request on the pipe of {Path} failed", Path);
+                failures++;
+
+                // Only the first failure in a row is worth a warning: the rest would flood the log.
+                if (failures == 1) {
+                    Log.Warning(ex, "A request on the pipe of {Path} failed", Path);
+                } else {
+                    Log.Debug(ex, "A request on the pipe of {Path} failed again ({Failures} in a row)", Path, failures);
+                }
             } finally {
-                Disconnect();
+                // A client that left without a word leaves the pipe broken, or, when it came and went
+                // before the wait took it, still holding its closed end: either way the pipe has to
+                // be disconnected, or every later wait for a connection fails at once.
+                if (connected) {
+                    Disconnect();
+                } else if (!token.IsCancellationRequested) {
+                    ResetUnconnected();
+                }
             }
+
+            if (failures > 0 && !await BackOffAsync(failures, token).ConfigureAwait(false)) {
+                break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Waits a little longer after each failure in a row (up to a second), so that a pipe in a
+    /// state it cannot leave never turns the listener into a busy loop.
+    /// </summary>
+    /// <returns>False when the registration is being disposed.</returns>
+    private static async Task<bool> BackOffAsync(int failures, CancellationToken token) {
+        var delay = TimeSpan.FromMilliseconds(Math.Min(1000, 50 * (1 << Math.Min(failures - 1, 5))));
+
+        try {
+            await Task.Delay(delay, token).ConfigureAwait(false);
+            return true;
+        } catch (OperationCanceledException) {
+            return false;
         }
     }
 
@@ -242,13 +281,38 @@ internal sealed class SingleInstance: IDisposable {
         _server.WaitForPipeDrain();
     }
 
+    /// <summary>
+    /// Ends the current connection, whether the pipe is still connected or broken by a client that
+    /// closed its end, so the pipe can wait for the next one. Called only once a connection was made:
+    /// the pipe then is neither waiting to connect nor disconnected, the two states it refuses.
+    /// </summary>
     private void Disconnect() {
         try {
-            if (!_disposed && _server.IsConnected) {
+            if (!_disposed) {
                 _server.Disconnect();
             }
         } catch (Exception ex) when (ex is IOException or InvalidOperationException or ObjectDisposedException) {
             Log.Debug(ex, "Unable to disconnect the pipe of {Path}", Path);
+        }
+    }
+
+    /// <summary>
+    /// Frees the pipe after a wait for a connection failed, as it does ("The pipe is being closed")
+    /// when a client connected and closed before the wait began. The stream still counts itself as
+    /// waiting to connect and so refuses <see cref="NamedPipeServerStream.Disconnect"/>; Windows
+    /// does not, and a pipe that has no client ignores the call.
+    /// </summary>
+    private void ResetUnconnected() {
+        try {
+            if (!_disposed && !NativeMethods.DisconnectNamedPipe(_server.SafePipeHandle)) {
+                Log.Debug(
+                    "Unable to reset the pipe of {Path}: DisconnectNamedPipe error {Error}",
+                    Path,
+                    Marshal.GetLastPInvokeError()
+                );
+            }
+        } catch (Exception ex) when (ex is InvalidOperationException or ObjectDisposedException) {
+            Log.Debug(ex, "Unable to reset the pipe of {Path}", Path);
         }
     }
 
@@ -280,6 +344,11 @@ internal sealed class SingleInstance: IDisposable {
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetNamedPipeServerProcessId(SafePipeHandle pipe, out uint processId);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DisconnectNamedPipe(SafePipeHandle pipe);
 
         [DllImport("user32.dll", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
