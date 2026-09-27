@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/PlanCake/PlanCake.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PlanCake.Tests/PlanCake.Tests.csproj" />
+  </Folder>
+  <Folder Name="/solution items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path="GitVersion.yml" />
+    <File Path="README.md" />
+  </Folder>
+</Solution>

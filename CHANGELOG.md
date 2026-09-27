@@ -1,43 +1,56 @@
 # Changelog
 
-All notable changes to this project are documented here. The format follows
+All notable changes to PlanCake are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html) driven by GitVersion: a release is
-a `vX.Y.Z` tag, and nothing carries a version literal.
+a `vX.Y.Z` tag, and nothing carries a version literal. The release notes shown in the update
+window come from `changelogs/<version>.md`.
 
-## [Unreleased]
+## [1.0.0] — unreleased
 
-### Added
+### Initial Release
 
-- Test project (xUnit, AwesomeAssertions, coverlet) covering the configuration round trip and
-  the localization fallback, running on every push.
-- GitHub Actions workflow: gettext install, translation compile, `dotnet format` check, build
-  and test.
-- Dependabot for NuGet and Actions, plus release-note categories.
-- GitVersion for all version numbers.
-- `locale/` scaffolding: the gettext scripts, a POT template and the translation workflow.
-- `.gitattributes` normalizing line endings to LF, except in `.bat` and `.cmd`.
-- `ExitCode` constants and unhandled-exception logging for background threads and dropped
-  tasks.
-- Portable mode: a `userdata/` folder next to the EXE moves all user data out of `%APPDATA%`.
+PlanCake lets you read Markdown files comfortably and leave notes right where they belong. It
+was made for the long implementation plans that AI coding assistants write, and works with any
+Markdown file. It runs as a window, or without one from the command line.
 
-### Changed
+### Features
 
-- Target framework raised to `net10.0-windows`; platform pinned to x64.
-- `Directory.Build.props` folded into the project file.
-- Solution converted to the XML `.slnx` format and moved to the repository root.
-- Packages updated to current versions and aligned with the ones shipping applications use.
-- `Config.Load` and `Config.Save` no longer show dialogs or call `Application.Exit` from a
-  static utility class: a missing file is written with the defaults and an unreadable one is
-  logged and falls back to them, so a bad INI cannot stop the app from starting.
-- `Localization` gained `SetLanguage`, a `LanguageChanged` event and a thread-safe catalog,
-  so the language can be switched at run time.
-- `Utils/Constants/Application.cs` renamed to `App.cs`; the old name shadowed
-  `System.Windows.Forms.Application` in every file that imported it.
-- Forms moved under `Ui/`, mirroring the namespace layout of shipping applications.
-- Copyright year updated to 2026.
-
-### Removed
-
-- The hardcoded `1.0.0.0` version.
-- `BaseOutputPath` / `BaseIntermediateOutputPath` overrides pointing at `$(SolutionDir)`.
+- **Read Markdown as a document**: real headings, lists, tables and code blocks instead of hash
+  signs and asterisks, with GitHub-style tables, task lists, footnotes and more. Zoom from 50 to
+  300 percent.
+- **Leave notes on any block**: click a paragraph, heading, list item, table row or code block,
+  or press Enter on it, and type a note. PlanCake writes it straight into the `.md` file, right
+  after that block, between a pair of markers (`[usernote]` … `[/usernote]` by default). There
+  is nothing to save and no side file.
+- **Notes in the document and in a list**: notes show after their blocks, with the Markdown in
+  them formatted, and in a notes list beside the document. Edit, delete, delete all, jump from
+  note to note with F9 and Shift+F9, and undo and redo everything PlanCake writes.
+- **Check off tasks**: task-list checkboxes toggle from the document and write `[x]` or `[ ]` to
+  the file, after a question that can be turned off.
+- **Open files every way**: from the command line, the Open dialog, drag and drop, the clipboard
+  (a copied file or path), and a link, which is downloaded to the Downloads folder (GitHub file
+  links work as they are). Links between Markdown files open in the same window, with Back and
+  Forward.
+- **One window per file**: opening a file that is already open brings its window to the front,
+  so two windows never write into the same file.
+- **Follows changes on disk**: when something else changes the file, PlanCake reloads it and
+  keeps your reading position, or asks first if you prefer. A note is never written over a
+  change you have not seen.
+- **Safe with older files**: a file in a legacy encoding opens read-only unless you let PlanCake
+  convert it to UTF-8, and a file whose encoding cannot be recognized is never changed.
+- **Command line** for scripts and AI assistants: `plancake list` (text or JSON), `check` (exit
+  code 3 while notes remain), `clear` and `export` to a standalone HTML page, with other markers
+  for a single run.
+- **Keyboard, mouse and screen readers alike**: every action works from the keyboard alone and
+  with the mouse, block-to-block movement with Alt+Shift+Down and Up Arrow, and status messages
+  that screen readers speak wherever the focus is. Keyboard shortcuts are listed in the Help
+  menu.
+- **Settings** for the interface and document languages, the note markers, what Enter and a
+  click do, confirmations, reloading and update checks, applied without a restart.
+- **Six languages**: English, Russian, Ukrainian, French, Hebrew (with a right-to-left
+  interface) and German, for the interface, the user manual (F1) and the installer. The
+  document language is set apart from the interface language.
+- **Automatic updates**, signed, with adjustable frequency.
+- **Installer, portable zip and winget** (`Oire.PlanCake`). The installer puts `plancake` on the
+  `PATH` and installs the .NET 10 Desktop Runtime and the WebView2 Runtime when missing.

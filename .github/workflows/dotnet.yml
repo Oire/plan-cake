@@ -48,7 +48,7 @@ jobs:
       # Localization.GetCurrentCulture silently falls back to en-US for every language.
       - name: Compile translations
         shell: pwsh
-        run: ./src/WinFormsTemplate/locale/scripts/Compile-Translations.ps1 -Strict
+        run: ./src/PlanCake/locale/scripts/Compile-Translations.ps1 -Strict
 
       - name: Restore dependencies
         run: dotnet restore

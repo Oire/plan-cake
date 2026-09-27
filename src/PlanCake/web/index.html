@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<!--
+  The page the document view shows. The host posts the rendered Markdown into <main> and
+  every string the page shows (see app.js and Technical details, "Page protocol", in the
+  PlanCake plan). <html lang> and dir follow the interface language; <main lang> follows the
+  document language. The two are independent.
+
+  The content security policy lets only the app's own script and style files run, so raw
+  HTML in a plan renders but cannot run script (no inline script, no event handler
+  attributes, no eval).
+-->
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src https://app.plancake; style-src https://app.plancake 'unsafe-inline'; img-src https://app.plancake data:; base-uri 'none'; form-action 'none'">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PlanCake</title>
+    <link rel="stylesheet" href="app.css">
+    <script src="morph.js" defer></script>
+    <script src="blocks.js" defer></script>
+    <script src="app.js" defer></script>
+</head>
+<body>
+<main id="document"></main>
+</body>
+</html>

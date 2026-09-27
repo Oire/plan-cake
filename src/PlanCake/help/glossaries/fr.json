@@ -1,0 +1,144 @@
+{
+  "language": "fr",
+  "languageName": "French",
+  "nativeName": "Français",
+  "direction": "ltr",
+  "keys": {
+    "Ctrl": "Ctrl",
+    "Alt": "Alt",
+    "Shift": "Maj",
+    "Enter": "Entrée",
+    "Tab": "Tab",
+    "Escape": "Échap",
+    "Delete": "Suppr",
+    "Backspace": "Retour arrière",
+    "Space": "Espace",
+    "Left Arrow": "Flèche gauche",
+    "Right Arrow": "Flèche droite",
+    "Up Arrow": "Flèche haut",
+    "Down Arrow": "Flèche bas",
+    "Applications": "Applications",
+    "Comma": "Virgule",
+    "Plus": "Plus",
+    "Minus": "Moins",
+    "Numpad Plus": "Plus du pavé numérique",
+    "Numpad Minus": "Moins du pavé numérique",
+    "Home": "Origine",
+    "End": "Fin",
+    "Page Up": "Page précédente",
+    "Page Down": "Page suivante"
+  },
+  "terms": [
+    {
+      "term": "note",
+      "translation": "note",
+      "context": "A single note the user adds to or edits on a block",
+      "notes": "Same spelling as English; feminine (une note, la note). Lowercase unless starting a sentence."
+    },
+    {
+      "term": "block",
+      "translation": "bloc",
+      "context": "A paragraph, list item, heading, table row or code block that a note attaches to",
+      "notes": "Masculine (un bloc, le bloc)."
+    },
+    {
+      "term": "notes list",
+      "translation": "liste des notes",
+      "context": "The panel listing every note in the file; section heading \"The notes list\"",
+      "notes": "Heading is capitalized as \"La liste des notes\"; in running prose it is lowercase \"la liste des notes\"."
+    },
+    {
+      "term": "status bar",
+      "translation": "barre d'état",
+      "context": "Bottom bar showing confirmation messages such as \"Note added\"",
+      "notes": "The section heading itself is \"Messages d'état\", but the element is referred to as \"la barre d'état\" throughout the prose."
+    },
+    {
+      "term": "menu bar",
+      "translation": "barre de menus",
+      "context": "The bar at the top of the main window holding File, Edit, View, Notes, Help"
+    },
+    {
+      "term": "screen reader",
+      "translation": "lecteur d'écran",
+      "context": "Section heading \"Using a screen reader\" and related prose (JAWS, NVDA)",
+      "notes": "Heading rendered as \"Utiliser un lecteur d'écran\"."
+    },
+    {
+      "term": "marker",
+      "translation": "marqueur",
+      "context": "The opening/closing marker text (e.g. [usernote]/[/usernote]) surrounding a note; \"changing the markers\"",
+      "notes": "Masculine (un marqueur, le marqueur). \"Changing the markers\" warning is rendered \"changer les marqueurs\"."
+    },
+    {
+      "term": "task",
+      "translation": "tâche",
+      "context": "A Markdown checklist item; \"Mark this task as done?\"",
+      "notes": "Feminine (une tâche, la tâche)."
+    },
+    {
+      "term": "document language",
+      "translation": "Langue du document",
+      "context": "The Document language setting controlling the voice/encoding assumptions for the open file",
+      "notes": "Exact capitalization used for the setting label and menu item; lowercase \"langue du document\" in running prose."
+    },
+    {
+      "term": "interface language",
+      "translation": "Langue de l'interface",
+      "context": "The Interface language setting controlling the language of menus, dialogs and messages",
+      "notes": "Exact capitalization used for the setting label and menu item; lowercase \"langue de l'interface\" in running prose."
+    },
+    {
+      "term": "dialog",
+      "translation": "boîte de dialogue",
+      "context": "Generic word for a dialog box, e.g. the Open dialog or a yes/no confirmation",
+      "notes": "Feminine (une boîte de dialogue, la boîte de dialogue). French spells this word with a final -e, unlike the American English 'dialog'."
+    },
+    {
+      "term": "Yes / No buttons",
+      "translation": "Oui / Non",
+      "context": "The buttons on PlanCake's yes-or-no confirmation dialogs (DialogHelper.Confirm)"
+    },
+    {
+      "term": "File Explorer",
+      "translation": "Explorateur de fichiers",
+      "context": "Windows Explorer, e.g. dragging a file from it, or its \"Copy as path\" command",
+      "notes": "Official French Windows name for the app; capitalized as a proper noun."
+    },
+    {
+      "term": "Downloads folder",
+      "translation": "dossier Téléchargements",
+      "context": "The Windows Downloads folder that downloaded plans are saved to",
+      "notes": "\"Téléchargements\" kept capitalized as the actual French Windows folder name."
+    },
+    {
+      "term": "Start menu",
+      "translation": "menu Démarrer",
+      "context": "The Windows Start menu, used to launch PlanCake",
+      "notes": "\"Démarrer\" capitalized as the official Windows button/menu name; \"menu\" lowercase."
+    },
+    {
+      "term": "Command Prompt",
+      "translation": "invite de commandes",
+      "context": "Windows cmd.exe, e.g. \"the plancake command works in any new PowerShell or Command Prompt window\"",
+      "notes": "Rendered as a lowercase common noun (\"invite de commandes\"), not capitalized as a product name the way the English manual capitalizes \"Command Prompt\"."
+    },
+    {
+      "term": "Copy as path",
+      "translation": "Copier en tant que chemin d'accès",
+      "context": "File Explorer's \"Copy as path\" command, which wraps the copied path in quotation marks"
+    },
+    {
+      "term": "issue",
+      "translation": "ticket",
+      "context": "A GitHub issue: \"Paste them into a new issue on PlanCake's GitHub page\"",
+      "notes": "\"New issue\" rendered as \"un nouveau ticket\", not a literal translation of \"issue\"."
+    },
+    {
+      "term": "Raw",
+      "translation": "Raw",
+      "context": "The GitHub \"Raw\" link/button used to reach a file's raw Markdown",
+      "notes": "Left untranslated: GitHub's own UI does not localize this button/label either."
+    }
+  ]
+}
