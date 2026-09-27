@@ -138,6 +138,39 @@ netsparkle-generate-appcast --generate-keys --key-path keys
 
 then paste the contents of `keys/NetSparkle_Ed25519.pub` into `App.UpdatePublicKey`.
 
+## Installer and releases
+
+`installer/Build-Installer.ps1` (or `build-installer.bat`, which also opens the output folder)
+compiles the translations with `-Strict`, publishes to `src/PlanCake/bin/x64/Release/publish`,
+compiles `installer/plancake.iss` with Inno Setup 6, and writes to `installer/Output/`
+(gitignored) the installer `plancake-v<VERSION>-setup.exe` and the portable
+`plancake-v<VERSION>-portable.zip`, where `<VERSION>` is the four-part file version.
+`-Appcast` adds `appcast.xml` and its signature, signed with the key in `keys/` (it needs
+`netsparkle-generate-appcast`); `-Deploy` uploads the lot to plancake.oire.dev over SCP with the
+host and path in `installer/deploy.json` (gitignored; copy `deploy.example.json`). Release notes
+come from `changelogs/<X.Y.Z>.md`, named after the tag; the script hands the file to the
+generator under the four-part name it looks for.
+
+What ships is the same in both: `plancake.exe`, `WebView2Loader.dll`, `web\`, `help\` and
+`locale\**\*.mo`. The publish folder holds more (the `.pdb`, WebView2's XML docs, a second
+`WebView2Loader.dll` under `runtimes\`), so a new file beside the exe must be added to both the
+`[Files]` section of `plancake.iss` and `$ShippedItems` in the script. The installer puts `{app}`
+on the machine `PATH` and takes it off on uninstall, and installs the .NET 10 Desktop Runtime
+and the WebView2 Runtime when missing (`CodeDependencies.iss`, from InnoDependencyInstaller).
+The `AppId` in `plancake.iss` is permanent: Windows and winget know PlanCake by it. The `.iss`
+and `.isl` files are UTF-8 with a BOM, which Inno Setup needs to read them as UTF-8.
+
+PlanCake is published to winget as `Oire.PlanCake`. The first release creates the manifest with
+`wingetcreate new` on the release's installer URL; after every later GitHub release, update it:
+
+```bash
+wingetcreate update -u 'https://github.com/Oire/plan-cake/releases/download/v<VERSION>/plancake-v<VERSION>-setup.exe|x64' -v <VERSION> --submit --token "$(gh auth token)" Oire.PlanCake
+```
+
+The installer is x64 only, but wingetcreate detects an Inno Setup installer as x86: without the
+`|x64` suffix the update fails with "Multiple matches" (and in `wingetcreate new`, set the
+architecture to x64 by hand).
+
 ## Error handling at startup
 
 `Program.Main` returns an `ExitCode` and installs handlers for `AppDomain.UnhandledException`

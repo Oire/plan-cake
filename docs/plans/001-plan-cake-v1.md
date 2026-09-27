@@ -1080,20 +1080,24 @@ reach every block with their own reading cursor.
 - Create: `installer/plancake.iss`, `installer/CodeDependencies.iss`,
   `installer/Languages/Custom.{en,ru,uk,fr,he,de}.isl`, `installer/Build-Installer.ps1`,
   `installer/build-installer.bat`, `installer/deploy.example.json`, `changelogs/1.0.0.md`
-- Modify: `.gitignore`
+- Modify: `.gitignore`, `.editorconfig` (`.iss` / `.isl` are UTF-8 with a BOM), `CLAUDE.md`
 
-- [ ] `plancake.iss` from SIC's `sic.iss`: PlanCake names, the six languages, the exe,
+- [x] `plancake.iss` from SIC's `sic.iss`: PlanCake names, the six languages, the exe,
       `WebView2Loader.dll`, `web\*`, `help\*`, `locale\*`; `Dependency_AddDotNet100Desktop`
       **and** `Dependency_AddWebView2`; the portable zip carries the same files
-- [ ] add `{app}` to the machine `PATH` (`[Registry]` on
+      (new permanent AppId `{71654D7C-5454-4DAB-B1DC-5874D6358D83}`; no `.ico` yet, so the
+      shortcuts use the exe's icon; a silent uninstall keeps the settings)
+- [x] add `{app}` to the machine `PATH` (`[Registry]` on
       `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment`, `ChangesEnvironment=yes`,
       skipped when already present, removed on uninstall)
-- [ ] `Build-Installer.ps1` from SIC's (publish, ISCC, portable zip with an empty `userdata\`,
+- [x] `Build-Installer.ps1` from SIC's (publish, ISCC, portable zip with an empty `userdata\`,
       appcast with `netsparkle-generate-appcast`, optional deploy via `deploy.json`); `deploy.json`
-      and `installer/Output/` ignored in git
-- [ ] document the `wingetcreate` command for `Oire.PlanCake` in `CLAUDE.md` (manifests are
+      and `installer/Output/` ignored in git (it also runs `Compile-Translations.ps1 -Strict`
+      first, checks the publish holds every catalog, and hands `changelogs/X.Y.Z.md` to the
+      appcast generator under the four-part version it expects)
+- [x] document the `wingetcreate` command for `Oire.PlanCake` in `CLAUDE.md` (manifests are
       created at the first release, not now)
-- [ ] validation commands pass
+- [x] validation commands pass
 
 ### Task 18: Update documentation
 

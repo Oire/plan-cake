@@ -16,6 +16,10 @@ end_of_line = crlf
 [*.md]
 trim_trailing_whitespace = false
 
+# Inno Setup reads a script or a message file without a BOM in the ANSI code page.
+[*.{iss,isl}]
+charset = utf-8-bom
+
 [*.{json,yml,yaml}]
 indent_size = 2
 

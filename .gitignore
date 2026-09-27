@@ -429,3 +429,9 @@ FodyWeavers.xsd
 
 # NetSparkle signing keys: the private key must never be committed (see "Updates" in CLAUDE.md).
 keys/
+
+# Installer output (built installers, portable zip and appcast)
+installer/Output/
+
+# Deploy configuration (contains the SSH host and path)
+installer/deploy.json
