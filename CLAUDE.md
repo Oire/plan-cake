@@ -5,7 +5,7 @@ WebView2 and writes the user's notes on them straight into the `.md` file. It ru
 or headless with a subcommand (`list`, `check`, `clear`, `export`). .NET 10, Windows x64 only.
 
 The repository was created from Oire's `winforms-template`; the conventions below come from it
-and stay binding. The implementation plan is `docs/plans/001-plan-cake-v1.md`.
+and stay binding. The implementation plan is `docs/plans/completed/001-plan-cake-v1.md`.
 
 ## Accessibility is load-bearing
 
@@ -131,7 +131,7 @@ and `UseWindowsForms`, an `Application` class in that namespace shadows
 
 ## Architecture
 
-The plan (`docs/plans/001-plan-cake-v1.md`, Technical details) has the full rules; this is the
+The plan (`docs/plans/completed/001-plan-cake-v1.md`, Technical details) has the full rules; this is the
 map.
 
 - **The file is the only store.** No Save command, no side file: a note is in the `.md` file the

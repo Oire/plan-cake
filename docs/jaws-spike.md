@@ -1,6 +1,6 @@
 # JAWS spike results
 
-Task 2 of `docs/plans/001-plan-cake-v1.md` built the WebView2 host and a throw-away page,
+Task 2 of `docs/plans/completed/001-plan-cake-v1.md` built the WebView2 host and a throw-away page,
 `src/PlanCake/web/spike.html`, to find out what JAWS does inside WebView2 before the note
 triggers were built. The user ran the checklist with JAWS in the virtual cursor, with JAWS's
 default settings. This file records each answer and the decision taken on it; the plan has
