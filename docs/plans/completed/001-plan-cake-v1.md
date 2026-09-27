@@ -59,8 +59,10 @@ names; Task 1 adapts it.
       (Ctrl+V after copying it in Explorer) and a link (downloaded to the Downloads folder)
 - [x] every interaction works with the keyboard and the mouse, left to right and right to left
 - [x] F1 opens the user manual in the current language
-- [ ] the installer installs PlanCake, puts `plancake` on the PATH, checks for the WebView2
-      Runtime, and the portable zip runs from any folder (open until a real test install)
+- [x] the installer installs PlanCake, puts `plancake` on the PATH, checks for the WebView2
+      Runtime, and the portable zip runs from any folder
+      (test install of v1.0.0.57: wizard read fully with JAWS; installed to Program Files\Oire\PlanCake,
+      on the machine PATH, Start menu entries, `plancake check` works; portable zip checked in Task 17)
 - [x] all validation commands pass
 
 ## Validation commands
