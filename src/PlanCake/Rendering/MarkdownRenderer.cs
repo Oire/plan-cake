@@ -198,7 +198,7 @@ internal static class MarkdownRenderer {
     private static string NoteHtml(Note note, int index, RenderOptions options) {
         var strings = options.Strings;
         var roleDescriptions =
-            $"""role="note" aria-roledescription="{HtmlEncode(strings.NoteRoleDescription)}" """
+            $"""role="region" aria-roledescription="{HtmlEncode(strings.NoteRoleDescription)}" """
             + $"""aria-brailleroledescription="{HtmlEncode(strings.NoteBrailleRoleDescription)}" """;
 
         if (options.Mode == RenderMode.Export) {
