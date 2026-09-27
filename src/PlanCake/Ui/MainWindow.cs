@@ -334,22 +334,41 @@ public partial class MainWindow: Form {
         }
 
         _updatesInitialized = true;
-        _updateService = UpdateService.Create();
+        _updateService = UpdateService.Create(CurrentUpdateCheckInterval);
 
-        if (_updateService is not { } updates) {
+        // A window that does not do the background checks may take them over later, reading the
+        // interval again then (CurrentUpdateCheckInterval).
+        if (_updateService is not { DoesBackgroundChecks: true } updates) {
             return;
         }
 
-        // In every window: one that does not do the background checks keeps the interval for
-        // when it takes them over from a window that closed.
         updates.ConfigurePeriodicChecks(Config.General.UpdateCheckInterval);
 
-        if (updates.DoesBackgroundChecks && Config.General.CheckForUpdatesOnStartup) {
+        if (Config.General.CheckForUpdatesOnStartup) {
             // Fire and forget: the check never throws, says nothing unless there is an update,
             // and never takes the focus otherwise. A named local, since _ is the gettext method here.
             var startupCheck = updates.CheckForUpdatesAsync();
             GC.KeepAlive(startupCheck);
         }
+    }
+
+    /// <summary>
+    /// The update check interval for this window taking the background checks over from one that
+    /// closed: the settings file is read again first, as on activation, since another window may
+    /// have changed it; a file that cannot be read keeps the settings in memory.
+    /// </summary>
+    /// <returns>
+    /// The interval, or <see langword="null"/> while a dialog of this window is open: the action
+    /// that opened it must finish with the settings the user saw (see <see cref="OnActivated"/>).
+    /// </returns>
+    private UpdateCheckInterval? CurrentUpdateCheckInterval() {
+        if (StartupFailed || IsDisposed || !IsHandleCreated || !NativeMethods.IsWindowEnabled(Handle)) {
+            return null;
+        }
+
+        ReloadSettingsIfChanged();
+
+        return Config.General.UpdateCheckInterval;
     }
 
     /// <summary>
@@ -2085,8 +2104,8 @@ public partial class MainWindow: Form {
             needsRender = false;
         }
 
-        // Does nothing when the interval has not changed; a window that does not do the background
-        // checks only keeps it, for when it takes them over.
+        // Does nothing when the interval has not changed, or in a window that does not do the
+        // background checks.
         _updateService?.ConfigurePeriodicChecks(general.UpdateCheckInterval);
 
         if (needsRender) {
@@ -2456,6 +2475,14 @@ public partial class MainWindow: Form {
         _notesListMenu?.Dispose();
         _notesListMenu = null;
         base.OnFormClosed(e);
+    }
+
+    private static class NativeMethods {
+        /// <summary>False while a modal dialog this window owns is open.</summary>
+        [DllImport("user32.dll")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool IsWindowEnabled(IntPtr window);
     }
 }
 

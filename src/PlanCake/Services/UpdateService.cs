@@ -37,20 +37,28 @@ internal sealed class UpdateService: IDisposable {
     internal static readonly TimeSpan TakeOverInterval = TimeSpan.FromMinutes(1);
 
     private readonly SparkleUpdater _sparkle;
+
+    /// <summary>
+    /// The interval Settings asks for now, read again from the file; <see langword="null"/> when
+    /// the window cannot take the checks over at the moment.
+    /// </summary>
+    private readonly Func<UpdateCheckInterval?> _currentInterval;
+
     private IDisposable? _backgroundChecks;
 
     /// <summary>Retries the claim while another window does the background checks; null once this one does.</summary>
     private System.Windows.Forms.Timer? _takeOver;
 
-    /// <summary>The interval Settings asks for, kept by every window for the day it takes the checks over.</summary>
+    /// <summary>The interval the background checks are to run at, once this window does them.</summary>
     private UpdateCheckInterval _wantedInterval = UpdateCheckInterval.Never;
 
     private UpdateCheckInterval _loopInterval = UpdateCheckInterval.Never;
     private bool _loopRunning;
     private bool _disposed;
 
-    private UpdateService(string publicKey, IDisposable? backgroundChecks) {
+    private UpdateService(string publicKey, IDisposable? backgroundChecks, Func<UpdateCheckInterval?> currentInterval) {
         _backgroundChecks = backgroundChecks;
+        _currentInterval = currentInterval;
         _sparkle = new SparkleUpdater(App.AppcastUrl, new Ed25519Checker(SecurityMode.Strict, publicKey)) {
             UIFactory = new UIFactory(null),
             RelaunchAfterUpdate = false,
@@ -82,11 +90,17 @@ internal sealed class UpdateService: IDisposable {
     /// was created on), or returns <see langword="null"/> when NetSparkle cannot be set up, which
     /// is logged: this window then never checks.
     /// </summary>
-    public static UpdateService? Create() {
+    /// <param name="currentInterval">
+    /// The interval Settings asks for, read again from the file (another window may have changed
+    /// it), for a window taking the background checks over; <see langword="null"/> when it cannot
+    /// take them over now.
+    /// </param>
+    public static UpdateService? Create(Func<UpdateCheckInterval?> currentInterval) {
+        ArgumentNullException.ThrowIfNull(currentInterval);
         var backgroundChecks = TryClaimBackgroundChecks(BackgroundChecksName);
 
         try {
-            return new UpdateService(App.UpdatePublicKey, backgroundChecks);
+            return new UpdateService(App.UpdatePublicKey, backgroundChecks, currentInterval);
         } catch (Exception ex) {
             Log.Error(ex, "UpdateService: unable to initialize; update checks are off");
             backgroundChecks?.Dispose();
@@ -118,8 +132,7 @@ internal sealed class UpdateService: IDisposable {
 
     /// <summary>
     /// Takes the background checks over when the window that did them has closed, at the
-    /// interval Settings asks for. The claim decides: of several windows trying at once, one
-    /// gets them. Called by <see cref="_takeOver"/>.
+    /// interval Settings asks for now (<see cref="TryTakeOver"/>). Called by <see cref="_takeOver"/>.
     /// </summary>
     /// <returns>True when this window has just taken the checks over.</returns>
     internal bool TryTakeOverBackgroundChecks() {
@@ -127,26 +140,61 @@ internal sealed class UpdateService: IDisposable {
             return false;
         }
 
-        _backgroundChecks = TryClaimBackgroundChecks(BackgroundChecksName);
-
-        if (_backgroundChecks is null) {
+        if (TryTakeOver(BackgroundChecksName, _currentInterval) is not var (claim, interval)) {
             return false;
         }
 
+        if (_disposed) {
+            claim.Dispose();
+
+            return false;
+        }
+
+        _backgroundChecks = claim;
+        _wantedInterval = interval;
         _takeOver?.Dispose();
         _takeOver = null;
-        Log.Information("UpdateService: the window doing the background checks closed; this one does them now");
+        Log.Information(
+            "UpdateService: the window doing the background checks closed; this one does them now, at {Interval}",
+            interval
+        );
         ApplyPeriodicChecks();
 
         return true;
     }
 
     /// <summary>
+    /// Whether a window takes the background checks over, and at what interval. The claim
+    /// decides first: of several windows trying at once, one gets it. The interval is then read
+    /// through <paramref name="currentInterval"/>, never taken from what this window read
+    /// earlier: another window may have changed it (to Never, say) since. When
+    /// <paramref name="currentInterval"/> gives <see langword="null"/>, the claim is let go, for
+    /// the next attempt.
+    /// </summary>
+    /// <returns>The claim and the interval, or <see langword="null"/> when the checks are not taken over.</returns>
+    internal static (IDisposable Claim, UpdateCheckInterval Interval)? TryTakeOver(
+        string name,
+        Func<UpdateCheckInterval?> currentInterval
+    ) {
+        if (TryClaimBackgroundChecks(name) is not { } claim) {
+            return null;
+        }
+
+        if (currentInterval() is { } interval) {
+            return (claim, interval);
+        }
+
+        claim.Dispose();
+
+        return null;
+    }
+
+    /// <summary>
     /// Starts, stops or re-times the background checks to match <paramref name="interval"/>.
     /// Passing the interval already in effect does nothing; <see cref="UpdateCheckInterval.Never"/>
     /// stops them. The loop does no check when it starts: the startup check is a setting of its
-    /// own. A process that does not do the background checks only keeps the interval, for the
-    /// day it takes them over.
+    /// own. Does nothing in a process that does not do the background checks: one that takes
+    /// them over reads the interval again then.
     /// </summary>
     public void ConfigurePeriodicChecks(UpdateCheckInterval interval) {
         ObjectDisposedException.ThrowIf(_disposed, this);

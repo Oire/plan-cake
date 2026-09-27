@@ -76,4 +76,42 @@ public class UpdateServiceTests {
         using var third = UpdateService.TryClaimBackgroundChecks(name);
         third.Should().NotBeNull();
     }
+
+    [Fact]
+    public void TryTakeOver_WhileAnotherWindowDoesTheChecks_TakesNothingAndReadsNothing() {
+        var name = $@"Local\Oire.PlanCake.Tests.{Guid.NewGuid():N}";
+        using var owner = UpdateService.TryClaimBackgroundChecks(name);
+        var reads = 0;
+
+        UpdateService.TryTakeOver(name, () => {
+            reads++;
+
+            return UpdateCheckInterval.Daily;
+        }).Should().BeNull();
+        reads.Should().Be(0);
+    }
+
+    [Fact]
+    public void TryTakeOver_AfterTheOwnerClosed_RunsAtTheIntervalReadNow() {
+        var name = $@"Local\Oire.PlanCake.Tests.{Guid.NewGuid():N}";
+        UpdateService.TryClaimBackgroundChecks(name)!.Dispose();
+
+        // What this window read at startup was Daily; another window has since set Never.
+        var takeOver = UpdateService.TryTakeOver(name, () => UpdateCheckInterval.Never);
+
+        takeOver.Should().NotBeNull();
+        using var claim = takeOver!.Value.Claim;
+        takeOver.Value.Interval.Should().Be(UpdateCheckInterval.Never);
+        UpdateService.TryClaimBackgroundChecks(name).Should().BeNull();
+    }
+
+    [Fact]
+    public void TryTakeOver_WhenTheWindowCannotReadTheIntervalNow_LetsTheClaimGo() {
+        var name = $@"Local\Oire.PlanCake.Tests.{Guid.NewGuid():N}";
+
+        UpdateService.TryTakeOver(name, () => null).Should().BeNull();
+
+        using var next = UpdateService.TryClaimBackgroundChecks(name);
+        next.Should().NotBeNull();
+    }
 }
