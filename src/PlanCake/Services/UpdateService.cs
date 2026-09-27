@@ -140,9 +140,13 @@ internal sealed class UpdateService: IDisposable {
             return false;
         }
 
-        if (TryTakeOver(BackgroundChecksName, _currentInterval) is not var (claim, interval)) {
+        // Null: another window does the checks, or this one cannot read the interval now; the
+        // timer goes on and tries again.
+        if (TryTakeOver(BackgroundChecksName, _currentInterval) is not { } takeOver) {
             return false;
         }
+
+        var (claim, interval) = takeOver;
 
         if (_disposed) {
             claim.Dispose();
