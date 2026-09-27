@@ -11,8 +11,12 @@
 
 var PlanCakeMorph = (function () {
     // Attributes that do not make a node's content different: line numbers and note indices
-    // shift with edits elsewhere, and the page adds tabindex while it focuses an element.
-    const volatileAttributes = / (?:data-lines|data-note|tabindex)="[^"]*"/g;
+    // shift with edits elsewhere, and the page adds tabindex while it focuses an element and
+    // the current mark (app.js) to the element it last focused.
+    const volatileAttributes = / (?:data-lines|data-note|tabindex|data-plancake-current)="[^"]*"/g;
+
+    // The attribute app.js marks the element it last focused with; the host never renders it.
+    const currentAttribute = "data-plancake-current";
 
     // Past this many cells (old times new nodes) the middle of a change is not diffed node by
     // node: it is patched position by position instead.
@@ -111,10 +115,15 @@ var PlanCakeMorph = (function () {
         return pairs;
     }
 
+    // The part of an element's HTML that says whether its content changed.
+    function contentKey(html) {
+        return html.replace(volatileAttributes, "");
+    }
+
     function describe(node) {
         if (node.nodeType === 1) {
             return {
-                key: node.outerHTML.replace(volatileAttributes, ""),
+                key: contentKey(node.outerHTML),
                 kind: node.tagName + (node.hasAttribute("data-note") ? "#note" : "")
             };
         }
@@ -124,8 +133,10 @@ var PlanCakeMorph = (function () {
 
     function syncAttributes(target, source) {
         Array.from(target.attributes).forEach(function (attribute) {
-            // The element the page focused keeps its tabindex until it loses the focus.
-            const keep = attribute.name === "tabindex" && target === document.activeElement;
+            // The element the page focused keeps its tabindex until it loses the focus, and the
+            // current mark until the page moves it.
+            const keep = (attribute.name === "tabindex" && target === document.activeElement)
+                || attribute.name === currentAttribute;
 
             if (!keep && !source.hasAttribute(attribute.name)) {
                 target.removeAttribute(attribute.name);
@@ -202,5 +213,5 @@ var PlanCakeMorph = (function () {
         morphChildren(target, template.content);
     }
 
-    return { planMatches: planMatches, morph: morph };
+    return { planMatches: planMatches, contentKey: contentKey, morph: morph };
 })();

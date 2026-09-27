@@ -33,6 +33,33 @@
     // and Shift+F9 start from.
     let current = null;
 
+    // The element the page last moved the focus to (a block or note with Alt+Shift+Down, F9
+    // or a focus the host asks for; a check box; an anchor's target). It carries this
+    // attribute, and app.css draws the focus outline from it, so the outline does not depend on
+    // when Chromium matches :focus or :focus-visible: with Alt+Shift+Down the :focus outline did
+    // not show at all (Task 15a check). The mark goes when another block or note becomes
+    // current, when the focus moves to another element of the document, and when the document
+    // loses the focus.
+    const currentAttribute = "data-plancake-current";
+    let marked = null;
+
+    function mark(element) {
+        if (marked === element) {
+            return;
+        }
+
+        unmark();
+        element.setAttribute(currentAttribute, "");
+        marked = element;
+    }
+
+    function unmark() {
+        if (marked !== null) {
+            marked.removeAttribute(currentAttribute);
+            marked = null;
+        }
+    }
+
     function post(message) {
         if (webview) {
             webview.postMessage(message);
@@ -92,6 +119,11 @@
     function setCurrent(element) {
         current = element;
 
+        // The mark stays on a check box the page focused inside the block that becomes current.
+        if (marked !== null && !element.contains(marked)) {
+            unmark();
+        }
+
         if (isNote(element)) {
             post({ type: "position", note: noteIndex(element), generation: generation });
         } else {
@@ -134,8 +166,9 @@
         return selection !== null && !selection.isCollapsed && selection.containsNode(element, true);
     }
 
-    // Moves the virtual cursor to `element`. A block gets tabindex="-1" only while it has
-    // focus: a permanent one makes JAWS switch to forms mode on Enter (Task 2 spike).
+    // Moves the virtual cursor to `element` and marks it for the focus outline. A block gets
+    // tabindex="-1" only while it has focus: a permanent one makes JAWS switch to forms mode on
+    // Enter (Task 2 spike). The mark comes first, so the focusin of this very focus keeps it.
     function focusElement(element) {
         if (!element.matches(focusableSelector)) {
             element.setAttribute("tabindex", "-1");
@@ -144,6 +177,7 @@
             }, { once: true });
         }
 
+        mark(element);
         element.focus();
     }
 
@@ -317,6 +351,10 @@
             current = null;
         }
 
+        if (marked !== null && !main.contains(marked)) {
+            marked = null;
+        }
+
         main.querySelectorAll(taskSelector).forEach(showMixedState);
         main.setAttribute("lang", message.documentLang);
         document.title = message.title;
@@ -478,10 +516,23 @@
             return;
         }
 
+        // The focus moved on (Tab to a link, JAWS passing one): that element shows its own.
+        if (node !== marked) {
+            unmark();
+        }
+
         const element = node.closest(targetSelector);
 
         if (element && main.contains(element) && element !== current) {
             setCurrent(element);
+        }
+    });
+
+    // The document lost the focus (to the notes list, a dialog, another window): no outline
+    // stays behind where the keys no longer go.
+    window.addEventListener("blur", function (event) {
+        if (event.target === window) {
+            unmark();
         }
     });
 

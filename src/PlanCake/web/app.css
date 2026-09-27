@@ -125,14 +125,17 @@ img {
     max-width: 100%;
 }
 
-/* Visible focus wherever the host or the keyboard puts it. */
+/* Visible focus wherever the host or the keyboard puts it. The element the page itself moved
+   the focus to carries data-plancake-current (app.js), which does not depend on when the
+   browser decides :focus or :focus-visible apply. */
 :focus {
     outline: none;
 }
 
 :focus-visible,
 [data-lines]:focus,
-[data-note]:focus {
+[data-note]:focus,
+[data-plancake-current] {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
 }
@@ -178,7 +181,8 @@ td .note {
 
     :focus-visible,
     [data-lines]:focus,
-    [data-note]:focus {
+    [data-note]:focus,
+    [data-plancake-current] {
         outline-color: Highlight;
     }
 

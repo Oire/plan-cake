@@ -855,7 +855,8 @@ public partial class MainWindow: Form {
     /// Alt+Shift+Down / Alt+Shift+Up: the page moves the focus to the next or previous block (or note) from
     /// the current position, so a keyboard user who does not use a screen reader can reach any
     /// block and press Enter on it. From the notes list the move happens in the document, which
-    /// then gets the focus.
+    /// gets the focus first: a page without the keyboard focus does not show its focused
+    /// element, and the page marks the block it moves to only while it has the focus.
     /// </summary>
     private void MoveToBlock(bool forward) {
         if (!_pageReady || _render is null) {
@@ -863,8 +864,8 @@ public partial class MainWindow: Form {
             return;
         }
 
-        documentView.PostMessage(forward ? new NextBlockMessage() : new PreviousBlockMessage());
         FocusDocument();
+        documentView.PostMessage(forward ? new NextBlockMessage() : new PreviousBlockMessage());
     }
 
     /// <summary>

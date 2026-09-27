@@ -87,6 +87,27 @@ public class MorphPlanTests {
     public void EmptyNew_KeepsNothing() =>
         Plan(["a", "b"], []).Should().BeEmpty();
 
+    private static string ContentKey(string html) {
+        var engine = new Engine();
+        engine.Execute(_script.Value);
+        engine.SetValue("html", html);
+
+        return engine.Evaluate("PlanCakeMorph.contentKey(html)").AsString();
+    }
+
+    [Fact]
+    public void ContentKey_IgnoresWhatThePageAndLineShiftsChange() {
+        // The current mark and a temporary tabindex (app.js), and line numbers that moved.
+        const string Focused = "<p data-lines=\"3-4\" tabindex=\"-1\" data-plancake-current=\"\">Text</p>";
+        const string Rendered = "<p data-lines=\"5-6\">Text</p>";
+
+        ContentKey(Focused).Should().Be(ContentKey(Rendered)).And.Be("<p>Text</p>");
+    }
+
+    [Fact]
+    public void ContentKey_KeepsTheContent() =>
+        ContentKey("<p data-lines=\"1-1\">One</p>").Should().NotBe(ContentKey("<p data-lines=\"1-1\">Two</p>"));
+
     [Fact]
     public void LargeChangedStretch_IsPatchedPositionByPosition() {
         var oldItems = Enumerable.Range(0, 600).Select(i => $"old{i}").ToArray();

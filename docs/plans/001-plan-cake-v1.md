@@ -1056,6 +1056,19 @@ reach every block with their own reading cursor.
       similar navigation. Alt+Down and Alt+Up are no longer bound (`HostCommandsTests` asserts
       it, as it does for F8). Key text now lists the modifiers in the Windows order Ctrl, Alt,
       Shift, so the menu shows "Alt+Shift+Down Arrow"; no catalog entry carries the key text
+- [x] ➕ show the focus outline on the current block: in the check with JAWS the keys moved the
+      block and Enter acted on the right one, but the `:focus` outline of `app.css` never
+      showed. The outline no longer depends on when Chromium matches `:focus` or
+      `:focus-visible`: the page marks the element it moves the focus to itself (the shared
+      helper, so Alt+Shift+Down / Alt+Shift+Up, F9 / Shift+F9, the host's `focusLines` and
+      `focusNote`, a toggled check box, an anchor's target) with `data-plancake-current`, and
+      `app.css` draws the same outline from that attribute (Highlight in forced colors). The
+      mark goes when another block or note becomes current, when the focus moves to another
+      element of the document, and when the document loses the focus; blocks still get
+      `tabindex="-1"` only while focused. `morph.js` keeps the mark on a kept node and leaves it
+      out of the content key (`MorphPlanTests`). The host now focuses the document before
+      posting `nextBlock` / `previousBlock`, so from the notes list the page has the focus when it
+      moves. Still to check by eye in the manual check above
 
 ### Task 16: User manual
 
