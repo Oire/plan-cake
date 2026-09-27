@@ -1,3 +1,4 @@
+using System.IO.Pipes;
 using AwesomeAssertions;
 using Oire.PlanCake.Utils;
 using Xunit;
@@ -94,5 +95,89 @@ public class SingleInstanceTests {
         SingleInstance.TryRegister(path, () => { })!.Dispose();
 
         SingleInstance.TryActivate(path).Should().BeFalse();
+    }
+
+    [Fact]
+    public void TryClaim_WithoutAWindowForTheFile_Registers() {
+        var path = UniquePath();
+
+        SingleInstance.TryClaim(path, () => { }, out var registration).Should().Be(ClaimOutcome.Registered);
+
+        using (registration) {
+            registration.Should().NotBeNull();
+            SingleInstance.TryRegister(path, () => { }).Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public void TryClaim_OfAFileAnotherWindowShows_ActivatesThatWindowAndRegistersNothing() {
+        var path = UniquePath();
+        using var activated = new ManualResetEventSlim();
+        using var owner = SingleInstance.TryRegister(path, activated.Set);
+
+        SingleInstance.TryClaim(path, () => { }, out var registration).Should().Be(ClaimOutcome.ActivatedOther);
+
+        registration.Should().BeNull();
+        activated.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
+    }
+
+    [Fact]
+    public void TryClaim_ByWindowsOpeningTheSameFileAtOnce_RegistersExactlyOne() {
+        const int windows = 4;
+        var path = UniquePath();
+        var activations = 0;
+        var outcomes = new ClaimOutcome[windows];
+        var registrations = new SingleInstance?[windows];
+        using var start = new Barrier(windows);
+
+        var threads = Enumerable.Range(0, windows).Select(i => new Thread(() => {
+            start.SignalAndWait();
+            outcomes[i] = SingleInstance.TryClaim(
+                path,
+                () => Interlocked.Increment(ref activations),
+                out registrations[i]
+            );
+        })).ToList();
+
+        threads.ForEach(thread => thread.Start());
+        threads.ForEach(thread => thread.Join());
+
+        try {
+            outcomes.Count(outcome => outcome == ClaimOutcome.Registered).Should().Be(1);
+            outcomes.Count(outcome => outcome == ClaimOutcome.ActivatedOther).Should().Be(windows - 1);
+            registrations.Count(registration => registration is not null).Should().Be(1);
+            Volatile.Read(ref activations).Should().Be(windows - 1);
+        } finally {
+            foreach (var registration in registrations) {
+                registration?.Dispose();
+            }
+        }
+    }
+
+    [Fact]
+    public void TryClaim_AfterTheWindowLetTheFileGo_Registers() {
+        var path = UniquePath();
+        SingleInstance.TryRegister(path, () => { })!.Dispose();
+
+        SingleInstance.TryClaim(path, () => { }, out var registration).Should().Be(ClaimOutcome.Registered);
+        registration!.Dispose();
+    }
+
+    [Fact]
+    public void TryClaim_OfAFileHeldByAWindowThatDoesNotAnswer_IsUnavailable() {
+        var path = UniquePath();
+
+        // Holds the pipe name and never answers.
+        using var silent = new NamedPipeServerStream(
+            SingleInstance.PipeName(path),
+            PipeDirection.InOut,
+            1,
+            PipeTransmissionMode.Byte,
+            PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly
+        );
+
+        SingleInstance.TryClaim(path, () => { }, out var registration, TimeSpan.FromMilliseconds(200))
+            .Should().Be(ClaimOutcome.Unavailable);
+        registration.Should().BeNull();
     }
 }

@@ -7,6 +7,18 @@ using Serilog;
 
 namespace Oire.PlanCake.Utils;
 
+/// <summary>How <see cref="SingleInstance.TryClaim"/> ended.</summary>
+internal enum ClaimOutcome {
+    /// <summary>The file is this window's now: it may open it.</summary>
+    Registered,
+
+    /// <summary>Another window shows the file and was asked to come to the front.</summary>
+    ActivatedOther,
+
+    /// <summary>Another window holds the file but did not answer: the file must not be opened here.</summary>
+    Unavailable,
+}
+
 /// <summary>
 /// One window per file (Task 10 of the plan). The window showing a file owns a named pipe named
 /// after the file's normalized full path; a second attempt to open the same file, from another
@@ -21,6 +33,9 @@ internal sealed class SingleInstance: IDisposable {
     internal const string Acknowledgement = "ok";
 
     private const int ErrorFileNotFound = 2;
+
+    /// <summary>How many times <see cref="TryClaim"/> tries to register, then to activate the owner.</summary>
+    private const int ClaimAttempts = 3;
     private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(2);
     private static readonly UTF8Encoding _utf8 = new(false);
 
@@ -86,6 +101,43 @@ internal sealed class SingleInstance: IDisposable {
             Log.Information("{Path} is already registered by another window", path);
             return null;
         }
+    }
+
+    /// <summary>
+    /// Claims <paramref name="path"/> for this window before it opens the file, so that two
+    /// windows never write the same file: registering is the test, and whoever registers first
+    /// is the only window showing it. When another window already holds it, that window is
+    /// asked to come to the front instead.
+    /// </summary>
+    /// <param name="path">The file to claim.</param>
+    /// <param name="onActivate">As for <see cref="TryRegister"/>.</param>
+    /// <param name="registration">The registration when the outcome is <see cref="ClaimOutcome.Registered"/>, else <see langword="null"/>.</param>
+    /// <param name="timeout">As for <see cref="TryActivate"/>.</param>
+    public static ClaimOutcome TryClaim(
+        string path,
+        Action onActivate,
+        out SingleInstance? registration,
+        TimeSpan? timeout = null
+    ) {
+        for (var attempt = 0; attempt < ClaimAttempts; attempt++) {
+            registration = TryRegister(path, onActivate);
+
+            if (registration is not null) {
+                return ClaimOutcome.Registered;
+            }
+
+            if (TryActivate(path, timeout)) {
+                return ClaimOutcome.ActivatedOther;
+            }
+
+            // The owner let the file go between the two (it closed, or moved to another file),
+            // or was busy: try again.
+        }
+
+        registration = null;
+        Log.Warning("{Path} is held by another window that does not answer", path);
+
+        return ClaimOutcome.Unavailable;
     }
 
     /// <summary>

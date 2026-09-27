@@ -25,15 +25,26 @@ file sealed class SerilogSparkleLogWriter: NetSparkleUpdater.Interfaces.ILogger 
 /// <remarks>
 /// Every PlanCake window is a process of its own. Only one of them, the first to start, checks
 /// on startup and in the background (<see cref="DoesBackgroundChecks"/>); otherwise opening five
-/// plans would check five times and could offer the same update five times. Help → Check for
-/// updates works in every window.
+/// plans would check five times and could offer the same update five times. When that window
+/// closes, one of the others takes the background checks over (<see cref="TakeOverInterval"/>).
+/// Help → Check for updates works in every window.
 /// </remarks>
 internal sealed class UpdateService: IDisposable {
     /// <summary>The named object whose creator does the startup and background checks.</summary>
     internal const string BackgroundChecksName = @"Local\Oire.PlanCake.BackgroundUpdateChecks";
 
+    /// <summary>How often a window that does not do the background checks tries to take them over.</summary>
+    internal static readonly TimeSpan TakeOverInterval = TimeSpan.FromMinutes(1);
+
     private readonly SparkleUpdater _sparkle;
-    private readonly IDisposable? _backgroundChecks;
+    private IDisposable? _backgroundChecks;
+
+    /// <summary>Retries the claim while another window does the background checks; null once this one does.</summary>
+    private System.Windows.Forms.Timer? _takeOver;
+
+    /// <summary>The interval Settings asks for, kept by every window for the day it takes the checks over.</summary>
+    private UpdateCheckInterval _wantedInterval = UpdateCheckInterval.Never;
+
     private UpdateCheckInterval _loopInterval = UpdateCheckInterval.Never;
     private bool _loopRunning;
     private bool _disposed;
@@ -47,6 +58,13 @@ internal sealed class UpdateService: IDisposable {
             TmpDownloadFileNameWithExtension = $"plancake-update-{Guid.NewGuid()}.exe",
         };
 
+        if (backgroundChecks is null) {
+            // Created on the UI thread, like the service, so it ticks there.
+            _takeOver = new System.Windows.Forms.Timer { Interval = (int)TakeOverInterval.TotalMilliseconds };
+            _takeOver.Tick += (_, _) => TryTakeOverBackgroundChecks();
+            _takeOver.Start();
+        }
+
         Log.Information(
             "UpdateService: initialized with appcast {Url}; background checks in this window: {Background}",
             App.AppcastUrl, DoesBackgroundChecks
@@ -55,7 +73,7 @@ internal sealed class UpdateService: IDisposable {
 
     /// <summary>
     /// True when this process does the startup and background checks: it is the first PlanCake
-    /// window that is still open.
+    /// window that is still open, or took the background checks over from one that closed.
     /// </summary>
     public bool DoesBackgroundChecks => _backgroundChecks is not null;
 
@@ -99,13 +117,45 @@ internal sealed class UpdateService: IDisposable {
     }
 
     /// <summary>
+    /// Takes the background checks over when the window that did them has closed, at the
+    /// interval Settings asks for. The claim decides: of several windows trying at once, one
+    /// gets them. Called by <see cref="_takeOver"/>.
+    /// </summary>
+    /// <returns>True when this window has just taken the checks over.</returns>
+    internal bool TryTakeOverBackgroundChecks() {
+        if (_disposed || DoesBackgroundChecks) {
+            return false;
+        }
+
+        _backgroundChecks = TryClaimBackgroundChecks(BackgroundChecksName);
+
+        if (_backgroundChecks is null) {
+            return false;
+        }
+
+        _takeOver?.Dispose();
+        _takeOver = null;
+        Log.Information("UpdateService: the window doing the background checks closed; this one does them now");
+        ApplyPeriodicChecks();
+
+        return true;
+    }
+
+    /// <summary>
     /// Starts, stops or re-times the background checks to match <paramref name="interval"/>.
     /// Passing the interval already in effect does nothing; <see cref="UpdateCheckInterval.Never"/>
     /// stops them. The loop does no check when it starts: the startup check is a setting of its
-    /// own. Does nothing in a process that does not do the background checks.
+    /// own. A process that does not do the background checks only keeps the interval, for the
+    /// day it takes them over.
     /// </summary>
     public void ConfigurePeriodicChecks(UpdateCheckInterval interval) {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        _wantedInterval = interval;
+        ApplyPeriodicChecks();
+    }
+
+    private void ApplyPeriodicChecks() {
+        var interval = _wantedInterval;
 
         if (!DoesBackgroundChecks || interval == _loopInterval) {
             return;
@@ -196,6 +246,8 @@ internal sealed class UpdateService: IDisposable {
         }
 
         _disposed = true;
+        _takeOver?.Dispose();
+        _takeOver = null;
         _sparkle.Dispose();
         _backgroundChecks?.Dispose();
     }

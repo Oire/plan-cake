@@ -320,7 +320,8 @@ public partial class MainWindow: Form {
     /// <summary>
     /// Sets up the update checks once the window is visible: the silent startup check and the
     /// background checks, each as Settings says, in the first PlanCake window only
-    /// (<see cref="UpdateService.DoesBackgroundChecks"/>).
+    /// (<see cref="UpdateService.DoesBackgroundChecks"/>); another window takes the background
+    /// checks over when that one closes.
     /// </summary>
     protected override void OnShown(EventArgs e) {
         base.OnShown(e);
@@ -335,13 +336,15 @@ public partial class MainWindow: Form {
         _updatesInitialized = true;
         _updateService = UpdateService.Create();
 
-        if (_updateService is not { DoesBackgroundChecks: true } updates) {
+        if (_updateService is not { } updates) {
             return;
         }
 
+        // In every window: one that does not do the background checks keeps the interval for
+        // when it takes them over from a window that closed.
         updates.ConfigurePeriodicChecks(Config.General.UpdateCheckInterval);
 
-        if (Config.General.CheckForUpdatesOnStartup) {
+        if (updates.DoesBackgroundChecks && Config.General.CheckForUpdatesOnStartup) {
             // Fire and forget: the check never throws, says nothing unless there is an update,
             // and never takes the focus otherwise. A named local, since _ is the gettext method here.
             var startupCheck = updates.CheckForUpdatesAsync();
@@ -403,9 +406,21 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (!String.IsNullOrWhiteSpace(_initialFile)) {
-            OpenFile(_initialFile);
+        // Another window took the file between Program's check and this one: that window is in
+        // front now, and this one, which has nothing to show, goes.
+        if (!String.IsNullOrWhiteSpace(_initialFile)
+            && LoadFileAs(_initialFile, position: null, recordHistory: true) == OpenOutcome.OpenElsewhere) {
+            Close();
         }
+    }
+
+    /// <summary>How an attempt to open a file ended.</summary>
+    private enum OpenOutcome {
+        Opened,
+        Failed,
+
+        /// <summary>Another window shows the file and was brought to the front; this one kept its file.</summary>
+        OpenElsewhere,
     }
 
     /// <summary>
@@ -422,7 +437,11 @@ public partial class MainWindow: Form {
     /// <param name="recordHistory">
     /// Push the file being left onto the history; false when moving through the history itself.
     /// </param>
-    private bool LoadFile(string path, BlockInfo? position, bool recordHistory) {
+    private bool LoadFile(string path, BlockInfo? position, bool recordHistory) =>
+        LoadFileAs(path, position, recordHistory) == OpenOutcome.Opened;
+
+    /// <inheritdoc cref="LoadFile"/>
+    private OpenOutcome LoadFileAs(string path, BlockInfo? position, bool recordHistory) {
         string fullPath;
 
         try {
@@ -431,18 +450,28 @@ public partial class MainWindow: Form {
             Log.Error(ex, "Unable to open {Path}", path);
             ShowError(_("Unable to open {0}: {1}", path, ex.Message));
 
-            return false;
+            return OpenOutcome.Failed;
         }
 
         // Opening the same file again keeps the reading position; another file starts at the top.
         var reopened = _file is not null && String.Equals(_file.Path, fullPath, StringComparison.OrdinalIgnoreCase);
 
-        // One window per file: a file another window shows brings that window to the front, and
-        // this one stays as it is (its history too).
-        if (!reopened && SingleInstance.TryActivate(fullPath)) {
-            Log.Information("{Path} is open in another window, which was activated", fullPath);
+        // One window per file, claimed before the file is opened: two windows that open the same
+        // file at once cannot both claim it, so only one of them ever writes it. A file another
+        // window shows brings that window to the front, and this one stays as it is (its history too).
+        SingleInstance? claim = null;
 
-            return false;
+        if (!reopened) {
+            switch (SingleInstance.TryClaim(fullPath, OnActivationRequested, out claim)) {
+                case ClaimOutcome.ActivatedOther:
+                    Log.Information("{Path} is open in another window, which was activated", fullPath);
+
+                    return OpenOutcome.OpenElsewhere;
+                case ClaimOutcome.Unavailable:
+                    ShowError(_("The file {0} is open in another PlanCake window, which does not respond.", path));
+
+                    return OpenOutcome.Failed;
+            }
         }
 
         MarkdownFile file;
@@ -456,15 +485,17 @@ public partial class MainWindow: Form {
                 DocumentLanguage: documentLanguage
             ));
         } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
+            claim?.Dispose();
             Log.Warning(ex, "Unable to open {Path}: not found", path);
             ShowError(_("The file {0} does not exist.", path));
 
-            return false;
+            return OpenOutcome.Failed;
         } catch (Exception ex) when (ex is IOException or ArgumentException or NotSupportedException) {
+            claim?.Dispose();
             Log.Error(ex, "Unable to open {Path}", path);
             ShowError(_("Unable to open {0}: {1}", path, ex.Message));
 
-            return false;
+            return OpenOutcome.Failed;
         }
 
         if (!reopened) {
@@ -485,8 +516,10 @@ public partial class MainWindow: Form {
             WatchFile(file.Path);
         }
 
-        if (!reopened || _instance is null) {
-            RegisterWindow(file.Path);
+        // The claim on the new file replaces the one on the file being left.
+        if (claim is not null) {
+            _instance?.Dispose();
+            _instance = claim;
         }
 
         // Another file gets a fresh page, so a screen reader starts it as a new document, at the
@@ -514,7 +547,7 @@ public partial class MainWindow: Form {
             documentView.FocusDocument();
         }
 
-        return true;
+        return OpenOutcome.Opened;
     }
 
     /// <summary>
@@ -1759,15 +1792,6 @@ public partial class MainWindow: Form {
         _watcher.Start(this);
     }
 
-    /// <summary>
-    /// Claims <paramref name="path"/> for this window, instead of the previous file, so that
-    /// opening it again anywhere brings this window to the front.
-    /// </summary>
-    private void RegisterWindow(string path) {
-        _instance?.Dispose();
-        _instance = SingleInstance.TryRegister(path, OnActivationRequested);
-    }
-
     /// <summary>Another attempt to open this window's file; runs on the pipe's thread.</summary>
     private void OnActivationRequested() {
         try {
@@ -2061,8 +2085,8 @@ public partial class MainWindow: Form {
             needsRender = false;
         }
 
-        // Does nothing when the interval has not changed, or in a window that does not do the
-        // background checks.
+        // Does nothing when the interval has not changed; a window that does not do the background
+        // checks only keeps it, for when it takes them over.
         _updateService?.ConfigurePeriodicChecks(general.UpdateCheckInterval);
 
         if (needsRender) {

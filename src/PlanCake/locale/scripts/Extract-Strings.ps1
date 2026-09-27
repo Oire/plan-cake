@@ -30,6 +30,16 @@ try {
         --aliasgetplural "_n" `
         --aliasgetparticularplural "_pn"
 
+    if ($LASTEXITCODE -ne 0) {
+        throw "GetText.Extractor exited with code $LASTEXITCODE"
+    }
+
+    # The extractor ends every entry with a blank line, the last one too, and writes CRLF:
+    # git reports the trailing blank line (git diff --check), and the repository keeps LF.
+    $text = [System.IO.File]::ReadAllText($OutputFile)
+    $text = ($text -replace "`r`n", "`n").TrimEnd("`n") + "`n"
+    [System.IO.File]::WriteAllText($OutputFile, $text, [System.Text.UTF8Encoding]::new($false))
+
     Write-Host "✅ String extraction completed successfully!" -ForegroundColor Green
     Write-Host "Template file created: $OutputFile" -ForegroundColor Yellow
 } catch {
