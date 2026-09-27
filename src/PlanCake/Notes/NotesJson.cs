@@ -49,7 +49,7 @@ internal static class NotesJson {
                 writer.WriteNumber("blockStartLine", block?.StartLine ?? 0);
                 writer.WriteNumber("blockEndLine", block?.EndLine ?? 0);
                 writer.WriteString("blockKind", KindName(block));
-                writer.WriteString("blockExcerpt", block?.Excerpt ?? string.Empty);
+                writer.WriteString("blockExcerpt", block?.Excerpt ?? String.Empty);
                 writer.WriteString("text", rendered.Note.Text);
                 writer.WriteEndObject();
             }

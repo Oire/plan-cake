@@ -20,7 +20,7 @@ public class ShortcutsDialogTests {
     public void BuildRows_ListEveryAvailableHostCommandWithAllItsKeys() {
         var rows = ShortcutsDialog.BuildRows();
 
-        foreach (var (command, keys) in HostCommands.AvailableShortcuts()) {
+        foreach (var (command, keys) in HostCommands.Shortcuts()) {
             rows.Should().Contain(new ShortcutRow(
                 HostCommands.DisplayName(command),
                 String.Join(", ", keys.Select(HostCommands.KeyText))

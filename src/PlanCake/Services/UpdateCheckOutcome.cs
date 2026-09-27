@@ -14,6 +14,6 @@ public enum UpdateCheckOutcome {
     /// <summary>The appcast could not be read or verified (no network, a bad signature, …).</summary>
     Failed,
 
-    /// <summary>This build has no usable update key, so it never checks.</summary>
-    NotConfigured,
+    /// <summary>The update checks could not be set up in this window (logged), so it never checks.</summary>
+    Unavailable,
 }

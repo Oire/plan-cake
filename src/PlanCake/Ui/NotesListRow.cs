@@ -25,7 +25,7 @@ internal sealed record NotesListRow(string Lines, string Block, string Text) {
         var start = note.Note.StartLine;
         var end = note.Note.EndLine;
         var lines = end > start ? $"{start}-{end}" : $"{start}";
-        var text = string.Join(
+        var text = String.Join(
             ' ',
             MarkdownRenderer.NotePlainText(note.Note.Text).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)
         );

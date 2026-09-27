@@ -64,6 +64,49 @@ internal static class NoteParser {
         return new NoteParseResult(notes, stripped, lineMap);
     }
 
+    /// <summary>
+    /// Reads a list marker, a bullet (<c>-</c>, <c>*</c>, <c>+</c>) or an ordered marker of up to
+    /// nine digits (<c>1.</c>, <c>1)</c>), at <paramref name="start"/>, followed by whitespace or
+    /// the end of the line (<paramref name="end"/>): <c>-foo</c> is no list item.
+    /// </summary>
+    /// <param name="markerEnd">Where the marker ends: the start of the whitespace after it.</param>
+    /// <param name="contentStart">Where that whitespace ends: <paramref name="end"/> for an empty item.</param>
+    /// <returns>False when no list marker starts there.</returns>
+    internal static bool TryParseListMarker(string source, int start, int end, out int markerEnd, out int contentStart) {
+        ArgumentNullException.ThrowIfNull(source);
+
+        var i = start;
+        markerEnd = contentStart = start;
+
+        if (i < end && source[i] is '-' or '*' or '+') {
+            i++;
+        } else {
+            while (i < end && i - start < 9 && Char.IsAsciiDigit(source[i])) {
+                i++;
+            }
+
+            if (i == start || i >= end || source[i] is not ('.' or ')')) {
+                return false;
+            }
+
+            i++;
+        }
+
+        if (i < end && source[i] is not (' ' or '\t')) {
+            return false;
+        }
+
+        markerEnd = i;
+
+        while (i < end && source[i] is ' ' or '\t') {
+            i++;
+        }
+
+        contentStart = i;
+
+        return true;
+    }
+
     /// <summary>Splits a source into lines; a line break at the very end starts no further line.</summary>
     internal static List<Line> SplitLines(string source) {
         var lines = new List<Line>();
@@ -273,7 +316,7 @@ internal static class NoteParser {
     private static bool IsBlankOrQuoteOnly(StringBuilder text) {
         foreach (var chunk in text.GetChunks()) {
             foreach (var c in chunk.Span) {
-                if (c != '>' && !char.IsWhiteSpace(c)) {
+                if (c != '>' && !Char.IsWhiteSpace(c)) {
                     return false;
                 }
             }

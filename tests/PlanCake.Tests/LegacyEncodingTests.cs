@@ -128,6 +128,99 @@ public class LegacyEncodingTests: IDisposable {
     }
 
     [Theory]
+    [InlineData(false, "ru", 1251)]
+    [InlineData(true, "ru", 1251)]
+    [InlineData(true, "fr", 1252)]
+    public void Open_Utf8WithOneStrayByte_IsDamagedUtf8NotALegacyFile(bool convert, string language, int ansi) {
+        // Valid UTF-8 Russian with one Windows-1251 byte pasted in on line 3.
+        byte[] bytes = [
+            .. new UTF8Encoding(false).GetBytes(Russian.Replace("Windows-1251", "UTF-8", StringComparison.Ordinal)),
+            .. new UTF8Encoding(false).GetBytes("Строка "), 0xE9, (byte)'\n',
+        ];
+        var path = WriteBytes(bytes);
+
+        var file = MarkdownFile.Open(path, Options(convert, language) with { AnsiEncoding = Encoding.GetEncoding(ansi) });
+
+        file.IsUnrecognized.Should().BeTrue();
+        file.IsReadOnly.Should().BeTrue();
+        file.ConvertedFrom.Should().BeNull();
+        file.Encoding.CodePage.Should().Be(65001);
+        file.InvalidByteLine.Should().Be(4);
+        file.Text.Should().StartWith("# Проверка кодировки").And.Contain("Строка �");
+        File.ReadAllBytes(path).Should().Equal(bytes);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Open_Utf8BomWithAnInvalidByte_IsNeverReadAsALegacyFile(bool convert) {
+        byte[] bytes = [0xEF, 0xBB, 0xBF, .. new UTF8Encoding(false).GetBytes("# Plan\n\nLine "), 0xFF, (byte)'\n'];
+        var path = WriteBytes(bytes);
+
+        var file = MarkdownFile.Open(path, Options(convert) with { AnsiEncoding = Encoding.GetEncoding(1252) });
+
+        file.IsUnrecognized.Should().BeTrue();
+        file.IsReadOnly.Should().BeTrue();
+        file.HasBom.Should().BeTrue();
+        file.InvalidByteLine.Should().Be(3);
+        file.Text.Should().Be("# Plan\n\nLine �\n");
+        File.ReadAllBytes(path).Should().Equal(bytes);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Open_Utf16WithAnOddLength_IsNeverReadAsALegacyFile(bool convert) {
+        byte[] bytes = [0xFF, 0xFE, .. new UnicodeEncoding(false, false).GetBytes("# План\n"), 0x41];
+        var path = WriteBytes(bytes);
+
+        var file = MarkdownFile.Open(path, Options(convert) with { AnsiEncoding = Encoding.GetEncoding(1252) });
+
+        file.IsUnrecognized.Should().BeTrue();
+        file.IsReadOnly.Should().BeTrue();
+        file.Text.Should().StartWith("# План\n").And.NotContain("\0");
+        File.ReadAllBytes(path).Should().Equal(bytes);
+    }
+
+    [Fact]
+    public void TryDecodeCleanly_RefusesNul() =>
+        LegacyEncoding.TryDecodeCleanly([(byte)'a', 0x00, (byte)'b', 0xE9], Encoding.GetEncoding(1252)).Should().BeNull();
+
+    [Theory]
+    [InlineData("Съешь же ещё этих мягких булок.")]
+    [InlineData("Déjà vu, élève, où, ça.")]
+    [InlineData("שלום עולם")]
+    public void FindDamagedUtf8_IsNullForALegacyFile(string text) {
+        var codePage = text[0] switch {
+            >= 'А' and <= 'я' => 1251,
+            >= 'א' and <= 'ת' => 1255,
+            _ => 1252,
+        };
+
+        LegacyEncoding.FindDamagedUtf8(Encoding.GetEncoding(codePage).GetBytes(text)).Should().BeNull();
+    }
+
+    [Fact]
+    public void Open_LegacyFileThatCannotBeConverted_OpensReadOnlyInsteadOfFailing() {
+        var bytes = Encoding.GetEncoding(1251).GetBytes(Russian);
+        var path = WriteBytes(bytes);
+        File.SetAttributes(path, FileAttributes.ReadOnly);
+
+        try {
+            var file = MarkdownFile.Open(path, Options(convert: true) with { Retries = 0 });
+
+            file.ConversionFailed.Should().BeTrue();
+            file.ConvertedFrom.Should().BeNull();
+            file.IsReadOnly.Should().BeTrue();
+            file.Encoding.CodePage.Should().Be(1251);
+            file.Text.Should().Be(Russian);
+            File.ReadAllBytes(path).Should().Equal(bytes);
+        } finally {
+            File.SetAttributes(path, FileAttributes.Normal);
+        }
+    }
+
+    [Theory]
     [InlineData("ru", 1251)]
     [InlineData("uk", 1251)]
     [InlineData("he", 1255)]

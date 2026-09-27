@@ -603,9 +603,6 @@
                 case "strings":
                     applyStrings(message);
                     break;
-                case "focusLines":
-                    focusLines(message.lines, false);
-                    break;
                 case "taskState":
                     setTaskState(message.lines, message.checked === true);
                     break;

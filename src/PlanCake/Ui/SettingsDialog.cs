@@ -51,14 +51,7 @@ internal partial class SettingsDialog: Form {
             return _("A marker cannot start or end with a double quote.");
         }
 
-        return error switch {
-            NoteMarkersError.None => null,
-            NoteMarkersError.EmptyOpening => _("The opening marker cannot be empty."),
-            NoteMarkersError.SurroundingWhitespace => _("A marker cannot start or end with a space."),
-            NoteMarkersError.LineBreak => _("A marker cannot contain a line break."),
-            NoteMarkersError.ClosingSameAsOpening => _("The closing marker must differ from the opening marker."),
-            _ => throw new ArgumentOutOfRangeException(nameof(opening), error, null),
-        };
+        return LocalizedText.MarkersError(error);
     }
 
     private void FillChoices() {

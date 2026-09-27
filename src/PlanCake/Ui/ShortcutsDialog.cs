@@ -41,11 +41,11 @@ internal partial class ShortcutsDialog: Form {
     }
 
     /// <summary>
-    /// Every shortcut: the available host commands with all their keys, then the keys of the
+    /// Every shortcut: the host commands with all their keys, then the keys of the
     /// document and of the notes list, then Exit.
     /// </summary>
     internal static IReadOnlyList<ShortcutRow> BuildRows() {
-        var rows = HostCommands.AvailableShortcuts()
+        var rows = HostCommands.Shortcuts()
             .Select(entry => new ShortcutRow(
                 HostCommands.DisplayName(entry.Command),
                 String.Join(", ", entry.Keys.Select(HostCommands.KeyText))

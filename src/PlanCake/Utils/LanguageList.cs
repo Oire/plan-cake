@@ -24,6 +24,22 @@ internal static class LanguageList {
     public static readonly IReadOnlyList<string> SupportedCodes = [English, "ru", "uk", "fr", "he", "de"];
 
     /// <summary>
+    /// True when <paramref name="code"/> names a culture Windows knows (<c>fr</c>, <c>pt-BR</c>):
+    /// what the interface language setting and <c>export --lang</c> accept.
+    /// </summary>
+    public static bool IsCulture(string? code) {
+        if (String.IsNullOrWhiteSpace(code)) {
+            return false;
+        }
+
+        try {
+            return !String.IsNullOrEmpty(CultureInfo.GetCultureInfo(code, predefinedOnly: true).Name);
+        } catch (CultureNotFoundException) {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// The languages a document can be read in (the <c>lang</c> of the rendered plan, which picks
     /// the screen reader's voice): the supported six, whatever catalogs are installed.
     /// </summary>

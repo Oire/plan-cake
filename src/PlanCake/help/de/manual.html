@@ -437,7 +437,7 @@ footer {
 
 <h3 id="open-link">Über einen Link im Web</h3>
 <p>Angenommen, ein Kollege schickt Ihnen einen Link zu einem Plan auf GitHub. Drücken Sie <kbd>Strg+L</kbd>, oder wählen Sie <strong>Über Link öffnen</strong> im Menü <strong>Datei</strong>. Das Feld <strong>Link</strong> ist bereits ausgefüllt, wenn die Zwischenablage einen Link enthält; andernfalls fügen Sie ihn ein oder tippen ihn. Drücken Sie <kbd>Eingabe</kbd> oder klicken Sie auf <strong>OK</strong>, um herunterzuladen; drücken Sie <kbd>Esc</kbd> oder klicken Sie auf <strong>Abbrechen</strong>, um abzubrechen.</p>
-<p>Die Statusleiste zeigt „Download von github.com...“ und, wenn der Download abgeschlossen ist, wo die Datei gespeichert wurde; dann öffnet sich der Plan. Downloads landen in Ihrem Windows-Ordner <strong>Downloads</strong> unter dem eigenen Namen der Datei; existiert dort bereits eine Datei mit diesem Namen, fügt PlanCake eine Zahl hinzu, etwa <code>plan (2).md</code>, so wie es ein Browser tut. Da die heruntergeladene Datei eine gewöhnliche Datei auf Ihrer Festplatte ist, werden Ihre Notizen darin gespeichert wie in jeder anderen.</p>
+<p>Die Statusleiste zeigt „Download von github.com...“ und, wenn der Download abgeschlossen ist, wo die Datei gespeichert wurde; dann öffnet sich der Plan. Downloads landen in Ihrem Windows-Ordner <strong>Downloads</strong> unter dem eigenen Namen der Datei, immer als Markdown-Datei: Ein Link zu einer Datei anderen Typs bekommt <code>.md</code> angehängt, sodass <code>tool.bat</code> als <code>tool.bat.md</code> gespeichert wird und nie ausgeführt werden kann. Wie ein Browser kennzeichnet PlanCake die Datei als aus dem Internet heruntergeladen; existiert dort bereits eine Datei mit diesem Namen, fügt PlanCake eine Zahl hinzu, etwa <code>plan (2).md</code>, so wie es ein Browser tut. Da die heruntergeladene Datei eine gewöhnliche Datei auf Ihrer Festplatte ist, werden Ihre Notizen darin gespeichert wie in jeder anderen.</p>
 <p>Ein paar Dinge zu Links:</p>
 <ul>
 <li>Sie können einen normalen GitHub-Seitenlink zu einer Datei einfügen; PlanCake ruft das rohe Markdown dahinter ab.</li>
@@ -462,7 +462,7 @@ footer {
 <ul>
 <li>Ein Weblink öffnet sich in Ihrem Standardbrowser.</li>
 <li>Ein Link zu einer anderen Markdown-Datei neben dieser öffnet diese Datei in PlanCake, im selben Fenster.</li>
-<li>Ein Link zu jeder anderen Art von Datei öffnet sie mit dem Programm, das Windows dafür verwendet.</li>
+<li>Ein Link zu jeder anderen Art von Datei öffnet sie mit dem Programm, das Windows dafür verwendet. Ein Link zu einem Programm oder Skript (etwa <code>.exe</code>, <code>.bat</code> oder <code>.js</code>) wird nie ausgeführt, was auch immer sein Text sagt: PlanCake fragt stattdessen, ob die Datei im Datei-Explorer angezeigt werden soll. Einem Link zu einer Datei auf der Netzwerkfreigabe eines anderen Computers folgt PlanCake nicht.</li>
 <li>Ein Link zu einer Überschrift im selben Dokument bringt Sie zu dieser Überschrift.</li>
 <li>Zeigt ein Link auf eine Datei, die nicht existiert, sagt die Statusleiste das und zeigt den Pfad.</li>
 </ul>
@@ -911,7 +911,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>PlanCake sagt, eine Notiz reicht bis zum Ende der Datei</summary>
-<p>Eine Notiz in der Datei hat eine Anfangsmarkierung, aber keine Endmarkierung – meist eine von Hand eingetippte Notiz. PlanCake behandelt alles nach der Markierung als Teil dieser Notiz. Drücken Sie <kbd>Strg+E</kbd>, um die Datei in Ihrem Editor zu öffnen und die Endmarkierung hinzuzufügen.</p>
+<p>Eine Notiz in der Datei hat eine Anfangsmarkierung, aber keine Endmarkierung – meist eine von Hand eingetippte Notiz. PlanCake behandelt alles nach der Markierung als Teil dieser Notiz. Drücken Sie <kbd>Strg+E</kbd>, um die Datei in Ihrem Editor zu öffnen und die Endmarkierung hinzuzufügen. Bis dahin bearbeitet oder löscht PlanCake diese Notiz nicht, und <strong>Alle Notizen löschen</strong> entfernt nichts, weil der Rest der Datei mit verschwinden würde.</p>
 </details>
 
 <details>

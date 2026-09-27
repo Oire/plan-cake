@@ -12,7 +12,7 @@ public class NoteStoreTests: IDisposable {
     private static readonly Encoding _windows1251 = CodePagesEncodingProvider.Instance.GetEncoding(1251)!;
 
     private readonly string _folder;
-    private string _path = string.Empty;
+    private string _path = String.Empty;
 
     public NoteStoreTests() {
         _folder = Path.Combine(Path.GetTempPath(), $"PlanCake.Tests-{Guid.NewGuid():N}");
@@ -240,6 +240,71 @@ public class NoteStoreTests: IDisposable {
         change.Line.Should().BeNull();
     }
 
+    // A note without a closing marker runs to the end of the file: changing it would change the rest.
+
+    private const string Unterminated = "Text\n[usernote]Closed[/usernote]\n\nPara.\n[usernote]Never closed\n\nMore of the plan\n";
+
+    [Fact]
+    public void Clear_WithANoteWithoutClosingMarker_ThrowsAndWritesNothing() {
+        var store = Store(Unterminated);
+
+        var clear = () => store.Clear(Unterminated);
+
+        clear.Should().Throw<UnterminatedNoteException>().Which.Line.Should().Be(5);
+        OnDisk.Should().Be(Unterminated);
+        store.CanUndo.Should().BeFalse();
+    }
+
+    [Fact]
+    public void DeleteAndEdit_NoteWithoutClosingMarker_ThrowAndWriteNothing() {
+        var store = Store(Unterminated);
+        var note = Render(Unterminated).Notes[1].Note;
+        note.Unterminated.Should().BeTrue();
+
+        var delete = () => store.Delete(Unterminated, note);
+        var edit = () => store.Edit(Unterminated, note, "Never closed");
+
+        delete.Should().Throw<UnterminatedNoteException>().Which.Line.Should().Be(5);
+        edit.Should().Throw<UnterminatedNoteException>();
+        OnDisk.Should().Be(Unterminated);
+    }
+
+    [Fact]
+    public void DeleteAndEdit_ClosedNoteBeforeAnUnterminatedOne_StillWork() {
+        var store = Store(Unterminated);
+
+        store.Delete(Unterminated, Render(Unterminated).Notes[0].Note);
+
+        OnDisk.Should().Be("Text\n\nPara.\n[usernote]Never closed\n\nMore of the plan\n");
+    }
+
+    // Misuse
+
+    [Fact]
+    public void Edit_NoteNotInTheCurrentText_ThrowsAndWritesNothing() {
+        const string Text = "Para.\n[usernote]one[/usernote]\n";
+        var store = Store(Text);
+        var elsewhere = Render("Other para, longer.\n\n[usernote]another[/usernote]\n").Notes[0].Note;
+
+        var edit = () => store.Edit(Text, elsewhere, "changed");
+        var delete = () => store.Delete(Text, elsewhere);
+
+        edit.Should().Throw<ArgumentException>();
+        delete.Should().Throw<ArgumentException>();
+        OnDisk.Should().Be(Text);
+    }
+
+    [Fact]
+    public void UndoAndRedo_WithoutHistory_Throw() {
+        var store = Store("Para.\n");
+
+        var undo = () => store.Undo();
+        var redo = () => store.Redo();
+
+        undo.Should().Throw<InvalidOperationException>();
+        redo.Should().Throw<InvalidOperationException>();
+    }
+
     [Fact]
     public void Clear_WithoutNotes_WritesNothingAndRecordsNoUndo() {
         var store = Store("Para.\n");
@@ -295,7 +360,7 @@ public class NoteStoreTests: IDisposable {
 
     private MarkdownFile MarkdownFileStub() {
         _path = Path.Combine(_folder, "stub.md");
-        File.WriteAllText(_path, string.Empty);
+        File.WriteAllText(_path, String.Empty);
 
         return MarkdownFile.Open(_path);
     }

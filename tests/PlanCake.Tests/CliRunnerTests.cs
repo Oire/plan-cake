@@ -16,6 +16,12 @@ namespace Oire.PlanCake.Tests;
 public class CliRunnerTests: IDisposable {
     private static readonly UTF8Encoding _utf8 = new(false);
 
+    /// <summary>
+    /// The ANSI code page every run decodes with as a last resort, so that no test depends on the
+    /// machine's (a CJK code page decodes bytes that Windows-1252 leaves undefined).
+    /// </summary>
+    private static readonly Encoding _ansi = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+
     /// <summary>A note of every kind: before the first block, then after each kind of block.</summary>
     private const string EveryKind = """
         [usernote]At the top[/usernote]
@@ -75,7 +81,7 @@ public class CliRunnerTests: IDisposable {
     private static (int ExitCode, string Output, string Error) Run(params string[] args) {
         using var output = new StringWriter();
         using var error = new StringWriter();
-        var exitCode = new CliRunner(output, error).Run(args);
+        var exitCode = new CliRunner(output, error, _ansi).Run(args);
 
         return (exitCode, output.ToString(), error.ToString());
     }
@@ -85,7 +91,7 @@ public class CliRunnerTests: IDisposable {
         using var stream = new MemoryStream();
         using var output = new StreamWriter(stream, _utf8);
         using var error = new StringWriter();
-        var exitCode = new CliRunner(output, error).Run(args);
+        var exitCode = new CliRunner(output, error, _ansi).Run(args);
         output.Flush();
 
         return (exitCode, stream.ToArray());
@@ -236,8 +242,8 @@ public class CliRunnerTests: IDisposable {
     public void List_WithoutNotes_PrintsNothingOrAnEmptyArray() {
         var path = Write("# Plan\n\nNo notes here.\n");
 
-        Run("list", path).Should().Be((ExitCode.Success, string.Empty, string.Empty));
-        Run("list", path, "--json").Should().Be((ExitCode.Success, "[]\n", string.Empty));
+        Run("list", path).Should().Be((ExitCode.Success, String.Empty, String.Empty));
+        Run("list", path, "--json").Should().Be((ExitCode.Success, "[]\n", String.Empty));
     }
 
     [Fact]
@@ -282,15 +288,27 @@ public class CliRunnerTests: IDisposable {
     public void List_MarkerOptions_OverrideTheSettings() {
         var path = Write("Para.\n<<one>>\n\n[usernote]not a note here[/usernote]\n");
 
-        var (_, output, _) = Run("check", path, "--open-marker", "<<", "--close-marker", ">>");
+        var (exitCode, output, _) = Run("list", path, "--open-marker", "<<", "--close-marker", ">>");
 
-        output.Should().Contain("1");
+        exitCode.Should().Be(ExitCode.Success);
+        output.Should().Be("2-2 after 1-1 \"Para.\": one\n");
+    }
+
+    [Fact]
+    public void Check_MarkerOptions_OverrideTheSettings() {
+        // Two notes with these markers, one with the default ones: only the options give 2.
+        var path = Write("Para.\n<<one>>\n\nOther.\n<<two>>\n\n[usernote]not a note here[/usernote]\n");
+
+        var (exitCode, output, _) = Run("check", path, "--open-marker", "<<", "--close-marker", ">>");
+
+        exitCode.Should().Be(ExitCode.NotesRemain);
+        output.Should().Be("2 notes\n");
     }
 
     [Fact]
     public void Commands_UseTheMarkersFromTheSettings() {
         Config.Notes.OpeningMarker = "%%";
-        Config.Notes.ClosingMarker = string.Empty;
+        Config.Notes.ClosingMarker = String.Empty;
         var path = Write("Para.\n%% a note\n\n[usernote]not a note[/usernote]\n");
 
         var (_, output, _) = Run("list", path);
@@ -366,6 +384,19 @@ public class CliRunnerTests: IDisposable {
     }
 
     [Fact]
+    public void Clear_WithANoteWithoutClosingMarker_IsRefusedAndNeverWritten() {
+        const string Text = "Text\n[usernote]Closed[/usernote]\n\n[usernote]Never closed\n\nMore of the plan\n";
+        var path = Write(Text);
+
+        var (exitCode, output, error) = Run("clear", path);
+
+        exitCode.Should().Be(ExitCode.Error);
+        output.Should().BeEmpty();
+        error.Should().Contain("line 4").And.Contain("Nothing was removed");
+        File.ReadAllText(path).Should().Be(Text);
+    }
+
+    [Fact]
     public void Clear_WithoutNotes_LeavesTheFileAlone() {
         var path = Write("# Plan\n");
         var written = File.GetLastWriteTimeUtc(path);
@@ -406,6 +437,23 @@ public class CliRunnerTests: IDisposable {
     }
 
     // export
+
+    [Fact]
+    public void Output_ThatNamesTheFileItselfAnotherWay_IsRefusedAndNeverWritten() {
+        var path = Write(EveryKind);
+
+        foreach (var output in new[] { path, @"\\?\" + path, Path.Combine(_folder, ".", "PLAN.MD") }) {
+            var (exportCode, _, exportError) = Run("export", path, "-o", output);
+            var (listCode, _, listError) = Run("list", path, "-o", output);
+
+            exportCode.Should().Be(ExitCode.Error, output);
+            exportError.Should().Contain("cannot be the file itself");
+            listCode.Should().Be(ExitCode.Error, output);
+            listError.Should().Contain("cannot be the file itself");
+        }
+
+        File.ReadAllText(path).Should().Be(EveryKind);
+    }
 
     [Fact]
     public void Export_WritesStandaloneHtmlWithNotesInTheDocumentLanguage() {

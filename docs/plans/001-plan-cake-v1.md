@@ -850,7 +850,10 @@ check tasks off from the document.
       next file; the log shows no reopen. Fixed on the way: every window keeps its own copy of
       the settings, so a setting saved in one reached another only at its next start, and that
       window's OK wrote its stale copy back. File → Settings now reads the file again before
-      showing the dialog, and what another window saved applies on OK or Cancel
+      showing the dialog, and what another window saved applies on OK or Cancel. (Review fix:
+      View → Interface language did not, and saved its stale copy back; it now reads the file
+      again too, `Config.SaveLanguage`, and the file is written through a temporary file, so a
+      window never reads it half written.)
 - [x] ➕ what an empty closing marker means is in the box's own label: "Closing marker (leave
       empty for a single marker that runs to the end of the line):". A separate hint label
       under the box, also given as the box's description, was tried first: JAWS read neither
@@ -1039,7 +1042,8 @@ reach every block with their own reading cursor.
       keys break nothing (whether JAWS passes them on or keeps them), JAWS stays out of forms
       mode, and reading with the virtual cursor works as before (checked with JAWS: the keys
       reach PlanCake, JAWS reads each block, Enter adds a note to the block reached; a screenshot
-      shows the blue outline on the current block while PlanCake has focus)
+      shows the blue outline on the current block while PlanCake has focus). Not recorded as
+      checked yet: that the block scrolls into view, and "No more blocks" at either end
 - [x] validation commands pass
 - [x] ➕ resize the panes without a mouse: the splitter between the document and the notes list
       could only be dragged. View → Wider notes list / Narrower notes list (no shortcut keys:
@@ -1069,7 +1073,7 @@ reach every block with their own reading cursor.
       `tabindex="-1"` only while focused. `morph.js` keeps the mark on a kept node and leaves it
       out of the content key (`MorphPlanTests`). The host now focuses the document before
       posting `nextBlock` / `previousBlock`, so from the notes list the page has the focus when it
-      moves. Still to check by eye in the manual check above
+      moves. Checked: a screenshot shows the outline on the current block (a944c28)
 
 ### Task 16: User manual
 
@@ -1234,8 +1238,8 @@ JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, eac
   (`title`: the first heading, else the file name; `task: true` focuses the task-list check box
   inside the `lines` block, Task 7a),
   `strings` `{ uiLang, uiDir, … }` (page chrome and live messages only: the note role
-  descriptions are already in the rendered HTML), `focusNote` `{ note }`, `focusLines`
-  `{ lines }`, `nextNote` / `previousNote` `{}`, `nextBlock` / `previousBlock` `{}` (Task 15a), `taskState` `{ lines, checked }` (Task 7a:
+  descriptions are already in the rendered HTML), `focusNote` `{ note }`,
+  `nextNote` / `previousNote` `{}`, `nextBlock` / `previousBlock` `{}` (Task 15a), `taskState` `{ lines, checked }` (Task 7a:
   sets a task checkbox back after a canceled toggle). No `announce` message: the Task 2 spike
   showed that the host's UIA notifications are heard in the virtual buffer, so every
   announcement goes through `StatusAnnouncer`

@@ -33,11 +33,6 @@ internal sealed record StringsMessage(string UiLang, string UiDir, string NoDocu
     public string Type { get; } = "strings";
 }
 
-/// <summary>Host → page: moves the virtual cursor to the block with these <c>data-lines</c>.</summary>
-internal sealed record FocusLinesMessage(string Lines) {
-    public string Type { get; } = "focusLines";
-}
-
 /// <summary>Host → page: moves the virtual cursor to the note with this <c>data-note</c> index.</summary>
 internal sealed record FocusNoteMessage(int Note) {
     public string Type { get; } = "focusNote";

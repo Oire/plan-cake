@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text;
 using UtfUnknown;
 
@@ -78,7 +79,8 @@ internal static class LegacyEncoding {
 
     /// <summary>
     /// Decodes <paramref name="bytes"/> with <paramref name="encoding"/> without losing anything:
-    /// no byte may be undefined in it, and the text may hold no replacement character and no C1
+    /// no byte may be undefined in it, and the text may hold no replacement character, no NUL
+    /// (what UTF-16 read as a single-byte code page yields for every other byte) and no C1
     /// control character (U+0080 to U+009F), which a single-byte code page yields for the bytes
     /// it leaves undefined and which no real text contains.
     /// </summary>
@@ -97,12 +99,60 @@ internal static class LegacyEncoding {
         }
 
         foreach (var c in text) {
-            if (c == '�' || c is >= '\u0080' and <= '\u009F') {
+            if (c is '�' or '\0' || c is >= '\u0080' and <= '\u009F') {
                 return null;
             }
         }
 
         return text;
+    }
+
+    /// <summary>
+    /// How many valid multibyte UTF-8 sequences a file needs per invalid byte to count as damaged
+    /// UTF-8 rather than a legacy encoding. In a legacy file nearly every letter outside ASCII is
+    /// an invalid byte, and a valid sequence turns up only by chance.
+    /// </summary>
+    internal const int DamagedUtf8Ratio = 2;
+
+    /// <summary>
+    /// Where the first invalid byte is when <paramref name="bytes"/>, which are not valid UTF-8,
+    /// are still UTF-8 with a few damaged bytes (a pasted character from another encoding, a
+    /// truncated end): they hold valid multibyte sequences, at least <see cref="DamagedUtf8Ratio"/>
+    /// per invalid byte. Decoding such a file with a single-byte code page would turn every
+    /// character outside ASCII into two or three wrong ones (<c>с</c> into <c>СЃ</c>).
+    /// </summary>
+    /// <returns>The offset of the first invalid byte, or <see langword="null"/> when the bytes do not look like UTF-8.</returns>
+    public static int? FindDamagedUtf8(ReadOnlySpan<byte> bytes) {
+        var valid = 0;
+        var invalid = 0;
+        int? first = null;
+        var offset = 0;
+
+        while (offset < bytes.Length) {
+            var status = Rune.DecodeFromUtf8(bytes[offset..], out _, out var consumed);
+
+            if (status == OperationStatus.Done) {
+                if (consumed > 1) {
+                    valid++;
+                }
+            } else {
+                invalid++;
+                first ??= offset;
+            }
+
+            offset += Math.Max(consumed, 1);
+        }
+
+        return invalid > 0 && valid >= invalid * DamagedUtf8Ratio ? first : null;
+    }
+
+    /// <summary>An encoding's name as people write it: <c>Windows-1251</c>, <c>UTF-8</c>.</summary>
+    public static string DisplayName(Encoding encoding) {
+        ArgumentNullException.ThrowIfNull(encoding);
+
+        return encoding.WebName.StartsWith("windows-", StringComparison.OrdinalIgnoreCase)
+            ? $"Windows-{encoding.CodePage}"
+            : encoding.WebName.ToUpperInvariant();
     }
 
     /// <summary>The detector's code page for the bytes when it is confident enough, else <see langword="null"/>.</summary>

@@ -268,6 +268,77 @@ public class FileWatcherTests: IDisposable {
     }
 
     [Fact]
+    public void UnreadableFile_IsLookedAtLaterEachTime_ThenLeftUntilTheNextEvent() {
+        var attempts = 0;
+        using var watcher = Watcher(_ => {
+            attempts++;
+            throw new IOException("Access denied");
+        });
+
+        Changed(watcher);
+        var delays = new List<TimeSpan>();
+
+        while (_timer.IsPending) {
+            _timer.Fire();
+
+            if (_timer.IsPending) {
+                delays.Add(_timer.Delay);
+            }
+        }
+
+        attempts.Should().Be(FileWatcher.MaxReadRetries + 1);
+        delays.Should().HaveCount(FileWatcher.MaxReadRetries);
+        delays.Should().BeInAscendingOrder();
+        delays[0].Should().Be(FileWatcher.Debounce);
+        delays[^1].Should().Be(FileWatcher.MaxRetryDelay);
+        _changes.Should().BeEmpty();
+
+        // The next event about the file starts over.
+        Changed(watcher);
+        _timer.Delay.Should().Be(FileWatcher.Debounce);
+        _timer.Fire();
+        attempts.Should().Be(FileWatcher.MaxReadRetries + 2);
+        _timer.Delay.Should().Be(FileWatcher.Debounce);
+    }
+
+    [Fact]
+    public void LegacyFileSavedUnchanged_ReadWithTheDocumentLanguage_ProducesNoReload() {
+        var windows1251 = CodePagesEncodingProvider.Instance.GetEncoding(1251)!;
+        var windows1252 = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+        var bytes = windows1251.GetBytes("Абзац.\n");
+        File.WriteAllBytes(_path, bytes);
+
+        // How the window opens it: the document language's code page before the ANSI one.
+        var asTheWindow = new MarkdownFileOptions(AnsiEncoding: windows1252, DocumentLanguage: "ru");
+        var shown = MarkdownFile.Open(_path, asTheWindow).Text;
+        shown.Should().Be("Абзац.\n");
+
+        using var watcher = new FileWatcher(_path, _timer, path => FileWatcher.ReadText(path, asTheWindow));
+        watcher.FileChanged += (_, e) => _changes.Add(e);
+        watcher.Acknowledge(shown);
+
+        // Saved again with the same bytes: only a timestamp changes.
+        File.WriteAllBytes(_path, bytes);
+        Changed(watcher);
+        _timer.Fire();
+
+        _changes.Should().BeEmpty();
+
+        // Decoded as the ANSI code page alone, the same bytes read as another text: a false change.
+        FileWatcher.ReadText(_path, asTheWindow with { DocumentLanguage = null }).Should().NotBe(shown);
+    }
+
+    [Fact]
+    public void ReadText_NeverConvertsTheFile() {
+        var bytes = CodePagesEncodingProvider.Instance.GetEncoding(1251)!.GetBytes("Абзац.\n");
+        File.WriteAllBytes(_path, bytes);
+
+        FileWatcher.ReadText(_path, new MarkdownFileOptions(ConvertToUtf8: true, DocumentLanguage: "ru"));
+
+        File.ReadAllBytes(_path).Should().Equal(bytes);
+    }
+
+    [Fact]
     public void DisposedWatcher_ReportsNothing() {
         var watcher = Watcher();
         File.WriteAllText(_path, "# Plan\n\nSecond.\n", _utf8);

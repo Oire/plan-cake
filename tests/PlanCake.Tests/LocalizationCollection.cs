@@ -3,8 +3,10 @@ using Xunit;
 namespace Oire.PlanCake.Tests;
 
 /// <summary>
-/// Tests that switch the interface language, or assert on the text <c>_()</c> returns, share
-/// static state: they run in this collection, one at a time and apart from every other test.
+/// The collection for the app's static state: tests that change <c>Config</c> (loading it from a
+/// temp file through <c>Config.OverrideFilePath</c>, setting its sections), switch the interface
+/// language, or assert on the text <c>_()</c> returns. They run in this collection, one at a time
+/// and apart from every other test. The name is historical: Config shares it.
 /// </summary>
 [CollectionDefinition(Name, DisableParallelization = true)]
 public sealed class LocalizationCollection {

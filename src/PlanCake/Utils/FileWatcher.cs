@@ -84,6 +84,16 @@ internal sealed class FileWatcher: IDisposable {
     /// <summary>How long after the last event the file is looked at.</summary>
     public static readonly TimeSpan Debounce = TimeSpan.FromMilliseconds(300);
 
+    /// <summary>
+    /// How many times in a row a file that cannot be read (locked, its permissions changed) is
+    /// looked at again, each time twice as late (up to <see cref="MaxRetryDelay"/>), before the
+    /// watcher waits for the next event about it.
+    /// </summary>
+    public const int MaxReadRetries = 8;
+
+    /// <summary>The longest wait before a file that cannot be read is looked at again.</summary>
+    public static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(10);
+
     private readonly IDebounceTimer _timer;
     private readonly Func<string, string?> _readText;
     private FileSystemWatcher? _watcher;
@@ -91,12 +101,17 @@ internal sealed class FileWatcher: IDisposable {
     private bool _missing;
     private bool _disposed;
 
+    /// <summary>How many times in a row the file could not be read.</summary>
+    private int _failedReads;
+
     /// <param name="path">The file to watch.</param>
     /// <param name="timer">The debounce timer; its callback must run on the thread that handles <see cref="FileChanged"/>.</param>
     /// <param name="readText">
     /// Reads the file's text, or returns <see langword="null"/> when the file does not exist; an
-    /// <see cref="IOException"/> (a locked file) means "look again later". Defaults to reading it
-    /// the way <see cref="MarkdownFile"/> does.
+    /// <see cref="IOException"/> (a locked file) means "look again later". Defaults to
+    /// <see cref="ReadText(String, MarkdownFileOptions?)"/> with the default options; the window
+    /// passes one that decodes the file exactly as it does (its document language), or the two
+    /// texts of a legacy file could differ and every event would look like a change.
     /// </param>
     public FileWatcher(string path, IDebounceTimer timer, Func<string, string?>? readText = null) {
         ArgumentException.ThrowIfNullOrEmpty(path);
@@ -104,7 +119,7 @@ internal sealed class FileWatcher: IDisposable {
 
         Path = System.IO.Path.GetFullPath(path);
         _timer = timer;
-        _readText = readText ?? ReadText;
+        _readText = readText ?? (file => ReadText(file));
     }
 
     /// <summary>The watched file's full path.</summary>
@@ -179,6 +194,8 @@ internal sealed class FileWatcher: IDisposable {
             || (e is RenamedEventArgs renamed && IsWatchedPath(renamed.OldFullPath));
 
         if (concerned) {
+            // A new event: a file that could not be read is worth trying again from the start.
+            _failedReads = 0;
             _timer.Restart(Debounce, Check);
         }
     }
@@ -206,12 +223,24 @@ internal sealed class FileWatcher: IDisposable {
         try {
             text = _readText(Path);
         } catch (IOException ex) {
-            // Still being written (locked): look again a little later.
+            _failedReads++;
+
+            // Still being written (locked): look again a little later, each time later still.
+            // A file that stays unreadable (its permissions changed, another program holds it
+            // without sharing) is left alone until the next event about it.
+            if (_failedReads > MaxReadRetries) {
+                Log.Warning(ex, "{Path} cannot be read; waiting for the next change to it", Path);
+
+                return;
+            }
+
             Log.Debug(ex, "{Path} cannot be read yet; checking again", Path);
-            _timer.Restart(Debounce, Check);
+            _timer.Restart(RetryDelay(_failedReads), Check);
 
             return;
         }
+
+        _failedReads = 0;
 
         if (text is null) {
             if (!_missing) {
@@ -242,14 +271,26 @@ internal sealed class FileWatcher: IDisposable {
         FileChanged?.Invoke(this, new FileChangeEventArgs(FileChangeKind.Changed, text));
     }
 
-    /// <summary>The file's text decoded as <see cref="MarkdownFile"/> does, or <see langword="null"/> when it is missing.</summary>
-    private static string? ReadText(string path) {
+    /// <summary>The wait before the next look at a file that could not be read <paramref name="failures"/> times.</summary>
+    internal static TimeSpan RetryDelay(int failures) {
+        var delay = Debounce * Math.Pow(2, Math.Clamp(failures - 1, 0, 16));
+
+        return delay < MaxRetryDelay ? delay : MaxRetryDelay;
+    }
+
+    /// <summary>
+    /// The file's text decoded as <see cref="MarkdownFile"/> does with <paramref name="options"/>
+    /// (never retried, and never converted), or <see langword="null"/> when it is missing.
+    /// </summary>
+    public static string? ReadText(string path, MarkdownFileOptions? options = null) {
         if (!File.Exists(path)) {
             return null;
         }
 
+        var readOptions = (options ?? MarkdownFileOptions.Default) with { ConvertToUtf8 = false, Retries = 0 };
+
         try {
-            return MarkdownFile.Open(path, new MarkdownFileOptions(Retries: 0)).Text;
+            return MarkdownFile.Open(path, readOptions).Text;
         } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
             return null;
         }

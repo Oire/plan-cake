@@ -125,7 +125,7 @@ public partial class MainWindow: Form {
 
     /// <summary>
     /// The update checks, created once the window is shown (NetSparkle's windows need the UI
-    /// thread); <see langword="null"/> before that, and in a build without an update key.
+    /// thread); <see langword="null"/> before that, and when they could not be set up.
     /// </summary>
     private UpdateService? _updateService;
 
@@ -177,10 +177,8 @@ public partial class MainWindow: Form {
 
     /// <summary>
     /// The menu bar, as data (Technical details → "Menus" in the plan). The shortcuts are shown
-    /// only: <see cref="HostCommands"/> runs them, from the document too. An item whose feature
-    /// arrives with a later task is added by that task; <see cref="MenuBuilder"/> drops the
-    /// separators its absence leaves doubled, leading or trailing. Enabled and checked states
-    /// are set again from the window's state whenever the menu bar opens (<see cref="WndProc"/>).
+    /// only: <see cref="HostCommands"/> runs them, from the document too. Enabled and checked
+    /// states are set again from the window's state whenever the menu bar opens (<see cref="WndProc"/>).
     /// Internal for the tests, which check the mnemonics of every menu level in every catalog.
     /// </summary>
     internal NativeMenuSpec BuildMenuSpec() {
@@ -188,53 +186,52 @@ public partial class MainWindow: Form {
         _menuCheckedWhen.Clear();
 
         var spec = new NativeMenuSpec();
-        var bar = new MenuBuilder(spec);
 
-        bar.AddMenu(_("&File"), file => {
+        spec.AddSubmenu(_("&File"), file => {
             MenuCommand(file, _("&Open..."), HostCommand.Open);
             MenuCommand(file, _("Open from &clipboard"), HostCommand.OpenFromClipboard);
             MenuCommand(file, _("Open from &link..."), HostCommand.OpenFromLink);
             file.AddSeparator();
             EnabledWhen(MenuCommand(file, _("Open in &editor"), HostCommand.OpenInEditor), FileIsThere);
-            EnabledWhen(file.Add(_("Export &notes..."), null, ExportNotes), HasFile);
+            EnabledWhen(file.AddItem(_("Export &notes..."), null, ExportNotes), HasFile);
             file.AddSeparator();
             MenuCommand(file, _("&Settings..."), HostCommand.Settings);
             file.AddSeparator();
-            file.Add(_("E&xit"), HostCommands.KeyText(Keys.Alt | Keys.F4), Close);
+            file.AddItem(_("E&xit"), HostCommands.KeyText(Keys.Alt | Keys.F4), Close);
         });
 
-        bar.AddMenu(_("&Edit"), edit => {
+        spec.AddSubmenu(_("&Edit"), edit => {
             EnabledWhen(MenuCommand(edit, _("&Undo"), HostCommand.Undo), () => FileIsThere() && _notes?.Store.CanUndo == true);
             EnabledWhen(MenuCommand(edit, _("&Redo"), HostCommand.Redo), () => FileIsThere() && _notes?.Store.CanRedo == true);
             edit.AddSeparator();
-            EnabledWhen(edit.Add(_("&Delete all notes..."), null, DeleteAllNotes), () => FileIsThere() && HasNotes());
+            EnabledWhen(edit.AddItem(_("&Delete all notes..."), null, DeleteAllNotes), () => FileIsThere() && HasNotes());
         });
 
-        bar.AddMenu(_("&View"), view => {
-            CheckedWhen(view.AddCheckable(_("&Notes list"), _showNotesList, null, ToggleNotesList), () => _showNotesList);
+        spec.AddSubmenu(_("&View"), view => {
+            CheckedWhen(view.AddCheckableItem(_("&Notes list"), _showNotesList, null, ToggleNotesList), () => _showNotesList);
             MenuCommand(view, _("&Switch pane"), HostCommand.SwitchPane);
-            EnabledWhen(view.Add(_("&Wider notes list"), null, () => ResizeNotesList(larger: true)), () => IsNotesListVisible);
-            EnabledWhen(view.Add(_("N&arrower notes list"), null, () => ResizeNotesList(larger: false)), () => IsNotesListVisible);
+            EnabledWhen(view.AddItem(_("&Wider notes list"), null, () => ResizeNotesList(larger: true)), () => IsNotesListVisible);
+            EnabledWhen(view.AddItem(_("N&arrower notes list"), null, () => ResizeNotesList(larger: false)), () => IsNotesListVisible);
             view.AddSeparator();
 
             // Language names carry no mnemonics: each is written in its own language.
-            view.AddMenu(_("&Interface language"), languages => {
+            view.AddSubmenu(_("&Interface language"), languages => {
                 var options = LanguageList.InterfaceLanguages(_("System default"));
 
                 foreach (var option in options) {
                     var code = option.Code;
                     CheckedWhen(
-                        languages.AddRadio(option.Name, "interfaceLanguage", false, () => SetInterfaceLanguage(code)),
+                        languages.AddRadioItem(option.Name, "interfaceLanguage", false, () => SetInterfaceLanguage(code)),
                         () => LanguageList.Find(options, Config.General.Language).Code == code
                     );
                 }
             });
 
-            EnabledWhen(view.AddMenu(_("&Document language"), languages => {
+            EnabledWhen(view.AddSubmenu(_("&Document language"), languages => {
                 foreach (var option in LanguageList.DocumentLanguages()) {
                     var code = option.Code;
                     CheckedWhen(
-                        languages.AddRadio(option.Name, "documentLanguage", false, () => SetDocumentLanguage(code)),
+                        languages.AddRadioItem(option.Name, "documentLanguage", false, () => SetDocumentLanguage(code)),
                         () => _documentLanguage == code
                     );
                 }
@@ -250,9 +247,9 @@ public partial class MainWindow: Form {
             EnabledWhen(MenuCommand(view, _("&Reload"), HostCommand.Reload), FileIsThere);
         });
 
-        bar.AddMenu(_("&Notes"), notes => {
-            EnabledWhen(notes.Add(_("&Edit note..."), null, EditCurrentNote), () => FileIsThere() && CurrentNote() is not null);
-            EnabledWhen(notes.Add(_("&Delete note"), null, DeleteCurrentNote), () => FileIsThere() && CurrentNote() is not null);
+        spec.AddSubmenu(_("&Notes"), notes => {
+            EnabledWhen(notes.AddItem(_("&Edit note..."), null, EditCurrentNote), () => FileIsThere() && CurrentNote() is not null);
+            EnabledWhen(notes.AddItem(_("&Delete note"), null, DeleteCurrentNote), () => FileIsThere() && CurrentNote() is not null);
             notes.AddSeparator();
             EnabledWhen(MenuCommand(notes, _("&Next note"), HostCommand.NextNote), HasNotes);
             EnabledWhen(MenuCommand(notes, _("&Previous note"), HostCommand.PreviousNote), HasNotes);
@@ -261,11 +258,11 @@ public partial class MainWindow: Form {
             EnabledWhen(MenuCommand(notes, _("Previous b&lock"), HostCommand.PreviousBlock), HasFile);
         });
 
-        bar.AddMenu(_("&Help"), help => {
+        spec.AddSubmenu(_("&Help"), help => {
             MenuCommand(help, _("&User manual"), HostCommand.UserManual);
-            help.Add(_("&Keyboard shortcuts"), null, ShowShortcuts);
+            help.AddItem(_("&Keyboard shortcuts"), null, ShowShortcuts);
             help.AddSeparator();
-            help.Add(_("&Check for updates"), null, CheckForUpdates);
+            help.AddItem(_("&Check for updates"), null, CheckForUpdates);
             MenuCommand(help, _("&About PlanCake"), HostCommand.About);
         });
 
@@ -275,8 +272,8 @@ public partial class MainWindow: Form {
     }
 
     /// <summary>A menu item that runs a host command and shows the command's first key.</summary>
-    private NativeMenuItemSpec MenuCommand(MenuBuilder menu, string text, HostCommand command) =>
-        menu.Add(text, HostCommands.MenuShortcut(command), () => RunCommand(command, Keys.None));
+    private NativeMenuItemSpec MenuCommand(NativeMenuSpec menu, string text, HostCommand command) =>
+        menu.AddItem(text, HostCommands.MenuShortcut(command), () => RunCommand(command, Keys.None));
 
     private NativeMenuItemSpec EnabledWhen(NativeMenuItemSpec item, Func<bool> isEnabled) {
         _menuEnabledWhen.Add((item, isEnabled));
@@ -354,7 +351,7 @@ public partial class MainWindow: Form {
 
     /// <summary>
     /// Help → Check for updates: an available update shows NetSparkle's window; every other
-    /// outcome (up to date, skipped, no network, a build without an update key) is said in a
+    /// outcome (up to date, skipped, no network, checks that could not be set up) is said in a
     /// message box.
     /// </summary>
     private async void CheckForUpdates() {
@@ -367,7 +364,7 @@ public partial class MainWindow: Form {
         try {
             var outcome = _updateService is { } updates
                 ? await updates.CheckForUpdatesAsync()
-                : UpdateCheckOutcome.NotConfigured;
+                : UpdateCheckOutcome.Unavailable;
 
             if (IsDisposed) {
                 return;
@@ -413,7 +410,7 @@ public partial class MainWindow: Form {
 
     /// <summary>
     /// Opens a Markdown file in the window. Every way of opening one (the command line, drag and
-    /// drop, a link in the document, and later File → Open, the clipboard and a web link) goes
+    /// drop, a link in the document, File → Open, the clipboard and a web link) goes
     /// through here, and the file being left goes into the history for Back. On failure the
     /// user is told why and the current document stays.
     /// </summary>
@@ -548,7 +545,7 @@ public partial class MainWindow: Form {
         var options = new RenderOptions(
             _markers,
             RenderMode.Interactive,
-            CurrentRenderStrings(),
+            LocalizedText.RenderStrings(),
             _documentLanguage
         );
 
@@ -609,9 +606,6 @@ public partial class MainWindow: Form {
         _pendingFocus = null;
     }
 
-    private static RenderStrings CurrentRenderStrings() =>
-        new(_("user note"), _("unote"));
-
     private void PostStrings() => documentView.PostMessage(PageStrings());
 
     /// <summary>
@@ -630,7 +624,17 @@ public partial class MainWindow: Form {
         var messages = new List<string>();
 
         if (file.ConvertedFrom is { } convertedFrom) {
-            messages.Add(_("Converted from {0} to UTF-8.", EncodingName(convertedFrom)));
+            messages.Add(_("Converted from {0} to UTF-8.", LegacyEncoding.DisplayName(convertedFrom)));
+        } else if (file.IsUnrecognized && file.InvalidByteLine is { } invalidLine) {
+            messages.Add(_(
+                "This file is in {0} but has an invalid byte on line {1}, so it was opened read-only and is never changed. Notes cannot be added to it.",
+                LegacyEncoding.DisplayName(file.Encoding), invalidLine
+            ));
+        } else if (file.ConversionFailed) {
+            messages.Add(_(
+                "This file is not in UTF-8 and could not be converted, so it was opened read-only as {0}. Notes cannot be added to it.",
+                LegacyEncoding.DisplayName(file.Encoding)
+            ));
         } else if (file.IsUnrecognized) {
             messages.Add(_(
                 "The encoding of this file could not be recognized, so it was opened read-only and is never changed. Notes cannot be added to it."
@@ -638,7 +642,7 @@ public partial class MainWindow: Form {
         } else if (file.IsReadOnly) {
             messages.Add(_(
                 "This file is not in UTF-8, so it was opened read-only as {0}. Notes cannot be added to it.",
-                EncodingName(file.Encoding)
+                LegacyEncoding.DisplayName(file.Encoding)
             ));
         }
 
@@ -650,12 +654,6 @@ public partial class MainWindow: Form {
             _announcer.Announce(String.Join(" ", messages));
         }
     }
-
-    /// <summary>An encoding's name as people write it: <c>Windows-1251</c>, <c>UTF-8</c>.</summary>
-    private static string EncodingName(Encoding encoding) =>
-        encoding.WebName.StartsWith("windows-", StringComparison.OrdinalIgnoreCase)
-            ? $"Windows-{encoding.CodePage}"
-            : encoding.WebName.ToUpperInvariant();
 
     private static void ShowError(string message) =>
         DialogHelper.Show(message, _("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -790,9 +788,7 @@ public partial class MainWindow: Form {
                 UndoOrRedo(redo: true);
                 break;
             default:
-                // The other commands arrive with their own tasks (see HostCommands.IsAvailable).
-                Log.Debug("Host command {Command} is not available yet", command);
-                break;
+                throw new ArgumentOutOfRangeException(nameof(command), command, null);
         }
     }
 
@@ -1046,7 +1042,7 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (CannotChangeReason(notes) is { } reason) {
+        if ((CannotChangeReason(notes) ?? NoteActionRunner.UnterminatedReason(note.Note)) is { } reason) {
             _announcer.Announce(reason);
             return;
         }
@@ -1112,7 +1108,7 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (CannotChangeReason(notes) is { } reason) {
+        if ((CannotChangeReason(notes) ?? NoteActionRunner.UnterminatedReason(note.Note)) is { } reason) {
             _announcer.Announce(reason);
             return;
         }
@@ -1348,6 +1344,9 @@ public partial class MainWindow: Form {
             case LinkKind.Markdown:
                 OpenFile(target.Target);
                 break;
+            case LinkKind.Program:
+                OfferToShowProgram(target.Target);
+                break;
             case LinkKind.InPage:
                 // The page scrolls to its own anchors.
                 break;
@@ -1360,9 +1359,41 @@ public partial class MainWindow: Form {
         }
     }
 
-    private void ShellOpen(string target) {
+    /// <summary>
+    /// A link to a program or a script: it is never run from a link, whatever the link text says.
+    /// Yes shows it selected in File Explorer, where the user can decide.
+    /// </summary>
+    private void OfferToShowProgram(string path) {
+        var confirmed = DialogHelper.Confirm(
+            _("This link leads to a program or a script, which PlanCake does not run:\n\n{0}\n\nShow it in File Explorer?", path),
+            _("Open link"),
+            MessageBoxIcon.Warning
+        );
+
+        if (confirmed) {
+            StartProcess(new ProcessStartInfo(ExplorerPath) {
+                Arguments = $"/select,\"{path}\"",
+                UseShellExecute = false,
+            }, path);
+        }
+
+        ReturnFocus();
+    }
+
+    private static string ExplorerPath =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
+
+    /// <summary>
+    /// Opens <paramref name="target"/> with the system's default verb: a web link, a folder, a
+    /// document. Never for a program or a script (<see cref="LinkResolver.IsRunnable"/>), which
+    /// the default verb runs.
+    /// </summary>
+    private void ShellOpen(string target) =>
+        StartProcess(new ProcessStartInfo(target) { UseShellExecute = true }, target);
+
+    private void StartProcess(ProcessStartInfo startInfo, string target) {
         try {
-            Process.Start(new ProcessStartInfo(target) { UseShellExecute = true })?.Dispose();
+            Process.Start(startInfo)?.Dispose();
         } catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or FileNotFoundException) {
             Log.Error(ex, "Unable to open {Target}", target);
             _announcer.Announce(_("Unable to open {0}", target));
@@ -1515,6 +1546,15 @@ public partial class MainWindow: Form {
         } catch (OperationCanceledException) {
             // The window closed.
             return;
+        } catch (Exception ex) {
+            // Nothing may leave an async void: it would end up in the unhandled-exception handler.
+            Log.Error(ex, "Download of {Url} failed", url);
+
+            if (!IsDisposed && !Disposing) {
+                _announcer.Announce(_("The download failed: {0}", ex.Message));
+            }
+
+            return;
         } finally {
             _download = null;
         }
@@ -1543,7 +1583,11 @@ public partial class MainWindow: Form {
         }
     }
 
-    /// <summary>File → Open in editor: the open file in the program Windows opens Markdown files with.</summary>
+    /// <summary>
+    /// File → Open in editor: a Markdown file in the program Windows opens Markdown files with;
+    /// any other file (opened through All files) with its "edit" verb, else in Notepad, never
+    /// with its default verb, which for a script or a program runs it.
+    /// </summary>
     private void OpenInEditor() {
         if (_file is null) {
             _announcer.Announce(_("No file is open."));
@@ -1555,7 +1599,24 @@ public partial class MainWindow: Form {
             return;
         }
 
-        ShellOpen(_file.Path);
+        var path = _file.Path;
+
+        if (LinkResolver.IsMarkdownPath(path)) {
+            ShellOpen(path);
+            return;
+        }
+
+        if (!LinkResolver.IsRunnable(path)) {
+            try {
+                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true, Verb = "edit" })?.Dispose();
+                return;
+            } catch (Win32Exception ex) {
+                Log.Information(ex, "{Path} has no edit verb; opening it in Notepad", path);
+            }
+        }
+
+        var notepad = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe");
+        StartProcess(new ProcessStartInfo(notepad) { ArgumentList = { path }, UseShellExecute = false }, path);
     }
 
     /// <summary>
@@ -1665,7 +1726,12 @@ public partial class MainWindow: Form {
             previous.Dispose();
         }
 
-        _watcher = new FileWatcher(path, new UiDebounceTimer());
+        // Decoded as the window decodes it: a legacy file depends on the document language.
+        _watcher = new FileWatcher(
+            path,
+            new UiDebounceTimer(),
+            file => FileWatcher.ReadText(file, new MarkdownFileOptions(DocumentLanguage: _documentLanguage))
+        );
         _watcher.FileChanged += OnWatchedFileChanged;
         _watcher.Start(this);
     }
@@ -1797,7 +1863,10 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (CannotChangeReason(notes) is { } reason) {
+        var unterminated = render.Notes.FirstOrDefault(note => note.Note.Unterminated)?.Note;
+
+        if ((CannotChangeReason(notes) ?? (unterminated is null ? null : NoteActionRunner.UnterminatedReason(unterminated)))
+            is { } reason) {
             _announcer.Announce(reason);
             return;
         }
@@ -1858,13 +1927,7 @@ public partial class MainWindow: Form {
     /// <see cref="Config"/> each time they are needed; the rest is applied here.
     /// </summary>
     private void ShowSettings() {
-        var before = new AppliedSettings(
-            Config.General.Language,
-            Config.General.DefaultDocumentLanguage,
-            Config.General.ShowNotesList,
-            Config.Notes.ToMarkers(),
-            Config.Advanced.ConvertToUtf8
-        );
+        var before = CurrentSettings();
         var saveFailed = false;
 
         // Every window is a process of its own with its own copy of the settings: read the file
@@ -1884,6 +1947,15 @@ public partial class MainWindow: Form {
             ShowError(_("The settings could not be saved. They apply until PlanCake is closed."));
         }
     }
+
+    /// <summary>What <see cref="ApplySettings"/> compares with to find what changed.</summary>
+    private static AppliedSettings CurrentSettings() => new(
+        Config.General.Language,
+        Config.General.DefaultDocumentLanguage,
+        Config.General.ShowNotesList,
+        Config.Notes.ToMarkers(),
+        Config.Advanced.ConvertToUtf8
+    );
 
     /// <summary>Applies what Settings changed, compared with <paramref name="before"/>.</summary>
     private void ApplySettings(AppliedSettings before) {
@@ -1942,20 +2014,24 @@ public partial class MainWindow: Form {
 
     /// <summary>
     /// View → Interface language: saves the choice and switches the menus, the window and the
-    /// page chrome to it at once. The document's own language does not change.
+    /// page chrome to it at once. The document's own language does not change. Like Settings,
+    /// it reads the file again first (<see cref="Config.SaveLanguage"/>), so what another window
+    /// saved since is kept, and applies here too.
     /// </summary>
     private void SetInterfaceLanguage(string code) {
         if (String.Equals(Config.General.Language, code, StringComparison.OrdinalIgnoreCase)) {
             return;
         }
 
-        Config.General.Language = code;
-        Config.Save();
-        Utils.Localization.SetLanguage(code);
-        Log.Information("Interface language set to {Language}", code);
+        var before = CurrentSettings();
 
-        // Out of the menu command first: a switch of direction recreates the window's handle.
-        BeginInvoke(ApplyLocalization);
+        if (!Config.SaveLanguage(code)) {
+            ShowError(_("The settings could not be saved. They apply until PlanCake is closed."));
+        }
+
+        // Switches the language (out of the menu command: a switch of direction recreates the
+        // window's handle) and applies whatever else changed in the file.
+        ApplySettings(before);
     }
 
     /// <summary>

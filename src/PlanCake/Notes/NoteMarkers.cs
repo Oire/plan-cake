@@ -29,7 +29,7 @@ internal sealed record NoteMarkers(string Opening, string Closing = "") {
     /// anything else into a message in the interface language.
     /// </summary>
     public NoteMarkersError Validate() {
-        if (string.IsNullOrEmpty(Opening)) {
+        if (String.IsNullOrEmpty(Opening)) {
             return NoteMarkersError.EmptyOpening;
         }
 
@@ -41,7 +41,7 @@ internal sealed record NoteMarkers(string Opening, string Closing = "") {
             return NoteMarkersError.SurroundingWhitespace;
         }
 
-        return string.Equals(Opening, Closing, StringComparison.Ordinal)
+        return String.Equals(Opening, Closing, StringComparison.Ordinal)
             ? NoteMarkersError.ClosingSameAsOpening
             : NoteMarkersError.None;
     }
@@ -49,5 +49,5 @@ internal sealed record NoteMarkers(string Opening, string Closing = "") {
     private static bool HasLineBreak(string marker) => marker.AsSpan().IndexOfAny('\r', '\n') >= 0;
 
     private static bool HasSurroundingWhitespace(string marker) =>
-        marker.Length > 0 && (char.IsWhiteSpace(marker[0]) || char.IsWhiteSpace(marker[^1]));
+        marker.Length > 0 && (Char.IsWhiteSpace(marker[0]) || Char.IsWhiteSpace(marker[^1]));
 }

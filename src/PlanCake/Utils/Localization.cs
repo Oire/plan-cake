@@ -6,7 +6,7 @@ namespace Oire.PlanCake.Utils;
 
 /// <summary>
 /// gettext front end. Import it as <c>using static Oire.PlanCake.Utils.Localization;</c>
-/// and wrap every user-visible literal in <see cref="_(string)"/>.
+/// and wrap every user-visible literal in <see cref="_(String)"/>.
 /// </summary>
 /// <remarks>
 /// <para>

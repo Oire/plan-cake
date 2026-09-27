@@ -350,7 +350,7 @@ internal static class MarkdownRenderer {
         <meta charset="utf-8">
         <meta http-equiv="Content-Security-Policy" content="{ExportContentSecurityPolicy}">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{HtmlEncode(title ?? string.Empty)}</title>
+        <title>{HtmlEncode(title ?? String.Empty)}</title>
         <style>
         {ExportStyle}
         </style>
@@ -393,7 +393,7 @@ internal static class MarkdownRenderer {
     /// text longer than <see cref="ExcerptLength"/> is cut to fit with an ellipsis.
     /// </summary>
     internal static string Excerpt(string text) {
-        var line = string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        var line = String.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
         if (line.Length <= ExcerptLength) {
             return line;
@@ -402,11 +402,11 @@ internal static class MarkdownRenderer {
         var cut = ExcerptLength - 1;
 
         // Never split a surrogate pair.
-        if (char.IsHighSurrogate(line[cut - 1])) {
+        if (Char.IsHighSurrogate(line[cut - 1])) {
             cut--;
         }
 
-        return string.Concat(line.AsSpan(0, cut).TrimEnd(), "…");
+        return String.Concat(line.AsSpan(0, cut).TrimEnd(), "…");
     }
 
     /// <summary>
@@ -453,7 +453,7 @@ internal static class MarkdownRenderer {
                     // carries the range; the <p> of a loose list gets the same one. Nested lists
                     // after the paragraph get their own.
                     SetDirection(lead);
-                    Add(BlockKind.ListItem, lead, lead, PlainText(lead), item);
+                    Add(BlockKind.ListItem, lead, PlainText(lead), item);
 
                     for (var i = 1; i < item.Count; i++) {
                         Visit(item[i]);
@@ -467,7 +467,7 @@ internal static class MarkdownRenderer {
                         SetDirection(cell);
                     }
 
-                    Add(BlockKind.TableRow, row, row, RowText(row));
+                    Add(BlockKind.TableRow, row, RowText(row));
                     break;
                 case ContainerBlock container:
                     Walk(container);
@@ -475,33 +475,33 @@ internal static class MarkdownRenderer {
                 case HeadingBlock heading:
                     var headingText = PlainText(heading);
                     Title ??= headingText;
-                    Add(BlockKind.Heading, heading, heading, headingText);
+                    Add(BlockKind.Heading, heading, headingText);
                     break;
                 case CodeBlock code:
-                    Add(BlockKind.Code, code, code, code.Lines.ToString().TrimEnd('\n'));
+                    Add(BlockKind.Code, code, code.Lines.ToString().TrimEnd('\n'));
                     break;
                 case ParagraphBlock paragraph:
-                    Add(BlockKind.Paragraph, paragraph, paragraph, PlainText(paragraph));
+                    Add(BlockKind.Paragraph, paragraph, PlainText(paragraph));
                     break;
             }
         }
 
-        private void Add(BlockKind kind, Block range, Block target, string text, params Block[] alsoStamp) {
-            if (range.Span.IsEmpty) {
+        private void Add(BlockKind kind, Block block, string text, params Block[] alsoStamp) {
+            if (block.Span.IsEmpty) {
                 return;
             }
 
-            var startLine = _parse.ToOriginalLine(StrippedLineOf(range.Span.Start));
-            var endLine = _parse.ToOriginalLine(StrippedLineOf(Math.Max(range.Span.Start, range.Span.End)));
+            var startLine = _parse.ToOriginalLine(StrippedLineOf(block.Span.Start));
+            var endLine = _parse.ToOriginalLine(StrippedLineOf(Math.Max(block.Span.Start, block.Span.End)));
             var info = new BlockInfo(kind, startLine, endLine, text, Excerpt(text));
 
-            target.GetAttributes().AddProperty("data-lines", info.Lines);
+            block.GetAttributes().AddProperty("data-lines", info.Lines);
 
             foreach (var other in alsoStamp) {
                 other.GetAttributes().AddProperty("data-lines", info.Lines);
             }
 
-            Blocks.Add(new Annotatable(info, target));
+            Blocks.Add(new Annotatable(info, block));
         }
 
         private static void SetDirection(Block block) => block.GetAttributes().AddPropertyIfNotExist("dir", "auto");
@@ -528,10 +528,10 @@ internal static class MarkdownRenderer {
                     }
                 }
 
-                cells.Add(string.Join(' ', parts));
+                cells.Add(String.Join(' ', parts));
             }
 
-            return string.Join(" | ", cells);
+            return String.Join(" | ", cells);
         }
 
         /// <summary>The 1-based stripped line holding the character at <paramref name="offset"/>.</summary>

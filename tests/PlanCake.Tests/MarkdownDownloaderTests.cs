@@ -46,6 +46,42 @@ public sealed class MarkdownDownloaderTests: IDisposable {
         }
     }
 
+    /// <summary>Answers only once the request is canceled: a server that never sends anything.</summary>
+    private sealed class HangingHandler: HttpMessageHandler {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+            await Task.Delay(System.Threading.Timeout.Infinite, cancellationToken);
+
+            throw new InvalidOperationException("Not reached.");
+        }
+    }
+
+    /// <summary>A body whose stream fails when read, as a dropped connection or a corrupt gzip body does.</summary>
+    private sealed class FailingContent(Exception failure): HttpContent {
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context) => throw failure;
+
+        protected override Task<Stream> CreateContentReadStreamAsync() => Task.FromResult<Stream>(new FailingStream(failure));
+
+        protected override bool TryComputeLength(out long length) {
+            length = 0;
+            return false;
+        }
+    }
+
+    private sealed class FailingStream(Exception failure): Stream {
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public override void Flush() { }
+        public override int Read(byte[] buffer, int offset, int count) => throw failure;
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) =>
+            ValueTask.FromException<int>(failure);
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
+
     private static HttpResponseMessage Text(string body, string mediaType = "text/plain") =>
         new(HttpStatusCode.OK) { Content = new StringContent(body, new UTF8Encoding(false), mediaType) };
 
@@ -192,6 +228,70 @@ public sealed class MarkdownDownloaderTests: IDisposable {
     }
 
     [Fact]
+    public async Task Download_ConnectionDroppedDuringTheBody_IsANetworkFailure() {
+        var (downloader, _) = Create(_ => new HttpResponseMessage(HttpStatusCode.OK) {
+            Content = new FailingContent(new IOException("The response ended prematurely.")),
+        });
+        using var d = downloader;
+
+        var result = await downloader.DownloadAsync("https://example.com/plan.md");
+
+        result.Failure.Should().Be(DownloadFailure.Network);
+        result.Error.Should().Contain("ended prematurely");
+        Directory.Exists(_downloads).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Download_CorruptCompressedBody_IsANetworkFailure() {
+        var (downloader, _) = Create(_ => new HttpResponseMessage(HttpStatusCode.OK) {
+            Content = new FailingContent(new InvalidDataException("The archive entry was compressed using an unsupported compression method.")),
+        });
+        using var d = downloader;
+
+        var result = await downloader.DownloadAsync("https://example.com/plan.md");
+
+        result.Failure.Should().Be(DownloadFailure.Network);
+    }
+
+    [Fact]
+    public async Task Download_SlowerThanTheTimeout_IsStopped() {
+        using var downloader = new MarkdownDownloader(new HangingHandler(), () => _downloads, TimeSpan.FromMilliseconds(50));
+
+        var result = await downloader.DownloadAsync("https://example.com/plan.md");
+
+        result.Failure.Should().Be(DownloadFailure.Timeout);
+        Directory.Exists(_downloads).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Download_ToAFolderThatCannotBeCreated_IsASaveFailure() {
+        Directory.CreateDirectory(_downloads);
+        var blocker = Path.Combine(_downloads, "a file");
+        File.WriteAllText(blocker, "in the way");
+        using var downloader = new MarkdownDownloader(new FakeHandler(_ => Text(Plan)), () => Path.Combine(blocker, "Downloads"));
+
+        var result = await downloader.DownloadAsync("https://example.com/plan.md");
+
+        result.Failure.Should().Be(DownloadFailure.Save);
+        result.FilePath.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Download_OfAProgramLink_IsSavedAsMarkdownAndMarkedAsFromTheInternet() {
+        var (downloader, _) = Create(_ => Text("@echo off\n"));
+        using var d = downloader;
+
+        var result = await downloader.DownloadAsync("https://example.com/tools/setup.bat");
+
+        result.FilePath.Should().Be(Path.Combine(_downloads, "setup.bat.md"));
+        var zone = File.ReadAllText(result.FilePath + ":Zone.Identifier");
+        zone.Should().Be(
+            "[ZoneTransfer]\r\nZoneId=3\r\nReferrerUrl=https://example.com/tools/setup.bat\r\n"
+            + "HostUrl=https://example.com/tools/setup.bat\r\n"
+        );
+    }
+
+    [Fact]
     public async Task Download_InvalidLink_IsRefusedWithoutARequest() {
         var (downloader, handler) = Create(_ => Text(Plan));
         using var d = downloader;
@@ -245,7 +345,12 @@ public sealed class MarkdownDownloaderTests: IDisposable {
     [InlineData("https://example.com/plans/next.markdown?x=1#top", "next.markdown")]
     [InlineData("https://example.com/plans/my%20plan.md", "my plan.md")]
     [InlineData("https://example.com/plans/README", "README.md")]
-    [InlineData("https://example.com/plans/notes.txt", "notes.txt")]
+    [InlineData("https://example.com/plans/notes.txt", "notes.txt.md")]
+    [InlineData("https://example.com/tool.bat", "tool.bat.md")]
+    [InlineData("https://example.com/x.hta", "x.hta.md")]
+    [InlineData("https://example.com/run.js", "run.js.md")]
+    [InlineData("https://example.com/link.lnk", "link.lnk.md")]
+    [InlineData("https://example.com/PLAN.MD", "PLAN.MD")]
     [InlineData("https://example.com/plans/", "plans.md")]
     [InlineData("https://example.com/", "download.md")]
     [InlineData("https://example.com/a%3Ab%3F.md", "a_b_.md")]

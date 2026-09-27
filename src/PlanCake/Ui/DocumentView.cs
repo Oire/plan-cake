@@ -83,7 +83,7 @@ internal sealed class DocumentView: UserControl {
     /// browser's own context menus, accelerator keys, status bar and (in Release) dev tools off.
     /// </summary>
     public async Task InitializeAsync() {
-        var userDataFolder = Path.Combine(App.DataFolder, "WebView2");
+        var userDataFolder = App.WebView2DataFolder;
         var environment = await CoreWebView2Environment.CreateAsync(
             browserExecutableFolder: null,
             userDataFolder: userDataFolder
@@ -93,7 +93,7 @@ internal sealed class DocumentView: UserControl {
         var core = _webView.CoreWebView2;
         core.SetVirtualHostNameToFolderMapping(
             HostName,
-            Path.Combine(AppContext.BaseDirectory, "web"),
+            App.WebFolder,
             CoreWebView2HostResourceAccessKind.DenyCors
         );
 
@@ -169,7 +169,7 @@ internal sealed class DocumentView: UserControl {
     /// </param>
     /// <param name="clientSize">The size of the view.</param>
     internal static Point MenuAnchor(RectangleF cssRect, double scale, Size clientSize) {
-        if (!double.IsFinite(scale) || scale <= 0) {
+        if (!Double.IsFinite(scale) || scale <= 0) {
             scale = 1;
         }
 
@@ -263,7 +263,7 @@ internal sealed class DocumentView: UserControl {
     // to the host and scrolls to in-page anchors itself, so any navigation that still starts
     // comes from something the plan's raw HTML did.
     private void OnNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e) {
-        if (_allowedNavigation is not null && string.Equals(e.Uri, _allowedNavigation, StringComparison.Ordinal)) {
+        if (_allowedNavigation is not null && String.Equals(e.Uri, _allowedNavigation, StringComparison.Ordinal)) {
             _allowedNavigation = null;
             return;
         }

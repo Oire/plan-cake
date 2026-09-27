@@ -73,6 +73,7 @@ internal sealed class MarkdownDownloader: IDisposable {
 
     private readonly HttpClient _client;
     private readonly Func<string> _downloadsFolder;
+    private readonly TimeSpan _timeout;
 
     /// <summary>A downloader that goes to the network and saves into the user's Downloads folder.</summary>
     public MarkdownDownloader()
@@ -80,7 +81,8 @@ internal sealed class MarkdownDownloader: IDisposable {
 
     /// <param name="handler">Sends the requests; tests pass one that never touches the network.</param>
     /// <param name="downloadsFolder">The folder the file is saved into, asked for at each download.</param>
-    internal MarkdownDownloader(HttpMessageHandler handler, Func<string> downloadsFolder) {
+    /// <param name="timeout">How long the whole download may take; <see langword="null"/> for <see cref="Timeout"/>.</param>
+    internal MarkdownDownloader(HttpMessageHandler handler, Func<string> downloadsFolder, TimeSpan? timeout = null) {
         ArgumentNullException.ThrowIfNull(handler);
         ArgumentNullException.ThrowIfNull(downloadsFolder);
 
@@ -90,12 +92,13 @@ internal sealed class MarkdownDownloader: IDisposable {
         var version = typeof(MarkdownDownloader).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
         _client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(App.Name, version));
         _downloadsFolder = downloadsFolder;
+        _timeout = timeout ?? Timeout;
     }
 
     /// <summary>
     /// Downloads <paramref name="url"/> and saves it in the Downloads folder under the last
-    /// segment of the link (<c>.md</c> added when it has no extension; <c> (2)</c>, <c> (3)</c>…
-    /// when the name is taken, as browsers do).
+    /// segment of the link, always as Markdown (see <see cref="FileNameFor"/>; <c> (2)</c>,
+    /// <c> (3)</c>… when the name is taken, as browsers do), marked as coming from the internet.
     /// </summary>
     /// <param name="cancellationToken">Cancels the download; an <see cref="OperationCanceledException"/> follows.</param>
     /// <returns>Where the file was saved, or why it was not.</returns>
@@ -111,7 +114,7 @@ internal sealed class MarkdownDownloader: IDisposable {
         Log.Information("Downloading {Url} from {Uri}", trimmed, uri);
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(Timeout);
+        timeout.CancelAfter(_timeout);
         byte[] content;
 
         try {
@@ -154,9 +157,11 @@ internal sealed class MarkdownDownloader: IDisposable {
 
             return DownloadResult.Failed(
                 DownloadFailure.Timeout,
-                _("The download took longer than {0} seconds and was stopped.", (int)Timeout.TotalSeconds)
+                _("The download took longer than {0} seconds and was stopped.", (int)_timeout.TotalSeconds)
             );
-        } catch (HttpRequestException ex) {
+        } catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidDataException) {
+            // A connection that drops while the body comes in is an IOException (HttpIOException),
+            // a corrupt compressed body an InvalidDataException.
             Log.Warning(ex, "Download of {Uri} failed", uri);
 
             return DownloadResult.Failed(DownloadFailure.Network, _("The download failed: {0}", ex.Message));
@@ -173,6 +178,7 @@ internal sealed class MarkdownDownloader: IDisposable {
 
         try {
             var path = SaveUnique(folder, FileNameFor(uri), content);
+            MarkFromInternet(path, uri, new Uri(trimmed));
             Log.Information("Downloaded {Uri} to {Path} ({Length} bytes)", uri, path, content.Length);
 
             return DownloadResult.Saved(path);
@@ -210,7 +216,9 @@ internal sealed class MarkdownDownloader: IDisposable {
     /// <summary>
     /// The file name a download of <paramref name="uri"/> is saved under: the link's last path
     /// segment, unescaped, with characters Windows does not allow in a name replaced, and
-    /// <c>.md</c> added when it has no extension.
+    /// <c>.md</c> added unless it already ends in <c>.md</c> or <c>.markdown</c>. A link to
+    /// <c>tool.bat</c> is saved as <c>tool.bat.md</c>, so that no download is ever a program or a
+    /// script that opening it, or following a link to it, would run.
     /// </summary>
     internal static string FileNameFor(Uri uri) {
         ArgumentNullException.ThrowIfNull(uri);
@@ -225,7 +233,7 @@ internal sealed class MarkdownDownloader: IDisposable {
             name = FallbackName;
         }
 
-        return Path.HasExtension(name) ? name : name + ".md";
+        return LinkResolver.IsMarkdownPath(name) ? name : name + ".md";
     }
 
     /// <summary>
@@ -256,6 +264,32 @@ internal sealed class MarkdownDownloader: IDisposable {
                 // Taken between the check and the write: try the next number.
             }
         }
+    }
+
+    /// <summary>
+    /// Marks the file as downloaded from the internet, as browsers do: a <c>Zone.Identifier</c>
+    /// stream with the Internet zone (3) and where it came from, which Windows and other programs
+    /// read before they trust the file. A volume without alternate data streams (FAT32, some
+    /// network shares) cannot hold the mark; that is logged, and the download stays.
+    /// </summary>
+    internal static void MarkFromInternet(string path, Uri host, Uri referrer) {
+        ArgumentNullException.ThrowIfNull(path);
+        ArgumentNullException.ThrowIfNull(host);
+        ArgumentNullException.ThrowIfNull(referrer);
+
+        try {
+            File.WriteAllText(path + ":Zone.Identifier", ZoneIdentifier(host, referrer), Encoding.ASCII);
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException) {
+            Log.Warning(ex, "Unable to mark {Path} as downloaded from the internet", path);
+        }
+    }
+
+    /// <summary>The content of the <c>Zone.Identifier</c> stream for a file from <paramref name="host"/>.</summary>
+    internal static string ZoneIdentifier(Uri host, Uri referrer) {
+        ArgumentNullException.ThrowIfNull(host);
+        ArgumentNullException.ThrowIfNull(referrer);
+
+        return $"[ZoneTransfer]\r\nZoneId=3\r\nReferrerUrl={referrer.AbsoluteUri}\r\nHostUrl={host.AbsoluteUri}\r\n";
     }
 
     /// <summary>

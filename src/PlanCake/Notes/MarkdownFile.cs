@@ -1,4 +1,5 @@
 using System.Text;
+using Serilog;
 
 namespace Oire.PlanCake.Notes;
 
@@ -35,9 +36,11 @@ internal sealed record MarkdownFileOptions(
 /// A file is decoded from its BOM (UTF-8, UTF-16 LE or BE) or else as strict UTF-8. A file that
 /// is not valid in that encoding is decoded with the legacy encoding <see cref="LegacyEncoding"/>
 /// finds and is then either read-only, so PlanCake cannot damage it, or, with
-/// <see cref="MarkdownFileOptions.ConvertToUtf8"/>, rewritten once as UTF-8 without BOM. When no
-/// legacy encoding decodes it without loss, its encoding is not recognized: the text shown has
-/// replacement characters, and the file is never written, whatever the options say.
+/// <see cref="MarkdownFileOptions.ConvertToUtf8"/>, rewritten once as UTF-8 without BOM (and
+/// read-only after all when that write fails). When no legacy encoding decodes it without loss,
+/// its encoding is not recognized: the text shown has replacement characters, and the file is
+/// never written, whatever the options say. The same goes, without trying any legacy encoding,
+/// for a file whose BOM states its encoding and for UTF-8 with a few damaged bytes.
 /// </remarks>
 internal sealed class MarkdownFile {
     private static readonly byte[] _utf8Bom = [0xEF, 0xBB, 0xBF];
@@ -64,7 +67,7 @@ internal sealed class MarkdownFile {
     public string Path { get; }
 
     /// <summary>The file's text as last read or written.</summary>
-    public string Text { get; private set; } = string.Empty;
+    public string Text { get; private set; } = String.Empty;
 
     /// <summary>The encoding the text is written back with (without its BOM).</summary>
     public Encoding Encoding { get; private set; } = new UTF8Encoding(false);
@@ -97,6 +100,19 @@ internal sealed class MarkdownFile {
     /// </summary>
     public Encoding? ConvertedFrom { get; private set; }
 
+    /// <summary>
+    /// True when the file was to be converted to UTF-8 when it was last read, but could not be
+    /// written: it is open read-only in its legacy encoding, and the caller says so.
+    /// </summary>
+    public bool ConversionFailed { get; private set; }
+
+    /// <summary>
+    /// For a file in a Unicode encoding with invalid bytes (<see cref="IsUnrecognized"/>: its BOM
+    /// states the encoding, or it is UTF-8 with a few damaged bytes), the 1-based line of the
+    /// first invalid byte, for the caller to name; <see langword="null"/> otherwise.
+    /// </summary>
+    public int? InvalidByteLine { get; private set; }
+
     /// <summary>Reads the file at <paramref name="path"/>.</summary>
     /// <exception cref="IOException">The file cannot be read, even after the retries.</exception>
     public static MarkdownFile Open(string path, MarkdownFileOptions? options = null) {
@@ -124,7 +140,9 @@ internal sealed class MarkdownFile {
         LineEnding = DominantLineEnding(decoded.Text);
         IsReadOnly = decoded.IsFallback;
         IsUnrecognized = decoded.IsLossy;
+        InvalidByteLine = decoded.InvalidByteLine;
         ConvertedFrom = null;
+        ConversionFailed = false;
 
         // Never a lossy decode: the replacement characters would be written over the original bytes.
         if (decoded.IsFallback && !decoded.IsLossy && _options.ConvertToUtf8) {
@@ -132,7 +150,19 @@ internal sealed class MarkdownFile {
             Encoding = new UTF8Encoding(false);
             HasBom = false;
             IsReadOnly = false;
-            Write(Text);
+
+            try {
+                Write(Text);
+            } catch (IOException ex) {
+                // A read-only file or folder, a file locked past the retries: the legacy decode
+                // stands, and the file is shown read-only as it is on disk.
+                Log.Warning(ex, "Unable to convert {Path} from {Encoding} to UTF-8; it is open read-only", Path, decoded.Encoding.WebName);
+                Encoding = decoded.Encoding;
+                HasBom = decoded.HasBom;
+                IsReadOnly = true;
+                ConvertedFrom = null;
+                ConversionFailed = true;
+            }
         }
 
         return Text;
@@ -146,12 +176,7 @@ internal sealed class MarkdownFile {
     /// <exception cref="IOException">The file cannot be written, even after the retries.</exception>
     public void Write(string text) {
         ArgumentNullException.ThrowIfNull(text);
-
-        if (IsReadOnly || IsUnrecognized) {
-            throw new ReadOnlyFileException(
-                $"{Path} is not valid {Encoding.WebName} and is open read-only; it is never written."
-            );
-        }
+        EnsureWritable();
 
         var preamble = HasBom ? Encoding.GetPreamble() : [];
         var body = Encoding.GetBytes(text);
@@ -168,17 +193,32 @@ internal sealed class MarkdownFile {
         Text = text;
     }
 
+    /// <summary>Throws when the file is never written (<see cref="IsReadOnly"/> or <see cref="IsUnrecognized"/>).</summary>
+    /// <exception cref="ReadOnlyFileException">The file is read-only.</exception>
+    public void EnsureWritable() {
+        if (IsReadOnly || IsUnrecognized) {
+            throw new ReadOnlyFileException(
+                $"{Path} is not valid {Encoding.WebName} and is open read-only; it is never written."
+            );
+        }
+    }
+
     /// <summary>The result of decoding a file's bytes.</summary>
     /// <param name="IsFallback">True when the bytes were not valid in their Unicode encoding and were decoded with a legacy one.</param>
     /// <param name="IsLossy">
     /// True when no encoding decoded them without loss: the text holds replacement characters.
+    /// </param>
+    /// <param name="InvalidByteLine">
+    /// For a file in a Unicode encoding (stated by its BOM, or damaged UTF-8) with invalid bytes,
+    /// the 1-based line of the first one; <see langword="null"/> otherwise.
     /// </param>
     internal readonly record struct DecodedText(
         string Text,
         Encoding Encoding,
         bool HasBom,
         bool IsFallback,
-        bool IsLossy = false
+        bool IsLossy = false,
+        int? InvalidByteLine = null
     );
 
     internal static DecodedText Decode(byte[] bytes, Encoding ansiEncoding, string? documentLanguage = null) {
@@ -194,17 +234,40 @@ internal sealed class MarkdownFile {
 
             return new DecodedText(text, encoding, bomLength > 0, false);
         } catch (DecoderFallbackException) {
+            // Shown with replacement characters so the user sees something, never written.
+            if (bomLength > 0) {
+                // The BOM states the encoding outright: a legacy code page would read the BOM
+                // itself as letters (and UTF-16 as a NUL after every letter).
+                var damaged = (Encoding)encoding.Clone();
+                damaged.DecoderFallback = new DecoderReplacementFallback("�");
+                var damagedText = damaged.GetString(bytes, bomLength, bytes.Length - bomLength);
+
+                return new DecodedText(damagedText, damaged, true, true, IsLossy: true, InvalidByteLine: 1 + LineOf(damagedText));
+            }
+
+            var lossy = new UTF8Encoding(false, false);
+
+            if (LegacyEncoding.FindDamagedUtf8(bytes) is { } offset) {
+                var line = 1 + bytes.AsSpan(0, offset).Count((byte)'\n');
+
+                return new DecodedText(lossy.GetString(bytes), lossy, false, true, IsLossy: true, InvalidByteLine: line);
+            }
+
             foreach (var candidate in LegacyEncoding.Candidates(bytes, documentLanguage, ansiEncoding)) {
                 if (LegacyEncoding.TryDecodeCleanly(bytes, candidate) is { } legacyText) {
                     return new DecodedText(legacyText, candidate, false, true);
                 }
             }
 
-            // Shown with replacement characters so the user sees something, never written.
-            var lossy = new UTF8Encoding(false, false);
-
             return new DecodedText(lossy.GetString(bytes), lossy, false, true, IsLossy: true);
         }
+    }
+
+    /// <summary>The number of line breaks before the first replacement character of <paramref name="text"/>.</summary>
+    private static int LineOf(string text) {
+        var index = text.IndexOf('�', StringComparison.Ordinal);
+
+        return index < 0 ? 0 : text.AsSpan(0, index).Count('\n');
     }
 
     /// <summary>The most frequent line ending in <paramref name="text"/>; <c>\n</c> when it has none.</summary>

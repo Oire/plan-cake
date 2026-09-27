@@ -196,10 +196,12 @@ public class PositionRestorerTests {
 
     [Fact]
     public void FindNote_NoteAtTheTop_MatchesWithoutABlock() {
+        // The note with the block is nearer to the previous line: only matching on the missing
+        // block (both have none) picks the other one.
         var previous = NoteOn(0, 1, "Top note", null);
         var notes = new[] {
-            NoteOn(0, 1, "Top note", null),
-            NoteOn(1, 5, "Top note", Block(BlockKind.Paragraph, 3, 3, "Text.")),
+            NoteOn(0, 3, "Top note", null),
+            NoteOn(1, 2, "Top note", Block(BlockKind.Paragraph, 1, 1, "Text.")),
         };
 
         PositionRestorer.FindNote(previous, notes).Should().BeSameAs(notes[0]);

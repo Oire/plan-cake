@@ -47,8 +47,8 @@ internal sealed record NoteChange(NoteOperation Operation, string Before, string
 
 /// <summary>
 /// Adds, edits and deletes notes in a Markdown file (and checks and unchecks its task-list
-/// items), never over a change the caller has not seen, and undoes and redoes those changes, per Task 5 and Technical details → "Note placement
-/// in the file" in the PlanCake plan.
+/// items), never over a change the caller has not seen, and undoes and redoes those changes,
+/// per Task 5 and Technical details → "Note placement in the file" in the PlanCake plan.
 /// </summary>
 /// <remarks>
 /// Every operation takes the text the caller last rendered and throws
@@ -91,7 +91,7 @@ internal sealed class NoteStore {
     public NoteTextError Validate(string text) {
         ArgumentNullException.ThrowIfNull(text);
 
-        if (string.IsNullOrWhiteSpace(text)) {
+        if (String.IsNullOrWhiteSpace(text)) {
             return NoteTextError.Empty;
         }
 
@@ -107,7 +107,7 @@ internal sealed class NoteStore {
 
         // Also catches a text ending in the start of the closing marker, which the marker PlanCake
         // appends would complete early.
-        var withClosing = string.Concat(text, Markers.Closing);
+        var withClosing = String.Concat(text, Markers.Closing);
 
         return withClosing.IndexOf(Markers.Closing, StringComparison.Ordinal) < text.Length
             ? NoteTextError.ContainsClosingMarker
@@ -130,32 +130,42 @@ internal sealed class NoteStore {
     }
 
     /// <summary>Replaces the text of <paramref name="note"/>, found in the rendered text.</summary>
+    /// <exception cref="UnterminatedNoteException">The note has no closing marker; nothing is written.</exception>
     public NoteChange Edit(string renderedText, Note note, string text) {
         ArgumentNullException.ThrowIfNull(note);
 
         var noteText = PrepareText(text);
         var current = ReadCurrent(renderedText);
         EnsureNoteIn(current, note);
+        EnsureTerminated(note);
         var after = ReplaceNote(current, note, noteText, Markers, File.LineEnding);
 
         return Apply(new NoteChange(NoteOperation.Edit, current, after, note.StartLine, 1));
     }
 
     /// <summary>Removes <paramref name="note"/>, found in the rendered text.</summary>
+    /// <exception cref="UnterminatedNoteException">The note has no closing marker; nothing is written.</exception>
     public NoteChange Delete(string renderedText, Note note) {
         ArgumentNullException.ThrowIfNull(note);
 
         var current = ReadCurrent(renderedText);
         EnsureNoteIn(current, note);
+        EnsureTerminated(note);
         var after = RemoveNote(current, note);
 
         return Apply(new NoteChange(NoteOperation.Delete, current, after, note.StartLine, 1));
     }
 
     /// <summary>Removes every note; nothing is written when there is none.</summary>
+    /// <exception cref="UnterminatedNoteException">A note has no closing marker; nothing is written.</exception>
     public NoteChange Clear(string renderedText) {
         var current = ReadCurrent(renderedText);
         var notes = NoteParser.Parse(current, Markers).Notes;
+
+        foreach (var note in notes) {
+            EnsureTerminated(note);
+        }
+
         var after = RemoveAll(current, notes);
 
         return Apply(new NoteChange(NoteOperation.Clear, current, after, null, notes.Count));
@@ -231,20 +241,22 @@ internal sealed class NoteStore {
 
         var current = File.Reload();
 
-        if (!string.Equals(current, renderedText, StringComparison.Ordinal)) {
+        if (!String.Equals(current, renderedText, StringComparison.Ordinal)) {
             throw new StaleFileException();
         }
 
-        EnsureWritable();
+        File.EnsureWritable();
 
         return current;
     }
 
-    private void EnsureWritable() {
-        if (File.IsReadOnly) {
-            throw new ReadOnlyFileException(
-                $"{File.Path} is not valid {File.Encoding.WebName} and is open read-only; it is never written."
-            );
+    /// <summary>
+    /// Refuses a note without a closing marker: it runs to the end of the file, so rewriting or
+    /// removing it would take the rest of the document with it.
+    /// </summary>
+    private static void EnsureTerminated(Note note) {
+        if (note.Unterminated) {
+            throw new UnterminatedNoteException(note.StartLine);
         }
     }
 
@@ -258,7 +270,7 @@ internal sealed class NoteStore {
     }
 
     private NoteChange Apply(NoteChange change) {
-        if (string.Equals(change.Before, change.After, StringComparison.Ordinal)) {
+        if (String.Equals(change.Before, change.After, StringComparison.Ordinal)) {
             return change;
         }
 
@@ -272,13 +284,13 @@ internal sealed class NoteStore {
     private void WriteReplacing(string expected, string replacement) {
         var current = File.Reload();
 
-        if (!string.Equals(current, expected, StringComparison.Ordinal)) {
+        if (!String.Equals(current, expected, StringComparison.Ordinal)) {
             ClearHistory();
 
             throw new StaleFileException();
         }
 
-        EnsureWritable();
+        File.EnsureWritable();
         File.Write(replacement);
     }
 
@@ -319,7 +331,7 @@ internal sealed class NoteStore {
         var prefix = block.Kind == BlockKind.ListItem
             ? ListItemPrefix(source, anchorLine)
             : source[anchorLine.Start..(anchorLine.Start + IndentationLength(source, anchorLine))];
-        var written = string.Join(lineEnding, FormatNote(text, markers, prefix, prefix));
+        var written = String.Join(lineEnding, FormatNote(text, markers, prefix, prefix));
 
         if (insertAt <= lines.Count) {
             return (source.Insert(lines[insertAt - 1].Start, written + lineEnding), insertAt);
@@ -336,10 +348,10 @@ internal sealed class NoteStore {
     internal static string ReplaceNote(string source, Note note, string text, NoteMarkers markers, string lineEnding) {
         var lineStart = LineStartOf(source, note.Start);
         var indentation = source[lineStart..SkipIndentation(source, lineStart, note.Start)];
-        var written = string.Join(lineEnding, FormatNote(text, markers, string.Empty, indentation));
+        var written = String.Join(lineEnding, FormatNote(text, markers, String.Empty, indentation));
         var end = EffectiveEnd(source, note);
 
-        return string.Concat(source.AsSpan(0, note.Start), written, source.AsSpan(end));
+        return String.Concat(source.AsSpan(0, note.Start), written, source.AsSpan(end));
     }
 
     /// <summary>
@@ -413,7 +425,7 @@ internal sealed class NoteStore {
         // An empty continuation line gets no prefix: the parser reads it back empty either way,
         // and the file gets no trailing whitespace.
         return lines
-            .Select((line, index) => (index == 0 ? firstPrefix : line.Length == 0 ? string.Empty : prefix) + line)
+            .Select((line, index) => (index == 0 ? firstPrefix : line.Length == 0 ? String.Empty : prefix) + line)
             .ToList();
     }
 
@@ -430,7 +442,7 @@ internal sealed class NoteStore {
 
         var contentStart = ListContentStart(source, i, line.ContentEnd) ?? i;
 
-        return string.Create(
+        return String.Create(
             contentStart - line.Start,
             (source, line.Start),
             static (span, state) => {
@@ -446,30 +458,7 @@ internal sealed class NoteStore {
     /// begins, or <see langword="null"/> when no list marker is there.
     /// </summary>
     private static int? ListContentStart(string source, int markerStart, int contentEnd) {
-        var i = markerStart;
-
-        if (i < contentEnd && source[i] is '-' or '*' or '+') {
-            i++;
-        } else {
-            while (i < contentEnd && i - markerStart < 9 && char.IsAsciiDigit(source[i])) {
-                i++;
-            }
-
-            if (i == markerStart || i >= contentEnd || source[i] is not ('.' or ')')) {
-                return null;
-            }
-
-            i++;
-        }
-
-        var spacesStart = i;
-
-        while (i < contentEnd && source[i] is ' ' or '\t') {
-            i++;
-        }
-
-        if (i == spacesStart && i < contentEnd) {
-            // "-foo" is not a list item.
+        if (!NoteParser.TryParseListMarker(source, markerStart, contentEnd, out var spacesStart, out var i)) {
             return null;
         }
 
@@ -496,7 +485,7 @@ internal sealed class NoteStore {
 
     private static bool IsBlankOrQuoteOnly(ReadOnlySpan<char> text) {
         foreach (var c in text) {
-            if (c != '>' && !char.IsWhiteSpace(c)) {
+            if (c != '>' && !Char.IsWhiteSpace(c)) {
                 return false;
             }
         }

@@ -59,8 +59,9 @@ German. Press F1 in PlanCake for the full user manual.
 
 - **Open a file** from the command line (`plancake plan.md`), with Ctrl+O, by dropping it on the
   window, from the clipboard (Ctrl+V after copying it in File Explorer, or a copied path), or from
-  a link (Ctrl+L; GitHub file links work as they are). Each file gets its own window, and a file
-  is never open in two windows at once.
+  a link (Ctrl+L; GitHub file links work as they are). A linked file is downloaded to your
+  Downloads folder and opened from there, so your notes go into that copy. Each file gets its own
+  window, and a file is never open in two windows at once.
 - **Add a note**: click a block, or move to it with Alt+Shift+Down Arrow and Alt+Shift+Up Arrow
   and press Enter. Type the note and press Enter. The note is in the file at once, shown after
   its block and in the notes list beside the document. Markdown in a note is shown formatted.
@@ -68,7 +69,7 @@ German. Press F1 in PlanCake for the full user manual.
   the notes list removes one; F9 and Shift+F9 go to the next and the previous note. Ctrl+Z and
   Ctrl+Y undo and redo everything PlanCake writes.
 - **Tick off tasks**: task-list checkboxes (`- [ ]`) are real checkboxes; checking one writes
-  `[x]` on that line of the file.
+  `[x]` on that line of the file, after a question you can turn off in Settings.
 - **Keep reading while the file changes**: when something else changes the file, PlanCake
   reloads it and keeps your place. It never writes a note over a change you have not seen.
 
@@ -145,17 +146,19 @@ If you change the markers in PlanCake's settings, change them there too.
 ## Building from source
 
 ```powershell
+# once: gettext's msgfmt, which compiles the translations
+winget install mlocati.GetText
+
+# before every build: .mo files are build output and are gitignored
+./src/PlanCake/locale/scripts/Compile-Translations.ps1 -Strict
 dotnet restore
 dotnet build
 dotnet test
 dotnet format            # --verify-no-changes is what CI runs
 ```
 
-Translations are compiled separately, since `.mo` files are build output and are gitignored:
-
-```powershell
-./src/PlanCake/locale/scripts/Compile-Translations.ps1
-```
+Skip the translations step and the app falls back to English, and the localization tests fail.
+CI runs the same steps in this order.
 
 The installer and the portable zip are built with [Inno Setup 6](https://jrsoftware.org/isinfo.php):
 

@@ -32,8 +32,7 @@ public static class App {
     /// The private key beside it is never committed.
     /// </summary>
     /// <remarks>
-    /// A value that is not a base64 32-byte key is refused by
-    /// <c>UpdateService.IsUsablePublicKey</c>, and every update check is then off (and logged as such).
+    /// <c>UpdateServiceTests</c> checks that it is base64 of 32 bytes.
     /// </remarks>
     public const string UpdatePublicKey = "3grlY7WRufCg+1vbmTzxPu8uSBDDo/BV887KX0pwDfM=";
 
@@ -76,4 +75,16 @@ public static class App {
     /// language; resolved against <see cref="AppContext.BaseDirectory"/> like <see cref="LocalesFolder"/>.
     /// </summary>
     public static readonly string HelpFolder = Path.Combine(AppContext.BaseDirectory, "help");
+
+    /// <summary>
+    /// Where the page the document view shows lives at run time (<c>index.html</c>, <c>app.js</c>,
+    /// …); resolved against <see cref="AppContext.BaseDirectory"/> like <see cref="LocalesFolder"/>.
+    /// </summary>
+    public static readonly string WebFolder = Path.Combine(AppContext.BaseDirectory, "web");
+
+    /// <summary>
+    /// The WebView2 user data folder (the browser's cache and state), under <see cref="DataFolder"/>
+    /// because the install folder is not writable.
+    /// </summary>
+    public static readonly string WebView2DataFolder = Path.Combine(DataFolder, "WebView2");
 }

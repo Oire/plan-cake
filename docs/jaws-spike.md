@@ -154,3 +154,21 @@ Delete all notes confirmation (and in every other one). Every yes-or-no question
 through `DialogHelper.Confirm`, a task dialog with Yes and No that allows cancel: Escape and the
 close button answer No; Yes stays the default button, and the dialog is mirrored in a
 right-to-left language.
+
+## Later findings (Task 12)
+
+### A hint is read only in the label
+
+A separate hint label under the Closing marker box, also given as the box's description, was
+read by JAWS in neither form. The hint is now in the box's own label ("Closing marker (leave
+empty for a single marker that runs to the end of the line):").
+
+## Later findings (Task 15a)
+
+### Keys for moving between blocks
+
+JAWS's `default.jkm` binds Alt+Down and Alt+Up to OpenListBox and CloseListBox, so they cannot be
+PlanCake's. Alt+Shift+Down and Alt+Shift+Up are bound to MouseDown and MouseUp, which pass the
+keys to the application unless the JAWS cursor is active. PlanCake uses those. Checked: the keys
+reach PlanCake, JAWS reads each block reached, JAWS stays out of forms mode, and Enter adds a
+note to that block.

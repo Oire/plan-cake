@@ -44,9 +44,12 @@ public class HelpLocatorTests {
         HelpLocator.FindManual(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")), _frenchCanada)
             .Should().BeNull();
 
-    [Fact]
-    public void TheEnglishManual_IsCopiedToTheOutput() =>
-        File.Exists(Path.Combine(App.HelpFolder, HelpLocator.FallbackLanguage, HelpLocator.ManualFileName))
+    public static TheoryData<string> SupportedLanguages => [.. LanguageList.SupportedCodes];
+
+    [Theory]
+    [MemberData(nameof(SupportedLanguages))]
+    public void EachManual_IsCopiedToTheOutput(string language) =>
+        File.Exists(Path.Combine(App.HelpFolder, language, HelpLocator.ManualFileName))
             .Should().BeTrue();
 
     [Fact]

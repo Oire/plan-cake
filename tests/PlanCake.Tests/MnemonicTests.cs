@@ -56,11 +56,11 @@ public class MnemonicTests: IDisposable {
 
     [Theory]
     [MemberData(nameof(Languages))]
-    public void Dialogs_HaveUniqueMnemonics(string language) {
+    public void Forms_HaveUniqueMnemonics(string language) {
         UseLanguage(language);
 
         Sta.Run(() => {
-            foreach (var dialog in Dialogs()) {
+            foreach (var dialog in Forms()) {
                 using (dialog) {
                     var duplicates = AllControls(dialog)
                         .Where(TakesMnemonic)
@@ -74,6 +74,24 @@ public class MnemonicTests: IDisposable {
                 }
             }
         });
+    }
+
+    [Fact]
+    public void Forms_CoverEveryFormOfTheApplication() {
+        var built = new List<Type>();
+
+        Sta.Run(() => {
+            foreach (var form in Forms()) {
+                using (form) {
+                    built.Add(form.GetType());
+                }
+            }
+        });
+
+        var forms = typeof(MainWindow).Assembly.GetTypes()
+            .Where(type => type.IsSubclassOf(typeof(Form)) && !type.IsAbstract);
+
+        built.Should().BeEquivalentTo(forms, "a new form must have its mnemonics checked in every catalog too");
     }
 
     private static void Nothing() { }
@@ -94,12 +112,14 @@ public class MnemonicTests: IDisposable {
             .Select(item => item.Text)
             .Concat(items.Where(item => item.Children is not null).SelectMany(item => ItemsWithoutMnemonic(item.Children!)));
 
-    /// <summary>Every dialog with designer texts that carry mnemonics.</summary>
-    private static List<Form> Dialogs() => [
+    /// <summary>Every form PlanCake shows; <see cref="Forms_CoverEveryFormOfTheApplication"/> keeps the list whole.</summary>
+    private static List<Form> Forms() => [
+        new MainWindow(),
         new NoteDialog(NoteDialogMode.Add, "Excerpt", String.Empty, _ => null, NoteEnterAction.Save),
         new OpenLinkDialog(),
         new SettingsDialog(),
         new AboutDialog(),
+        new ShortcutsDialog(ShortcutsDialog.BuildRows()),
     ];
 
     private static IEnumerable<Control> AllControls(Control parent) =>

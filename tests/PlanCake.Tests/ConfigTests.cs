@@ -13,10 +13,11 @@ namespace Oire.PlanCake.Tests;
 /// would read and overwrite the developer's real settings under <c>%APPDATA%</c>.
 /// </summary>
 /// <remarks>
-/// <c>Config</c> is static, so these tests must not run in parallel with each other. xUnit
-/// serializes tests within a single class by default, which is enough here; a second class
-/// touching <c>Config</c> would need a shared collection fixture.
+/// <c>Config</c> is static, so these tests run in <see cref="LocalizationCollection"/>, the
+/// collection for static app state, with every other class that changes <c>Config</c>
+/// (<c>CliRunnerTests</c>) or the interface language, one at a time.
 /// </remarks>
+[Collection(LocalizationCollection.Name)]
 public class ConfigTests: IDisposable {
     private readonly string _tempFolder;
 
@@ -150,13 +151,57 @@ public class ConfigTests: IDisposable {
     public void Load_OnAnUnreadableFile_FallsBackToTheDefaultsWithoutThrowing() {
         WriteFile("[General]\nLanguage = fr-FR\n");
 
+        // Values that differ from the defaults, so a Load that kept them would be caught.
+        Config.General.Language = "fr";
+        Config.General.ShowNotesList = false;
+        Config.Notes.OpeningMarker = "<<";
+        Config.Notes.ClosingMarker = ">>";
+        Config.Advanced.ConvertToUtf8 = true;
+
         // Hold the file open with no sharing: Load must survive an IO failure rather than
         // taking the whole startup path down with it.
         using var locked = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.None);
 
         Config.Load();
 
-        Config.General.Language.Should().Be(App.SystemLanguageName);
+        ShouldHaveTheDefaults();
+    }
+
+    [Fact]
+    public void Save_ReplacesTheFileWholeAndLeavesNoTemporaryFileBehind() {
+        Config.Load();
+        Config.General.Language = "de";
+
+        Config.Save().Should().BeTrue();
+
+        Directory.GetFiles(_tempFolder).Should().Equal(FilePath);
+        File.ReadAllText(FilePath).Should().Contain("Language=de");
+    }
+
+    [Fact]
+    public void SaveLanguage_KeepsWhatAnotherWindowSavedSince() {
+        // This window read the settings...
+        Config.Load();
+        var ownCopy = Config.Notes.OpeningMarker;
+
+        // ...then another window (another process with its own copy) changed and saved others.
+        WriteFile(
+            "[General]\nLanguage = System\nConfirmNoteDelete = False\n"
+            + "[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n[Advanced]\nConvertToUtf8 = True\n"
+        );
+        Config.Notes.OpeningMarker.Should().Be(ownCopy);
+
+        Config.SaveLanguage("uk").Should().BeTrue();
+
+        Config.General.Language.Should().Be("uk");
+        Config.Notes.OpeningMarker.Should().Be("<<");
+
+        Config.Load();
+        Config.General.Language.Should().Be("uk");
+        Config.General.ConfirmNoteDelete.Should().BeFalse();
+        Config.Notes.OpeningMarker.Should().Be("<<");
+        Config.Notes.ClosingMarker.Should().Be(">>");
+        Config.Advanced.ConvertToUtf8.Should().BeTrue();
     }
 
     [Fact]

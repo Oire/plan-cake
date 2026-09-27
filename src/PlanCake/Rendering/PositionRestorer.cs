@@ -20,10 +20,10 @@ internal static class PositionRestorer {
         }
 
         var sameText = blocks.Where(
-            block => block.Kind == previous.Kind && string.Equals(block.Text, previous.Text, StringComparison.Ordinal)
+            block => block.Kind == previous.Kind && String.Equals(block.Text, previous.Text, StringComparison.Ordinal)
         );
 
-        return Nearest(previous.StartLine, sameText) ?? Nearest(previous.StartLine, blocks);
+        return Nearest(previous.StartLine, sameText, BlockStart) ?? Nearest(previous.StartLine, blocks, BlockStart);
     }
 
     /// <summary>
@@ -57,42 +57,18 @@ internal static class PositionRestorer {
 
         var line = previous.Note.StartLine;
         var same = notes.Where(note =>
-            string.Equals(note.Note.Text, previous.Note.Text, StringComparison.Ordinal)
-            && string.Equals(note.Block?.Text, previous.Block?.Text, StringComparison.Ordinal)
+            String.Equals(note.Note.Text, previous.Note.Text, StringComparison.Ordinal)
+            && String.Equals(note.Block?.Text, previous.Block?.Text, StringComparison.Ordinal)
         );
 
-        return NearestNote(line, same) ?? NearestNote(line, notes);
+        return Nearest(line, same, NoteStart) ?? Nearest(line, notes, NoteStart);
     }
 
-    private static RenderedNote? NearestNote(int line, IEnumerable<RenderedNote> candidates) {
-        RenderedNote? nearest = null;
-        var nearestDistance = int.MaxValue;
+    private static int NoteStart(RenderedNote note) => note.Note.StartLine;
 
-        foreach (var note in candidates) {
-            var distance = Math.Abs(note.Note.StartLine - line);
+    private static int BlockStart(BlockInfo block) => block.StartLine;
 
-            if (distance < nearestDistance) {
-                nearest = note;
-                nearestDistance = distance;
-            }
-        }
-
-        return nearest;
-    }
-
-    private static BlockInfo? Nearest(int line, IEnumerable<BlockInfo> candidates) {
-        BlockInfo? nearest = null;
-        var nearestDistance = int.MaxValue;
-
-        foreach (var block in candidates) {
-            var distance = Math.Abs(block.StartLine - line);
-
-            if (distance < nearestDistance) {
-                nearest = block;
-                nearestDistance = distance;
-            }
-        }
-
-        return nearest;
-    }
+    /// <summary>The candidate whose start line is nearest to <paramref name="line"/>, the earlier one on a tie.</summary>
+    private static T? Nearest<T>(int line, IEnumerable<T> candidates, Func<T, int> startLine) where T : class =>
+        candidates.MinBy(candidate => Math.Abs(startLine(candidate) - line));
 }

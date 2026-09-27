@@ -63,6 +63,75 @@ public class LinkResolverTests {
     }
 
     [Theory]
+    [InlineData("setup.exe", @"C:\plans\setup.exe")]
+    [InlineData("run.bat", @"C:\plans\run.bat")]
+    [InlineData("RUN.CMD", @"C:\plans\RUN.CMD")]
+    [InlineData("tool.hta", @"C:\plans\tool.hta")]
+    [InlineData("script.js", @"C:\plans\script.js")]
+    [InlineData("script.vbs", @"C:\plans\script.vbs")]
+    [InlineData("script.ps1", @"C:\plans\script.ps1")]
+    [InlineData("shortcut.lnk", @"C:\plans\shortcut.lnk")]
+    [InlineData("site.url", @"C:\plans\site.url")]
+    [InlineData("install.msi", @"C:\plans\install.msi")]
+    [InlineData("file:///C:/plans/setup.exe", @"C:\plans\setup.exe")]
+    public void Resolve_ProgramOrScript_IsNeverOpenedByTheSystem(string href, string expected) {
+        var programs = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { expected };
+
+        LinkResolver.Resolve(href, Folder, programs.Contains).Should().Be(new LinkTarget(LinkKind.Program, expected));
+    }
+
+    [Theory]
+    [InlineData("setup.exe", true)]
+    [InlineData("Setup.EXE", true)]
+    [InlineData("run.bat", true)]
+    [InlineData("payload.hta", true)]
+    [InlineData("x.wsf", true)]
+    [InlineData("x.scr", true)]
+    [InlineData("diagram.png", false)]
+    [InlineData("notes.txt", false)]
+    [InlineData("report.pdf", false)]
+    [InlineData("plan.md", false)]
+    [InlineData("README", false)]
+    [InlineData(null, false)]
+    public void IsRunnable_ChecksTheExtension(string? path, bool expected) {
+        LinkResolver.IsRunnable(path).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(@"\\host\share\x.exe")]
+    [InlineData(@"\\host\share\plan.md")]
+    [InlineData("//host/share/plan.md")]
+    [InlineData("file://host/share/plan.md")]
+    [InlineData(@"\\?\UNC\host\share\plan.md")]
+    [InlineData(@"\\.\pipe\plancake")]
+    public void Resolve_AnotherComputersShare_IsUnsupportedWithoutTouchingIt(string href) {
+        var touched = new List<string>();
+
+        var target = LinkResolver.Resolve(href, Folder, path => {
+            touched.Add(path);
+            return true;
+        });
+
+        target.Kind.Should().Be(LinkKind.Unsupported);
+        touched.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Resolve_ShareOfTheDocumentItself_IsFollowed() {
+        var existing = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+            @"\\server\plans\next.md",
+            @"\\server\other\diagram.png",
+        };
+
+        LinkResolver.Resolve("next.md", @"\\server\plans", existing.Contains)
+            .Should().Be(new LinkTarget(LinkKind.Markdown, @"\\server\plans\next.md"));
+        LinkResolver.Resolve(@"\\server\other\diagram.png", @"\\SERVER\plans", existing.Contains)
+            .Should().Be(new LinkTarget(LinkKind.OtherFile, @"\\server\other\diagram.png"));
+        LinkResolver.Resolve(@"\\elsewhere\plans\next.md", @"\\server\plans", existing.Contains)
+            .Kind.Should().Be(LinkKind.Unsupported);
+    }
+
+    [Theory]
     [InlineData("missing.md", @"C:\plans\missing.md")]
     [InlineData("sub/missing.png", @"C:\plans\sub\missing.png")]
     [InlineData(@"C:\nowhere\plan.md", @"C:\nowhere\plan.md")]

@@ -50,7 +50,6 @@ public class PageMessagesTests {
 
     [Fact]
     public void Serialize_FocusAndNavigationMessages_HaveTheirTypes() {
-        Parse(PageMessages.Serialize(new FocusLinesMessage("3-3"))).GetProperty("lines").GetString().Should().Be("3-3");
         Parse(PageMessages.Serialize(new FocusNoteMessage(2))).GetProperty("note").GetInt32().Should().Be(2);
         Parse(PageMessages.Serialize(new NextNoteMessage())).GetProperty("type").GetString().Should().Be("nextNote");
         Parse(PageMessages.Serialize(new PreviousNoteMessage())).GetProperty("type").GetString()
@@ -147,7 +146,7 @@ public class PageMessagesTests {
             .Should().Be(new Point(0, 0));
         DocumentView.MenuAnchor(new RectangleF(10, 690, 100, 30), 1, new Size(1000, 700))
             .Should().Be(new Point(10, 690));
-        DocumentView.MenuAnchor(new RectangleF(10, 20, 100, 30), double.NaN, new Size(1000, 700))
+        DocumentView.MenuAnchor(new RectangleF(10, 20, 100, 30), Double.NaN, new Size(1000, 700))
             .Should().Be(new Point(10, 50));
     }
 

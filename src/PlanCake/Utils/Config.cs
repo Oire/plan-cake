@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Reflection;
 using Oire.PlanCake.Notes;
 using Oire.PlanCake.Utils.Enums;
@@ -127,7 +126,7 @@ internal static class Config {
     /// </summary>
     public static void Load() {
         try {
-            var cfg = Configuration.LoadFromFile(FilePath);
+            var cfg = LoadWithRetries();
             General = ReadSection<SectionGeneral>(cfg, nameof(General));
             Notes = ReadSection<SectionNotes>(cfg, nameof(Notes));
             Advanced = ReadSection<SectionAdvanced>(cfg, nameof(Advanced));
@@ -161,13 +160,58 @@ internal static class Config {
                 Section.FromObject(nameof(Notes), Notes),
                 Section.FromObject(nameof(Advanced), Advanced),
             };
-            cfg.SaveToFile(FilePath);
+
+            // Every window is a process of its own and reads the file again (Settings, View →
+            // Interface language): written in place, a half-written file could be read and its
+            // defaults then saved over the user's settings. A move within the folder is atomic.
+            var temp = $"{FilePath}.{Guid.NewGuid():N}.tmp";
+
+            try {
+                cfg.SaveToFile(temp);
+                File.Move(temp, FilePath, overwrite: true);
+            } finally {
+                if (File.Exists(temp)) {
+                    File.Delete(temp);
+                }
+            }
 
             return true;
         } catch (Exception ex) {
             Log.Error(ex, "Config: unable to save {Path}", FilePath);
 
             return false;
+        }
+    }
+
+    /// <summary>
+    /// View → Interface language: reads the file again (another window may have saved other
+    /// settings since this one read it), sets the interface language, and saves.
+    /// </summary>
+    /// <returns><c>true</c> when the file was written.</returns>
+    public static bool SaveLanguage(string language) {
+        ArgumentException.ThrowIfNullOrWhiteSpace(language);
+
+        Load();
+        General.Language = language;
+
+        return Save();
+    }
+
+    /// <summary>How many times a file another window is replacing is read again before giving up.</summary>
+    private const int LoadRetries = 3;
+
+    /// <summary>
+    /// Reads the file, trying again a little later while another window is replacing it; a
+    /// missing file is not retried.
+    /// </summary>
+    private static Configuration LoadWithRetries() {
+        for (var attempt = 0; ; attempt++) {
+            try {
+                return Configuration.LoadFromFile(FilePath);
+            } catch (IOException ex) when (ex is not (FileNotFoundException or DirectoryNotFoundException)
+                                           && attempt < LoadRetries) {
+                Thread.Sleep(50);
+            }
         }
     }
 
@@ -218,7 +262,7 @@ internal static class Config {
     private static void Normalize() {
         if (String.Equals(General.Language?.Trim(), App.SystemLanguageName, StringComparison.OrdinalIgnoreCase)) {
             General.Language = App.SystemLanguageName;
-        } else if (!IsCulture(General.Language)) {
+        } else if (!LanguageList.IsCulture(General.Language)) {
             Log.Warning("Config: interface language {Language} is unknown; using the default", General.Language);
             General.Language = App.SystemLanguageName;
         }
@@ -246,20 +290,6 @@ internal static class Config {
             );
             Notes.OpeningMarker = NoteMarkers.Default.Opening;
             Notes.ClosingMarker = NoteMarkers.Default.Closing;
-        }
-    }
-
-    private static bool IsCulture(string? language) {
-        if (String.IsNullOrWhiteSpace(language)) {
-            return false;
-        }
-
-        try {
-            CultureInfo.GetCultureInfo(language, predefinedOnly: true);
-
-            return true;
-        } catch (CultureNotFoundException) {
-            return false;
         }
     }
 }

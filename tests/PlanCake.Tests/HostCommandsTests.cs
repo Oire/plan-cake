@@ -35,6 +35,7 @@ public class HostCommandsTests {
         { Keys.Control | Keys.Z, nameof(HostCommand.Undo) },
         { Keys.Control | Keys.Y, nameof(HostCommand.Redo) },
         { Keys.Control | Keys.Oemplus, nameof(HostCommand.ZoomIn) },
+        { Keys.Control | Keys.Shift | Keys.Oemplus, nameof(HostCommand.ZoomIn) }, // Ctrl+Plus where + is Shift+=.
         { Keys.Control | Keys.Add, nameof(HostCommand.ZoomIn) },
         { Keys.Control | Keys.OemMinus, nameof(HostCommand.ZoomOut) },
         { Keys.Control | Keys.Subtract, nameof(HostCommand.ZoomOut) },
@@ -104,16 +105,20 @@ public class HostCommandsTests {
     }
 
     [Fact]
-    public void AvailableShortcuts_ListEveryCommand() {
-        var commands = HostCommands.AvailableShortcuts().Select(entry => entry.Command).ToList();
+    public void Shortcuts_ListEveryCommand() {
+        var commands = HostCommands.Shortcuts().Select(entry => entry.Command).ToList();
 
         commands.Should().BeEquivalentTo(Enum.GetValues<HostCommand>());
         commands.Should().OnlyHaveUniqueItems();
     }
 
     [Fact]
-    public void AvailableShortcuts_GiveEveryKeyOfACommand() {
-        var back = HostCommands.AvailableShortcuts().Single(entry => entry.Command == HostCommand.Back);
+    public void KeysOf_LeavesOutTheLayoutVariantOfCtrlPlus() =>
+        HostCommands.KeysOf(HostCommand.ZoomIn).Should().Equal(Keys.Control | Keys.Oemplus, Keys.Control | Keys.Add);
+
+    [Fact]
+    public void Shortcuts_GiveEveryKeyOfACommand() {
+        var back = HostCommands.Shortcuts().Single(entry => entry.Command == HostCommand.Back);
 
         back.Keys.Should().Equal(Keys.Alt | Keys.Left, Keys.Back);
     }

@@ -38,7 +38,7 @@ internal static class TaskToggle {
             return source;
         }
 
-        return string.Create(source.Length, (source, position, isChecked), static (span, state) => {
+        return String.Create(source.Length, (source, position, isChecked), static (span, state) => {
             state.source.AsSpan().CopyTo(span);
             span[state.position] = state.isChecked ? 'x' : ' ';
         });
@@ -86,35 +86,12 @@ internal static class TaskToggle {
     }
 
     /// <summary>
-    /// Skips a bullet (<c>-</c>, <c>*</c>, <c>+</c>) or an ordered marker (<c>1.</c>, <c>1)</c>)
-    /// and the whitespace after it; returns <paramref name="i"/> unchanged when there is none (an
-    /// item whose paragraph starts on the line after its marker).
+    /// Skips a list marker and the whitespace after it; returns <paramref name="i"/> unchanged
+    /// when there is none, or nothing follows it on the line (an item whose paragraph starts on
+    /// the line after its marker).
     /// </summary>
-    private static int SkipListMarker(string source, int i, int end) {
-        var j = i;
-
-        if (j < end && source[j] is '-' or '*' or '+') {
-            j++;
-        } else {
-            while (j < end && j - i < 9 && char.IsAsciiDigit(source[j])) {
-                j++;
-            }
-
-            if (j == i || j >= end || source[j] is not ('.' or ')')) {
-                return i;
-            }
-
-            j++;
-        }
-
-        if (j >= end || source[j] is not (' ' or '\t')) {
-            return i;
-        }
-
-        while (j < end && source[j] is ' ' or '\t') {
-            j++;
-        }
-
-        return j;
-    }
+    private static int SkipListMarker(string source, int i, int end) =>
+        NoteParser.TryParseListMarker(source, i, end, out var markerEnd, out var contentStart) && contentStart > markerEnd
+            ? contentStart
+            : i;
 }

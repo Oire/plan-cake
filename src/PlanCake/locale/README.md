@@ -42,10 +42,13 @@ cd src/PlanCake/locale/scripts
   them. A fuzzy entry is `msgmerge`'s guess, not a translation: `msgfmt` leaves it out of the
   `.mo`, so the app quietly shows English and nobody notices for months.
 - **Menu mnemonics must be unique per menu level in every catalog.** A duplicate `&` letter
-  within one menu throws at startup on that locale only, so it will not show up in testing
-  unless someone runs the app in that language.
+  within one menu throws at startup on that locale only. `MnemonicTests` builds every menu and
+  form in every catalog and fails on a duplicate.
 - **Designer strings are written in English** and translated at run time by
   `Localizer.Localize(this, Localization.Catalog)` in the form's constructor. Strings built at
   run time go through `_()` instead.
-- Add every shipping language to `<SatelliteResourceLanguages>` in the `.csproj` and to the
-  language picker in the settings UI. Both are easy to forget.
+- Adding a language touches more than the catalog: `<SatelliteResourceLanguages>` in the
+  `.csproj`, `LanguageList.SupportedCodes`, `LegacyEncoding.CodePageOf`,
+  `help/<code>/manual.html` plus `help/glossaries/<code>.json`, and
+  `installer/Languages/Custom.<code>.isl` plus a `[Languages]` line in `plancake.iss`. The
+  interface-language list follows the `locale` folders by itself. See CLAUDE.md → Localization.

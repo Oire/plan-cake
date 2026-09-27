@@ -64,6 +64,16 @@ decisions.
   manual, `help/<code>/manual.html`, with a glossary in `help/glossaries/`; and the installer,
   `installer/Languages/Custom.<code>.isl` plus a `[Languages]` line in `plancake.iss`.
 
+- **A new dialog:** set its title in the constructor right after `Localizer.Localize`
+  (`Text = _("…");`), because the extractor misses a designer `Text =` on the form itself; call
+  `TextDirection.Apply(this)`; send every message box through `DialogHelper`; and add the form
+  to the lists in `MnemonicTests` and `TextDirectionTests` (both fail until you do: each checks
+  that its list covers every `Form` type).
+- **The user manual follows the UI.** `help/<code>/manual.html` (six languages) is written by
+  hand with the `write-manual` skill, using the glossaries in `help/glossaries/`. It repeats
+  menu names, shortcuts and setting labels word for word, and no test checks it. A change to a
+  command, a key, a menu item or a setting updates all six manuals in the same change.
+
 - The catalog is `PlanCake.po` / `.mo`, named after `App.Name`; the executable is `plancake.exe`
   (`AssemblyName`). The gettext scripts read `App.Name` from `Utils/Constants/App.cs`, not the
   `AssemblyName`.
@@ -153,20 +163,35 @@ map.
   notes, distinct from `ExitCode.Error` (1).
 - **Services/** is `UpdateService` (Updates below) and `MarkdownDownloader` (File → Open from
   link: http(s) only, a GitHub file page turned into its raw file, 30 seconds, 10 MB, into the
-  Downloads folder).
+  Downloads folder, always under a `.md` name and with a `Zone.Identifier` stream, as a
+  browser marks a download).
+- **Links in a plan never run anything.** A plan may come from a download or an AI assistant,
+  and its link text can say anything. `LinkResolver` sorts a program or script
+  (`LinkKind.Program`: `.exe`, `.bat`, `.js`, `.lnk`, … and `PATHEXT` and `AssocIsDangerous`)
+  away from the shell (the window offers to show it in File Explorer), and does not follow, or
+  even check, a UNC path on another host than the document's, since touching it sends the
+  user's credentials there. File → Open in editor uses the "edit" verb or Notepad for anything
+  that is not Markdown, never the default verb.
 - **web/** is the page. `app.js` shows what the host renders, reports which block or note the
   user acts on, and moves focus when the host asks. `morph.js` updates the page in place when
   the same file is rendered again; `blocks.js` picks the block Alt+Shift+Down and Up move to.
   Both expose a pure function that the tests run in Jint (`MorphPlanTests`, `BlockPickTests`).
   **No user-visible string is written in the page**: all of them come from the host in the
-  `strings` message, already translated.
+  `strings` message, already translated. Focus moves through `focusElement` in `app.js`, which
+  adds a temporary `tabindex="-1"` and marks the element with `data-plancake-current`;
+  `app.css` draws the focus outline from that mark, not from `:focus`, which Chromium did not
+  show when the page moved the focus itself. An attribute the page manages at run time
+  (`data-lines`, `data-note`, `tabindex`, `data-plancake-current`) must be in `morph.js`'s
+  `volatileAttributes`, or every re-render counts it as a content change. The page's content
+  security policy (`index.html`) is the only thing keeping a plan's raw HTML from running
+  script; `PageSecurityPolicyTests` pins it.
 
 ### Page protocol
 
 JSON messages through `chrome.webview.postMessage` / `PostWebMessageAsJson`, each with a `type`;
 the full list is in the plan (Technical details → Page protocol) and the shapes in
 `Ui/PageMessages.cs`. Host → page: `render` (HTML, document language, title, where to put the
-focus), `strings`, `focusNote`, `focusLines`, `nextNote` / `previousNote`, `nextBlock` /
+focus), `strings`, `focusNote`, `nextNote` / `previousNote`, `nextBlock` /
 `previousBlock`, `taskState`. Page → host: `activate`, `activateNote`, `contextMenu`,
 `toggleTask`, `position`, `openLink`, `noMoreNotes`, `noMoreBlocks`, `dropFiles`, `goBack`,
 `ready`. Every render carries a `generation`; the host ignores a message from an older render
@@ -250,10 +275,15 @@ tests need no console.
 
 ## Data locations
 
-`App.DataFolder` resolves to `%APPDATA%\Oire\PlanCake`, or to `userdata/` next to the EXE
-when that folder exists (portable mode, detected once at static init). Config files sit at the
-root of the data folder (`PlanCake.cfg`); user content goes under the `data/` subfolder, so clearing user data
-never takes the settings with it.
+`App.DataFolder` resolves to `%APPDATA%\Oire\PlanCake`, or to `userdata\` next to the EXE when
+that folder exists (portable mode, detected once at static init). It holds `PlanCake.cfg`
+(written to a temporary file and moved over the old one, since other windows read it),
+`logs\` (Serilog: `PlanCake.log`, `PlanCake-short.log`, `errors.log`, `errors-short.log`,
+`analysis.json`; every window and every CLI run is its own process, so while one holds a log,
+the others write to numbered siblings such as `PlanCake_001.log`) and `WebView2\` (the
+browser's user data folder, `App.WebView2DataFolder`). PlanCake keeps no other user content, so
+`App.DataSubfolder` (`data\`) is unused. The logs are the first thing to read when a user
+reports a problem.
 
 ## File safety
 
@@ -262,7 +292,10 @@ U+FFFD, introduced by decoding): it would destroy what they stand for. A file th
 is decoded only with a legacy encoding that decodes it cleanly (`Notes/LegacyEncoding.cs`: the
 charset detector, then the document language's code page, then the ANSI code page unless that
 is UTF-8, 65001); when none does, the file stays read-only and is never converted, whatever
-the settings say. Tests inject the ANSI code page, so they never depend on the machine's.
+the settings say. Two cases never reach the legacy code pages at all and stay read-only too: a
+file whose BOM states its encoding but that does not decode in it, and UTF-8 with a few damaged
+bytes (`LegacyEncoding.FindDamagedUtf8`), which a single-byte code page would turn into
+mojibake. Tests inject the ANSI code page, so they never depend on the machine's.
 
 ## Updates
 
@@ -323,7 +356,11 @@ architecture to x64 by hand).
 
 `Program.Main` returns an `ExitCode` and installs handlers for `AppDomain.UnhandledException`
 and `TaskScheduler.UnobservedTaskException` — without them, an exception on a background
-thread kills the process with nothing in the log.
+thread kills the process with nothing in the log. For the window it also subscribes
+`Application.ThreadException` (with `UnhandledExceptionMode.CatchException`): WinForms catches
+an exception from the message loop itself (an `async void` handler, a `BeginInvoke` callback),
+and without a handler shows its own dialog and logs nothing. The handler logs it and asks
+whether to keep PlanCake open.
 
 Utility classes log and degrade; they do not show dialogs and do not call `Application.Exit`.
 Deciding to stop is `Program`'s job.
@@ -334,6 +371,16 @@ xUnit + AwesomeAssertions in `tests/PlanCake.Tests`. The app project grants it
 `InternalsVisibleTo`, which is how `Config.OverrideFilePath` lets the config tests write to a
 temp directory instead of the developer's real `%APPDATA%`. Static state means tests that
 touch `Config` or `Localization` must not run in parallel across classes.
+
+- A test class that changes `Config` or the interface language, or asserts on text from `_()`,
+  goes in `[Collection(LocalizationCollection.Name)]`, which runs alone.
+- A test that builds a form or control wraps it in `Sta.Run(...)`; forms are built and
+  disposed, never shown.
+- `web/morph.js` and `web/blocks.js` expose pure functions that `MorphPlanTests` and
+  `BlockPickTests` run in Jint, so the page needs no JS toolchain.
+- While a PlanCake window is open, `bin\Debug\plancake.exe` is locked: build and test with
+  `dotnet build --artifacts-path <temp dir>` (and the same for `dotnet test`) rather than
+  closing the user's window.
 
 Keep the tests inherited from the template: they are cheap, and they fail loudly if a rename
 breaks the data-folder layout or the localization fallback.

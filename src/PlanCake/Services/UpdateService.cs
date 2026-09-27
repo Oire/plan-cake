@@ -32,9 +32,6 @@ internal sealed class UpdateService: IDisposable {
     /// <summary>The named object whose creator does the startup and background checks.</summary>
     internal const string BackgroundChecksName = @"Local\Oire.PlanCake.BackgroundUpdateChecks";
 
-    /// <summary>The length of an Ed25519 public key.</summary>
-    private const int PublicKeyLength = 32;
-
     private readonly SparkleUpdater _sparkle;
     private readonly IDisposable? _backgroundChecks;
     private UpdateCheckInterval _loopInterval = UpdateCheckInterval.Never;
@@ -64,19 +61,10 @@ internal sealed class UpdateService: IDisposable {
 
     /// <summary>
     /// Creates the service on the UI thread (NetSparkle shows its windows through the thread it
-    /// was created on), or returns <see langword="null"/> when <see cref="App.UpdatePublicKey"/>
-    /// is not a usable key (still the placeholder), which is logged: this build never checks.
+    /// was created on), or returns <see langword="null"/> when NetSparkle cannot be set up, which
+    /// is logged: this window then never checks.
     /// </summary>
     public static UpdateService? Create() {
-        if (!IsUsablePublicKey(App.UpdatePublicKey)) {
-            Log.Warning(
-                "UpdateService: App.UpdatePublicKey is not an Ed25519 public key (still the placeholder?); "
-                + "update checks are off in this build"
-            );
-
-            return null;
-        }
-
         var backgroundChecks = TryClaimBackgroundChecks(BackgroundChecksName);
 
         try {
@@ -87,17 +75,6 @@ internal sealed class UpdateService: IDisposable {
 
             return null;
         }
-    }
-
-    /// <summary>True when <paramref name="key"/> is base64 of a 32-byte Ed25519 public key.</summary>
-    internal static bool IsUsablePublicKey(string? key) {
-        if (String.IsNullOrWhiteSpace(key)) {
-            return false;
-        }
-
-        Span<byte> bytes = stackalloc byte[PublicKeyLength * 2];
-
-        return Convert.TryFromBase64String(key.Trim(), bytes, out var written) && written == PublicKeyLength;
     }
 
     /// <summary>
@@ -209,7 +186,7 @@ internal sealed class UpdateService: IDisposable {
         UpdateCheckOutcome.UpdateAvailable => null,
         UpdateCheckOutcome.UpToDate => _("PlanCake is up to date."),
         UpdateCheckOutcome.Skipped => _("The latest version of PlanCake is one you chose to skip."),
-        UpdateCheckOutcome.NotConfigured => _("This copy of PlanCake cannot check for updates: it was built without an update key."),
+        UpdateCheckOutcome.Unavailable => _("Update checks could not be started. The log has the details."),
         _ => _("Unable to check for updates. Please try again later."),
     };
 

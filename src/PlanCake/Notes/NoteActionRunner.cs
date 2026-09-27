@@ -26,6 +26,12 @@ internal enum NoteActionStatus {
 
     /// <summary>The file is open read-only and is never written.</summary>
     ReadOnly,
+
+    /// <summary>
+    /// The note (or one of the notes) has no closing marker and runs to the end of the file;
+    /// nothing was written.
+    /// </summary>
+    Unterminated,
 }
 
 /// <summary>The outcome of a note action, for the window to show.</summary>
@@ -73,6 +79,20 @@ internal sealed class NoteActionRunner {
 
     private static string ReadOnlyMessage =>
         _("This file is not in UTF-8, so it is open read-only. Notes cannot be written to it.");
+
+    /// <summary>
+    /// Why <paramref name="note"/> cannot be edited or deleted, or <see langword="null"/> when it
+    /// can: a note without a closing marker runs to the end of the file.
+    /// </summary>
+    public static string? UnterminatedReason(Note note) {
+        ArgumentNullException.ThrowIfNull(note);
+
+        return note.Unterminated ? UnterminatedMessage(note.StartLine) : null;
+    }
+
+    /// <summary>What the user is told about a note without a closing marker on <paramref name="line"/>.</summary>
+    public static string UnterminatedMessage(int line) =>
+        _("The note on line {0} has no closing marker, so it runs to the end of the file, and changing it would change the rest of the file too. Add the closing marker in an editor first.", line);
 
     /// <summary>Why <paramref name="text"/> cannot be written as a note, or <see langword="null"/> when it can.</summary>
     public string? DescribeTextError(string text) {
@@ -227,6 +247,10 @@ internal sealed class NoteActionRunner {
             Log.Warning(ex, "Action refused: {Path} is read-only", Store.File.Path);
 
             return new NoteActionResult(NoteActionStatus.ReadOnly, ReadOnlyMessage);
+        } catch (UnterminatedNoteException ex) {
+            Log.Warning(ex, "Action refused: a note in {Path} has no closing marker", Store.File.Path);
+
+            return new NoteActionResult(NoteActionStatus.Unterminated, UnterminatedMessage(ex.Line));
         } catch (IOException ex) {
             Log.Error(ex, "Action failed on {Path}", Store.File.Path);
 

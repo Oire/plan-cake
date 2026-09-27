@@ -161,6 +161,23 @@ public class MarkdownFileTests: IDisposable {
     }
 
     [Fact]
+    public void Write_FileWithTheReadOnlyAttribute_ThrowsIOException() {
+        var path = WriteBytes(Utf8("a\n"));
+        var file = MarkdownFile.Open(path, Options() with { Retries = 1 });
+        File.SetAttributes(path, FileAttributes.ReadOnly);
+
+        try {
+            var write = () => file.Write("b\n");
+
+            write.Should().Throw<IOException>();
+            File.ReadAllText(path).Should().Be("a\n");
+            Directory.GetFiles(_folder).Should().Equal(path);
+        } finally {
+            File.SetAttributes(path, FileAttributes.Normal);
+        }
+    }
+
+    [Fact]
     public void Write_FileUnlockedDuringTheRetries_Succeeds() {
         var path = WriteBytes(Utf8("a\n"));
         var file = MarkdownFile.Open(

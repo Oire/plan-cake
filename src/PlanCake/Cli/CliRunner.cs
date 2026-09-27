@@ -26,15 +26,24 @@ internal sealed class CliRunner {
 
     private readonly TextWriter _output;
     private readonly TextWriter _error;
+    private readonly Encoding? _ansiEncoding;
     private readonly RootCommand _root;
     private readonly Argument<string?> _fileArgument;
 
-    public CliRunner(TextWriter output, TextWriter error) {
+    public CliRunner(TextWriter output, TextWriter error) : this(output, error, null) { }
+
+    /// <param name="ansiEncoding">
+    /// The Windows ANSI code page files are decoded with as a last resort (see
+    /// <see cref="MarkdownFileOptions.AnsiEncoding"/>); <see langword="null"/> for the machine's.
+    /// Tests inject it, so they do not depend on the machine.
+    /// </param>
+    internal CliRunner(TextWriter output, TextWriter error, Encoding? ansiEncoding) {
         ArgumentNullException.ThrowIfNull(output);
         ArgumentNullException.ThrowIfNull(error);
 
         _output = output;
         _error = error;
+        _ansiEncoding = ansiEncoding;
 
         // Hidden from the help, where the parser would list it under every subcommand too; the
         // description says how to open the window instead.
@@ -129,7 +138,7 @@ internal sealed class CliRunner {
 
             var outputPath = result.GetValue(output);
 
-            if (outputPath is not null && IsSameFile(outputPath, markdown.Path)) {
+            if (outputPath is not null && FileIdentity.IsSameFile(outputPath, markdown.Path)) {
                 return Fail(_("The output file cannot be the file itself: {0}", outputPath));
             }
 
@@ -184,7 +193,7 @@ internal sealed class CliRunner {
             }
 
             if (markdown.ConvertedFrom is { } convertedFrom) {
-                WriteLine(_output, _("Converted from {0} to UTF-8.", EncodingName(convertedFrom)));
+                WriteLine(_output, _("Converted from {0} to UTF-8.", LegacyEncoding.DisplayName(convertedFrom)));
             }
 
             var parse = NoteParser.Parse(markdown.Text, noteMarkers);
@@ -197,10 +206,25 @@ internal sealed class CliRunner {
                     ));
                 }
 
+                // A note without a closing marker runs to the end of the file: removing it would
+                // take the rest of the document with it.
+                if (parse.HasUnterminated) {
+                    return Fail(_(
+                        "Nothing was removed: a note without a closing marker would take the rest of the file with it. Add the closing marker first."
+                    ));
+                }
+
+                if (markdown.ConversionFailed) {
+                    return Fail(_(
+                        "{0} is not in UTF-8 but in {1}, and it could not be converted, so PlanCake does not change it.",
+                        markdown.Path, LegacyEncoding.DisplayName(markdown.Encoding)
+                    ));
+                }
+
                 if (markdown.IsReadOnly) {
                     return Fail(_(
                         "{0} is not in UTF-8 but in {1}, so PlanCake does not change it. To convert it, turn on converting files that are not UTF-8 in PlanCake's settings.",
-                        markdown.Path, EncodingName(markdown.Encoding)
+                        markdown.Path, LegacyEncoding.DisplayName(markdown.Encoding)
                     ));
                 }
 
@@ -240,7 +264,7 @@ internal sealed class CliRunner {
         command.SetAction(result => {
             var documentLanguage = result.GetValue(language)?.Trim() ?? Config.General.DefaultDocumentLanguage;
 
-            if (!IsLanguageCode(documentLanguage)) {
+            if (!LanguageList.IsCulture(documentLanguage)) {
                 return Fail(_("{0} is not a language code.", documentLanguage));
             }
 
@@ -251,7 +275,7 @@ internal sealed class CliRunner {
 
             var outputPath = result.GetValue(output)!;
 
-            if (IsSameFile(outputPath, markdown.Path)) {
+            if (FileIdentity.IsSameFile(outputPath, markdown.Path)) {
                 return Fail(_("The output file cannot be the file itself: {0}", outputPath));
             }
 
@@ -294,7 +318,7 @@ internal sealed class CliRunner {
         var opening = result.GetValue(options.Opening) ?? Config.Notes.OpeningMarker;
         var closing = result.GetValue(options.Closing);
         var singleToken = result.GetValue(options.SingleToken);
-        markers = new NoteMarkers(opening, singleToken ? string.Empty : closing ?? Config.Notes.ClosingMarker);
+        markers = new NoteMarkers(opening, singleToken ? String.Empty : closing ?? Config.Notes.ClosingMarker);
 
         if (singleToken && closing is not null) {
             Fail(_("--single-token and --close-marker cannot be used together."));
@@ -302,16 +326,7 @@ internal sealed class CliRunner {
             return false;
         }
 
-        var reason = markers.Validate() switch {
-            NoteMarkersError.None => null,
-            NoteMarkersError.EmptyOpening => _("The opening marker cannot be empty."),
-            NoteMarkersError.SurroundingWhitespace => _("A marker cannot start or end with a space."),
-            NoteMarkersError.LineBreak => _("A marker cannot contain a line break."),
-            NoteMarkersError.ClosingSameAsOpening => _("The closing marker must differ from the opening marker."),
-            var error => error.ToString(),
-        };
-
-        if (reason is not null) {
+        if (LocalizedText.MarkersError(markers.Validate()) is { } reason) {
             Fail(reason);
 
             return false;
@@ -330,6 +345,7 @@ internal sealed class CliRunner {
         try {
             file = MarkdownFile.Open(path, new MarkdownFileOptions(
                 ConvertToUtf8: convertToUtf8,
+                AnsiEncoding: _ansiEncoding,
                 DocumentLanguage: documentLanguage ?? Config.General.DefaultDocumentLanguage
             ));
         } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
@@ -345,7 +361,12 @@ internal sealed class CliRunner {
             return false;
         }
 
-        if (file.IsUnrecognized) {
+        if (file.IsUnrecognized && file.InvalidByteLine is { } invalidLine) {
+            WriteLine(_error, _(
+                "Warning: {0} is in {1} but has an invalid byte on line {2}, which shows as a replacement character.",
+                file.Path, LegacyEncoding.DisplayName(file.Encoding), invalidLine
+            ));
+        } else if (file.IsUnrecognized) {
             WriteLine(_error, _(
                 "Warning: the encoding of {0} could not be recognized; what could not be decoded shows as replacement characters.",
                 file.Path
@@ -359,7 +380,7 @@ internal sealed class CliRunner {
         MarkdownRenderer.Render(file.Text, new RenderOptions(
             markers,
             mode,
-            new RenderStrings(_("user note"), _("unote")),
+            LocalizedText.RenderStrings(),
             language ?? Config.General.DefaultDocumentLanguage,
             Path.GetFileName(file.Path)
         ));
@@ -424,30 +445,4 @@ internal sealed class CliRunner {
         writer.Write(text);
         writer.Write('\n');
     }
-
-    private static bool IsSameFile(string path, string fullPath) {
-        try {
-            return string.Equals(Path.GetFullPath(path), fullPath, StringComparison.OrdinalIgnoreCase);
-        } catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException) {
-            return false;
-        }
-    }
-
-    private static bool IsLanguageCode(string code) {
-        if (string.IsNullOrWhiteSpace(code)) {
-            return false;
-        }
-
-        try {
-            return !string.IsNullOrEmpty(CultureInfo.GetCultureInfo(code, predefinedOnly: true).Name);
-        } catch (CultureNotFoundException) {
-            return false;
-        }
-    }
-
-    /// <summary>An encoding's name as people write it: <c>Windows-1251</c>, <c>UTF-8</c>.</summary>
-    private static string EncodingName(Encoding encoding) =>
-        encoding.WebName.StartsWith("windows-", StringComparison.OrdinalIgnoreCase)
-            ? $"Windows-{encoding.CodePage}"
-            : encoding.WebName.ToUpperInvariant();
 }

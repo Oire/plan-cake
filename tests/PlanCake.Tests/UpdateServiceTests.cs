@@ -2,13 +2,14 @@ using AwesomeAssertions;
 using NetSparkleUpdater.Enums;
 using Oire.PlanCake.Services;
 using Oire.PlanCake.Utils;
+using Oire.PlanCake.Utils.Constants;
 using Oire.PlanCake.Utils.Enums;
 using Xunit;
 
 namespace Oire.PlanCake.Tests;
 
 /// <summary>
-/// The parts of <see cref="UpdateService"/> that decide without the network: the key check, the
+/// The parts of <see cref="UpdateService"/> that decide without the network: the public key, the
 /// background check intervals, the outcomes and what the user is told, and the claim that keeps
 /// the background checks to one PlanCake window.
 /// </summary>
@@ -19,23 +20,13 @@ public class UpdateServiceTests {
         Localization.SetLanguage("en-US");
     }
 
-    [Theory]
-    [InlineData("1Q9hfqwf3i6ZcncHvt08rqAO17iDrhHTvrjHAdCXw68=")] // SIC!'s public key.
-    [InlineData("  1Q9hfqwf3i6ZcncHvt08rqAO17iDrhHTvrjHAdCXw68=\n")] // As a .pub file may hold it.
-    [InlineData("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")]
-    public void IsUsablePublicKey_AcceptsBase64Of32Bytes(string key) =>
-        UpdateService.IsUsablePublicKey(key).Should().BeTrue();
+    [Fact]
+    public void UpdatePublicKey_IsBase64OfA32ByteEd25519Key() {
+        var bytes = new byte[64];
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData("PLACEHOLDER: paste the contents of keys/NetSparkle_Ed25519.pub here")]
-    [InlineData("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==")] // 31 bytes.
-    [InlineData("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==")] // 34 bytes.
-    [InlineData("not base64 at all!")]
-    public void IsUsablePublicKey_RefusesAnythingElse(string? key) =>
-        UpdateService.IsUsablePublicKey(key).Should().BeFalse();
+        Convert.TryFromBase64String(App.UpdatePublicKey, bytes, out var written).Should().BeTrue();
+        written.Should().Be(32);
+    }
 
     [Theory]
     [InlineData(UpdateCheckInterval.Daily, 1)]
@@ -65,10 +56,7 @@ public class UpdateServiceTests {
     [InlineData(UpdateCheckOutcome.UpToDate, "PlanCake is up to date.")]
     [InlineData(UpdateCheckOutcome.Skipped, "The latest version of PlanCake is one you chose to skip.")]
     [InlineData(UpdateCheckOutcome.Failed, "Unable to check for updates. Please try again later.")]
-    [InlineData(
-        UpdateCheckOutcome.NotConfigured,
-        "This copy of PlanCake cannot check for updates: it was built without an update key."
-    )]
+    [InlineData(UpdateCheckOutcome.Unavailable, "Update checks could not be started. The log has the details.")]
     public void Describe_TellsTheUserTheOutcome(UpdateCheckOutcome outcome, string expected) =>
         UpdateService.Describe(outcome).Should().Be(expected);
 

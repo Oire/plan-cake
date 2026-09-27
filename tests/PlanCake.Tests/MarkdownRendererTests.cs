@@ -424,7 +424,7 @@ public class MarkdownRendererTests {
 
     [Fact]
     public void Render_LongExcerpt_IsTruncatedTo80CharactersWithAnEllipsis() {
-        var words = string.Join(' ', Enumerable.Repeat("word", 30));
+        var words = String.Join(' ', Enumerable.Repeat("word", 30));
 
         var excerpt = Render(words + "\n").Blocks[0].Excerpt;
 

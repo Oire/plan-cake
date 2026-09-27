@@ -437,7 +437,7 @@ footer {
 
 <h3 id="open-link">Depuis un lien sur le web</h3>
 <p>Supposons qu’un collègue vous envoie un lien vers un plan sur GitHub. Appuyez sur <kbd>Ctrl+L</kbd>, ou choisissez <strong>Ouvrir depuis un lien</strong> dans le menu <strong>Fichier</strong>. La zone <strong>Lien</strong> est déjà remplie si le presse-papiers contient un lien&nbsp;; sinon, collez-le ou tapez-le. Appuyez sur <kbd>Entrée</kbd> ou cliquez sur <strong>OK</strong> pour télécharger&nbsp;; appuyez sur <kbd>Échap</kbd> ou cliquez sur <strong>Annuler</strong> pour renoncer.</p>
-<p>La barre d’état affiche « Téléchargement depuis github.com... » puis, une fois le téléchargement terminé, l’endroit où le fichier a été enregistré&nbsp;; le plan s’ouvre ensuite. Les téléchargements vont dans votre dossier Windows <strong>Téléchargements</strong>, sous le nom même du fichier&nbsp;; si un fichier de ce nom s’y trouve déjà, PlanCake ajoute un numéro, comme <code>plan (2).md</code>, à la manière d’un navigateur. Comme le fichier téléchargé est un fichier ordinaire sur votre disque, vos notes y sont enregistrées comme dans n’importe quel autre.</p>
+<p>La barre d’état affiche « Téléchargement depuis github.com... » puis, une fois le téléchargement terminé, l’endroit où le fichier a été enregistré&nbsp;; le plan s’ouvre ensuite. Les téléchargements vont dans votre dossier Windows <strong>Téléchargements</strong>, sous le nom même du fichier, toujours en tant que fichier Markdown&nbsp;: un lien vers un fichier d’un autre type reçoit l’extension <code>.md</code>, si bien que <code>tool.bat</code> est enregistré sous <code>tool.bat.md</code> et ne peut jamais s’exécuter. Comme un navigateur, PlanCake marque le fichier comme téléchargé depuis Internet&nbsp;; si un fichier de ce nom s’y trouve déjà, PlanCake ajoute un numéro, comme <code>plan (2).md</code>, à la manière d’un navigateur. Comme le fichier téléchargé est un fichier ordinaire sur votre disque, vos notes y sont enregistrées comme dans n’importe quel autre.</p>
 <p>Quelques points à connaître sur les liens&nbsp;:</p>
 <ul>
 <li>Vous pouvez coller un lien normal vers une page GitHub d’un fichier&nbsp;; PlanCake récupère le Markdown brut qui se trouve derrière.</li>
@@ -462,7 +462,7 @@ footer {
 <ul>
 <li>Un lien web s’ouvre dans votre navigateur par défaut.</li>
 <li>Un lien vers un autre fichier Markdown situé à côté de celui-ci ouvre ce fichier dans PlanCake, dans la même fenêtre.</li>
-<li>Un lien vers tout autre type de fichier l’ouvre avec le programme que Windows lui associe.</li>
+<li>Un lien vers tout autre type de fichier l’ouvre avec le programme que Windows lui associe. Un lien vers un programme ou un script (comme <code>.exe</code>, <code>.bat</code> ou <code>.js</code>) n’est jamais exécuté, quoi qu’en dise son texte&nbsp;: PlanCake propose plutôt d’afficher le fichier dans l’Explorateur de fichiers. Un lien vers un fichier situé sur le partage réseau d’un autre ordinateur n’est pas suivi.</li>
 <li>Un lien vers un titre du même document vous y amène.</li>
 <li>Si un lien pointe vers un fichier qui n’existe pas, la barre d’état le signale et affiche le chemin.</li>
 </ul>
@@ -911,7 +911,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>PlanCake indique qu’une note s’étend jusqu’à la fin du fichier</summary>
-<p>Une note du fichier possède un marqueur d’ouverture mais pas de marqueur de fermeture — généralement une note tapée à la main. PlanCake considère tout ce qui suit le marqueur comme faisant partie de cette note. Appuyez sur <kbd>Ctrl+E</kbd> pour ouvrir le fichier dans votre éditeur et ajouter le marqueur de fermeture.</p>
+<p>Une note du fichier possède un marqueur d’ouverture mais pas de marqueur de fermeture — généralement une note tapée à la main. PlanCake considère tout ce qui suit le marqueur comme faisant partie de cette note. Appuyez sur <kbd>Ctrl+E</kbd> pour ouvrir le fichier dans votre éditeur et ajouter le marqueur de fermeture. D’ici là, PlanCake ne modifie ni ne supprime cette note, et <strong>Supprimer toutes les notes</strong> ne supprime rien, car le reste du fichier partirait avec elle.</p>
 </details>
 
 <details>

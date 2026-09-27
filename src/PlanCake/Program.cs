@@ -59,6 +59,12 @@ internal static class Program {
                 return ExitCode.Success;
             }
 
+            // WinForms catches an exception from the message loop (an async void handler, a
+            // BeginInvoke callback) itself: without a handler it shows its own dialog and
+            // AppDomain.UnhandledException never fires, so nothing reached the log.
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += (_, e) => OnUiThreadException(e.Exception);
+
             // To customize application configuration such as high DPI settings or the default
             // font, see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
@@ -89,6 +95,28 @@ internal static class Program {
             return ExitCode.Error;
         } finally {
             Log.CloseAndFlush();
+        }
+    }
+
+    /// <summary>
+    /// An exception on the UI thread that nothing caught: logged, then the user decides whether
+    /// the window goes on (the document on disk is never half written: every write is atomic)
+    /// or PlanCake closes.
+    /// </summary>
+    private static void OnUiThreadException(Exception ex) {
+        Log.Error(ex, "Unhandled exception on the UI thread");
+
+        var goOn = DialogHelper.Confirm(
+            _("Something went wrong: {0}", ex.Message)
+                + Environment.NewLine + Environment.NewLine
+                + _("The details are in the log. Keep PlanCake open?"),
+            _("Error"),
+            MessageBoxIcon.Error
+        );
+
+        if (!goOn) {
+            Log.Information("The user closed PlanCake after an unhandled exception");
+            Application.Exit();
         }
     }
 

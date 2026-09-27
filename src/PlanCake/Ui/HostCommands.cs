@@ -66,17 +66,17 @@ internal static class HostCommands {
         (Keys.Shift | Keys.F1, HostCommand.About),
     ];
 
-    private static readonly Dictionary<Keys, HostCommand> _shortcuts =
-        _table.ToDictionary(entry => entry.Keys, entry => entry.Command);
-
     /// <summary>
-    /// Commands whose feature arrives with a later task: their keys are reserved here, but no menu
-    /// item or shortcuts dialog row offers them yet. Each task removes its command from this set.
+    /// Keys that run a command without being shown for it: what a key labeled as the shown one
+    /// sends on some layouts. On a US or UK layout the + of the main keyboard is Shift+=, so
+    /// Ctrl+Plus arrives as Ctrl+Shift+=.
     /// </summary>
-    private static readonly HashSet<HostCommand> _notYetAvailable = [];
+    private static readonly (Keys Keys, HostCommand Command)[] _layoutVariants = [
+        (Keys.Control | Keys.Shift | Keys.Oemplus, HostCommand.ZoomIn),
+    ];
 
-    /// <summary>Every shortcut and the command it runs.</summary>
-    public static IReadOnlyDictionary<Keys, HostCommand> Shortcuts => _shortcuts;
+    private static readonly Dictionary<Keys, HostCommand> _shortcuts =
+        _table.Concat(_layoutVariants).ToDictionary(entry => entry.Keys, entry => entry.Command);
 
     /// <summary>
     /// Looks up the command bound to <paramref name="keyData"/> (key code plus modifiers, as
@@ -84,9 +84,6 @@ internal static class HostCommands {
     /// </summary>
     public static bool TryGetCommand(Keys keyData, out HostCommand command) =>
         _shortcuts.TryGetValue(keyData, out command);
-
-    /// <summary>True when the command's feature exists: a menu item and the shortcuts dialog may offer it.</summary>
-    public static bool IsAvailable(HostCommand command) => !_notYetAvailable.Contains(command);
 
     /// <summary>The keys bound to <paramref name="command"/>, the one its menu item shows first.</summary>
     public static IReadOnlyList<Keys> KeysOf(HostCommand command) =>
@@ -100,13 +97,12 @@ internal static class HostCommands {
         KeysOf(command) is [var first, ..] ? KeyText(first) : null;
 
     /// <summary>
-    /// The available commands that have keys, in table order, each with every key bound to it:
-    /// the rows the shortcuts dialog starts with.
+    /// The commands that have keys, in table order, each with every key bound to it: the rows the
+    /// shortcuts dialog starts with.
     /// </summary>
-    public static IReadOnlyList<(HostCommand Command, IReadOnlyList<Keys> Keys)> AvailableShortcuts() =>
+    public static IReadOnlyList<(HostCommand Command, IReadOnlyList<Keys> Keys)> Shortcuts() =>
         _table.Select(entry => entry.Command)
             .Distinct()
-            .Where(IsAvailable)
             .Select(command => (command, KeysOf(command)))
             .ToList();
 

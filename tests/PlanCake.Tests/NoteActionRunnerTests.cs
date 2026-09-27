@@ -215,6 +215,50 @@ public class NoteActionRunnerTests: IDisposable {
         OnDisk.Should().Be("Para.\n");
     }
 
+    [Fact]
+    public void Add_FileWithTheReadOnlyAttribute_FailsWithTheReasonAndKeepsTheText() {
+        var runner = Runner("Para.\n", new MarkdownFileOptions(Retries: 0));
+        var rendered = runner.Store.File.Text;
+        var block = Render(rendered).Blocks[0];
+        File.SetAttributes(_path, FileAttributes.ReadOnly);
+        NoteActionResult result;
+
+        try {
+            result = runner.Add(rendered, block, "Check this");
+        } finally {
+            File.SetAttributes(_path, FileAttributes.Normal);
+        }
+
+        result.Status.Should().Be(NoteActionStatus.Failed);
+        result.Message.Should().StartWith("Unable to write the file: ");
+        result.KeepsText.Should().BeTrue();
+        OnDisk.Should().Be("Para.\n");
+    }
+
+    // A note without a closing marker
+
+    [Fact]
+    public void EditDeleteAndClear_NoteWithoutClosingMarker_AreRefusedWithTheReason() {
+        const string Text = "Para.\n[usernote]Never closed\n\nMore of the plan\n";
+        var runner = Runner(Text);
+        var note = Render(Text).Notes[0].Note;
+
+        NoteActionRunner.UnterminatedReason(note).Should().Contain("line 2").And.Contain("no closing marker");
+
+        foreach (var result in new[] { runner.Edit(Text, note, "Never closed"), runner.Delete(Text, note), runner.Clear(Text) }) {
+            result.Status.Should().Be(NoteActionStatus.Unterminated);
+            result.Message.Should().Be(NoteActionRunner.UnterminatedReason(note));
+            result.NeedsRender.Should().BeFalse();
+            result.KeepsText.Should().BeFalse();
+        }
+
+        OnDisk.Should().Be(Text);
+    }
+
+    [Fact]
+    public void UnterminatedReason_OfAClosedNote_IsNull() =>
+        NoteActionRunner.UnterminatedReason(Render("Para.\n[usernote]closed[/usernote]\n").Notes[0].Note).Should().BeNull();
+
     // Delete all notes
 
     [Fact]
