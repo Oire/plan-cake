@@ -57,8 +57,7 @@ names; Task 1 adapts it.
       output and exit codes in Technical details
 - [x] a Markdown file opens from File → Open, the command line, drag and drop, the clipboard
       (Ctrl+V after copying it in Explorer) and a link (downloaded to the Downloads folder)
-- [ ] every interaction works with the keyboard and the mouse, left to right and right to left
-      (open until Task 15a's check of the block keys without a screen reader)
+- [x] every interaction works with the keyboard and the mouse, left to right and right to left
 - [x] F1 opens the user manual in the current language
 - [ ] the installer installs PlanCake, puts `plancake` on the PATH, checks for the WebView2
       Runtime, and the portable zip runs from any folder (open until a real test install)
@@ -1034,11 +1033,13 @@ reach every block with their own reading cursor.
 - [x] test: the host-command table (both keys, their menu text), the page messages, the
       choice of block in Jint (`BlockPickTests`: next and previous, the ends, hidden blocks,
       no position yet, an empty document), mnemonics (`MnemonicTests`)
-- [ ] **ask the user** to check without a screen reader: Alt+Shift+Down and Alt+Shift+Up move block to
+- [x] **ask the user** to check without a screen reader: Alt+Shift+Down and Alt+Shift+Up move block to
       block with a visible focus outline, scrolling the block into view; Enter then adds a note
       to that block; at either end "No more blocks" shows in the status bar. And with JAWS: the
       keys break nothing (whether JAWS passes them on or keeps them), JAWS stays out of forms
-      mode, and reading with the virtual cursor works as before
+      mode, and reading with the virtual cursor works as before (checked with JAWS: the keys
+      reach PlanCake, JAWS reads each block, Enter adds a note to the block reached; a screenshot
+      shows the blue outline on the current block while PlanCake has focus)
 - [x] validation commands pass
 - [x] ➕ resize the panes without a mouse: the splitter between the document and the notes list
       could only be dragged. View → Wider notes list / Narrower notes list (no shortcut keys:
