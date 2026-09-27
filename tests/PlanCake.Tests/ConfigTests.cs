@@ -232,6 +232,85 @@ public class ConfigTests: IDisposable {
     }
 
     [Fact]
+    public void ReloadIfChanged_WhenTheFileCannotBeRead_KeepsTheSettingsAndTriesAgain() {
+        WriteFile("[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n[General]\nLanguage = fr\n");
+        Config.Load();
+
+        // Another window saves; the file is then held by another program (an antivirus scan).
+        WriteFile("[Notes]\nOpeningMarker = {{\nClosingMarker = }}\n[General]\nLanguage = fr\n");
+        File.SetLastWriteTimeUtc(FilePath, DateTime.UtcNow.AddMinutes(1));
+
+        using (new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.None)) {
+            Config.ReloadIfChanged().Should().BeFalse();
+        }
+
+        Config.Notes.OpeningMarker.Should().Be("<<");
+        Config.Notes.ClosingMarker.Should().Be(">>");
+        Config.General.Language.Should().Be("fr");
+
+        // Released: the next check reads it.
+        Config.ReloadIfChanged().Should().BeTrue();
+        Config.Notes.OpeningMarker.Should().Be("{{");
+        Config.Notes.ClosingMarker.Should().Be("}}");
+    }
+
+    [Fact]
+    public void Reload_OnAMalformedFile_KeepsTheSettingsInMemory() {
+        WriteFile("[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n[Advanced]\nConvertToUtf8 = True\n");
+        Config.Load();
+
+        WriteFile(UnparsableFile);
+
+        Config.Reload().Should().BeFalse();
+
+        Config.Notes.OpeningMarker.Should().Be("<<");
+        Config.Notes.ClosingMarker.Should().Be(">>");
+        Config.Advanced.ConvertToUtf8.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Load_AtStartupOnAMalformedFile_UsesTheDefaults() {
+        WriteFile(UnparsableFile);
+        Config.Notes.OpeningMarker = "<<";
+        Config.Notes.ClosingMarker = ">>";
+
+        Config.Load();
+
+        ShouldHaveTheDefaults();
+        File.ReadAllText(FilePath).Should().Be(UnparsableFile);
+    }
+
+    [Fact]
+    public void SaveLanguage_WhenTheFileCannotBeRead_SetsTheLanguageWithoutOverwritingTheFile() {
+        WriteFile("[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n");
+        Config.Load();
+
+        WriteFile(UnparsableFile);
+
+        Config.SaveLanguage("uk").Should().BeFalse();
+
+        Config.General.Language.Should().Be("uk");
+        Config.Notes.OpeningMarker.Should().Be("<<");
+        File.ReadAllText(FilePath).Should().Be(UnparsableFile);
+    }
+
+    [Fact]
+    public void Reload_WhenTheFileWasDeleted_WritesTheDefaultsOut() {
+        WriteFile("[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n");
+        Config.Load();
+
+        File.Delete(FilePath);
+
+        Config.Reload().Should().BeTrue();
+
+        ShouldHaveTheDefaults();
+        File.Exists(FilePath).Should().BeTrue();
+    }
+
+    /// <summary>A hand edit SharpConfig rejects: a section header with no closing bracket.</summary>
+    private const string UnparsableFile = "[General\nLanguage = fr\n";
+
+    [Fact]
     public void Load_WithAnInvalidEnum_FallsBackToItsDefaultAndKeepsTheOtherSettings() {
         WriteFile(
             "[General]\nLanguage = ru\nExternalChangeAction = Sometimes\nConfirmNoteDelete = False\n"

@@ -853,7 +853,10 @@ check tasks off from the document.
       showing the dialog, and what another window saved applies on OK or Cancel. (Review fix:
       View → Interface language did not, and saved its stale copy back; it now reads the file
       again too, `Config.SaveLanguage`, and the file is written through a temporary file, so a
-      window never reads it half written.)
+      window never reads it half written. A second review fix: a file that cannot be read on
+      one of these later reads, or when a window is activated after another saved, keeps the
+      settings the window has, never the defaults, and is tried again at the next activation;
+      View → Interface language then does not save. Only startup falls back to the defaults.)
 - [x] ➕ what an empty closing marker means is in the box's own label: "Closing marker (leave
       empty for a single marker that runs to the end of the line):". A separate hint label
       under the box, also given as the box's description, was tried first: JAWS read neither

@@ -10,14 +10,15 @@ namespace Oire.PlanCake.Utils;
 /// <summary>
 /// Static configuration container backed by an INI file under <see cref="App.DataFolder"/>
 /// (<c>PlanCake.cfg</c>, sections <c>[General]</c>, <c>[Notes]</c> and <c>[Advanced]</c>; Technical
-/// details → "Settings" in the plan). Call <see cref="Load"/> once at startup and <see cref="Save"/>
-/// whenever a section changes. The section properties are safe to read from any thread once
+/// details → "Settings" in the plan). Call <see cref="Load"/> once at startup, <see cref="Reload"/>
+/// to read it again while running, and <see cref="Save"/> whenever a section changes. The section properties are safe to read from any thread once
 /// <see cref="Load"/> has returned.
 /// </summary>
 /// <remarks>
-/// Neither method throws and neither shows a dialog: configuration is a convenience, not a
+/// No method throws and none shows a dialog: configuration is a convenience, not a
 /// precondition for running. A missing file is written out with the defaults; an unreadable
-/// one is logged and the defaults are used for the session. A value that cannot be read (a
+/// one is logged, and the defaults are used for the session at startup, or the settings
+/// already in memory are kept on a later read. A value that cannot be read (a
 /// hand-edited typo, an unknown enum name, markers that cannot delimit a note, a document
 /// language PlanCake does not offer) falls back to its default alone, keeping the other settings.
 /// </remarks>
@@ -128,27 +129,60 @@ internal static class Config {
     #endregion
 
     /// <summary>
-    /// Reads the configuration file, or creates it with the defaults if it does not exist yet.
+    /// Startup: reads the configuration file, or creates it with the defaults if it does not
+    /// exist yet. A file that cannot be read leaves the defaults for the session.
     /// </summary>
     public static void Load() {
+        if (!TryRead()) {
+            // Malformed INI, a locked file, a permissions problem. Carry on with the defaults
+            // rather than refusing to start.
+            ResetToDefaults();
+        }
+    }
+
+    /// <summary>
+    /// A running window reads the file again (another window may have saved since). A file that
+    /// cannot be read keeps the settings already in memory: falling back to the defaults here
+    /// would switch the note markers of a window at work, and a save would then write the
+    /// defaults over the user's settings.
+    /// </summary>
+    /// <returns><c>true</c> when the file was read (or, missing, written out with the defaults).</returns>
+    public static bool Reload() => TryRead();
+
+    /// <summary>
+    /// Reads the file into the sections, or writes the defaults out when it does not exist. The
+    /// sections, and the stamp <see cref="ReloadIfChanged"/> compares with, change only when the
+    /// read succeeds, so a failed read is tried again at the next check.
+    /// </summary>
+    private static bool TryRead() {
         // Taken before reading: a save by another window after it makes the next check read again.
-        _knownStamp = FileStamp();
+        var stamp = FileStamp();
 
         try {
             var cfg = LoadWithRetries();
-            General = ReadSection<SectionGeneral>(cfg, nameof(General));
-            Notes = ReadSection<SectionNotes>(cfg, nameof(Notes));
-            Advanced = ReadSection<SectionAdvanced>(cfg, nameof(Advanced));
-            Normalize();
+            var general = ReadSection<SectionGeneral>(cfg, nameof(General));
+            var notes = ReadSection<SectionNotes>(cfg, nameof(Notes));
+            var advanced = ReadSection<SectionAdvanced>(cfg, nameof(Advanced));
+            Normalize(general, notes);
+
+            General = general;
+            Notes = notes;
+            Advanced = advanced;
+            _knownStamp = stamp;
+
+            return true;
         } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
-            // First run. Not an error — write the defaults out so the user has a file to edit.
+            // First run, or the file was deleted. Not an error — write the defaults out so the
+            // user has a file to edit.
             ResetToDefaults();
+            _knownStamp = stamp;
             Save();
+
+            return true;
         } catch (Exception ex) {
-            // Malformed INI, a locked file, a permissions problem. Carry on with the defaults
-            // rather than refusing to start, but say so in the log.
-            Log.Warning(ex, "Config: unable to read {Path}, falling back to defaults", FilePath);
-            ResetToDefaults();
+            Log.Warning(ex, "Config: unable to read {Path}", FilePath);
+
+            return false;
         }
     }
 
@@ -197,16 +231,11 @@ internal static class Config {
     /// Reads the file again when it changed since this process last read or wrote it: every
     /// window is a process of its own, and another one may have saved its settings since.
     /// </summary>
-    /// <returns><c>true</c> when the file was read again.</returns>
-    public static bool ReloadIfChanged() {
-        if (FileStamp() == _knownStamp) {
-            return false;
-        }
-
-        Load();
-
-        return true;
-    }
+    /// <returns>
+    /// <c>true</c> when the file was read again; <c>false</c> when it did not change, or could not
+    /// be read (the settings in memory are kept, and the next call tries again).
+    /// </returns>
+    public static bool ReloadIfChanged() => FileStamp() != _knownStamp && Reload();
 
     /// <summary>The file's last-write time, or <see cref="DateTime.MinValue"/> when it cannot be read.</summary>
     private static DateTime FileStamp() {
@@ -220,16 +249,18 @@ internal static class Config {
 
     /// <summary>
     /// View → Interface language: reads the file again (another window may have saved other
-    /// settings since this one read it), sets the interface language, and saves.
+    /// settings since this one read it), sets the interface language, and saves. When the file
+    /// cannot be read, the language is set for this session only and the file is left alone:
+    /// saving the settings in memory could overwrite what it holds.
     /// </summary>
     /// <returns><c>true</c> when the file was written.</returns>
     public static bool SaveLanguage(string language) {
         ArgumentException.ThrowIfNullOrWhiteSpace(language);
 
-        Load();
+        var read = Reload();
         General.Language = language;
 
-        return Save();
+        return read && Save();
     }
 
     /// <summary>How many times a file another window is replacing is read again before giving up.</summary>
@@ -294,37 +325,37 @@ internal static class Config {
     }
 
     /// <summary>Replaces values that were read but cannot be used with their defaults.</summary>
-    private static void Normalize() {
-        if (String.Equals(General.Language?.Trim(), App.SystemLanguageName, StringComparison.OrdinalIgnoreCase)) {
-            General.Language = App.SystemLanguageName;
-        } else if (!LanguageList.IsCulture(General.Language)) {
-            Log.Warning("Config: interface language {Language} is unknown; using the default", General.Language);
-            General.Language = App.SystemLanguageName;
+    private static void Normalize(SectionGeneral general, SectionNotes notes) {
+        if (String.Equals(general.Language?.Trim(), App.SystemLanguageName, StringComparison.OrdinalIgnoreCase)) {
+            general.Language = App.SystemLanguageName;
+        } else if (!LanguageList.IsCulture(general.Language)) {
+            Log.Warning("Config: interface language {Language} is unknown; using the default", general.Language);
+            general.Language = App.SystemLanguageName;
         }
 
         var documentLanguage = LanguageList.SupportedCodes.FirstOrDefault(code =>
-            String.Equals(code, General.DefaultDocumentLanguage?.Trim(), StringComparison.OrdinalIgnoreCase)
+            String.Equals(code, general.DefaultDocumentLanguage?.Trim(), StringComparison.OrdinalIgnoreCase)
         );
 
         if (documentLanguage is null) {
             Log.Warning(
                 "Config: document language {Language} is not offered; using the default",
-                General.DefaultDocumentLanguage
+                general.DefaultDocumentLanguage
             );
         }
 
-        General.DefaultDocumentLanguage = documentLanguage ?? LanguageList.English;
+        general.DefaultDocumentLanguage = documentLanguage ?? LanguageList.English;
 
-        Notes.OpeningMarker ??= String.Empty;
-        Notes.ClosingMarker ??= String.Empty;
+        notes.OpeningMarker ??= String.Empty;
+        notes.ClosingMarker ??= String.Empty;
 
-        if (Notes.ToMarkers().Validate() is var error and not NoteMarkersError.None) {
+        if (notes.ToMarkers().Validate() is var error and not NoteMarkersError.None) {
             Log.Warning(
                 "Config: note markers {Opening} … {Closing} are unusable ({Error}); using the defaults",
-                Notes.OpeningMarker, Notes.ClosingMarker, error
+                notes.OpeningMarker, notes.ClosingMarker, error
             );
-            Notes.OpeningMarker = NoteMarkers.Default.Opening;
-            Notes.ClosingMarker = NoteMarkers.Default.Closing;
+            notes.OpeningMarker = NoteMarkers.Default.Opening;
+            notes.ClosingMarker = NoteMarkers.Default.Closing;
         }
     }
 }

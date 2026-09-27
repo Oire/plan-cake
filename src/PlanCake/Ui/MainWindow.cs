@@ -1957,8 +1957,9 @@ public partial class MainWindow: Form {
         var saveFailed = false;
 
         // Every window is a process of its own with its own copy of the settings: read the file
-        // again, so the dialog shows (and OK keeps) what another window saved since.
-        Config.Load();
+        // again, so the dialog shows (and OK keeps) what another window saved since. A file that
+        // cannot be read keeps the settings in memory, never the defaults, for the dialog to show.
+        Config.Reload();
 
         using (var dialog = new SettingsDialog()) {
             if (dialog.ShowDialog(this) == DialogResult.OK) {
