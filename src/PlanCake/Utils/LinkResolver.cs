@@ -13,12 +13,16 @@ internal enum LinkKind {
     /// <summary>An existing Markdown file, opened in PlanCake.</summary>
     Markdown,
 
-    /// <summary>Any other existing file or folder, opened by the system.</summary>
+    /// <summary>
+    /// An existing folder, or a file of a passive type (plain text, PDF, a picture; see
+    /// <see cref="LinkResolver.IsPassiveDocument"/>), opened by the system.
+    /// </summary>
     OtherFile,
 
     /// <summary>
-    /// An existing program or script (<c>.exe</c>, <c>.bat</c>, <c>.js</c>, <c>.lnk</c>, …; see
-    /// <see cref="LinkResolver.IsRunnable"/>), which the system would run: never opened from a link.
+    /// Any other existing file: a program or a script (<c>.exe</c>, <c>.bat</c>, <c>.py</c>,
+    /// <c>.lnk</c>, …), or a file whose default action PlanCake cannot vouch for (<c>.rdp</c>,
+    /// <c>.iso</c>, <c>.docm</c>, …). Never opened from a link; shown in File Explorer on request.
     /// </summary>
     Program,
 
@@ -45,7 +49,8 @@ internal sealed record LinkTarget(LinkKind Kind, string Target);
 /// </summary>
 /// <remarks>
 /// A plan may come from anywhere (a download, an AI assistant), and its link text can say
-/// anything. So a link never runs a program (<see cref="LinkKind.Program"/>), and a link to
+/// anything. So a link opens only a folder or a passive document, never a program or any other
+/// file the system's default action might run (<see cref="LinkKind.Program"/>), and a link to
 /// another computer's share (<c>\\host\share\…</c>, <c>file://host/…</c>) is not followed, nor
 /// even checked for existence, since reaching the host sends it the user's Windows credentials;
 /// only the share the open document is on itself is allowed.
@@ -63,8 +68,29 @@ internal static class LinkResolver {
         ".vbe", ".wsf", ".wsh", ".ws", ".wsc", ".sct", ".ps1", ".psm1", ".psd1", ".ps1xml",
         ".psc1", ".reg", ".inf", ".scf", ".jar", ".gadget", ".settingcontent-ms", ".library-ms",
         ".search-ms", ".searchconnector-ms", ".diagcab", ".xll", ".xbap", ".chm", ".appx",
-        ".appxbundle", ".msix", ".msixbundle",
+        ".appxbundle", ".msix", ".msixbundle", ".py", ".pyw", ".pyz", ".sh", ".bash", ".rb", ".pl",
+        ".php", ".tcl", ".lua", ".rdp", ".theme", ".themepack", ".deskthemepack", ".iso", ".img",
+        ".vhd", ".vhdx",
     };
+
+    /// <summary>
+    /// File types a link opens with the system: documents and pictures whose default action only
+    /// shows them. Anything else might run something, whatever the machine says about it.
+    /// </summary>
+    private static readonly HashSet<string> _passiveExtensions = new(StringComparer.OrdinalIgnoreCase) {
+        ".txt", ".log", ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tif", ".tiff",
+        ".ico",
+    };
+
+    /// <summary>
+    /// True when <paramref name="path"/> is a file a link may open with the system: plain text,
+    /// a PDF or a picture, going by its extension.
+    /// </summary>
+    public static bool IsPassiveDocument(string? path) {
+        var extension = Path.GetExtension(path);
+
+        return !String.IsNullOrEmpty(extension) && _passiveExtensions.Contains(extension);
+    }
 
     /// <summary>
     /// True when the system would run <paramref name="path"/> instead of opening it: a program, a
@@ -108,8 +134,17 @@ internal static class LinkResolver {
     /// <param name="exists">
     /// Whether a local path exists; <see langword="null"/> checks the disk for a file or a folder.
     /// </param>
-    public static LinkTarget Resolve(string? href, string? documentFolder, Func<string, bool>? exists = null) {
+    /// <param name="isFolder">
+    /// Whether an existing local path is a folder; <see langword="null"/> checks the disk.
+    /// </param>
+    public static LinkTarget Resolve(
+        string? href,
+        string? documentFolder,
+        Func<string, bool>? exists = null,
+        Func<string, bool>? isFolder = null
+    ) {
         exists ??= path => File.Exists(path) || Directory.Exists(path);
+        isFolder ??= Directory.Exists;
         var link = href?.Trim() ?? String.Empty;
 
         if (link.Length == 0) {
@@ -127,7 +162,7 @@ internal static class LinkResolver {
             }
 
             return uri.IsFile
-                ? Local(uri.LocalPath, documentFolder, link, exists)
+                ? Local(uri.LocalPath, documentFolder, link, exists, isFolder)
                 : new LinkTarget(LinkKind.Unsupported, link);
         }
 
@@ -146,13 +181,19 @@ internal static class LinkResolver {
         try {
             var path = Path.Combine(documentFolder, relative.Replace('/', Path.DirectorySeparatorChar));
 
-            return Local(Path.GetFullPath(path), documentFolder, link, exists);
+            return Local(Path.GetFullPath(path), documentFolder, link, exists, isFolder);
         } catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException) {
             return new LinkTarget(LinkKind.Unsupported, link);
         }
     }
 
-    private static LinkTarget Local(string path, string? documentFolder, string link, Func<string, bool> exists) {
+    private static LinkTarget Local(
+        string path,
+        string? documentFolder,
+        string link,
+        Func<string, bool> exists,
+        Func<string, bool> isFolder
+    ) {
         // Checked before the disk is touched: File.Exists on a UNC path already reaches the host.
         if (!IsReachableWithoutAsking(path, documentFolder)) {
             return new LinkTarget(LinkKind.Unsupported, link);
@@ -166,7 +207,11 @@ internal static class LinkResolver {
             return new LinkTarget(LinkKind.Markdown, path);
         }
 
-        return new LinkTarget(IsRunnable(path) ? LinkKind.Program : LinkKind.OtherFile, path);
+        // An allowlist, not a blocklist: the default action of a type no list names (a .py file
+        // with the Python launcher installed, a .sh file with Git for Windows) may run it.
+        var opens = !IsRunnable(path) && (IsPassiveDocument(path) || isFolder(path));
+
+        return new LinkTarget(opens ? LinkKind.OtherFile : LinkKind.Program, path);
     }
 
     /// <summary>

@@ -462,7 +462,7 @@ footer {
 <ul>
 <li>Un lien web s’ouvre dans votre navigateur par défaut.</li>
 <li>Un lien vers un autre fichier Markdown situé à côté de celui-ci ouvre ce fichier dans PlanCake, dans la même fenêtre.</li>
-<li>Un lien vers tout autre type de fichier l’ouvre avec le programme que Windows lui associe. Un lien vers un programme ou un script (comme <code>.exe</code>, <code>.bat</code> ou <code>.js</code>) n’est jamais exécuté, quoi qu’en dise son texte&nbsp;: PlanCake propose plutôt d’afficher le fichier dans l’Explorateur de fichiers. Un lien vers un fichier situé sur le partage réseau d’un autre ordinateur n’est pas suivi.</li>
+<li>Un lien vers un dossier l’ouvre dans l’Explorateur de fichiers, et un lien vers un fichier texte, un PDF ou une image l’ouvre avec le programme que Windows lui associe. Tout autre fichier (un programme, un script comme <code>.bat</code>, <code>.js</code> ou <code>.py</code>, ou tout autre type dont l’ouverture pourrait exécuter quelque chose) n’est jamais ouvert depuis un lien, quoi qu’en dise son texte&nbsp;: PlanCake propose plutôt d’afficher le fichier dans l’Explorateur de fichiers. Un lien vers un fichier situé sur le partage réseau d’un autre ordinateur n’est pas suivi.</li>
 <li>Un lien vers un titre du même document vous y amène.</li>
 <li>Si un lien pointe vers un fichier qui n’existe pas, la barre d’état le signale et affiche le chemin.</li>
 </ul>
@@ -911,7 +911,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>PlanCake indique qu’une note s’étend jusqu’à la fin du fichier</summary>
-<p>Une note du fichier possède un marqueur d’ouverture mais pas de marqueur de fermeture — généralement une note tapée à la main. PlanCake considère tout ce qui suit le marqueur comme faisant partie de cette note. Appuyez sur <kbd>Ctrl+E</kbd> pour ouvrir le fichier dans votre éditeur et ajouter le marqueur de fermeture. D’ici là, PlanCake ne modifie ni ne supprime cette note, et <strong>Supprimer toutes les notes</strong> ne supprime rien, car le reste du fichier partirait avec elle.</p>
+<p>Une note du fichier possède un marqueur d’ouverture mais pas de marqueur de fermeture — généralement une note tapée à la main. PlanCake considère tout ce qui suit le marqueur comme faisant partie de cette note. Appuyez sur <kbd>Ctrl+E</kbd> pour ouvrir le fichier dans votre éditeur et ajouter le marqueur de fermeture. D’ici là, PlanCake ne modifie ni ne supprime cette note, et <strong>Supprimer toutes les notes</strong> ne supprime rien, car le reste du fichier partirait avec elle. PlanCake n’ajoute pas non plus de note au dernier bloc qui la précède, car cette note en ferait partie.</p>
 </details>
 
 <details>

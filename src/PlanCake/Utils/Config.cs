@@ -53,6 +53,12 @@ internal static class Config {
 
     public static SectionAdvanced Advanced { get; private set; } = new();
 
+    /// <summary>
+    /// The last-write time of the file when this process last read or wrote it, so that
+    /// <see cref="ReloadIfChanged"/> can tell another window's save.
+    /// </summary>
+    private static DateTime _knownStamp;
+
     #region Config section classes
 
     /// <summary>App-level settings: languages, confirmations, the window, updates.</summary>
@@ -125,6 +131,9 @@ internal static class Config {
     /// Reads the configuration file, or creates it with the defaults if it does not exist yet.
     /// </summary>
     public static void Load() {
+        // Taken before reading: a save by another window after it makes the next check read again.
+        _knownStamp = FileStamp();
+
         try {
             var cfg = LoadWithRetries();
             General = ReadSection<SectionGeneral>(cfg, nameof(General));
@@ -169,6 +178,7 @@ internal static class Config {
             try {
                 cfg.SaveToFile(temp);
                 File.Move(temp, FilePath, overwrite: true);
+                _knownStamp = FileStamp();
             } finally {
                 if (File.Exists(temp)) {
                     File.Delete(temp);
@@ -180,6 +190,31 @@ internal static class Config {
             Log.Error(ex, "Config: unable to save {Path}", FilePath);
 
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Reads the file again when it changed since this process last read or wrote it: every
+    /// window is a process of its own, and another one may have saved its settings since.
+    /// </summary>
+    /// <returns><c>true</c> when the file was read again.</returns>
+    public static bool ReloadIfChanged() {
+        if (FileStamp() == _knownStamp) {
+            return false;
+        }
+
+        Load();
+
+        return true;
+    }
+
+    /// <summary>The file's last-write time, or <see cref="DateTime.MinValue"/> when it cannot be read.</summary>
+    private static DateTime FileStamp() {
+        try {
+            return File.GetLastWriteTimeUtc(FilePath);
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
+                                         or NotSupportedException) {
+            return DateTime.MinValue;
         }
     }
 

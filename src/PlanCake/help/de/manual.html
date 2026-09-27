@@ -462,7 +462,7 @@ footer {
 <ul>
 <li>Ein Weblink öffnet sich in Ihrem Standardbrowser.</li>
 <li>Ein Link zu einer anderen Markdown-Datei neben dieser öffnet diese Datei in PlanCake, im selben Fenster.</li>
-<li>Ein Link zu jeder anderen Art von Datei öffnet sie mit dem Programm, das Windows dafür verwendet. Ein Link zu einem Programm oder Skript (etwa <code>.exe</code>, <code>.bat</code> oder <code>.js</code>) wird nie ausgeführt, was auch immer sein Text sagt: PlanCake fragt stattdessen, ob die Datei im Datei-Explorer angezeigt werden soll. Einem Link zu einer Datei auf der Netzwerkfreigabe eines anderen Computers folgt PlanCake nicht.</li>
+<li>Ein Link zu einem Ordner öffnet ihn im Datei-Explorer, und ein Link zu einer Textdatei, einer PDF-Datei oder einem Bild öffnet sie mit dem Programm, das Windows dafür verwendet. Jede andere Datei (ein Programm, ein Skript wie <code>.bat</code>, <code>.js</code> oder <code>.py</code> oder jeder andere Typ, dessen Öffnen etwas ausführen könnte) wird nie über einen Link geöffnet, was auch immer sein Text sagt: PlanCake fragt stattdessen, ob die Datei im Datei-Explorer angezeigt werden soll. Einem Link zu einer Datei auf der Netzwerkfreigabe eines anderen Computers folgt PlanCake nicht.</li>
 <li>Ein Link zu einer Überschrift im selben Dokument bringt Sie zu dieser Überschrift.</li>
 <li>Zeigt ein Link auf eine Datei, die nicht existiert, sagt die Statusleiste das und zeigt den Pfad.</li>
 </ul>
@@ -911,7 +911,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>PlanCake sagt, eine Notiz reicht bis zum Ende der Datei</summary>
-<p>Eine Notiz in der Datei hat eine Anfangsmarkierung, aber keine Endmarkierung – meist eine von Hand eingetippte Notiz. PlanCake behandelt alles nach der Markierung als Teil dieser Notiz. Drücken Sie <kbd>Strg+E</kbd>, um die Datei in Ihrem Editor zu öffnen und die Endmarkierung hinzuzufügen. Bis dahin bearbeitet oder löscht PlanCake diese Notiz nicht, und <strong>Alle Notizen löschen</strong> entfernt nichts, weil der Rest der Datei mit verschwinden würde.</p>
+<p>Eine Notiz in der Datei hat eine Anfangsmarkierung, aber keine Endmarkierung – meist eine von Hand eingetippte Notiz. PlanCake behandelt alles nach der Markierung als Teil dieser Notiz. Drücken Sie <kbd>Strg+E</kbd>, um die Datei in Ihrem Editor zu öffnen und die Endmarkierung hinzuzufügen. Bis dahin bearbeitet oder löscht PlanCake diese Notiz nicht, und <strong>Alle Notizen löschen</strong> entfernt nichts, weil der Rest der Datei mit verschwinden würde. Auch fügt PlanCake dem letzten Block davor keine Notiz hinzu, denn sie würde Teil dieser Notiz.</p>
 </details>
 
 <details>

@@ -922,9 +922,20 @@ public partial class MainWindow: Form {
 
                 break;
             case PageMessages.ToggleTask:
-                if (FindTarget(e.Message) is { Block: { } taskBlock, Note: null } taskTarget
-                    && PageMessages.GetBool(e.Message, "checked") is { } isChecked) {
-                    BeginInvoke(WhileCurrent(taskTarget, () => ToggleTask(taskTarget, taskBlock, isChecked)));
+                if (PageMessages.GetBool(e.Message, "checked") is not { } isChecked) {
+                    break;
+                }
+
+                if (FindTarget(e.Message) is { Block: { } taskBlock, Note: null } taskTarget) {
+                    BeginInvoke(() => {
+                        if (taskTarget.Generation == _generation) {
+                            ToggleTask(taskTarget, taskBlock, isChecked);
+                        } else {
+                            TaskToggleDropped();
+                        }
+                    });
+                } else if (_render is not null && !IsCurrentRender(e.Message)) {
+                    TaskToggleDropped();
                 }
 
                 break;
@@ -1024,7 +1035,7 @@ public partial class MainWindow: Form {
             return;
         }
 
-        if (CannotChangeReason(notes) is { } reason) {
+        if ((CannotChangeReason(notes) ?? notes.UnterminatedReason(target.RenderedText, block)) is { } reason) {
             _announcer.Announce(reason);
             return;
         }
@@ -1163,7 +1174,9 @@ public partial class MainWindow: Form {
 
             var result = notes.ToggleTask(target.RenderedText, item.StartLine, isChecked);
 
-            if (!result.NeedsRender) {
+            // Stale re-renders from the file, and the page sets every check box from the new
+            // render; the check box is set back first all the same.
+            if (result.Status != NoteActionStatus.Done) {
                 RevertTask(item, fileState);
             }
 
@@ -1197,6 +1210,15 @@ public partial class MainWindow: Form {
         "{0} is no longer there: it was deleted, renamed or moved. Notes cannot be changed until it is back.",
         _file is null ? String.Empty : Path.GetFileName(_file.Path)
     );
+
+    /// <summary>
+    /// A check box was toggled in a render that has since been replaced (the file changed): the
+    /// toggle is not written, and the new render, on its way to the page, shows the file's state.
+    /// </summary>
+    private void TaskToggleDropped() {
+        Log.Information("Task toggle from an older render dropped");
+        _announcer.Announce(_("The file changed. Please try again."));
+    }
 
     /// <summary>Sets the item's check box in the page back to the file's state.</summary>
     private void RevertTask(BlockInfo item, bool fileState) {
@@ -1360,12 +1382,13 @@ public partial class MainWindow: Form {
     }
 
     /// <summary>
-    /// A link to a program or a script: it is never run from a link, whatever the link text says.
-    /// Yes shows it selected in File Explorer, where the user can decide.
+    /// A link to a program, a script or any other file that is not a passive document: it is
+    /// never opened from a link, whatever the link text says, since its default action might run
+    /// something. Yes shows it selected in File Explorer, where the user can decide.
     /// </summary>
     private void OfferToShowProgram(string path) {
         var confirmed = DialogHelper.Confirm(
-            _("This link leads to a program or a script, which PlanCake does not run:\n\n{0}\n\nShow it in File Explorer?", path),
+            _("PlanCake does not open this file from a link, since opening it could run a program:\n\n{0}\n\nShow it in File Explorer?", path),
             _("Open link"),
             MessageBoxIcon.Warning
         );
@@ -1385,8 +1408,8 @@ public partial class MainWindow: Form {
 
     /// <summary>
     /// Opens <paramref name="target"/> with the system's default verb: a web link, a folder, a
-    /// document. Never for a program or a script (<see cref="LinkResolver.IsRunnable"/>), which
-    /// the default verb runs.
+    /// passive document (<see cref="LinkResolver.IsPassiveDocument"/>). Never for a program, a
+    /// script or any other local file from a link, which the default verb might run.
     /// </summary>
     private void ShellOpen(string target) =>
         StartProcess(new ProcessStartInfo(target) { UseShellExecute = true }, target);
@@ -1871,6 +1894,9 @@ public partial class MainWindow: Form {
             return;
         }
 
+        // Taken before the question: while it is open, an outside change can reload the file, and
+        // the notes it brings must not be deleted without being asked about (Clear then refuses).
+        var renderedText = _renderedText;
         var count = render.Notes.Count;
         var confirmed = DialogHelper.Confirm(
             _n("Delete the note in this file?", "Delete all {0} notes in this file?", count, count),
@@ -1882,7 +1908,7 @@ public partial class MainWindow: Form {
             return;
         }
 
-        ShowNoteResult(notes.Clear(_renderedText));
+        ShowNoteResult(notes.Clear(renderedText));
     }
 
     /// <summary>
@@ -1957,8 +1983,41 @@ public partial class MainWindow: Form {
         Config.Advanced.ConvertToUtf8
     );
 
+    /// <summary>
+    /// Every window is a process of its own with its own copy of the settings: what another window
+    /// saved (the note markers above all, which the notes written here must use) applies here as
+    /// soon as this window is active again, before anything can be written with the old settings.
+    /// </summary>
+    /// <remarks>
+    /// Posted, not run at once: the window is activated again while a dialog it opened closes,
+    /// before the action that opened it (a note written, notes deleted after a question) has run,
+    /// and that action must finish with the settings, and the render, the user saw.
+    /// </remarks>
+    protected override void OnActivated(EventArgs e) {
+        base.OnActivated(e);
+
+        if (!StartupFailed && !IsDisposed && IsHandleCreated) {
+            BeginInvoke(ReloadSettingsIfChanged);
+        }
+    }
+
+    private void ReloadSettingsIfChanged() {
+        if (StartupFailed || IsDisposed) {
+            return;
+        }
+
+        var before = CurrentSettings();
+
+        if (Config.ReloadIfChanged()) {
+            Log.Information("Settings file changed; applying it");
+
+            // The focus stays where activation puts it back.
+            ApplySettings(before, returnFocus: false);
+        }
+    }
+
     /// <summary>Applies what Settings changed, compared with <paramref name="before"/>.</summary>
-    private void ApplySettings(AppliedSettings before) {
+    private void ApplySettings(AppliedSettings before, bool returnFocus = true) {
         var general = Config.General;
         var needsRender = false;
 
@@ -2009,7 +2068,9 @@ public partial class MainWindow: Form {
             RenderDocument(restorePosition: false);
         }
 
-        ReturnFocus();
+        if (returnFocus) {
+            ReturnFocus();
+        }
     }
 
     /// <summary>

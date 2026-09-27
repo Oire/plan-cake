@@ -17,8 +17,12 @@ public class LinkResolverTests {
         @"D:\elsewhere\UPPER.MD",
     };
 
+    private static readonly HashSet<string> _folders = new(StringComparer.OrdinalIgnoreCase) {
+        @"C:\plans\assets",
+    };
+
     private static LinkTarget Resolve(string? href, string? folder = Folder) =>
-        LinkResolver.Resolve(href, folder, _existing.Contains);
+        LinkResolver.Resolve(href, folder, _existing.Contains, _folders.Contains);
 
     [Theory]
     [InlineData("https://github.com/Oire/plan-cake", "https://github.com/Oire/plan-cake")]
@@ -74,10 +78,48 @@ public class LinkResolverTests {
     [InlineData("site.url", @"C:\plans\site.url")]
     [InlineData("install.msi", @"C:\plans\install.msi")]
     [InlineData("file:///C:/plans/setup.exe", @"C:\plans\setup.exe")]
+    [InlineData("scripts/setup.py", @"C:\plans\scripts\setup.py")]
+    [InlineData("setup.sh", @"C:\plans\setup.sh")]
+    [InlineData("server.rdp", @"C:\plans\server.rdp")]
+    [InlineData("dark.theme", @"C:\plans\dark.theme")]
+    [InlineData("disk.iso", @"C:\plans\disk.iso")]
+    [InlineData("disk.vhdx", @"C:\plans\disk.vhdx")]
     public void Resolve_ProgramOrScript_IsNeverOpenedByTheSystem(string href, string expected) {
         var programs = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { expected };
 
-        LinkResolver.Resolve(href, Folder, programs.Contains).Should().Be(new LinkTarget(LinkKind.Program, expected));
+        LinkResolver.Resolve(href, Folder, programs.Contains, _ => false)
+            .Should().Be(new LinkTarget(LinkKind.Program, expected));
+    }
+
+    [Theory]
+    [InlineData("tool.unknownext", @"C:\plans\tool.unknownext")]
+    [InlineData("report.docm", @"C:\plans\report.docm")]
+    [InlineData("page.html", @"C:\plans\page.html")]
+    [InlineData("README", @"C:\plans\README")]
+    public void Resolve_FileNotKnownToBePassive_IsNeverOpenedByTheSystem(string href, string expected) {
+        var files = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { expected };
+
+        LinkResolver.Resolve(href, Folder, files.Contains, _ => false)
+            .Should().Be(new LinkTarget(LinkKind.Program, expected));
+    }
+
+    [Theory]
+    [InlineData("notes.txt", true)]
+    [InlineData("report.PDF", true)]
+    [InlineData("photo.jpeg", true)]
+    [InlineData("setup.py", false)]
+    [InlineData("page.html", false)]
+    [InlineData("README", false)]
+    [InlineData(null, false)]
+    public void IsPassiveDocument_ChecksTheExtension(string? path, bool expected) {
+        LinkResolver.IsPassiveDocument(path).Should().Be(expected);
+    }
+
+    [Fact]
+    public void Resolve_FolderWithARunnableName_IsNotOpened() {
+        var target = LinkResolver.Resolve("tools.exe", Folder, _ => true, _ => true);
+
+        target.Should().Be(new LinkTarget(LinkKind.Program, @"C:\plans\tools.exe"));
     }
 
     [Theory]
@@ -87,6 +129,10 @@ public class LinkResolverTests {
     [InlineData("payload.hta", true)]
     [InlineData("x.wsf", true)]
     [InlineData("x.scr", true)]
+    [InlineData("setup.py", true)]
+    [InlineData("run.sh", true)]
+    [InlineData("host.rdp", true)]
+    [InlineData("disk.vhd", true)]
     [InlineData("diagram.png", false)]
     [InlineData("notes.txt", false)]
     [InlineData("report.pdf", false)]

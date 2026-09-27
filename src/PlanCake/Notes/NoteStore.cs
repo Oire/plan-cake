@@ -118,15 +118,37 @@ internal sealed class NoteStore {
     /// Writes a note after <paramref name="afterBlock"/>'s last line, after any notes already
     /// anchored there.
     /// </summary>
+    /// <exception cref="UnterminatedNoteException">
+    /// A note without a closing marker starts before where the note would go, so the new note's
+    /// closing marker would end it (<see cref="UnterminatedBefore"/>); nothing is written.
+    /// </exception>
     public NoteChange Add(string renderedText, BlockInfo afterBlock, string text) {
         ArgumentNullException.ThrowIfNull(afterBlock);
 
         var noteText = PrepareText(text);
         var current = ReadCurrent(renderedText);
         var parse = NoteParser.Parse(current, Markers);
+
+        if (UnterminatedBefore(current, parse, afterBlock) is { } unterminated) {
+            throw new UnterminatedNoteException(unterminated.StartLine);
+        }
+
         var (after, line) = InsertNote(current, parse, afterBlock, noteText, Markers, File.LineEnding);
 
         return Apply(new NoteChange(NoteOperation.Add, current, after, line, 1));
+    }
+
+    /// <summary>
+    /// The note without a closing marker that a note added after <paramref name="block"/> would
+    /// land in, or <see langword="null"/> when there is none. Such a note runs to the end of the
+    /// file; a note written after its start would give it a closing marker, so the two would read
+    /// back as one note taking in everything between them, which deleting it would then remove.
+    /// </summary>
+    public Note? UnterminatedBefore(string source, BlockInfo block) {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(block);
+
+        return UnterminatedBefore(source, NoteParser.Parse(source, Markers), block);
     }
 
     /// <summary>Replaces the text of <paramref name="note"/>, found in the rendered text.</summary>
@@ -296,19 +318,23 @@ internal sealed class NoteStore {
 
     // Pure text operations, internal for the tests.
 
+    private static Note? UnterminatedBefore(string source, NoteParseResult parse, BlockInfo block) {
+        // Only the last note can lack its closing marker: it runs to the end of the file.
+        if (parse.Notes.FirstOrDefault(note => note.Unterminated) is not { } unterminated) {
+            return null;
+        }
+
+        // A note goes in at the start of its line, so one inserted on the unterminated note's own
+        // line or before it stays out of it.
+        return InsertionLine(source, parse, block) > unterminated.StartLine ? unterminated : null;
+    }
+
     /// <summary>
-    /// Inserts a note on new lines after <paramref name="block"/>'s last original line and after
-    /// any notes already anchored there (skipping blank lines only when a note follows them).
+    /// The 1-based line a note added after <paramref name="block"/> goes in before (one past the
+    /// last line at the end of the file): after the block's last original line and any notes
+    /// already anchored there (skipping blank lines only when a note follows them).
     /// </summary>
-    /// <returns>The new text and the 1-based line the note starts on.</returns>
-    internal static (string Text, int Line) InsertNote(
-        string source,
-        NoteParseResult parse,
-        BlockInfo block,
-        string text,
-        NoteMarkers markers,
-        string lineEnding
-    ) {
+    private static int InsertionLine(string source, NoteParseResult parse, BlockInfo block) {
         var lines = NoteParser.SplitLines(source);
         ArgumentOutOfRangeException.ThrowIfLessThan(block.StartLine, 1, nameof(block));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(block.StartLine, block.EndLine, nameof(block));
@@ -327,6 +353,24 @@ internal sealed class NoteStore {
             }
         }
 
+        return insertAt;
+    }
+
+    /// <summary>
+    /// Inserts a note on new lines after <paramref name="block"/>'s last original line and after
+    /// any notes already anchored there (skipping blank lines only when a note follows them).
+    /// </summary>
+    /// <returns>The new text and the 1-based line the note starts on.</returns>
+    internal static (string Text, int Line) InsertNote(
+        string source,
+        NoteParseResult parse,
+        BlockInfo block,
+        string text,
+        NoteMarkers markers,
+        string lineEnding
+    ) {
+        var insertAt = InsertionLine(source, parse, block);
+        var lines = NoteParser.SplitLines(source);
         var anchorLine = lines[block.StartLine - 1];
         var prefix = block.Kind == BlockKind.ListItem
             ? ListItemPrefix(source, anchorLine)

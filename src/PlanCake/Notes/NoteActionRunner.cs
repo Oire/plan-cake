@@ -90,6 +90,23 @@ internal sealed class NoteActionRunner {
         return note.Unterminated ? UnterminatedMessage(note.StartLine) : null;
     }
 
+    /// <summary>
+    /// Why no note can be added after <paramref name="block"/> of <paramref name="renderedText"/>,
+    /// or <see langword="null"/> when one can: a note without a closing marker starts before
+    /// where it would go (<see cref="NoteStore.UnterminatedBefore"/>), and would take it in.
+    /// </summary>
+    public string? UnterminatedReason(string renderedText, BlockInfo block) {
+        ArgumentNullException.ThrowIfNull(renderedText);
+        ArgumentNullException.ThrowIfNull(block);
+
+        return Store.UnterminatedBefore(renderedText, block) is { } note
+            ? UnterminatedAddMessage(note.StartLine)
+            : null;
+    }
+
+    private static string UnterminatedAddMessage(int line) =>
+        _("The note on line {0} has no closing marker, so it runs to the end of the file, and a note added here would become part of it. Add the closing marker in an editor first.", line);
+
     /// <summary>What the user is told about a note without a closing marker on <paramref name="line"/>.</summary>
     public static string UnterminatedMessage(int line) =>
         _("The note on line {0} has no closing marker, so it runs to the end of the file, and changing it would change the rest of the file too. Add the closing marker in an editor first.", line);
@@ -110,9 +127,17 @@ internal sealed class NoteActionRunner {
         };
     }
 
-    /// <summary>Adds a note after <paramref name="block"/>.</summary>
+    /// <summary>
+    /// Adds a note after <paramref name="block"/>; refused when a note without a closing marker
+    /// starts before where it would go (<see cref="UnterminatedReason(String, BlockInfo)"/>).
+    /// </summary>
     public NoteActionResult Add(string renderedText, BlockInfo block, string text) {
+        ArgumentNullException.ThrowIfNull(renderedText);
         ArgumentNullException.ThrowIfNull(block);
+
+        if (UnterminatedReason(renderedText, block) is { } reason) {
+            return new NoteActionResult(NoteActionStatus.Unterminated, reason);
+        }
 
         return WriteNote(text, () => Store.Add(renderedText, block, text), _("Note added"));
     }

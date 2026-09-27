@@ -462,7 +462,7 @@ footer {
 <ul>
 <li>A web link opens in your default browser.</li>
 <li>A link to another Markdown file next to this one opens that file in PlanCake, in the same window.</li>
-<li>A link to any other kind of file opens it with the program Windows uses for it. A link to a program or a script (such as <code>.exe</code>, <code>.bat</code> or <code>.js</code>) is never run, whatever its text says: PlanCake asks whether to show the file in File Explorer instead. A link to a file on another computer's network share is not followed.</li>
+<li>A link to a folder opens it in File Explorer, and a link to a plain text file, a PDF or a picture opens it with the program Windows uses for it. Any other file (a program, a script such as <code>.bat</code>, <code>.js</code> or <code>.py</code>, or any other type whose opening could run something) is never opened from a link, whatever its text says: PlanCake asks whether to show the file in File Explorer instead. A link to a file on another computer's network share is not followed.</li>
 <li>A link to a heading in the same document takes you to that heading.</li>
 <li>If a link points to a file that does not exist, the status bar says so and shows the path.</li>
 </ul>
@@ -911,7 +911,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>PlanCake says a note runs to the end of the file</summary>
-<p>A note in the file has an opening marker but no closing one — usually a note typed by hand. PlanCake treats everything after the marker as part of that note. Press <kbd>Ctrl+E</kbd> to open the file in your editor and add the closing marker. Until then, PlanCake does not edit or delete that note, and <strong>Delete all notes</strong> removes nothing, because the rest of the file would go with it.</p>
+<p>A note in the file has an opening marker but no closing one — usually a note typed by hand. PlanCake treats everything after the marker as part of that note. Press <kbd>Ctrl+E</kbd> to open the file in your editor and add the closing marker. Until then, PlanCake does not edit or delete that note, and <strong>Delete all notes</strong> removes nothing, because the rest of the file would go with it. Nor does it add a note to the last block before that note, which would become part of it.</p>
 </details>
 
 <details>

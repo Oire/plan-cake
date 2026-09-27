@@ -355,7 +355,13 @@
             marked = null;
         }
 
-        main.querySelectorAll(taskSelector).forEach(showMixedState);
+        // Each check box shows the file's state. The morph compares markup, which holds the
+        // checked attribute and not the state the user toggled: a check box whose toggle was
+        // not written (the file changed meanwhile) would otherwise keep a state the file lacks.
+        main.querySelectorAll(taskSelector).forEach(function (checkbox) {
+            checkbox.checked = checkbox.hasAttribute("checked");
+            showMixedState(checkbox);
+        });
         main.setAttribute("lang", message.documentLang);
         document.title = message.title;
 

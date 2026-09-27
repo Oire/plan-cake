@@ -205,6 +205,33 @@ public class ConfigTests: IDisposable {
     }
 
     [Fact]
+    public void ReloadIfChanged_ReadsWhatAnotherWindowSavedOnce() {
+        Config.Load();
+        Config.ReloadIfChanged().Should().BeFalse();
+
+        // Another window (another process with its own copy) saves new markers.
+        WriteFile("[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n");
+        File.SetLastWriteTimeUtc(FilePath, DateTime.UtcNow.AddMinutes(1));
+
+        Config.ReloadIfChanged().Should().BeTrue();
+        Config.Notes.OpeningMarker.Should().Be("<<");
+        Config.Notes.ClosingMarker.Should().Be(">>");
+        Config.ReloadIfChanged().Should().BeFalse();
+    }
+
+    [Fact]
+    public void ReloadIfChanged_AfterItsOwnSave_ReadsNothing() {
+        Config.Load();
+        Config.Notes.OpeningMarker = "<<";
+        Config.Notes.ClosingMarker = ">>";
+
+        Config.Save().Should().BeTrue();
+
+        Config.ReloadIfChanged().Should().BeFalse();
+        Config.Notes.OpeningMarker.Should().Be("<<");
+    }
+
+    [Fact]
     public void Load_WithAnInvalidEnum_FallsBackToItsDefaultAndKeepsTheOtherSettings() {
         WriteFile(
             "[General]\nLanguage = ru\nExternalChangeAction = Sometimes\nConfirmNoteDelete = False\n"

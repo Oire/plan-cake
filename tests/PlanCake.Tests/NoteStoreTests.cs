@@ -269,6 +269,39 @@ public class NoteStoreTests: IDisposable {
         OnDisk.Should().Be(Unterminated);
     }
 
+    // A stray opening marker (here in inline code) runs to the end of the file; a note added
+    // after it would close it, and the two would read back as one note.
+    [Theory]
+    [InlineData("# Title\n\nPara `[usernote]` stray\n\nMore of the plan\n", 3)]
+    [InlineData("# Title\n\nPara.\n\n[usernote]Never closed\n\nMore of the plan\n", 5)]
+    public void Add_AfterTheStartOfAnUnterminatedNote_ThrowsAndWritesNothing(string text, int markerLine) {
+        var store = Store(text);
+        var block = Render(text).Blocks[^1];
+        block.Kind.Should().Be(BlockKind.Paragraph);
+
+        var add = () => store.Add(text, block, "Looks good");
+
+        add.Should().Throw<UnterminatedNoteException>().Which.Line.Should().Be(markerLine);
+        OnDisk.Should().Be(text);
+        store.CanUndo.Should().BeFalse();
+        store.UnterminatedBefore(text, block)!.StartLine.Should().Be(markerLine);
+    }
+
+    [Fact]
+    public void Add_BeforeAnUnterminatedNote_IsWrittenAndLeavesItUnterminated() {
+        const string Text = "# Title\n\nPara.\n\n[usernote]Never closed\n\nMore of the plan\n";
+        var store = Store(Text);
+        var heading = Render(Text).Blocks[0];
+        store.UnterminatedBefore(Text, heading).Should().BeNull();
+
+        store.Add(Text, heading, "First");
+
+        OnDisk.Should().Be("# Title\n[usernote]First[/usernote]\n\nPara.\n\n[usernote]Never closed\n\nMore of the plan\n");
+        var notes = Render(OnDisk).Notes;
+        notes.Should().HaveCount(2);
+        notes[1].Note.Unterminated.Should().BeTrue();
+    }
+
     [Fact]
     public void DeleteAndEdit_ClosedNoteBeforeAnUnterminatedOne_StillWork() {
         var store = Store(Unterminated);
