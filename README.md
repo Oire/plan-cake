@@ -2,36 +2,147 @@
 
 Read Markdown files comfortably and leave notes right where they belong.
 
-PlanCake is a Windows desktop application that shows a Markdown file as properly rendered HTML,
-so a screen reader such as JAWS reads it with heading, list and table navigation instead of
-spelling out the punctuation, and lets you leave notes on any paragraph, list item, heading,
-table row or code block. The notes are written straight into the `.md` file, between a pair of
-markers (`[usernote]` … `[/usernote]` by default), where an AI assistant or a colleague can pick
-them up.
-
-PlanCake is under development; the first release is not out yet.
+PlanCake is a Windows application that shows a Markdown file the way it is meant to be read:
+real headings, lists, tables and code blocks instead of hash signs and asterisks. Click a
+paragraph, a list item, a heading, a table row or a code block, type a note, and PlanCake writes
+it straight into the `.md` file, right after that block, between a pair of markers
+(`[usernote]` … `[/usernote]` by default). Whoever reads the file next, a colleague or an AI
+assistant such as Claude, finds your notes exactly where they belong.
 
 ## Why
 
-Implementation plans written by AI coding assistants are long Markdown files, often 800 lines and
-more. Reading them raw in a code editor with JAWS means hearing "hash hash hash" and "star star"
-all day, with no way to jump by heading, list or table. Rendering the file fixes the reading.
+AI coding assistants write long implementation plans, often 800 lines of Markdown and more, and
+ask you to review them. Reading them raw in a code editor is tiring, and commenting on them is
+worse: you either describe in a chat where each remark belongs ("in Task 4, the third item…") or
+edit the file by hand and hope the assistant notices.
 
-Reviewing a plan also means commenting on it: "this step is wrong", "do this one first". A web
-page viewed in the JAWS virtual cursor cannot tell anyone *where* you are, and counting line
-numbers in the source by ear is no fun. PlanCake annotates **blocks** instead of lines: every
-rendered block knows which source lines it came from, so pressing Enter on it is enough to put a
-note in exactly the right place in the file. Claude's manual-review step then reads those notes
-and acts on them.
+PlanCake makes both halves comfortable. It renders the plan, so you read it like a document. And
+it knows which lines of the file each rendered block came from, so leaving a note on a block
+takes one click, or Enter, and no line numbers. The notes are plain text in the file itself:
+there is nothing to save, no side file, and any tool that reads the file sees them. When you are
+done, the assistant reads your notes with the exact blocks they refer to, reworks the plan and
+removes them.
 
-## Requirements
+Like every Oire application, PlanCake is built to work for everyone: everything works equally
+well with the mouse, from the keyboard alone, and with a screen reader, which reads the rendered
+plan with its usual heading, list and table navigation instead of spelling out Markdown
+punctuation.
+
+## Installing
+
+Download PlanCake from [plancake.oire.dev](https://plancake.oire.dev), in one of two forms:
+
+- **The installer** sets everything up: it installs the .NET 10 Desktop Runtime and the
+  Microsoft Edge WebView2 Runtime if they are missing, and puts `plancake` on your `PATH`.
+- **The portable zip** runs from any folder. Keep the empty `userdata` folder next to
+  `plancake.exe`, and PlanCake keeps its settings there instead of in `%APPDATA%\Oire\PlanCake`.
+
+Or install it with [winget](https://learn.microsoft.com/windows/package-manager/winget/):
+
+```powershell
+winget install Oire.PlanCake
+```
+
+Requirements:
 
 - Windows 10 or 11, x64
 - [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)
   (preinstalled on Windows 11)
 
-## Building
+The installer brings both runtimes along; the portable zip needs them already there.
+
+PlanCake speaks English, Russian, Ukrainian, French, Hebrew (with a right-to-left interface) and
+German. Press F1 in PlanCake for the full user manual.
+
+## Reading and annotating
+
+- **Open a file** from the command line (`plancake plan.md`), with Ctrl+O, by dropping it on the
+  window, from the clipboard (Ctrl+V after copying it in File Explorer, or a copied path), or from
+  a link (Ctrl+L; GitHub file links work as they are). Each file gets its own window, and a file
+  is never open in two windows at once.
+- **Add a note**: click a block, or move to it with Alt+Shift+Down Arrow and Alt+Shift+Up Arrow
+  and press Enter. Type the note and press Enter. The note is in the file at once, shown after
+  its block and in the notes list beside the document. Markdown in a note is shown formatted.
+- **Edit, delete, move between notes**: click a note or press Enter on it to edit it; Delete in
+  the notes list removes one; F9 and Shift+F9 go to the next and the previous note. Ctrl+Z and
+  Ctrl+Y undo and redo everything PlanCake writes.
+- **Tick off tasks**: task-list checkboxes (`- [ ]`) are real checkboxes; checking one writes
+  `[x]` on that line of the file.
+- **Keep reading while the file changes**: when something else changes the file, PlanCake
+  reloads it and keeps your place. It never writes a note over a change you have not seen.
+
+In the file, a note looks like this:
+
+```markdown
+Back up the database before you run the migration.
+[usernote]Also back up the uploads folder.[/usernote]
+```
+
+The markers can be changed in Settings (Ctrl+Comma), including a single marker that runs to the
+end of its line.
+
+## The command line
+
+Run with a subcommand, PlanCake works without a window, for scripts and AI assistants:
+
+```powershell
+plancake plan.md                          # open the window with plan.md
+plancake list plan.md                     # print every note with the block it follows
+plancake list plan.md --json -o notes.json   # the same as JSON, to a file
+plancake check plan.md                    # count the notes: exit code 0 with none, 3 with some
+plancake clear plan.md                    # remove every note from the file
+plancake export plan.md -o plan.html      # a standalone web page with the notes marked
+plancake check plan.md --open-marker "!NOTE!" --single-token   # other markers for one run
+```
+
+Errors go to the error output with exit code 1. Output is UTF-8 without a byte order mark.
+`plancake --help` and `plancake <command> --help` list every option.
+
+PlanCake is a Windows application, so an interactive PowerShell or Command Prompt does not wait
+for it: typed at the prompt, the output may appear after the prompt returns. Piped or captured
+output is always complete (`plancake check plan.md | Out-Host`, or `cmd /c "plancake check
+plan.md"` when you need `$LASTEXITCODE`).
+
+### A shorter command: `pk`
+
+To open plans with two letters, add an alias to your shell profile. In PowerShell (the file
+`$PROFILE` names):
+
+```powershell
+Set-Alias pk plancake
+```
+
+In bash (`~/.bashrc`):
+
+```bash
+alias pk=plancake
+```
+
+Then `pk plan.md` opens a plan, and `pk list plan.md` works like `plancake list plan.md`.
+
+## Reviewing a plan with Claude
+
+When Claude writes a plan and asks you to review it, open it with `pk plan.md`, read it, and
+leave notes wherever you want changes. Tell Claude you are done: it runs
+`plancake list plan.md --json` to read your notes with the blocks they refer to, reworks the
+plan, removes the notes it has dealt with, and confirms with `plancake check plan.md` that none
+is left.
+
+The [Debussy](https://debussy.oire.dev/) plugins for Claude Code have this manual-review step
+built in. They find notes by the markers in their `noteMarkers` setting, where a pair is written
+`open...close`, so point it at PlanCake's markers in `~/.claude/debussy.json` (or the project's
+`.claude/debussy.json`):
+
+```json
+{
+  "noteMarkers": ["[usernote]...[/usernote]"]
+}
+```
+
+If you change the markers in PlanCake's settings, change them there too.
+
+## Building from source
 
 ```powershell
 dotnet restore
@@ -45,6 +156,14 @@ Translations are compiled separately, since `.mo` files are build output and are
 ```powershell
 ./src/PlanCake/locale/scripts/Compile-Translations.ps1
 ```
+
+The installer and the portable zip are built with [Inno Setup 6](https://jrsoftware.org/isinfo.php):
+
+```powershell
+./installer/Build-Installer.ps1
+```
+
+It compiles the translations, publishes a Release build and writes both to `installer/Output/`.
 
 See `src/PlanCake/locale/README.md` for the translation workflow and `CLAUDE.md` for the
 conventions this repository follows.

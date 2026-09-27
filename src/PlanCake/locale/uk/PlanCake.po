@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-09-27 01:29:23+0200\n"
+"POT-Creation-Date: 2026-09-27 12:16:58+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: uk\n"
@@ -266,7 +266,7 @@ msgstr "Нотатка не має закривального маркера й 
 msgid "A note has no closing marker, so it runs to the end of the file."
 msgstr "Нотатка не має закривального маркера, тому триває до кінця файлу."
 
-#: ..\..\Ui\AboutDialog.cs:24 ..\..\Ui\HostCommands.cs:132
+#: ..\..\Ui\AboutDialog.cs:24 ..\..\Ui\HostCommands.cs:134
 msgid "About PlanCake"
 msgstr "Про PlanCake"
 
@@ -294,11 +294,11 @@ msgstr "Видалення всіх нотаток повторено"
 msgid "All notes deleted undone"
 msgstr "Видалення всіх нотаток скасовано"
 
-#: ..\..\Ui\HostCommands.cs:152
+#: ..\..\Ui\HostCommands.cs:151
 msgid "Alt"
 msgstr "Alt"
 
-#: ..\..\Ui\HostCommands.cs:173
+#: ..\..\Ui\HostCommands.cs:176
 msgid "Applications"
 msgstr "Клавіша програм"
 
@@ -314,11 +314,11 @@ msgstr "Запитувати перед &видаленням нотатки"
 msgid "Ask before reloading it"
 msgstr "Запитувати, чи перезавантажити його"
 
-#: ..\..\Ui\HostCommands.cs:119
+#: ..\..\Ui\HostCommands.cs:121
 msgid "Back to the previous file"
 msgstr "Назад до попереднього файлу"
 
-#: ..\..\Ui\HostCommands.cs:168
+#: ..\..\Ui\HostCommands.cs:171
 msgid "Backspace"
 msgstr "Backspace"
 
@@ -358,7 +358,7 @@ msgstr ""
 msgid "Close"
 msgstr "Закрити"
 
-#: ..\..\Ui\HostCommands.cs:174
+#: ..\..\Ui\HostCommands.cs:177
 msgid "Comma"
 msgstr "Кома"
 
@@ -383,11 +383,11 @@ msgstr "Перетворено з {0} на UTF-8."
 msgid "Copied"
 msgstr "Скопійовано"
 
-#: ..\..\Ui\HostCommands.cs:144
+#: ..\..\Ui\HostCommands.cs:147
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: ..\..\Ui\HostCommands.cs:169
+#: ..\..\Ui\HostCommands.cs:172
 msgid "Delete"
 msgstr "Delete"
 
@@ -423,7 +423,7 @@ msgstr ""
 msgid "Document language: {0}"
 msgstr "Мова документа: {0}"
 
-#: ..\..\Ui\HostCommands.cs:167
+#: ..\..\Ui\HostCommands.cs:170
 msgid "Down Arrow"
 msgstr "Стрілка вниз"
 
@@ -445,7 +445,7 @@ msgstr "В&ихід"
 msgid "Edit note"
 msgstr "Редагувати нотатку"
 
-#: ..\..\Ui\HostCommands.cs:170
+#: ..\..\Ui\HostCommands.cs:173
 msgid "Enter"
 msgstr "Enter"
 
@@ -500,7 +500,7 @@ msgstr "Файл змінено"
 msgid "File reloaded"
 msgstr "Файл перезавантажено"
 
-#: ..\..\Ui\HostCommands.cs:120
+#: ..\..\Ui\HostCommands.cs:122
 msgid "Forward to the next file"
 msgstr "Уперед до наступного файлу"
 
@@ -545,7 +545,7 @@ msgstr "Файли JSON"
 msgid "Keyboard shortcuts"
 msgstr "Комбінації клавіш"
 
-#: ..\..\Ui\HostCommands.cs:164
+#: ..\..\Ui\HostCommands.cs:167
 msgid "Left Arrow"
 msgstr "Стрілка вліво"
 
@@ -583,7 +583,7 @@ msgstr ""
 msgid "Markdown files"
 msgstr "Файли Markdown"
 
-#: ..\..\Ui\HostCommands.cs:176
+#: ..\..\Ui\HostCommands.cs:179
 msgid "Minus"
 msgstr "Мінус"
 
@@ -599,11 +599,11 @@ msgstr "Ніколи"
 msgid "Next &block"
 msgstr "Наступний &блок"
 
-#: ..\..\Ui\HostCommands.cs:124
+#: ..\..\Ui\HostCommands.cs:126
 msgid "Next block"
 msgstr "Наступний блок"
 
-#: ..\..\Ui\HostCommands.cs:122
+#: ..\..\Ui\HostCommands.cs:124
 msgid "Next note"
 msgstr "Наступна нотатка"
 
@@ -707,11 +707,11 @@ msgstr "Нічого повторювати"
 msgid "Nothing to undo"
 msgstr "Нічого скасовувати"
 
-#: ..\..\Ui\HostCommands.cs:178
+#: ..\..\Ui\HostCommands.cs:181
 msgid "Numpad Minus"
 msgstr "Мінус на цифровій клавіатурі"
 
-#: ..\..\Ui\HostCommands.cs:177
+#: ..\..\Ui\HostCommands.cs:180
 msgid "Numpad Plus"
 msgstr "Плюс на цифровій клавіатурі"
 
@@ -743,7 +743,7 @@ msgstr "Відкривати можна лише файли Markdown (.md, .mark
 msgid "Open"
 msgstr "Відкрити"
 
-#: ..\..\Ui\HostCommands.cs:113
+#: ..\..\Ui\HostCommands.cs:115
 msgid "Open a file"
 msgstr "Відкрити файл"
 
@@ -755,7 +755,7 @@ msgstr "Відкрити з &буфера обміну"
 msgid "Open from &link..."
 msgstr "Відкрити за &посиланням..."
 
-#: ..\..\Ui\HostCommands.cs:115
+#: ..\..\Ui\HostCommands.cs:117
 msgid "Open from a link"
 msgstr "Відкрити за посиланням"
 
@@ -763,7 +763,7 @@ msgstr "Відкрити за посиланням"
 msgid "Open from link"
 msgstr "Відкрити за посиланням"
 
-#: ..\..\Ui\HostCommands.cs:114
+#: ..\..\Ui\HostCommands.cs:116
 msgid "Open from the clipboard"
 msgstr "Відкрити з буфера обміну"
 
@@ -771,7 +771,7 @@ msgstr "Відкрити з буфера обміну"
 msgid "Open in &editor"
 msgstr "Відкрити в &редакторі"
 
-#: ..\..\Ui\HostCommands.cs:116
+#: ..\..\Ui\HostCommands.cs:118
 msgid "Open in the editor"
 msgstr "Відкрити в редакторі"
 
@@ -801,11 +801,12 @@ msgstr "PlanCake на GitHub"
 
 #: ..\..\Cli\CliRunner.cs:55
 msgid ""
-"PlanCake: read and annotate Markdown files with a screen reader. Without a "
-"command, \"plancake [file]\" opens the window, with the file if one is given."
+"PlanCake: read Markdown files comfortably and leave notes right where they "
+"belong. Without a command, \"plancake [file]\" opens the window, with the "
+"file if one is given."
 msgstr ""
-"PlanCake: читання файлів Markdown з програмою зчитування екрана та нотатки "
-"до них. Без команди \"plancake [file]\" відкриває вікно — з файлом, якщо "
+"PlanCake: зручне читання файлів Markdown і нотатки саме там, де вони "
+"потрібні. Без команди \"plancake [file]\" відкриває вікно — з файлом, якщо "
 "його вказано."
 
 #: ..\..\Ui\OpenLinkDialog.cs:31
@@ -816,7 +817,7 @@ msgstr "Будь ласка, введіть посилання."
 msgid "Please enter a valid link starting with http:// or https://."
 msgstr "Введіть допустиме посилання, що починається з http:// або https://."
 
-#: ..\..\Ui\HostCommands.cs:175
+#: ..\..\Ui\HostCommands.cs:178
 msgid "Plus"
 msgstr "Плюс"
 
@@ -824,11 +825,11 @@ msgstr "Плюс"
 msgid "Previous b&lock"
 msgstr "Попередній б&лок"
 
-#: ..\..\Ui\HostCommands.cs:125
+#: ..\..\Ui\HostCommands.cs:127
 msgid "Previous block"
 msgstr "Попередній блок"
 
-#: ..\..\Ui\HostCommands.cs:123
+#: ..\..\Ui\HostCommands.cs:125
 msgid "Previous note"
 msgstr "Попередня нотатка"
 
@@ -852,7 +853,7 @@ msgstr "Зручне читання файлів Markdown і нотатки са
 msgid "Ready"
 msgstr "Готово"
 
-#: ..\..\Ui\HostCommands.cs:127
+#: ..\..\Ui\HostCommands.cs:129
 msgid "Redo"
 msgstr "Повторити"
 
@@ -860,7 +861,7 @@ msgstr "Повторити"
 msgid "Reload it"
 msgstr "Перезавантажувати його"
 
-#: ..\..\Ui\HostCommands.cs:118
+#: ..\..\Ui\HostCommands.cs:120
 msgid "Reload the file"
 msgstr "Перезавантажити файл"
 
@@ -876,11 +877,11 @@ msgstr[0] "Видалено {0} нотатку."
 msgstr[1] "Видалено {0} нотатки."
 msgstr[2] "Видалено {0} нотаток."
 
-#: ..\..\Ui\HostCommands.cs:130
+#: ..\..\Ui\HostCommands.cs:132
 msgid "Reset zoom"
 msgstr "Скинути масштаб"
 
-#: ..\..\Ui\HostCommands.cs:165
+#: ..\..\Ui\HostCommands.cs:168
 msgid "Right Arrow"
 msgstr "Стрілка вправо"
 
@@ -889,11 +890,11 @@ msgstr "Стрілка вправо"
 msgid "Saves the note ({0} starts a new line)"
 msgstr "Зберігає нотатку ({0} починає новий рядок)"
 
-#: ..\..\Ui\HostCommands.cs:117 ..\..\Ui\SettingsDialog.cs:23
+#: ..\..\Ui\HostCommands.cs:119 ..\..\Ui\SettingsDialog.cs:23
 msgid "Settings"
 msgstr "Налаштування"
 
-#: ..\..\Ui\HostCommands.cs:148
+#: ..\..\Ui\HostCommands.cs:155
 msgid "Shift"
 msgstr "Shift"
 
@@ -905,7 +906,7 @@ msgstr "Комбінація клавіш"
 msgid "Show the notes &list"
 msgstr "Показувати &список нотаток"
 
-#: ..\..\Ui\HostCommands.cs:171
+#: ..\..\Ui\HostCommands.cs:174
 msgid "Space"
 msgstr "Пробіл"
 
@@ -914,7 +915,7 @@ msgstr "Пробіл"
 msgid "Starts a new line ({0} saves the note)"
 msgstr "Починає новий рядок ({0} зберігає нотатку)"
 
-#: ..\..\Ui\HostCommands.cs:121
+#: ..\..\Ui\HostCommands.cs:123
 msgid "Switch between the document and the notes list"
 msgstr "Перемкнутися між документом і списком нотаток"
 
@@ -922,7 +923,7 @@ msgstr "Перемкнутися між документом і списком �
 msgid "System default"
 msgstr "Мова системи"
 
-#: ..\..\Ui\HostCommands.cs:172
+#: ..\..\Ui\HostCommands.cs:175
 msgid "Tab"
 msgstr "Tab"
 
@@ -1204,7 +1205,7 @@ msgstr "Не вдалося записати файл: {0}"
 msgid "Uncheck task"
 msgstr "Зняти позначку із завдання"
 
-#: ..\..\Ui\HostCommands.cs:126
+#: ..\..\Ui\HostCommands.cs:128
 msgid "Undo"
 msgstr "Скасувати"
 
@@ -1217,11 +1218,11 @@ msgstr "пнот"
 msgid "Unrecognized option: {0}"
 msgstr "Невідомий параметр: {0}"
 
-#: ..\..\Ui\HostCommands.cs:166
+#: ..\..\Ui\HostCommands.cs:169
 msgid "Up Arrow"
 msgstr "Стрілка вгору"
 
-#: ..\..\Ui\HostCommands.cs:131 ..\..\Ui\MainWindow.cs:1833
+#: ..\..\Ui\HostCommands.cs:133 ..\..\Ui\MainWindow.cs:1833
 msgid "User manual"
 msgstr "Посібник користувача"
 
@@ -1274,10 +1275,10 @@ msgstr "Масштаб {0}%"
 msgid "Zoom &out"
 msgstr "З&меншити масштаб"
 
-#: ..\..\Ui\HostCommands.cs:128
+#: ..\..\Ui\HostCommands.cs:130
 msgid "Zoom in"
 msgstr "Збільшити масштаб"
 
-#: ..\..\Ui\HostCommands.cs:129
+#: ..\..\Ui\HostCommands.cs:131
 msgid "Zoom out"
 msgstr "Зменшити масштаб"

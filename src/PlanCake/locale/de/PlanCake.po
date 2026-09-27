@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-09-27 01:29:23+0200\n"
+"POT-Creation-Date: 2026-09-27 12:16:58+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:58+02:00\n"
 "Last-Translator: \n"
 "Language-Team: de\n"
@@ -267,7 +267,7 @@ msgid "A note has no closing marker, so it runs to the end of the file."
 msgstr ""
 "Eine Notiz hat keine Endmarkierung und reicht daher bis zum Ende der Datei."
 
-#: ..\..\Ui\AboutDialog.cs:24 ..\..\Ui\HostCommands.cs:132
+#: ..\..\Ui\AboutDialog.cs:24 ..\..\Ui\HostCommands.cs:134
 msgid "About PlanCake"
 msgstr "Über PlanCake"
 
@@ -295,11 +295,11 @@ msgstr "Löschen aller Notizen wiederholt"
 msgid "All notes deleted undone"
 msgstr "Löschen aller Notizen rückgängig gemacht"
 
-#: ..\..\Ui\HostCommands.cs:152
+#: ..\..\Ui\HostCommands.cs:151
 msgid "Alt"
 msgstr "Alt"
 
-#: ..\..\Ui\HostCommands.cs:173
+#: ..\..\Ui\HostCommands.cs:176
 msgid "Applications"
 msgstr "Anwendungstaste"
 
@@ -315,11 +315,11 @@ msgstr "Vor dem Löschen einer &Notiz fragen"
 msgid "Ask before reloading it"
 msgstr "Vor dem Neuladen fragen"
 
-#: ..\..\Ui\HostCommands.cs:119
+#: ..\..\Ui\HostCommands.cs:121
 msgid "Back to the previous file"
 msgstr "Zurück zur vorherigen Datei"
 
-#: ..\..\Ui\HostCommands.cs:168
+#: ..\..\Ui\HostCommands.cs:171
 msgid "Backspace"
 msgstr "Rücktaste"
 
@@ -359,7 +359,7 @@ msgstr ""
 msgid "Close"
 msgstr "Schließen"
 
-#: ..\..\Ui\HostCommands.cs:174
+#: ..\..\Ui\HostCommands.cs:177
 msgid "Comma"
 msgstr "Komma"
 
@@ -384,11 +384,11 @@ msgstr "Von {0} in UTF-8 konvertiert."
 msgid "Copied"
 msgstr "Kopiert"
 
-#: ..\..\Ui\HostCommands.cs:144
+#: ..\..\Ui\HostCommands.cs:147
 msgid "Ctrl"
 msgstr "Strg"
 
-#: ..\..\Ui\HostCommands.cs:169
+#: ..\..\Ui\HostCommands.cs:172
 msgid "Delete"
 msgstr "Entf"
 
@@ -423,7 +423,7 @@ msgstr ""
 msgid "Document language: {0}"
 msgstr "Dokumentsprache: {0}"
 
-#: ..\..\Ui\HostCommands.cs:167
+#: ..\..\Ui\HostCommands.cs:170
 msgid "Down Arrow"
 msgstr "Nach-unten"
 
@@ -445,7 +445,7 @@ msgstr "B&eenden"
 msgid "Edit note"
 msgstr "Notiz bearbeiten"
 
-#: ..\..\Ui\HostCommands.cs:170
+#: ..\..\Ui\HostCommands.cs:173
 msgid "Enter"
 msgstr "Eingabe"
 
@@ -499,7 +499,7 @@ msgstr "Datei geändert"
 msgid "File reloaded"
 msgstr "Datei neu geladen"
 
-#: ..\..\Ui\HostCommands.cs:120
+#: ..\..\Ui\HostCommands.cs:122
 msgid "Forward to the next file"
 msgstr "Weiter zur nächsten Datei"
 
@@ -546,7 +546,7 @@ msgstr "JSON-Dateien"
 msgid "Keyboard shortcuts"
 msgstr "Tastenkombinationen"
 
-#: ..\..\Ui\HostCommands.cs:164
+#: ..\..\Ui\HostCommands.cs:167
 msgid "Left Arrow"
 msgstr "Nach-links"
 
@@ -586,7 +586,7 @@ msgstr ""
 msgid "Markdown files"
 msgstr "Markdown-Dateien"
 
-#: ..\..\Ui\HostCommands.cs:176
+#: ..\..\Ui\HostCommands.cs:179
 msgid "Minus"
 msgstr "Minus"
 
@@ -602,11 +602,11 @@ msgstr "Nie"
 msgid "Next &block"
 msgstr "Nächster Bl&ock"
 
-#: ..\..\Ui\HostCommands.cs:124
+#: ..\..\Ui\HostCommands.cs:126
 msgid "Next block"
 msgstr "Nächster Block"
 
-#: ..\..\Ui\HostCommands.cs:122
+#: ..\..\Ui\HostCommands.cs:124
 msgid "Next note"
 msgstr "Nächste Notiz"
 
@@ -710,11 +710,11 @@ msgstr "Nichts zum Wiederholen"
 msgid "Nothing to undo"
 msgstr "Nichts zum Rückgängigmachen"
 
-#: ..\..\Ui\HostCommands.cs:178
+#: ..\..\Ui\HostCommands.cs:181
 msgid "Numpad Minus"
 msgstr "Minus (Ziffernblock)"
 
-#: ..\..\Ui\HostCommands.cs:177
+#: ..\..\Ui\HostCommands.cs:180
 msgid "Numpad Plus"
 msgstr "Plus (Ziffernblock)"
 
@@ -746,7 +746,7 @@ msgstr "Nur Markdown-Dateien (.md, .markdown) können geöffnet werden."
 msgid "Open"
 msgstr "Öffnen"
 
-#: ..\..\Ui\HostCommands.cs:113
+#: ..\..\Ui\HostCommands.cs:115
 msgid "Open a file"
 msgstr "Eine Datei öffnen"
 
@@ -758,7 +758,7 @@ msgstr "Aus der &Zwischenablage öffnen"
 msgid "Open from &link..."
 msgstr "Über &Link öffnen..."
 
-#: ..\..\Ui\HostCommands.cs:115
+#: ..\..\Ui\HostCommands.cs:117
 msgid "Open from a link"
 msgstr "Über einen Link öffnen"
 
@@ -766,7 +766,7 @@ msgstr "Über einen Link öffnen"
 msgid "Open from link"
 msgstr "Über Link öffnen"
 
-#: ..\..\Ui\HostCommands.cs:114
+#: ..\..\Ui\HostCommands.cs:116
 msgid "Open from the clipboard"
 msgstr "Aus der Zwischenablage öffnen"
 
@@ -774,7 +774,7 @@ msgstr "Aus der Zwischenablage öffnen"
 msgid "Open in &editor"
 msgstr "Im E&ditor öffnen"
 
-#: ..\..\Ui\HostCommands.cs:116
+#: ..\..\Ui\HostCommands.cs:118
 msgid "Open in the editor"
 msgstr "Im Editor öffnen"
 
@@ -804,12 +804,13 @@ msgstr "PlanCake auf GitHub"
 
 #: ..\..\Cli\CliRunner.cs:55
 msgid ""
-"PlanCake: read and annotate Markdown files with a screen reader. Without a "
-"command, \"plancake [file]\" opens the window, with the file if one is given."
+"PlanCake: read Markdown files comfortably and leave notes right where they "
+"belong. Without a command, \"plancake [file]\" opens the window, with the "
+"file if one is given."
 msgstr ""
-"PlanCake: Markdown-Dateien mit einem Screenreader lesen und mit Notizen "
-"versehen. Ohne Befehl öffnet \"plancake [file]\" das Fenster, mit der Datei, "
-"falls eine angegeben ist."
+"PlanCake: Markdown-Dateien bequem lesen und Notizen genau dort "
+"hinterlassen, wo sie hingehören. Ohne Befehl öffnet \"plancake [file]\" das "
+"Fenster, mit der Datei, falls eine angegeben ist."
 
 #: ..\..\Ui\OpenLinkDialog.cs:31
 msgid "Please enter a link."
@@ -821,7 +822,7 @@ msgstr ""
 "Bitte geben Sie einen gültigen Link ein, der mit http:// oder https:// "
 "beginnt."
 
-#: ..\..\Ui\HostCommands.cs:175
+#: ..\..\Ui\HostCommands.cs:178
 msgid "Plus"
 msgstr "Plus"
 
@@ -829,11 +830,11 @@ msgstr "Plus"
 msgid "Previous b&lock"
 msgstr "Vorheriger Bloc&k"
 
-#: ..\..\Ui\HostCommands.cs:125
+#: ..\..\Ui\HostCommands.cs:127
 msgid "Previous block"
 msgstr "Vorheriger Block"
 
-#: ..\..\Ui\HostCommands.cs:123
+#: ..\..\Ui\HostCommands.cs:125
 msgid "Previous note"
 msgstr "Vorherige Notiz"
 
@@ -860,7 +861,7 @@ msgstr ""
 msgid "Ready"
 msgstr "Bereit"
 
-#: ..\..\Ui\HostCommands.cs:127
+#: ..\..\Ui\HostCommands.cs:129
 msgid "Redo"
 msgstr "Wiederholen"
 
@@ -868,7 +869,7 @@ msgstr "Wiederholen"
 msgid "Reload it"
 msgstr "Neu laden"
 
-#: ..\..\Ui\HostCommands.cs:118
+#: ..\..\Ui\HostCommands.cs:120
 msgid "Reload the file"
 msgstr "Die Datei neu laden"
 
@@ -883,11 +884,11 @@ msgid_plural "Removed {0} notes."
 msgstr[0] "{0} Notiz entfernt."
 msgstr[1] "{0} Notizen entfernt."
 
-#: ..\..\Ui\HostCommands.cs:130
+#: ..\..\Ui\HostCommands.cs:132
 msgid "Reset zoom"
 msgstr "Zoom zurücksetzen"
 
-#: ..\..\Ui\HostCommands.cs:165
+#: ..\..\Ui\HostCommands.cs:168
 msgid "Right Arrow"
 msgstr "Nach-rechts"
 
@@ -896,11 +897,11 @@ msgstr "Nach-rechts"
 msgid "Saves the note ({0} starts a new line)"
 msgstr "Speichert die Notiz ({0} beginnt eine neue Zeile)"
 
-#: ..\..\Ui\HostCommands.cs:117 ..\..\Ui\SettingsDialog.cs:23
+#: ..\..\Ui\HostCommands.cs:119 ..\..\Ui\SettingsDialog.cs:23
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: ..\..\Ui\HostCommands.cs:148
+#: ..\..\Ui\HostCommands.cs:155
 msgid "Shift"
 msgstr "Umschalt"
 
@@ -912,7 +913,7 @@ msgstr "Tastenkombination"
 msgid "Show the notes &list"
 msgstr "Notiz&liste anzeigen"
 
-#: ..\..\Ui\HostCommands.cs:171
+#: ..\..\Ui\HostCommands.cs:174
 msgid "Space"
 msgstr "Leertaste"
 
@@ -921,7 +922,7 @@ msgstr "Leertaste"
 msgid "Starts a new line ({0} saves the note)"
 msgstr "Beginnt eine neue Zeile ({0} speichert die Notiz)"
 
-#: ..\..\Ui\HostCommands.cs:121
+#: ..\..\Ui\HostCommands.cs:123
 msgid "Switch between the document and the notes list"
 msgstr "Zwischen dem Dokument und der Notizliste wechseln"
 
@@ -929,7 +930,7 @@ msgstr "Zwischen dem Dokument und der Notizliste wechseln"
 msgid "System default"
 msgstr "Systemsprache"
 
-#: ..\..\Ui\HostCommands.cs:172
+#: ..\..\Ui\HostCommands.cs:175
 msgid "Tab"
 msgstr "Tab"
 
@@ -1227,7 +1228,7 @@ msgstr "Die Datei kann nicht geschrieben werden: {0}"
 msgid "Uncheck task"
 msgstr "Häkchen entfernen"
 
-#: ..\..\Ui\HostCommands.cs:126
+#: ..\..\Ui\HostCommands.cs:128
 msgid "Undo"
 msgstr "Rückgängig"
 
@@ -1240,11 +1241,11 @@ msgstr "bnotiz"
 msgid "Unrecognized option: {0}"
 msgstr "Unbekannte Option: {0}"
 
-#: ..\..\Ui\HostCommands.cs:166
+#: ..\..\Ui\HostCommands.cs:169
 msgid "Up Arrow"
 msgstr "Nach-oben"
 
-#: ..\..\Ui\HostCommands.cs:131 ..\..\Ui\MainWindow.cs:1833
+#: ..\..\Ui\HostCommands.cs:133 ..\..\Ui\MainWindow.cs:1833
 msgid "User manual"
 msgstr "Benutzerhandbuch"
 
@@ -1297,10 +1298,10 @@ msgstr "Zoom {0} %"
 msgid "Zoom &out"
 msgstr "Ver&kleinern"
 
-#: ..\..\Ui\HostCommands.cs:128
+#: ..\..\Ui\HostCommands.cs:130
 msgid "Zoom in"
 msgstr "Vergrößern"
 
-#: ..\..\Ui\HostCommands.cs:129
+#: ..\..\Ui\HostCommands.cs:131
 msgid "Zoom out"
 msgstr "Verkleinern"

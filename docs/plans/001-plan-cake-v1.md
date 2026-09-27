@@ -30,38 +30,39 @@ names; Task 1 adapts it.
 
 ## Done when
 
-- [ ] `plancake plan.md` opens a window showing `plan.md` rendered as HTML in WebView2; JAWS
+- [x] `plancake plan.md` opens a window showing `plan.md` rendered as HTML in WebView2; JAWS
       reads it in its virtual buffer with heading, list and table navigation, and no
       Markdown punctuation is read out
-- [ ] pressing Enter on a paragraph, list item, heading, table row or code block (or clicking
+- [x] pressing Enter on a paragraph, list item, heading, table row or code block (or clicking
       it) opens the note dialog without switching JAWS to forms mode, and the Applications key
       or Shift+F10 opens the context menu; confirming writes `[usernote]text[/usernote]` after
       that block's last source line, and the view returns to the new note
-- [ ] notes show in the document after their block, as user notes (`role="note"`), with the
+- [x] notes show in the document after their block, as user notes (`role="note"`), with the
       Markdown written in them rendered, and in a notes list beside it;
       notes can be edited, deleted, navigated with F9 / Shift+F9, undone and redone
 - [x] a task-list checkbox can be toggled from the document (Space, Enter or a click), after a
       confirmation that can be turned off; the file on disk gets `[x]` or `[ ]` on that item's
       line, and the toggle can be undone and redone
-- [ ] when the file changes on disk the view reloads (or asks, per settings) and keeps the
+- [x] when the file changes on disk the view reloads (or asks, per settings) and keeps the
       reading position; a note is never written over a change the user has not seen
-- [ ] File → Settings changes the interface language (English, Russian, Ukrainian, French,
+- [x] File → Settings changes the interface language (English, Russian, Ukrainian, French,
       Hebrew with right-to-left layout, German), the default document language, the note
       markers, and the other settings listed in Technical details; changes apply without a
       restart
-- [ ] View → Interface language and View → Document language switch those two languages from
+- [x] View → Interface language and View → Document language switch those two languages from
       the menu; JAWS reads the plan in the document language (English by default), whatever
       the interface language is
 - [x] links and raw HTML in a plan cannot navigate the view away or run script
 - [x] `plancake list <file> [--json]`, `check`, `clear` and `export` work headless with the
       output and exit codes in Technical details
-- [ ] a Markdown file opens from File → Open, the command line, drag and drop, the clipboard
+- [x] a Markdown file opens from File → Open, the command line, drag and drop, the clipboard
       (Ctrl+V after copying it in Explorer) and a link (downloaded to the Downloads folder)
 - [ ] every interaction works with the keyboard and the mouse, left to right and right to left
-- [ ] F1 opens the user manual in the current language
+      (open until Task 15a's check of the block keys without a screen reader)
+- [x] F1 opens the user manual in the current language
 - [ ] the installer installs PlanCake, puts `plancake` on the PATH, checks for the WebView2
-      Runtime, and the portable zip runs from any folder
-- [ ] all validation commands pass
+      Runtime, and the portable zip runs from any folder (open until a real test install)
+- [x] all validation commands pass
 
 ## Validation commands
 
@@ -1102,16 +1103,31 @@ reach every block with their own reading cursor.
 ### Task 18: Update documentation
 
 **Files:**
-- Modify: `README.md`, `CLAUDE.md`, `CHANGELOG.md`, `changelogs/1.0.0.md`
+- Modify: `README.md`, `CLAUDE.md`, `CHANGELOG.md`, `changelogs/1.0.0.md`,
+  `src/PlanCake/Cli/CliRunner.cs`, `src/PlanCake/locale/**`
 
-- [ ] README: what PlanCake is, installing, reading and annotating, the command line with
+- [x] README: what PlanCake is, installing, reading and annotating, the command line with
       examples, the `pk` alias (`Set-Alias pk plancake` in the PowerShell profile,
       `alias pk=plancake` in bash), how to point Debussy's `noteMarkers` at PlanCake's markers
-- [ ] CLAUDE.md: architecture (Notes, Rendering, Ui, Cli, Services, `web/`), the page protocol,
+      (written for a general audience, like the manual: the "Why" is reading long plans
+      comfortably and annotating them for an AI assistant, with accessibility as part of it;
+      installing from plancake.oire.dev, the portable zip and winget `Oire.PlanCake`; building
+      adds `Build-Installer.ps1`)
+- [x] CLAUDE.md: architecture (Notes, Rendering, Ui, Cli, Services, `web/`), the page protocol,
       the WebView2 gotchas (user data folder, accelerator keys, single-file native loader,
       `BeginInvoke` before any dialog or menu started from a WebView2 event),
       the JAWS spike results, the three pieces of a language, the AttachConsole caveat
-- [ ] CHANGELOG.md and `changelogs/1.0.0.md`: the 1.0.0 feature list
+      (also one window per file, the single-window update checks, and the Updates section no
+      longer calls the public key a placeholder; "adding a language" now lists every place a
+      language lives, since the interface list is built from the `locale` folders)
+- [x] CHANGELOG.md and `changelogs/1.0.0.md`: the 1.0.0 feature list (the template's own
+      history, which described changes to the template rather than to PlanCake, gave way to
+      the 1.0.0 entry)
+- [x] ➕ the command-line help's description said "read and annotate Markdown files with a
+      screen reader"; it now opens with the tagline ("PlanCake: read Markdown files comfortably
+      and leave notes right where they belong. …"), translated in ru, uk, fr, he, de from the
+      tagline's existing translations, no fuzzy entries. No test pinned the old text
+- [x] validation commands pass
 
 ## Technical details
 

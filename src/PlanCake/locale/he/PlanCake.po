@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-09-27 01:29:23+0200\n"
+"POT-Creation-Date: 2026-09-27 12:16:58+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:58+02:00\n"
 "Last-Translator: \n"
 "Language-Team: he\n"
@@ -262,7 +262,7 @@ msgstr "להערה אין סמן סגירה, והיא מסתיימת בסוף ה
 msgid "A note has no closing marker, so it runs to the end of the file."
 msgstr "להערה אין סמן סגירה, ולכן היא נמשכת עד סוף הקובץ."
 
-#: ..\..\Ui\AboutDialog.cs:24 ..\..\Ui\HostCommands.cs:132
+#: ..\..\Ui\AboutDialog.cs:24 ..\..\Ui\HostCommands.cs:134
 msgid "About PlanCake"
 msgstr "אודות PlanCake"
 
@@ -290,11 +290,11 @@ msgstr "מחיקת כל ההערות בוצעה שוב"
 msgid "All notes deleted undone"
 msgstr "מחיקת כל ההערות בוטלה"
 
-#: ..\..\Ui\HostCommands.cs:152
+#: ..\..\Ui\HostCommands.cs:151
 msgid "Alt"
 msgstr "Alt"
 
-#: ..\..\Ui\HostCommands.cs:173
+#: ..\..\Ui\HostCommands.cs:176
 msgid "Applications"
 msgstr "מקש יישומים"
 
@@ -310,11 +310,11 @@ msgstr "שאל לפני מחיקת &הערה"
 msgid "Ask before reloading it"
 msgstr "שאל לפני טעינה מחדש"
 
-#: ..\..\Ui\HostCommands.cs:119
+#: ..\..\Ui\HostCommands.cs:121
 msgid "Back to the previous file"
 msgstr "חזרה לקובץ הקודם"
 
-#: ..\..\Ui\HostCommands.cs:168
+#: ..\..\Ui\HostCommands.cs:171
 msgid "Backspace"
 msgstr "Backspace"
 
@@ -352,7 +352,7 @@ msgstr "סמן ס&גירה (השאירו ריק לסמן יחיד שנמשך ע�
 msgid "Close"
 msgstr "סגור"
 
-#: ..\..\Ui\HostCommands.cs:174
+#: ..\..\Ui\HostCommands.cs:177
 msgid "Comma"
 msgstr "פסיק"
 
@@ -376,11 +376,11 @@ msgstr "הומר מ-{0} ל-UTF-8."
 msgid "Copied"
 msgstr "הועתק"
 
-#: ..\..\Ui\HostCommands.cs:144
+#: ..\..\Ui\HostCommands.cs:147
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: ..\..\Ui\HostCommands.cs:169
+#: ..\..\Ui\HostCommands.cs:172
 msgid "Delete"
 msgstr "Delete"
 
@@ -415,7 +415,7 @@ msgstr ""
 msgid "Document language: {0}"
 msgstr "שפת המסמך: {0}"
 
-#: ..\..\Ui\HostCommands.cs:167
+#: ..\..\Ui\HostCommands.cs:170
 msgid "Down Arrow"
 msgstr "חץ למטה"
 
@@ -437,7 +437,7 @@ msgstr "י&ציאה"
 msgid "Edit note"
 msgstr "עריכת הערה"
 
-#: ..\..\Ui\HostCommands.cs:170
+#: ..\..\Ui\HostCommands.cs:173
 msgid "Enter"
 msgstr "Enter"
 
@@ -491,7 +491,7 @@ msgstr "הקובץ השתנה"
 msgid "File reloaded"
 msgstr "הקובץ נטען מחדש"
 
-#: ..\..\Ui\HostCommands.cs:120
+#: ..\..\Ui\HostCommands.cs:122
 msgid "Forward to the next file"
 msgstr "קדימה לקובץ הבא"
 
@@ -536,7 +536,7 @@ msgstr "קובצי JSON"
 msgid "Keyboard shortcuts"
 msgstr "קיצורי מקלדת"
 
-#: ..\..\Ui\HostCommands.cs:164
+#: ..\..\Ui\HostCommands.cs:167
 msgid "Left Arrow"
 msgstr "חץ שמאלה"
 
@@ -574,7 +574,7 @@ msgstr ""
 msgid "Markdown files"
 msgstr "קובצי Markdown"
 
-#: ..\..\Ui\HostCommands.cs:176
+#: ..\..\Ui\HostCommands.cs:179
 msgid "Minus"
 msgstr "מינוס"
 
@@ -590,11 +590,11 @@ msgstr "אף פעם"
 msgid "Next &block"
 msgstr "&בלוק הבא"
 
-#: ..\..\Ui\HostCommands.cs:124
+#: ..\..\Ui\HostCommands.cs:126
 msgid "Next block"
 msgstr "הבלוק הבא"
 
-#: ..\..\Ui\HostCommands.cs:122
+#: ..\..\Ui\HostCommands.cs:124
 msgid "Next note"
 msgstr "ההערה הבאה"
 
@@ -698,11 +698,11 @@ msgstr "אין מה לבצע שוב"
 msgid "Nothing to undo"
 msgstr "אין מה לבטל"
 
-#: ..\..\Ui\HostCommands.cs:178
+#: ..\..\Ui\HostCommands.cs:181
 msgid "Numpad Minus"
 msgstr "מינוס במקלדת הנומרית"
 
-#: ..\..\Ui\HostCommands.cs:177
+#: ..\..\Ui\HostCommands.cs:180
 msgid "Numpad Plus"
 msgstr "פלוס במקלדת הנומרית"
 
@@ -734,7 +734,7 @@ msgstr "ניתן לפתוח רק קובצי Markdown (.md, .markdown)."
 msgid "Open"
 msgstr "פתיחה"
 
-#: ..\..\Ui\HostCommands.cs:113
+#: ..\..\Ui\HostCommands.cs:115
 msgid "Open a file"
 msgstr "פתיחת קובץ"
 
@@ -746,7 +746,7 @@ msgstr "פתח מ&לוח הגזירים"
 msgid "Open from &link..."
 msgstr "פתח מ&קישור..."
 
-#: ..\..\Ui\HostCommands.cs:115
+#: ..\..\Ui\HostCommands.cs:117
 msgid "Open from a link"
 msgstr "פתיחה מקישור"
 
@@ -754,7 +754,7 @@ msgstr "פתיחה מקישור"
 msgid "Open from link"
 msgstr "פתיחה מקישור"
 
-#: ..\..\Ui\HostCommands.cs:114
+#: ..\..\Ui\HostCommands.cs:116
 msgid "Open from the clipboard"
 msgstr "פתיחה מלוח הגזירים"
 
@@ -762,7 +762,7 @@ msgstr "פתיחה מלוח הגזירים"
 msgid "Open in &editor"
 msgstr "פתח ב&עורך"
 
-#: ..\..\Ui\HostCommands.cs:116
+#: ..\..\Ui\HostCommands.cs:118
 msgid "Open in the editor"
 msgstr "פתיחה בעורך"
 
@@ -792,11 +792,12 @@ msgstr "PlanCake ב-GitHub"
 
 #: ..\..\Cli\CliRunner.cs:55
 msgid ""
-"PlanCake: read and annotate Markdown files with a screen reader. Without a "
-"command, \"plancake [file]\" opens the window, with the file if one is given."
+"PlanCake: read Markdown files comfortably and leave notes right where they "
+"belong. Without a command, \"plancake [file]\" opens the window, with the "
+"file if one is given."
 msgstr ""
-"PlanCake: קריאה של קובצי Markdown והוספת הערות אליהם בעזרת קורא מסך. ללא "
-"פקודה, \"plancake [file]\" פותח את החלון, עם הקובץ אם צוין."
+"PlanCake: קריאה נוחה של קובצי Markdown והוספת הערות בדיוק במקום הנכון. "
+"ללא פקודה, \"plancake [file]\" פותח את החלון, עם הקובץ אם צוין."
 
 #: ..\..\Ui\OpenLinkDialog.cs:31
 msgid "Please enter a link."
@@ -806,7 +807,7 @@ msgstr "הזינו קישור."
 msgid "Please enter a valid link starting with http:// or https://."
 msgstr "הזינו קישור תקין שמתחיל ב-http:// או ב-https://."
 
-#: ..\..\Ui\HostCommands.cs:175
+#: ..\..\Ui\HostCommands.cs:178
 msgid "Plus"
 msgstr "פלוס"
 
@@ -814,11 +815,11 @@ msgstr "פלוס"
 msgid "Previous b&lock"
 msgstr "ב&לוק קודם"
 
-#: ..\..\Ui\HostCommands.cs:125
+#: ..\..\Ui\HostCommands.cs:127
 msgid "Previous block"
 msgstr "הבלוק הקודם"
 
-#: ..\..\Ui\HostCommands.cs:123
+#: ..\..\Ui\HostCommands.cs:125
 msgid "Previous note"
 msgstr "ההערה הקודמת"
 
@@ -842,7 +843,7 @@ msgstr "קריאה נוחה של קובצי Markdown והוספת הערות ב�
 msgid "Ready"
 msgstr "מוכן"
 
-#: ..\..\Ui\HostCommands.cs:127
+#: ..\..\Ui\HostCommands.cs:129
 msgid "Redo"
 msgstr "בצע שוב"
 
@@ -850,7 +851,7 @@ msgstr "בצע שוב"
 msgid "Reload it"
 msgstr "טען אותו מחדש"
 
-#: ..\..\Ui\HostCommands.cs:118
+#: ..\..\Ui\HostCommands.cs:120
 msgid "Reload the file"
 msgstr "טעינה מחדש של הקובץ"
 
@@ -865,11 +866,11 @@ msgid_plural "Removed {0} notes."
 msgstr[0] "הוסרה הערה אחת."
 msgstr[1] "הוסרו {0} הערות."
 
-#: ..\..\Ui\HostCommands.cs:130
+#: ..\..\Ui\HostCommands.cs:132
 msgid "Reset zoom"
 msgstr "איפוס גודל התצוגה"
 
-#: ..\..\Ui\HostCommands.cs:165
+#: ..\..\Ui\HostCommands.cs:168
 msgid "Right Arrow"
 msgstr "חץ ימינה"
 
@@ -878,11 +879,11 @@ msgstr "חץ ימינה"
 msgid "Saves the note ({0} starts a new line)"
 msgstr "שומר את ההערה ({0} מתחיל שורה חדשה)"
 
-#: ..\..\Ui\HostCommands.cs:117 ..\..\Ui\SettingsDialog.cs:23
+#: ..\..\Ui\HostCommands.cs:119 ..\..\Ui\SettingsDialog.cs:23
 msgid "Settings"
 msgstr "הגדרות"
 
-#: ..\..\Ui\HostCommands.cs:148
+#: ..\..\Ui\HostCommands.cs:155
 msgid "Shift"
 msgstr "Shift"
 
@@ -894,7 +895,7 @@ msgstr "קיצור"
 msgid "Show the notes &list"
 msgstr "ה&צג את רשימת ההערות"
 
-#: ..\..\Ui\HostCommands.cs:171
+#: ..\..\Ui\HostCommands.cs:174
 msgid "Space"
 msgstr "רווח"
 
@@ -903,7 +904,7 @@ msgstr "רווח"
 msgid "Starts a new line ({0} saves the note)"
 msgstr "מתחיל שורה חדשה ({0} שומר את ההערה)"
 
-#: ..\..\Ui\HostCommands.cs:121
+#: ..\..\Ui\HostCommands.cs:123
 msgid "Switch between the document and the notes list"
 msgstr "מעבר בין המסמך לרשימת ההערות"
 
@@ -911,7 +912,7 @@ msgstr "מעבר בין המסמך לרשימת ההערות"
 msgid "System default"
 msgstr "שפת המערכת"
 
-#: ..\..\Ui\HostCommands.cs:172
+#: ..\..\Ui\HostCommands.cs:175
 msgid "Tab"
 msgstr "Tab"
 
@@ -1185,7 +1186,7 @@ msgstr "לא ניתן לכתוב את הקובץ: {0}"
 msgid "Uncheck task"
 msgstr "ביטול סימון משימה"
 
-#: ..\..\Ui\HostCommands.cs:126
+#: ..\..\Ui\HostCommands.cs:128
 msgid "Undo"
 msgstr "בטל"
 
@@ -1198,11 +1199,11 @@ msgstr "הערמ"
 msgid "Unrecognized option: {0}"
 msgstr "אפשרות לא מוכרת: {0}"
 
-#: ..\..\Ui\HostCommands.cs:166
+#: ..\..\Ui\HostCommands.cs:169
 msgid "Up Arrow"
 msgstr "חץ למעלה"
 
-#: ..\..\Ui\HostCommands.cs:131 ..\..\Ui\MainWindow.cs:1833
+#: ..\..\Ui\HostCommands.cs:133 ..\..\Ui\MainWindow.cs:1833
 msgid "User manual"
 msgstr "מדריך המשתמש"
 
@@ -1253,10 +1254,10 @@ msgstr "גודל תצוגה {0}%"
 msgid "Zoom &out"
 msgstr "הקטן &תצוגה"
 
-#: ..\..\Ui\HostCommands.cs:128
+#: ..\..\Ui\HostCommands.cs:130
 msgid "Zoom in"
 msgstr "הגדלת התצוגה"
 
-#: ..\..\Ui\HostCommands.cs:129
+#: ..\..\Ui\HostCommands.cs:131
 msgid "Zoom out"
 msgstr "הקטנת התצוגה"

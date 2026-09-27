@@ -52,7 +52,7 @@ internal sealed class CliRunner {
         });
 
         _root = new RootCommand(_(
-            "PlanCake: read and annotate Markdown files with a screen reader. Without a command, \"plancake [file]\" opens the window, with the file if one is given."
+            "PlanCake: read Markdown files comfortably and leave notes right where they belong. Without a command, \"plancake [file]\" opens the window, with the file if one is given."
         )) {
             _fileArgument,
             ListCommand(),
