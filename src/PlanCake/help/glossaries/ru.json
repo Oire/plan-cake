@@ -1,0 +1,146 @@
+{
+  "language": "ru",
+  "languageName": "Russian",
+  "nativeName": "Русский",
+  "direction": "ltr",
+  "keys": {
+    "Ctrl": "Ctrl",
+    "Alt": "Alt",
+    "Shift": "Shift",
+    "Enter": "Enter",
+    "Tab": "Tab",
+    "Escape": "Escape",
+    "Delete": "Delete",
+    "Backspace": "Backspace",
+    "Space": "Пробел",
+    "Left Arrow": "Стрелка влево",
+    "Right Arrow": "Стрелка вправо",
+    "Up Arrow": "Стрелка вверх",
+    "Down Arrow": "Стрелка вниз",
+    "Applications": "Клавиша приложений",
+    "Comma": "Запятая",
+    "Plus": "Плюс",
+    "Minus": "Минус",
+    "Numpad Plus": "Плюс на цифровой клавиатуре",
+    "Numpad Minus": "Минус на цифровой клавиатуре",
+    "Home": "Home",
+    "End": "End",
+    "Page Up": "Page Up",
+    "Page Down": "Page Down"
+  },
+  "terms": [
+    {
+      "term": "note",
+      "translation": "заметка",
+      "context": "A single note the user adds to a block and PlanCake writes into the Markdown file",
+      "notes": "Always 'заметка', feminine noun; declines normally across cases (заметки, заметку, заметок...). Never 'комментарий' or 'примечание'"
+    },
+    {
+      "term": "block",
+      "translation": "блок",
+      "context": "A paragraph, list item, heading, table row or code block that a note attaches to",
+      "notes": "Generic term covering paragraph/heading/list item/table row/code block collectively, as in 'следующий блок' (next block)"
+    },
+    {
+      "term": "notes list",
+      "translation": "список заметок",
+      "context": "The panel listing all notes in the file, with the 'The notes list' section heading",
+      "notes": "Consistent throughout: heading, menu items (Список заметок, Расширить/Сузить список заметок) and prose all use this phrase"
+    },
+    {
+      "term": "status bar",
+      "translation": "строка состояния",
+      "context": "Bottom bar showing confirmation messages such as 'Note added'",
+      "notes": "Always 'строка состояния', feminine noun"
+    },
+    {
+      "term": "menu bar",
+      "translation": "строка меню",
+      "context": "Top bar of the window holding the menus"
+    },
+    {
+      "term": "screen reader",
+      "translation": "программа экранного доступа",
+      "context": "Section heading 'Using a screen reader' and general accessibility prose",
+      "notes": "Literally 'program of screen access'; this is the established Russian term, never 'скринридер' or a transliteration"
+    },
+    {
+      "term": "marker",
+      "translation": "маркер",
+      "context": "The note markers such as [usernote]/[/usernote] wrapping a note's text in the file",
+      "notes": "Used for both the opening and closing marker (открывающий/закрывающий маркер)"
+    },
+    {
+      "term": "task",
+      "translation": "задача",
+      "context": "A Markdown checklist item, as in 'Mark this task as done?'",
+      "notes": "Feminine noun; section heading is 'Отметка выполненных задач' (Marking tasks done)"
+    },
+    {
+      "term": "document language",
+      "translation": "Язык документа",
+      "context": "Setting controlling what voice a screen reader uses to read the plan, independent of the interface language",
+      "notes": "Capitalized as a settings/menu label, matching the manual's rendering"
+    },
+    {
+      "term": "interface language",
+      "translation": "Язык интерфейса",
+      "context": "Setting controlling the language of menus, dialogs and messages",
+      "notes": "Capitalized as a settings/menu label, matching the manual's rendering"
+    },
+    {
+      "term": "dialog",
+      "translation": "диалог",
+      "context": "Generic word for a dialog box, e.g. the Open dialog or a Yes/No confirmation",
+      "notes": "Masculine noun; used both generically ('в остальных диалогах') and in specific dialog names ('диалог заметки', 'диалог открытия')"
+    },
+    {
+      "term": "Yes / No buttons",
+      "translation": "Да / Нет",
+      "context": "The two buttons in a Yes/No confirmation dialog",
+      "notes": "Bare 'Да' and 'Нет', bolded in the manual; not 'ОК' (OK is a separate button used in non-confirmation dialogs)"
+    },
+    {
+      "term": "File Explorer",
+      "translation": "Проводник",
+      "context": "Windows Explorer, e.g. dragging a file from it or its 'Copy as path' command",
+      "notes": "Capitalized as a proper name; declines across cases (Проводника, Проводнике)"
+    },
+    {
+      "term": "Downloads folder",
+      "translation": "папка Загрузки",
+      "context": "The Windows Downloads folder where PlanCake saves files opened from a link",
+      "notes": "'Загрузки' is capitalized as the folder's proper name, 'папка' stays lowercase; rendered as 'вашу папку Загрузки Windows'"
+    },
+    {
+      "term": "Start menu",
+      "translation": "меню Пуск",
+      "context": "Launching PlanCake from the Windows Start menu",
+      "notes": "'Пуск' capitalized as the Windows menu's proper name"
+    },
+    {
+      "term": "Command Prompt",
+      "translation": "командная строка",
+      "context": "The Windows Command Prompt / command line, e.g. running plancake.exe from it",
+      "notes": "Lowercase; the manual uses the same phrase for both the specific Command Prompt app and the generic 'command line' concept, and does not distinguish them"
+    },
+    {
+      "term": "Copy as path",
+      "translation": "Копировать как путь",
+      "context": "File Explorer's 'Copy as path' command, which adds quotation marks around the copied path",
+      "notes": "Capitalized as a command name, matching the manual's rendering"
+    },
+    {
+      "term": "issue",
+      "translation": "issue",
+      "context": "A GitHub issue, as in 'paste them into a new issue on PlanCake's GitHub page'",
+      "notes": "Left untranslated, in Latin script, as is common Russian developer usage; not 'проблема' or 'обращение'"
+    },
+    {
+      "term": "Raw",
+      "translation": "Raw",
+      "context": "GitHub's 'Raw' link/button for viewing a file's raw content",
+      "notes": "Left untranslated, in Latin script, bolded as a UI label name"
+    }
+  ]
+}

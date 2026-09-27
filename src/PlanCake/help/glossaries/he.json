@@ -1,0 +1,136 @@
+{
+  "language": "he",
+  "languageName": "Hebrew",
+  "nativeName": "עברית",
+  "direction": "rtl",
+  "keys": {
+    "Ctrl": "Ctrl",
+    "Alt": "Alt",
+    "Shift": "Shift",
+    "Enter": "Enter",
+    "Tab": "Tab",
+    "Escape": "Escape",
+    "Delete": "Delete",
+    "Backspace": "Backspace",
+    "Space": "רווח",
+    "Left Arrow": "חץ שמאלה",
+    "Right Arrow": "חץ ימינה",
+    "Up Arrow": "חץ למעלה",
+    "Down Arrow": "חץ למטה",
+    "Applications": "מקש יישומים",
+    "Comma": "פסיק",
+    "Plus": "פלוס",
+    "Minus": "מינוס",
+    "Numpad Plus": "פלוס במקלדת הנומרית",
+    "Numpad Minus": "מינוס במקלדת הנומרית",
+    "Home": "Home",
+    "End": "End",
+    "Page Up": "Page Up",
+    "Page Down": "Page Down"
+  },
+  "terms": [
+    {
+      "term": "note",
+      "translation": "הערה",
+      "context": "A single note the user adds to or edits on a block"
+    },
+    {
+      "term": "block",
+      "translation": "בלוק",
+      "context": "A paragraph, list item, heading, etc. in the document that a note attaches to",
+      "notes": "Transliterated from English rather than translated (e.g. not פסקה, which is reserved for 'paragraph' specifically)"
+    },
+    {
+      "term": "notes list",
+      "translation": "רשימת ההערות",
+      "context": "The panel listing every note in the file; section heading \"The notes list\""
+    },
+    {
+      "term": "status bar",
+      "translation": "שורת המצב",
+      "context": "Bar at the bottom of the window showing confirmation messages like \"Note added\""
+    },
+    {
+      "term": "menu bar",
+      "translation": "שורת התפריטים",
+      "context": "Bar at the top of the window holding File, Edit, View, Notes, Help",
+      "notes": "Definite form שורת התפריטים is used when referring back to it (e.g. reaching it with Alt); the indefinite שורת תפריטים appears once, on first mention of the window layout"
+    },
+    {
+      "term": "screen reader",
+      "translation": "קורא מסך",
+      "context": "Section heading \"Using a screen reader\""
+    },
+    {
+      "term": "marker",
+      "translation": "סמן",
+      "context": "The note markers, e.g. [usernote]/[/usernote]; \"changing the markers\" warning",
+      "notes": "Plural is סמנים"
+    },
+    {
+      "term": "task",
+      "translation": "משימה",
+      "context": "A Markdown checklist item; \"Mark this task as done?\" confirmation and \"Checking off tasks\" section"
+    },
+    {
+      "term": "document language",
+      "translation": "שפת מסמך",
+      "context": "The \"Document language\" setting and View-menu submenu name",
+      "notes": "Indefinite form שפת מסמך is the setting/menu item label; the general concept and section heading \"The document's language\" use the definite form שפת המסמך"
+    },
+    {
+      "term": "interface language",
+      "translation": "שפת ממשק",
+      "context": "The \"Interface language\" setting and View-menu submenu name",
+      "notes": "Indefinite form שפת ממשק is the setting/menu item label; running prose referring to \"the interface language\" uses the definite form שפת הממשק"
+    },
+    {
+      "term": "dialog",
+      "translation": "תיבת דו-שיח",
+      "context": "Generic word for a dialog box, e.g. the Open dialog or a confirmation dialog"
+    },
+    {
+      "term": "Yes / No buttons",
+      "translation": "כן / לא",
+      "context": "The two buttons on a yes-or-no confirmation, e.g. \"Mark this task as done?\""
+    },
+    {
+      "term": "File Explorer",
+      "translation": "סייר הקבצים",
+      "context": "Windows Explorer, e.g. dragging a file from it or its \"Copy as path\" command"
+    },
+    {
+      "term": "Downloads folder",
+      "translation": "תיקיית ההורדות",
+      "context": "The Windows Downloads folder where files opened from a link are saved"
+    },
+    {
+      "term": "Start menu",
+      "translation": "תפריט ה-Start",
+      "context": "Starting PlanCake from the Windows Start menu",
+      "notes": "\"Start\" is kept in Latin script, hyphen-joined to the Hebrew prefix ה-"
+    },
+    {
+      "term": "Command Prompt",
+      "translation": "שורת הפקודה",
+      "context": "Windows Command Prompt, as contrasted with PowerShell"
+    },
+    {
+      "term": "Copy as path",
+      "translation": "העתק כנתיב",
+      "context": "File Explorer's \"Copy as path\" command, which adds quotation marks around the copied path"
+    },
+    {
+      "term": "issue",
+      "translation": "תקלה (issue)",
+      "context": "A GitHub issue, \"Paste them into a new issue on PlanCake's GitHub page\"",
+      "notes": "The manual keeps the English word \"issue\" in parentheses next to the Hebrew תקלה for clarity, since תקלה alone reads as \"malfunction/fault\""
+    },
+    {
+      "term": "Raw",
+      "translation": "Raw",
+      "context": "GitHub's \"Raw\" link for viewing/downloading a file's plain contents",
+      "notes": "Left untranslated, in Latin script"
+    }
+  ]
+}

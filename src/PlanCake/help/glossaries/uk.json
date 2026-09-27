@@ -1,0 +1,138 @@
+{
+  "language": "uk",
+  "languageName": "Ukrainian",
+  "nativeName": "Українська",
+  "direction": "ltr",
+  "keys": {
+    "Ctrl": "Ctrl",
+    "Alt": "Alt",
+    "Shift": "Shift",
+    "Enter": "Enter",
+    "Tab": "Tab",
+    "Escape": "Escape",
+    "Delete": "Delete",
+    "Backspace": "Backspace",
+    "Space": "Пробіл",
+    "Left Arrow": "Стрілка вліво",
+    "Right Arrow": "Стрілка вправо",
+    "Up Arrow": "Стрілка вгору",
+    "Down Arrow": "Стрілка вниз",
+    "Applications": "Клавіша програм",
+    "Comma": "Кома",
+    "Plus": "Плюс",
+    "Minus": "Мінус",
+    "Numpad Plus": "Плюс на цифровій клавіатурі",
+    "Numpad Minus": "Мінус на цифровій клавіатурі",
+    "Home": "Home",
+    "End": "End",
+    "Page Up": "Page Up",
+    "Page Down": "Page Down"
+  },
+  "terms": [
+    {
+      "term": "note",
+      "translation": "нотатка",
+      "context": "A single note the user adds to a block in the document",
+      "notes": "Never 'примітка' or 'коментар'; 'нотатка' is used consistently throughout, including in status messages such as «Нотатку додано»"
+    },
+    {
+      "term": "block",
+      "translation": "блок",
+      "context": "A paragraph, list item, heading, table row or code block that a note attaches to",
+      "notes": "Used generically for any commentable unit ('перейти від блоку до блоку', 'блок коду', 'меню блоку')"
+    },
+    {
+      "term": "notes list",
+      "translation": "список нотаток",
+      "context": "The panel listing every note in the file; also the 'Notes list' menu command and section heading",
+      "notes": "Consistent across the View menu command, the section heading and status messages ('Список нотаток 40%', 'Список нотаток приховано')"
+    },
+    {
+      "term": "status bar",
+      "translation": "рядок стану",
+      "context": "The bar at the bottom of the window that shows confirmation messages such as 'Note added'"
+    },
+    {
+      "term": "menu bar",
+      "translation": "рядок меню",
+      "context": "The bar at the top of the window holding File/Edit/View/Notes/Help"
+    },
+    {
+      "term": "screen reader",
+      "translation": "програма зчитування екрана",
+      "context": "Assistive technology, as in the 'Using a screen reader' section heading",
+      "notes": "Rendered as a descriptive phrase ('program for reading the screen'), not a loanword like 'скринридер'; declines by case as needed ('вашою програмою зчитування екрана')"
+    },
+    {
+      "term": "marker",
+      "translation": "маркер",
+      "context": "The text pair (default [usernote]/[/usernote]) that wraps a note in the Markdown file",
+      "notes": "Also 'Відкривальний маркер' / 'Закривальний маркер' for the Opening marker / Closing marker settings"
+    },
+    {
+      "term": "task",
+      "translation": "завдання",
+      "context": "A Markdown checklist item, as in the confirmation 'Mark this task as done?'",
+      "notes": "Confirmation text: «Позначити це завдання як виконане? Файл на диску буде змінено.»"
+    },
+    {
+      "term": "document language",
+      "translation": "Мова документа",
+      "context": "The setting controlling what language PlanCake assumes the open document is written in"
+    },
+    {
+      "term": "interface language",
+      "translation": "Мова інтерфейсу",
+      "context": "The setting controlling the language of PlanCake's own menus, dialogs and messages"
+    },
+    {
+      "term": "dialog",
+      "translation": "вікно",
+      "context": "Generic word for a dialog box, e.g. the Open dialog or a confirmation dialog",
+      "notes": "PlanCake has no separate word for 'dialog box' distinct from 'window'; both are 'вікно' ('вікно «Відкрити»', 'стандартне вікно відкриття Windows')"
+    },
+    {
+      "term": "Yes / No buttons",
+      "translation": "Так / Ні",
+      "context": "Confirmation dialog buttons, e.g. for deleting a note or marking a task done"
+    },
+    {
+      "term": "File Explorer",
+      "translation": "Провідник файлів",
+      "context": "Windows Explorer, as the source of dragged or copied files"
+    },
+    {
+      "term": "Downloads folder",
+      "translation": "тека «Завантаження»",
+      "context": "The Windows Downloads folder where files opened from a link are saved",
+      "notes": "Manual text: 'до вашої теки Windows Завантаження'; 'тека' is PlanCake's word for 'folder'"
+    },
+    {
+      "term": "Start menu",
+      "translation": "меню Пуск",
+      "context": "Windows Start menu, used to launch PlanCake"
+    },
+    {
+      "term": "Command Prompt",
+      "translation": "командний рядок",
+      "context": "cmd.exe, as distinct from PowerShell"
+    },
+    {
+      "term": "Copy as path",
+      "translation": "Копіювати як шлях",
+      "context": "File Explorer's command that copies a quoted file path to the clipboard"
+    },
+    {
+      "term": "issue",
+      "translation": "звернення",
+      "context": "A GitHub issue, as in 'Paste them into a new issue on PlanCake's GitHub page'",
+      "notes": "Rendered as 'нове звернення' (a general-purpose word for a report/inquiry), not a calque like 'тікет' or literal 'проблема'"
+    },
+    {
+      "term": "Raw",
+      "translation": "Raw",
+      "context": "GitHub's 'Raw' link/button for viewing a file's raw contents",
+      "notes": "Left untranslated, in Latin script, as it names GitHub's own UI label"
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "language": "de",
+  "languageName": "German",
+  "nativeName": "Deutsch",
+  "direction": "ltr",
+  "keys": {
+    "Ctrl": "Strg",
+    "Alt": "Alt",
+    "Shift": "Umschalt",
+    "Enter": "Eingabe",
+    "Tab": "Tab",
+    "Escape": "Esc",
+    "Delete": "Entf",
+    "Backspace": "Rücktaste",
+    "Space": "Leertaste",
+    "Left Arrow": "Nach-links",
+    "Right Arrow": "Nach-rechts",
+    "Up Arrow": "Nach-oben",
+    "Down Arrow": "Nach-unten",
+    "Applications": "Anwendungstaste",
+    "Comma": "Komma",
+    "Plus": "Plus",
+    "Minus": "Minus",
+    "Numpad Plus": "Plus (Ziffernblock)",
+    "Numpad Minus": "Minus (Ziffernblock)",
+    "Home": "Pos1",
+    "End": "Ende",
+    "Page Up": "Bild-auf",
+    "Page Down": "Bild-ab"
+  },
+  "terms": [
+    {
+      "term": "note",
+      "translation": "Notiz",
+      "context": "A single note the user adds to or edits on a block",
+      "notes": "Capitalized as a German noun (die Notiz). Plural Notizen."
+    },
+    {
+      "term": "block",
+      "translation": "Block",
+      "context": "A paragraph, heading, list item, table row, code block or note that a note attaches to",
+      "notes": "Same word as English, capitalized as a German noun (der Block)."
+    },
+    {
+      "term": "notes list",
+      "translation": "Notizliste",
+      "context": "\"The notes list\" section heading and prose — the panel listing every note in the file",
+      "notes": "One compound word, capitalized (die Notizliste)."
+    },
+    {
+      "term": "status bar",
+      "translation": "Statusleiste",
+      "context": "Bottom bar showing confirmation messages such as \"Note added\"",
+      "notes": "One compound word (die Statusleiste)."
+    },
+    {
+      "term": "menu bar",
+      "translation": "Menüleiste",
+      "context": "Top bar holding the File/Edit/View/Notes/Help menus",
+      "notes": "One compound word (die Menüleiste)."
+    },
+    {
+      "term": "screen reader",
+      "translation": "Screenreader",
+      "context": "\"Using a screen reader\" section heading and prose (JAWS, NVDA, etc.)",
+      "notes": "Kept as one German loanword, capitalized (der Screenreader), not translated as \"Bildschirmleser\"."
+    },
+    {
+      "term": "marker",
+      "translation": "Markierung",
+      "context": "The note markers, e.g. [usernote]/[/usernote]; \"changing the markers hides existing notes\"",
+      "notes": "Plural Markierungen, used throughout the note-markers settings and warning text."
+    },
+    {
+      "term": "task",
+      "translation": "Aufgabe",
+      "context": "A Markdown checklist item; \"Mark this task as done?\"",
+      "notes": "Capitalized as a German noun (die Aufgabe)."
+    },
+    {
+      "term": "document language",
+      "translation": "Dokumentsprache",
+      "context": "The \"Document language\" setting, which sets the screen-reader voice and legacy-encoding detection for the open file",
+      "notes": "One compound word, capitalized as the setting name (die Dokumentsprache)."
+    },
+    {
+      "term": "interface language",
+      "translation": "Oberflächensprache",
+      "context": "The \"Interface language\" setting, which sets the language of menus, dialogs and messages",
+      "notes": "One compound word, capitalized as the setting name (die Oberflächensprache)."
+    },
+    {
+      "term": "dialog",
+      "translation": "Dialog",
+      "context": "Generic word for a dialog box, e.g. the Add note dialog or the standard Windows Open dialog",
+      "notes": "Same word as English, capitalized as a German noun (der Dialog)."
+    },
+    {
+      "term": "Yes / No buttons",
+      "translation": "Ja / Nein",
+      "context": "The confirmation dialog buttons, e.g. \"Delete this note?\" answered with Yes or No",
+      "notes": "Not capitalized as buttons beyond normal sentence case; matches the German words for yes and no exactly."
+    },
+    {
+      "term": "File Explorer",
+      "translation": "Datei-Explorer",
+      "context": "Windows File Explorer, e.g. dragging a Markdown file onto the PlanCake window",
+      "notes": "Hyphenated in the German manual's rendering of this Windows UI element name."
+    },
+    {
+      "term": "Downloads folder",
+      "translation": "Windows-Ordner Downloads",
+      "context": "The Windows Downloads folder where PlanCake saves a plan downloaded from a link",
+      "notes": "The manual phrases this as \"Ihrem Windows-Ordner Downloads\" rather than a \"Downloads-Ordner\" compound; the folder's own name, Downloads, stays untranslated since it is the real Windows folder name."
+    },
+    {
+      "term": "Start menu",
+      "translation": "Startmenü",
+      "context": "The Windows Start menu, used to launch PlanCake",
+      "notes": "One compound word (das Startmenü)."
+    },
+    {
+      "term": "Command Prompt",
+      "translation": "Eingabeaufforderung",
+      "context": "The Windows Command Prompt (cmd.exe), as distinct from PowerShell which stays untranslated",
+      "notes": "Windows' own localized name for this app; PowerShell is left in Latin script per repo convention."
+    },
+    {
+      "term": "Copy as path",
+      "translation": "Als Pfad kopieren",
+      "context": "File Explorer's \"Copy as path\" command, which puts a quoted file path on the clipboard",
+      "notes": "Windows' own localized command name."
+    },
+    {
+      "term": "issue",
+      "translation": "Issue",
+      "context": "A GitHub issue; \"Paste them into a new issue on PlanCake's GitHub page\"",
+      "notes": "Kept as an English loanword, capitalized as a German noun (ein neues Issue), not translated as \"Fehlermeldung\" or \"Ticket\"."
+    },
+    {
+      "term": "Raw",
+      "translation": "Raw",
+      "context": "GitHub's \"Raw\" link/button for viewing a file's raw content",
+      "notes": "Left untranslated, matching GitHub's own (unlocalized) button label."
+    }
+  ]
+}
