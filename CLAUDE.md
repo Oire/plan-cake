@@ -247,9 +247,10 @@ In short:
 - **JAWS keeps its virtual cursor on DOM nodes.** Replacing the page's content throws it to the
   top, hence `morph.js`; and a different file must be a fresh page load, or JAWS keeps its old
   offset.
-- **Notes are `role="region"` elements** (not `role="note"`, which JAWS navigates worse) with the
-  role descriptions "user note" and, for braille, "unote" (localized). A button style was tried
-  and dropped: long labels are hard to listen to.
+- **Notes are `role="region"` elements** (not `role="note"`, which JAWS navigates worse) named
+  `aria-label="User note"` (localized). Role descriptions ("user note", and "unote" for braille)
+  were tried and dropped as cumbersome to listen to, and so was a button style: long labels are
+  hard to listen to.
 
 ### One window per file
 

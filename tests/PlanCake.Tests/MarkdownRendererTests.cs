@@ -6,7 +6,7 @@ using Xunit;
 namespace Oire.PlanCake.Tests;
 
 public class MarkdownRendererTests {
-    private static readonly RenderStrings _strings = new("user note", "unote");
+    private static readonly RenderStrings _strings = new("User note");
 
     private static RenderResult Render(
         string source,
@@ -21,8 +21,7 @@ public class MarkdownRendererTests {
     private static IEnumerable<string> Ranges(RenderResult result, BlockKind kind) =>
         result.Blocks.Where(block => block.Kind == kind).Select(block => block.Lines);
 
-    private const string NoteRoles =
-        "role=\"region\" aria-roledescription=\"user note\" aria-brailleroledescription=\"unote\"";
+    private const string NoteRoles = "role=\"region\" aria-label=\"User note\"";
 
     /// <summary>A user note whose text renders as one paragraph.</summary>
     private static string NoteDiv(int index, string text) => NoteDivHtml(index, $"""<p dir="auto">{text}</p>""");
@@ -394,13 +393,11 @@ public class MarkdownRendererTests {
 
     [Fact]
     public void Render_LocalizedStrings_AreWrittenEncoded() {
-        var strings = new RenderStrings("заметка \"пользователя\"", "зам");
+        var strings = new RenderStrings("Заметка \"пользователя\"");
 
         var result = Render("Para\n[usernote]n[/usernote]\n", strings: strings);
 
-        result.Html.Should()
-            .Contain("""aria-roledescription="заметка &quot;пользователя&quot;" """)
-            .And.Contain("""aria-brailleroledescription="зам" """);
+        result.Html.Should().Contain("""aria-label="Заметка &quot;пользователя&quot;" """);
     }
 
     /// <summary>The HTML of the user note with this <c>data-note</c> index.</summary>

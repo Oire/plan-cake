@@ -9,7 +9,7 @@ namespace Oire.PlanCake.Tests;
 
 [Collection(LocalizationCollection.Name)]
 public class NoteActionRunnerTests: IDisposable {
-    private static readonly RenderStrings _strings = new("user note", "unote");
+    private static readonly RenderStrings _strings = new("User note");
     private static readonly Encoding _windows1251 = CodePagesEncodingProvider.Instance.GetEncoding(1251)!;
 
     private readonly string _folder;
