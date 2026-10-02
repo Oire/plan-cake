@@ -150,6 +150,14 @@ public partial class MainWindow: Form {
         Localizer.Localize(this, Utils.Localization.Catalog, _localizationStore);
         TextDirection.Apply(this);
 
+        // The .ico holds every size from 16 to 256 pixels, so the title bar and Alt+Tab each get
+        // a sharp one; the exe's own icon (ApplicationIcon) is not what a form shows.
+        using (var iconStream = typeof(MainWindow).Assembly.GetManifestResourceStream("PlanCake.ico")) {
+            if (iconStream is not null) {
+                Icon = new Icon(iconStream);
+            }
+        }
+
         _initialFile = initialFile;
         _announcer = new StatusAnnouncer(statusStrip, statusLabel);
         documentView.MessageReceived += OnPageMessage;

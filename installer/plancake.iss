@@ -47,6 +47,10 @@ Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
 
+; The wizard's own icon. Shortcuts and Apps & features take theirs from the exe, which
+; carries the same icon (ApplicationIcon in PlanCake.csproj), so the .ico is not shipped.
+SetupIconFile=..\src\PlanCake\PlanCake.ico
+
 ; Uninstall configuration
 UninstallDisplayName={#MyAppName} {#MyAppVersion}
 UninstallDisplayIcon={app}\{#MyAppExeName}
