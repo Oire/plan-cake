@@ -153,9 +153,9 @@ public class MarkdownRendererTests {
         var result = Render("- [x] done\n- [ ] todo\n");
 
         result.Html.Should().Contain(
-            """<li class="task-list-item" dir="auto" data-lines="1-1"><input class="task-list-item-checkbox" type="checkbox" checked="checked" /> done</li>"""
+            """<li class="task-list-item" dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" checked="checked" /> done</li>"""
         ).And.Contain(
-            """<li class="task-list-item" dir="auto" data-lines="2-2"><input class="task-list-item-checkbox" type="checkbox" /> todo</li>"""
+            """<li class="task-list-item" dir="auto" data-lines="2-2"><input data-plancake-task="true" type="checkbox" /> todo</li>"""
         );
         result.Html.Should().NotContain("disabled");
         Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "2-2");
@@ -166,16 +166,16 @@ public class MarkdownRendererTests {
         var result = Render("- [ ] one\n\n- [x] two\n");
 
         result.Html.Should().Contain(
-            """<p dir="auto" data-lines="1-1"><input class="task-list-item-checkbox" type="checkbox" /> one</p>"""
+            """<p dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" /> one</p>"""
         );
         Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "3-3");
     }
 
     // Partially checked parents
 
-    private const string Unchecked = """<input class="task-list-item-checkbox" type="checkbox" />""";
-    private const string Mixed = """<input class="task-list-item-checkbox" type="checkbox" data-mixed="true" />""";
-    private const string Checked = """<input class="task-list-item-checkbox" type="checkbox" checked="checked" />""";
+    private const string Unchecked = """<input data-plancake-task="true" type="checkbox" />""";
+    private const string Mixed = """<input data-plancake-task="true" type="checkbox" data-mixed="true" />""";
+    private const string Checked = """<input data-plancake-task="true" type="checkbox" checked="checked" />""";
 
     [Fact]
     public void Render_TaskParentWithOneOfTwoChildrenChecked_IsMixed() {
@@ -224,7 +224,7 @@ public class MarkdownRendererTests {
 
         result.Html.Should().Contain("""<input disabled="disabled" type="checkbox" checked="checked" />""")
             .And.Contain("""<input disabled="disabled" type="checkbox" />""");
-        result.Html.Should().NotContain("task-list-item-checkbox");
+        result.Html.Should().NotContain("data-plancake-task");
     }
 
     [Fact]
@@ -234,6 +234,73 @@ public class MarkdownRendererTests {
         result.Html.Should().Contain("<kbd>F9</kbd>")
             .And.Contain("<details><summary>More</summary>Hidden</details>");
         result.Blocks.Should().ContainSingle().Which.Text.Should().Be("Press F9.");
+    }
+
+    // The plan's own markup cannot imitate the page's markers
+
+    [Fact]
+    public void Render_RawHtmlBlock_ProtocolAttributesAreRenamed() {
+        var result = Render(
+            "Text\n\n<div data-lines=\"40-40\" style=\"position:fixed;inset:0;opacity:0\">\n"
+            + "<span DATA-NOTE='0' data-mixed data-plancake-current>x</span>\n</div>\n"
+        );
+
+        result.Html.Should().Contain("""<div x-data-lines="40-40" style="position:fixed;inset:0;opacity:0">""")
+            .And.Contain("<span x-DATA-NOTE='0' x-data-mixed x-data-plancake-current>x</span>");
+        result.Html.Should().NotContain(" data-lines=\"40-40\"").And.NotContain(" DATA-NOTE");
+        Ranges(result, BlockKind.Paragraph).Should().Equal("1-1");
+    }
+
+    [Fact]
+    public void Render_RawInlineHtml_ProtocolAttributesAreRenamed() {
+        var result = Render("Press <span\tData-Lines=\"9-9\" data-note=1>F9</span>.\n");
+
+        result.Html.Should().Contain("<span\tx-Data-Lines=\"9-9\" x-data-note=1>F9</span>");
+        result.Html.Split("data-lines=").Should().HaveCount(2, "only the paragraph's own range is left");
+    }
+
+    [Theory]
+    [InlineData("<div/data-lines=1>", "<div/x-data-lines=1>")]
+    [InlineData("<div title=\"a\"data-note='0'>", "<div title=\"a\"x-data-note='0'>")]
+    [InlineData("<div\ndata-mixed\n>", "<div\nx-data-mixed\n>")]
+    [InlineData("<div data-PLANCAKE-current/>", "<div x-data-PLANCAKE-current/>")]
+    [InlineData("<div data-lines>", "<div x-data-lines>")]
+    public void NeutralizeRawHtml_RenamesEveryWayToWriteTheName(string html, string expected) =>
+        MarkdownRenderer.NeutralizeRawHtml(html).Should().Be(expected);
+
+    [Fact]
+    public void Render_RawCheckbox_IsNotATaskCheckbox() {
+        var result = Render(
+            "- [ ] real\n\n<input type=\"checkbox\" class=\"task-list-item-checkbox\" Data-PlanCake-Task=\"true\">\n"
+        );
+
+        result.Html.Split("data-plancake-task=").Should().HaveCount(2, "only the real task has the marker");
+        result.Html.Should().Contain("""<input type="checkbox" class="task-list-item-checkbox" x-Data-PlanCake-Task="true">""");
+    }
+
+    [Fact]
+    public void Render_RawHtmlTextAndOtherAttributes_AreKept() {
+        const string html = """<div class="data-lines" data-linesx="1" title="data-note">no data-lines-like name</div>""";
+
+        Render(html + "\n").Html.Should().Contain(html);
+    }
+
+    [Fact]
+    public void Render_GenericAttributes_ProtocolNamesAreDropped() {
+        var result = Render("# Title {data-lines=40-40 data-plancake-task=true}\n\nText *em*{Data-Note=0} [l](u){data-mixed=true}\n");
+
+        result.Html.Should().Contain("""<h1 id="title" dir="auto" data-lines="1-1">Title</h1>""")
+            .And.Contain("<em>em</em>")
+            .And.Contain("""<a href="u">l</a>""");
+        result.Html.Should().NotContain("40-40").And.NotContain("Data-Note").And.NotContain("data-mixed")
+            .And.NotContain("data-plancake-task");
+    }
+
+    [Fact]
+    public void Render_NoteText_GenericAttributesCannotFakeABlock() {
+        var result = Render("Text\n[usernote][link](u){data-lines=1-1} *em*{data-note=0}[/usernote]\n");
+
+        result.Html.Should().Contain(NoteDiv(0, """<a href="u">link</a> <em>em</em>"""));
     }
 
     [Fact]

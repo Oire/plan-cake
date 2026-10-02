@@ -10,13 +10,17 @@
     const webview = window.chrome && window.chrome.webview;
     const main = document.getElementById("document");
 
+    // Only the host writes these attributes: it renames them where the plan's own raw HTML
+    // carries them (MarkdownRenderer.NeutralizeProtocolMarkers), so a plan cannot pass an
+    // element of its own off as a block, a note or a task.
     const blockSelector = "[data-lines]";
     const noteSelector = "[data-note]";
     const targetSelector = noteSelector + ", " + blockSelector;
 
     // A task-list check box the host rendered enabled (Task 7a). Toggling one asks the host to
-    // rewrite the item's marker in the file.
-    const taskSelector = "input.task-list-item-checkbox";
+    // rewrite the item's marker in the file. Found by an attribute, not a class: a class can be
+    // spelled with character references in raw HTML, an attribute name cannot.
+    const taskSelector = "input[data-plancake-task]";
 
     // Elements with a behavior of their own: a click or Enter on one inside a block does not
     // activate the block.

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using Markdig;
 using Markdig.Extensions.Footnotes;
 using Markdig.Extensions.Tables;
@@ -8,6 +9,7 @@ using Markdig.Helpers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
 using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 using Oire.PlanCake.Notes;
 
 namespace Oire.PlanCake.Rendering;
@@ -45,7 +47,7 @@ internal sealed record RenderOptions(
 /// they annotate, every annotatable block stamped with its original source line range, per
 /// Technical details → "Annotatable blocks" and "Note placement in the view" in the PlanCake plan.
 /// </summary>
-internal static class MarkdownRenderer {
+internal static partial class MarkdownRenderer {
     /// <summary>The longest a <see cref="BlockInfo.Excerpt"/> gets, ellipsis included.</summary>
     public const int ExcerptLength = 80;
 
@@ -63,8 +65,15 @@ internal static class MarkdownRenderer {
         .note > :last-child { margin-bottom: 0; }
         """;
 
-    /// <summary>The class the page finds a task-list check box by.</summary>
-    public const string TaskCheckboxClass = "task-list-item-checkbox";
+    /// <summary>
+    /// The attribute the page finds a task-list check box by. An attribute, not a class: a class
+    /// in raw HTML can be spelled with character references, an attribute name cannot, so
+    /// <see cref="NeutralizeProtocolMarkers"/> catches every spelling of it.
+    /// </summary>
+    public const string TaskCheckboxAttribute = "data-plancake-task";
+
+    /// <summary>The prefix a protocol attribute written by the plan itself gets, so the page ignores it.</summary>
+    internal const string NeutralizedPrefix = "x-";
 
     private static readonly MarkdownPipeline _pipeline = new MarkdownPipelineBuilder()
         .UseAdvancedExtensions()
@@ -98,6 +107,7 @@ internal static class MarkdownRenderer {
 
         var parse = NoteParser.Parse(source, options.Markers);
         var document = Markdown.Parse(parse.StrippedSource, _pipeline);
+        NeutralizeProtocolMarkers(document);
         var walker = new BlockWalker(parse);
         walker.Walk(document);
 
@@ -109,6 +119,63 @@ internal static class MarkdownRenderer {
             : body;
 
         return new RenderResult(html, walker.Blocks.Select(block => block.Info).ToList(), notes, title, parse);
+    }
+
+    /// <summary>
+    /// Matches, in raw HTML, a name the page and the host trust to come from the renderer
+    /// (<c>data-lines</c>, <c>data-note</c>, <c>data-mixed</c> and every <c>data-plancake-*</c>)
+    /// wherever the browser could read it as an attribute name: after whitespace, a slash or a
+    /// quote, and before whitespace, a slash, <c>&gt;</c>, <c>=</c> or the end of the line. HTML
+    /// lowercases attribute names, so the match ignores case. It may also match such a word in
+    /// the text of a raw HTML block, which then shows with the prefix: a much smaller cost than
+    /// tracking the browser's tokenizer through comments, raw text elements and foreign content.
+    /// </summary>
+    [GeneratedRegex(
+        """(?<=^|[\s/"'])(?:data-lines|data-note|data-mixed|data-plancake-[^\s/>=]*)(?=[\s/>=]|$)""",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
+    )]
+    private static partial Regex ProtocolAttributeName();
+
+    /// <summary>
+    /// Keeps the plan itself from imitating the markers the page acts on. A block or note the user
+    /// clicks is found by <c>data-lines</c> and <c>data-note</c>, a task check box by
+    /// <see cref="TaskCheckboxAttribute"/>; raw HTML or a generic attribute (<c>{data-lines=40-40}</c>)
+    /// carrying one of them would send the user's click to another block, or toggle a task they did
+    /// not touch. Raw HTML gets <see cref="NeutralizedPrefix"/> before such a name; a generic
+    /// attribute with such a name is dropped. Runs before the walker stamps the real ones.
+    /// </summary>
+    internal static void NeutralizeProtocolMarkers(MarkdownDocument document) {
+        foreach (var node in document.Descendants()) {
+            switch (node) {
+                case HtmlBlock block:
+                    block.Lines = NeutralizedLines(block.Lines);
+                    break;
+                case HtmlInline inline:
+                    inline.Tag = NeutralizeRawHtml(inline.Tag);
+                    break;
+            }
+
+            node.TryGetAttributes()?.Properties?.RemoveAll(property => IsProtocolAttribute(property.Key));
+        }
+    }
+
+    /// <summary>Raw HTML with every name the page trusts renamed (see <see cref="ProtocolAttributeName"/>).</summary>
+    internal static string NeutralizeRawHtml(string html) =>
+        ProtocolAttributeName().Replace(html, match => NeutralizedPrefix + match.Value);
+
+    private static bool IsProtocolAttribute(string name) =>
+        ProtocolAttributeName().Match(name) is { Success: true, Index: 0 } match && match.Length == name.Length;
+
+    private static StringLineGroup NeutralizedLines(StringLineGroup lines) {
+        var neutralized = new StringLineGroup(lines.Count);
+
+        foreach (var line in lines.Lines.AsSpan(0, lines.Count)) {
+            var slice = new StringSlice(NeutralizeRawHtml(line.Slice.ToString()), line.Slice.NewLine);
+            var copy = line with { Slice = slice };
+            neutralized.Add(ref copy);
+        }
+
+        return neutralized;
     }
 
     private static string ToHtml(MarkdownDocument document, RenderMode mode, IReadOnlySet<TaskList> mixedTasks) {
@@ -215,6 +282,7 @@ internal static class MarkdownRenderer {
     /// </summary>
     internal static string NoteBlockHtml(string text) {
         var document = Markdown.Parse(text, _notePipeline);
+        NeutralizeProtocolMarkers(document);
 
         foreach (var block in document.Descendants<Block>()) {
             block.GetAttributes().AddPropertyIfNotExist("dir", "auto");
@@ -291,7 +359,7 @@ internal static class MarkdownRenderer {
         item.Count > 0 && item[0] is ParagraphBlock { Inline.FirstChild: TaskList task } ? task : null;
 
     /// <summary>
-    /// A task-list check box. In the window it is enabled, with a class the page finds it by, and
+    /// A task-list check box. In the window it is enabled, with an attribute the page finds it by, and
     /// the page sends a toggle to the host, which rewrites the marker in the file; a partially
     /// done item carries <c>data-mixed</c>, which the page turns into the check box's
     /// <c>indeterminate</c> state. In an exported file it stays disabled as Markdig renders it,
@@ -308,7 +376,7 @@ internal static class MarkdownRenderer {
             var mixed = mixedTasks.Contains(obj);
 
             if (mode == RenderMode.Interactive) {
-                renderer.Write($"<input class=\"{TaskCheckboxClass}\" type=\"checkbox\"");
+                renderer.Write($"<input {TaskCheckboxAttribute}=\"true\" type=\"checkbox\"");
 
                 if (mixed) {
                     renderer.Write(" data-mixed=\"true\"");

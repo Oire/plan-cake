@@ -72,6 +72,71 @@ public class SingleInstanceTests {
         SingleInstance.NormalizePath(@"C:\Plans\Drafts\..\Plan.md\").Should().Be(@"C:\PLANS\PLAN.MD");
 
     [Fact]
+    public void FinalPath_OfAnExistingFile_IsItsPathWithoutTheLongPathPrefix() {
+        var folder = Directory.CreateDirectory(Path.GetDirectoryName(UniquePath())!).FullName;
+        var file = Path.Combine(folder, "plan.md");
+        File.WriteAllText(file, "# Plan\n");
+
+        try {
+            SingleInstance.FinalPath(file).Should().BeEquivalentTo(file);
+            SingleInstance.FinalPath(Path.Combine(folder, "missing.md")).Should().BeNull();
+        } finally {
+            Directory.Delete(folder, true);
+        }
+    }
+
+    [Fact]
+    public void PipeName_ThroughAJunction_IsTheFilesOwn() {
+        var folder = Path.GetDirectoryName(UniquePath())!;
+        var target = Directory.CreateDirectory(Path.Combine(folder, "target")).FullName;
+        var junction = Path.Combine(folder, "junction");
+        var file = Path.Combine(target, "plan.md");
+        File.WriteAllText(file, "# Plan\n");
+
+        try {
+            // A junction needs no privilege, unlike a symbolic link; where mklink still fails,
+            // there is nothing to compare.
+            if (!TryCreateJunction(junction, target)) {
+                return;
+            }
+
+            SingleInstance.PipeName(Path.Combine(junction, "plan.md")).Should().Be(SingleInstance.PipeName(file));
+        } finally {
+            // Removes the junction itself, not the folder it points to.
+            if (Directory.Exists(junction)) {
+                Directory.Delete(junction);
+            }
+
+            Directory.Delete(folder, true);
+        }
+    }
+
+    private static bool TryCreateJunction(string junction, string target) {
+        try {
+            using var mklink = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo {
+                FileName = "cmd.exe",
+                ArgumentList = { "/c", "mklink", "/J", junction, target },
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            });
+
+            if (mklink is null) {
+                return false;
+            }
+
+            mklink.StandardOutput.ReadToEnd();
+            mklink.StandardError.ReadToEnd();
+            mklink.WaitForExit();
+
+            return mklink.ExitCode == 0 && Directory.Exists(junction);
+        } catch (System.ComponentModel.Win32Exception) {
+            return false;
+        }
+    }
+
+    [Fact]
     public void SecondRegistration_ForTheSamePath_IsDetected() {
         var path = UniquePath();
         using var first = SingleInstance.TryRegister(path, () => { });
