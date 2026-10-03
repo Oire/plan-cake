@@ -44,8 +44,7 @@ PlanCake is not signed with a code-signing certificate, so the first time you ru
 or `plancake.exe` from the zip, Windows SmartScreen may say "Windows protected your PC" and name
 an unknown publisher. Choose **More info**, then **Run anyway**.
 
-Once the first release is published, PlanCake can also be installed with
-[winget](https://learn.microsoft.com/windows/package-manager/winget/):
+PlanCake can also be installed with [winget](https://learn.microsoft.com/windows/package-manager/winget/):
 
 ```powershell
 winget install Oire.PlanCake

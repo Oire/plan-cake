@@ -9,7 +9,9 @@ update window come from `changelogs/<X.Y.Z>.md`.
 
 ## [Unreleased]
 
-The first release, 1.0.0. PlanCake lets you read Markdown files comfortably and leave notes
+## [1.0.0.11] - 2026-10-04
+
+The first release. PlanCake lets you read Markdown files comfortably and leave notes
 right where they belong. It was made for the long implementation plans that AI coding assistants
 write, and works with any Markdown file. It runs as a window, or without one from the command
 line.
@@ -57,8 +59,5 @@ line.
 - **Licenses**: PlanCake's license and the notices of the components it includes ship with it,
   and **Licenses** in About PlanCake opens them.
 
-<!-- When the release is tagged, rename [Unreleased] to [1.0.0.N] - YYYY-MM-DD and start a new
-     empty [Unreleased] above it. Then link [1.0.0.N] to
-     https://github.com/Oire/plan-cake/releases/tag/v1.0.0.N and [Unreleased] to
-     https://github.com/Oire/plan-cake/compare/v1.0.0.N...master (see Releasing in CLAUDE.md). -->
-[Unreleased]: https://github.com/Oire/plan-cake/commits/master
+[Unreleased]: https://github.com/Oire/plan-cake/compare/v1.0.0.11...master
+[1.0.0.11]: https://github.com/Oire/plan-cake/releases/tag/v1.0.0.11
