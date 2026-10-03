@@ -1403,10 +1403,8 @@ public partial class MainWindow: Form {
         }
 
         if (Config.General.ConfirmNoteDelete) {
-            var confirmed = DialogHelper.Confirm(
-                _("Delete this note?\n\n{0}", MarkdownRenderer.Excerpt(MarkdownRenderer.NotePlainText(note.Note.Text))),
-                _("Delete note")
-            );
+            var excerpt = TextDirection.Embed(MarkdownRenderer.Excerpt(MarkdownRenderer.NotePlainText(note.Note.Text)));
+            var confirmed = DialogHelper.Confirm(_("Delete this note?\n\n{0}", excerpt), _("Delete note"));
 
             if (!confirmed) {
                 ReturnFocus();
@@ -1466,7 +1464,7 @@ public partial class MainWindow: Form {
 
     /// <summary>Asks before a check box rewrites the file on disk.</summary>
     private static bool ConfirmToggle(BlockInfo item, bool isChecked) {
-        var text = TaskToggle.WithoutMarker(item.Excerpt);
+        var text = TextDirection.Embed(TaskToggle.WithoutMarker(item.Excerpt));
         var question = isChecked
             ? _("Mark this task as done? The file on disk will be changed.\n\n{0}", text)
             : _("Mark this task as not done? The file on disk will be changed.\n\n{0}", text);
@@ -2441,7 +2439,7 @@ public partial class MainWindow: Form {
         notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(200)));
         notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(60)));
         notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(120)));
-        notesList.InfoTip = item => item.Tag is RenderedNote note ? NotesListRow.TipText(note) : null;
+        notesList.InfoTip = item => item.Tag is RenderedNote note ? TextDirection.Embed(NotesListRow.TipText(note)) : null;
         LocalizeNotesList();
 
         notesList.ItemActivate += OnNotesListItemActivate;
@@ -2522,7 +2520,10 @@ public partial class MainWindow: Form {
     /// </summary>
     private void FillNotesList(RenderResult render, RenderedNote? previous, RenderedNote? focused) {
         var startOfDocument = _("The start of the document");
-        var rows = render.Notes.Select(note => NotesListRow.From(note, startOfDocument).ToCells()).ToList();
+        // Every cell keeps its own direction: a right-to-left interface would move the punctuation of a note or an excerpt.
+        var rows = render.Notes
+            .Select(note => NotesListRow.From(note, startOfDocument).ToCells().Select(TextDirection.Embed).ToArray())
+            .ToList();
         var unchanged = rows.Count == notesList.Items.Count
             && rows.Select((cells, index) => cells.SequenceEqual(notesList.Items[index].Cells)).All(same => same);
 

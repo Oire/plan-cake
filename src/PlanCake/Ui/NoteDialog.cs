@@ -56,7 +56,7 @@ internal partial class NoteDialog: Form {
         _validate = validate;
         _enterAction = enterAction;
 
-        excerptLabel.Text = excerpt;
+        excerptLabel.Text = TextDirection.Embed(excerpt);
         noteTextBox.Text = text;
         noteTextBox.SelectionStart = noteTextBox.TextLength;
         noteTextBox.TextChanged += OnNoteTextChanged;
@@ -80,6 +80,9 @@ internal partial class NoteDialog: Form {
                 case NoteKeyAction.Save:
                     if (okButton.Enabled) {
                         okButton.PerformClick();
+                    } else {
+                        // OK is off while the box is empty; say why the key did nothing.
+                        StatusAnnouncer.Speak(noteTextBox, _("Type a note first."));
                     }
 
                     return true;

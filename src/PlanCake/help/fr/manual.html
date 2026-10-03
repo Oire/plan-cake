@@ -486,7 +486,7 @@ footer {
 <ol>
 <li>Cliquez sur le paragraphe, le titre, l’élément de liste, la ligne de tableau ou le bloc de code que vous voulez commenter. Le bloc sous le pointeur de la souris est mis en évidence, pour que vous voyiez à quel bloc un clic ajoute une note. Depuis le clavier, déplacez-vous dessus avec <kbd>Alt+Maj+Flèche bas</kbd> ou <kbd>Alt+Maj+Flèche haut</kbd> (voir <a href="#reading-basics">Se déplacer</a>) et appuyez sur <kbd>Entrée</kbd>. La boîte de dialogue <strong>Ajouter une note</strong> s’ouvre. Elle affiche le début du bloc sous <strong>Note sur</strong>, afin que vous puissiez vérifier que vous avez choisi le bon, et place le curseur dans la zone <strong>Note</strong>.</li>
 <li>Tapez votre note. Pour y commencer une nouvelle ligne, appuyez sur <kbd>Ctrl+Entrée</kbd>.</li>
-<li>Appuyez sur <kbd>Entrée</kbd> ou cliquez sur <strong>OK</strong> pour enregistrer&nbsp;; appuyez sur <kbd>Échap</kbd> ou cliquez sur <strong>Annuler</strong> pour renoncer. <strong>OK</strong> reste indisponible tant que la zone est vide.</li>
+<li>Appuyez sur <kbd>Entrée</kbd> ou cliquez sur <strong>OK</strong> pour enregistrer&nbsp;; appuyez sur <kbd>Échap</kbd> ou cliquez sur <strong>Annuler</strong> pour renoncer. <strong>OK</strong> reste indisponible tant que la zone est vide, et un appui sur <kbd>Entrée</kbd> indique alors seulement « Saisissez d’abord une note. »</li>
 </ol>
 <p>PlanCake écrit aussitôt la note dans le fichier, juste après le bloc. Le document se met à jour, la barre d’état affiche « Note ajoutée », et la nouvelle note se trouve là où vous êtes désormais. Elle apparaît aussi dans la liste des notes.</p>
 <p>Un simple clic suffit&nbsp;; un double-clic ne fait rien de plus qu’un simple clic. Sélectionner du texte avec la souris n’ouvre pas la boîte de dialogue, vous pouvez donc toujours sélectionner et copier du texte comme d’habitude.</p>
@@ -547,7 +547,7 @@ footer {
 <article aria-labelledby="encodings">
 <h2 id="encodings">Les fichiers qui ne sont pas en UTF-8</h2>
 <p>Presque tous les fichiers Markdown sont aujourd’hui en UTF-8. Les fichiers plus anciens, notamment dans des langues telles que le russe ou l’hébreu, sont parfois enregistrés dans un ancien encodage Windows à la place. PlanCake les ouvre et les affiche correctement, mais par défaut il n’y écrit pas&nbsp;: le fichier s’ouvre en lecture seule, et PlanCake vous le signale, en nommant l’encodage, par exemple « Ce fichier n’est pas en UTF-8, il a donc été ouvert en lecture seule en tant que Windows-1251. Impossible d’y ajouter des notes. Pour le convertir en UTF-8, activez la conversion des fichiers qui ne sont pas en UTF-8 dans les paramètres. »</p>
-<p>Pour ajouter des notes à de tels fichiers, activez <strong>Convertir en UTF-8 les fichiers qui ne sont pas en UTF-8</strong> dans les <a href="#settings-advanced">paramètres avancés</a>. PlanCake convertit alors chaque fichier de ce type en UTF-8 dès que vous l’ouvrez et vous le signale, par exemple « Le fichier a été converti de Windows-1251 en UTF-8. » Seul l’encodage change&nbsp;; le texte et les fins de ligne restent les mêmes.</p>
+<p>Pour ajouter des notes à de tels fichiers, activez <strong>Convertir en UTF-8 à l’ouverture</strong> dans les <a href="#settings-advanced">paramètres avancés</a>. PlanCake convertit alors chaque fichier de ce type en UTF-8 dès que vous l’ouvrez et vous le signale, par exemple « Le fichier a été converti de Windows-1251 en UTF-8. » Seul l’encodage change&nbsp;; le texte et les fins de ligne restent les mêmes.</p>
 <p>Parfois, PlanCake ne peut pas déterminer avec certitude quel encodage un fichier utilise. Un tel fichier reste toujours en lecture seule, quel que soit le paramètre&nbsp;: « L’encodage de ce fichier n’a pas pu être reconnu, il a donc été ouvert en lecture seule et ne sera jamais modifié. Impossible d’y ajouter des notes. » C’est une règle stricte. Écrire dans un fichier qui n’a pas été lu correctement détruirait les caractères que PlanCake n’a pas pu déchiffrer, et PlanCake ne fait jamais cela.</p>
 <p>Le paramètre <strong>Langue du document</strong> est l’un des indices que PlanCake utilise pour reconnaître un ancien encodage&nbsp;; le régler sur la langue dans laquelle vos anciens fichiers sont écrits est donc utile.</p>
 </article>
@@ -581,11 +581,11 @@ footer {
 <dt>Marqueur d’ouverture</dt>
 <dd>Le texte par lequel une note commence dans le fichier. Par défaut&nbsp;: <code>[usernote]</code>. Il ne peut être vide, ne peut ni commencer ni se terminer par une espace ou un guillemet double, et ne peut contenir de saut de ligne.</dd>
 <dt>Marqueur de fermeture (laisser vide pour un marqueur unique qui s’étend jusqu’à la fin de la ligne)</dt>
-<dd>Le texte par lequel une note se termine. Par défaut&nbsp;: <code>[/usernote]</code>. Il suit les mêmes règles et doit être différent du marqueur d’ouverture. Si vous le laissez vide, une note s’étend du marqueur d’ouverture jusqu’à la fin de sa ligne&nbsp;; les notes ne font alors toujours qu’une seule ligne, et tout saut de ligne que vous tapez dans une note devient une espace.</dd>
+<dd>Le texte par lequel une note se termine. Par défaut&nbsp;: <code>[/usernote]</code>. Il suit les mêmes règles et doit être différent du marqueur d’ouverture. Si vous le laissez vide, une note s’étend du marqueur d’ouverture jusqu’à la fin de sa ligne&nbsp;; les notes ne font alors toujours qu’une seule ligne, et tout saut de ligne que vous tapez dans une note devient une espace. Si les marqueurs enfreignent l’une de ces règles, la ligne en dessous en donne la raison, précédée de « Erreur : », et un lecteur d’écran la lit dès que vous faites une pause dans la saisie.</dd>
 <dt>Entrée ou clic sur un bloc</dt>
 <dd><strong>Ajoute une note</strong> (par défaut) ouvre la boîte de dialogue <strong>Ajouter une note</strong>. <strong>Ouvre le menu contextuel</strong> affiche à la place le menu du bloc, où vous choisissez <strong>Ajouter une note</strong> ou <strong>Copier le texte du bloc</strong>&nbsp;; choisissez cette option si vous vous surprenez à ajouter des notes par accident. Un clic ou <kbd>Entrée</kbd> sur une note existante l’ouvre toujours pour la modifier, et un clic droit, la touche <kbd>Applications</kbd> et <kbd>Maj+F10</kbd> ouvrent toujours le menu.</dd>
-<dt>Entrée dans la boîte de dialogue de note</dt>
-<dd><strong>Enregistre la note (Ctrl+Entrée commence une nouvelle ligne)</strong> est le réglage par défaut. <strong>Commence une nouvelle ligne (Ctrl+Entrée enregistre la note)</strong> convient aux notes longues à plusieurs paragraphes. Quel que soit votre choix, <kbd>Ctrl+Entrée</kbd> fait l’autre action.</dd>
+<dt>Entrée dans la boîte de dialogue de note (Ctrl+Entrée fait l’inverse)</dt>
+<dd><strong>Enregistre la note</strong> est le réglage par défaut. <strong>Commence une nouvelle ligne</strong> convient aux notes longues à plusieurs paragraphes. Quel que soit votre choix, <kbd>Ctrl+Entrée</kbd> fait l’autre action.</dd>
 </dl>
 <aside role="note" class="warning">
 <p><strong>Avertissement&nbsp;: changer les marqueurs masque les notes existantes.</strong> PlanCake ne lit que les marqueurs définis en ce moment. Les notes déjà présentes dans un fichier et écrites avec d’autres marqueurs s’affichent comme du texte ordinaire&nbsp;: elles ne sont plus dans la liste des notes, <kbd>F9</kbd> les saute, et la ligne de commande ne les compte pas. Rien ne change dans le fichier, et rien n’est perdu. Rétablissez les marqueurs d’origine, et ces notes redeviennent des notes.</p>
@@ -594,8 +594,8 @@ footer {
 
 <h3 id="settings-advanced">Avancé</h3>
 <dl>
-<dt>Convertir en UTF-8 (sans BOM) les fichiers qui ne sont pas en UTF-8 à leur ouverture. Le fichier sur le disque est réécrit.</dt>
-<dd>Désactivé par défaut, de sorte que les fichiers dans d’anciens encodages s’ouvrent en lecture seule et ne sont jamais modifiés. Activez-le pour que PlanCake convertisse ces fichiers en UTF-8 à leur ouverture, afin que vous puissiez y ajouter des notes. Un fichier dont PlanCake ne peut pas reconnaître l’encodage n’est jamais converti. Voir <a href="#encodings">Les fichiers qui ne sont pas en UTF-8</a>.</dd>
+<dt>Convertir en UTF-8 à l’ouverture</dt>
+<dd>Désactivé par défaut, de sorte que les fichiers dans d’anciens encodages s’ouvrent en lecture seule et ne sont jamais modifiés. Activez-le pour que PlanCake convertisse à son ouverture un fichier qui n’est pas en UTF-8 en UTF-8 sans marque d’ordre des octets (BOM), afin que vous puissiez y ajouter des notes. La conversion réécrit le fichier sur le disque. Un fichier dont PlanCake ne peut pas reconnaître l’encodage n’est jamais converti. Voir <a href="#encodings">Les fichiers qui ne sont pas en UTF-8</a>.</dd>
 </dl>
 </article>
 
@@ -881,7 +881,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>Je ne peux pas ajouter de notes&nbsp;: le fichier est en lecture seule</summary>
-<p>Le fichier n’est pas en UTF-8. Activez <strong>Convertir en UTF-8 les fichiers qui ne sont pas en UTF-8</strong> dans les paramètres avancés et rouvrez le fichier. Si PlanCake indique que l’encodage n’a pas pu être reconnu, le fichier reste en lecture seule quoi que vous fassiez&nbsp;; ouvrez-le dans un éditeur de texte, enregistrez-le en UTF-8, puis rouvrez-le dans PlanCake.</p>
+<p>Le fichier n’est pas en UTF-8. Activez <strong>Convertir en UTF-8 à l’ouverture</strong> dans les paramètres avancés et rouvrez le fichier. Si PlanCake indique que l’encodage n’a pas pu être reconnu, le fichier reste en lecture seule quoi que vous fassiez&nbsp;; ouvrez-le dans un éditeur de texte, enregistrez-le en UTF-8, puis rouvrez-le dans PlanCake.</p>
 <p>Si PlanCake indique à la place que le fichier n’est plus là, c’est qu’il a été supprimé, renommé ou déplacé pendant qu’il était ouvert. Remettez-le en place, ou ouvrez-le depuis son nouvel emplacement.</p>
 </details>
 

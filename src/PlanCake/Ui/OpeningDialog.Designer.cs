@@ -17,6 +17,7 @@ partial class OpeningDialog {
         messageLabel = new Label();
         progressBar = new ProgressBar();
         cancelButton = new Button();
+        buttonLayout = DialogButtons.CreateRow(cancelButton);
         mainLayout.SuspendLayout();
         SuspendLayout();
         //
@@ -26,7 +27,7 @@ partial class OpeningDialog {
         mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
         mainLayout.Controls.Add(messageLabel, 0, 0);
         mainLayout.Controls.Add(progressBar, 0, 1);
-        mainLayout.Controls.Add(cancelButton, 0, 2);
+        mainLayout.Controls.Add(buttonLayout, 0, 2);
         mainLayout.Dock = DockStyle.Fill;
         mainLayout.Name = "mainLayout";
         mainLayout.Padding = new Padding(12);
@@ -54,13 +55,14 @@ partial class OpeningDialog {
         progressBar.Style = ProgressBarStyle.Marquee;
         progressBar.TabIndex = 1;
         //
+        // buttonLayout: Cancel at the end of the row (DialogButtons).
+        //
+        buttonLayout.TabIndex = 2;
+        //
         // cancelButton
         //
-        cancelButton.Anchor = AnchorStyles.Right;
-        cancelButton.AutoSize = true;
         cancelButton.DialogResult = DialogResult.Cancel;
         cancelButton.Name = "cancelButton";
-        cancelButton.TabIndex = 2;
         cancelButton.Text = "&Cancel";
         //
         // OpeningDialog
@@ -90,4 +92,5 @@ partial class OpeningDialog {
     private Label messageLabel;
     private ProgressBar progressBar;
     private Button cancelButton;
+    private TableLayoutPanel buttonLayout;
 }

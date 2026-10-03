@@ -76,6 +76,24 @@ public class MnemonicTests: IDisposable {
         });
     }
 
+    [Theory]
+    [MemberData(nameof(Languages))]
+    public void Forms_GiveEveryButtonAndCheckBoxAMnemonic(string language) {
+        UseLanguage(language);
+
+        Sta.Run(() => {
+            foreach (var dialog in Forms()) {
+                using (dialog) {
+                    AllControls(dialog)
+                        .OfType<ButtonBase>()
+                        .Where(button => !button.UseMnemonic || MenuTextFormatter.ExtractMnemonic(button.Text) is null)
+                        .Select(button => button.Text)
+                        .Should().BeEmpty("every button of {0} in {1} is reached by Alt and a letter", dialog.GetType().Name, language);
+                }
+            }
+        });
+    }
+
     [Fact]
     public void Forms_CoverEveryFormOfTheApplication() {
         var built = new List<Type>();

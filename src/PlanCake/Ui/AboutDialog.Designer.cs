@@ -16,7 +16,7 @@ partial class AboutDialog {
         components = new System.ComponentModel.Container();
         mainLayout = new TableLayoutPanel();
         appNameLabel = new Label();
-        descriptionLabel = new Label();
+        descriptionLabel = new WrappingLabel();
         versionLabel = new Label();
         copyrightLabel = new Label();
         repoLink = new LinkLabel();
@@ -24,13 +24,17 @@ partial class AboutDialog {
         copyInfoStatusLabel = new Label();
         okButton = new Button();
         copyInfoStatusTimer = new System.Windows.Forms.Timer(components);
+        buttonLayout = DialogButtons.CreateRow(okButton);
         mainLayout.SuspendLayout();
         SuspendLayout();
         //
-        // mainLayout
+        // mainLayout: one column of a fixed width, which the description wraps in; the dialog
+        // takes the layout's height.
         //
+        mainLayout.AutoSize = true;
+        mainLayout.AutoSizeMode = AutoSizeMode.GrowAndShrink;
         mainLayout.ColumnCount = 1;
-        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 408F));
         mainLayout.Controls.Add(appNameLabel, 0, 0);
         mainLayout.Controls.Add(descriptionLabel, 0, 1);
         mainLayout.Controls.Add(versionLabel, 0, 2);
@@ -38,7 +42,7 @@ partial class AboutDialog {
         mainLayout.Controls.Add(repoLink, 0, 4);
         mainLayout.Controls.Add(copyInfoButton, 0, 5);
         mainLayout.Controls.Add(copyInfoStatusLabel, 0, 6);
-        mainLayout.Controls.Add(okButton, 0, 7);
+        mainLayout.Controls.Add(buttonLayout, 0, 7);
         mainLayout.Dock = DockStyle.Fill;
         mainLayout.Name = "mainLayout";
         mainLayout.Padding = new Padding(16);
@@ -66,9 +70,8 @@ partial class AboutDialog {
         //
         // descriptionLabel
         //
-        descriptionLabel.Anchor = AnchorStyles.None;
+        descriptionLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         descriptionLabel.AutoSize = true;
-        descriptionLabel.MaximumSize = new Size(400, 0);
         descriptionLabel.Name = "descriptionLabel";
         descriptionLabel.Padding = new Padding(0, 0, 0, 8);
         descriptionLabel.TabIndex = 1;
@@ -114,7 +117,8 @@ partial class AboutDialog {
         copyInfoButton.TabIndex = 5;
         copyInfoButton.Text = "&Copy info";
         //
-        // copyInfoStatusLabel
+        // copyInfoStatusLabel: one line tall even while empty (set in code), so that nothing moves
+        // when it says "Copied".
         //
         copyInfoStatusLabel.Anchor = AnchorStyles.None;
         copyInfoStatusLabel.AutoSize = true;
@@ -123,15 +127,15 @@ partial class AboutDialog {
         copyInfoStatusLabel.TabIndex = 6;
         copyInfoStatusLabel.UseMnemonic = false;
         //
+        // buttonLayout: OK at the end of the row (DialogButtons).
+        //
+        buttonLayout.TabIndex = 7;
+        //
         // okButton
         //
-        okButton.Anchor = AnchorStyles.None;
-        okButton.AutoSize = true;
         okButton.DialogResult = DialogResult.OK;
-        okButton.MinimumSize = new Size(80, 0);
         okButton.Name = "okButton";
-        okButton.TabIndex = 7;
-        okButton.Text = "OK";
+        okButton.Text = "&OK";
         //
         // copyInfoStatusTimer
         //
@@ -143,8 +147,9 @@ partial class AboutDialog {
         AccessibleRole = AccessibleRole.Dialog;
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
+        AutoSize = true;
+        AutoSizeMode = AutoSizeMode.GrowAndShrink;
         CancelButton = okButton;
-        ClientSize = new Size(440, 320);
         Controls.Add(mainLayout);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -162,12 +167,13 @@ partial class AboutDialog {
 
     private TableLayoutPanel mainLayout;
     private Label appNameLabel;
-    private Label descriptionLabel;
+    private WrappingLabel descriptionLabel;
     private Label versionLabel;
     private Label copyrightLabel;
     private LinkLabel repoLink;
     private Button copyInfoButton;
     private Label copyInfoStatusLabel;
     private Button okButton;
+    private TableLayoutPanel buttonLayout;
     private System.Windows.Forms.Timer copyInfoStatusTimer;
 }

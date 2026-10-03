@@ -486,7 +486,7 @@ footer {
 <ol>
 <li>Klicken Sie den Absatz, die Überschrift, das Listenelement, die Tabellenzeile oder den Codeblock an, den Sie kommentieren möchten. Der Block unter dem Mauszeiger wird hervorgehoben, sodass Sie sehen, welchem Block ein Klick eine Notiz hinzufügt. Von der Tastatur aus bewegen Sie sich mit <kbd>Alt+Umschalt+Nach-unten</kbd> oder <kbd>Alt+Umschalt+Nach-oben</kbd> dorthin (siehe <a href="#reading-basics">Sich im Dokument bewegen</a>) und drücken <kbd>Eingabe</kbd>. Der Dialog <strong>Notiz hinzufügen</strong> öffnet sich. Er zeigt den Anfang des Blocks unter <strong>Notiz zu</strong>, damit Sie prüfen können, ob Sie den richtigen ausgewählt haben, und setzt den Cursor in das Feld <strong>Notiz</strong>.</li>
 <li>Tippen Sie Ihre Notiz. Um darin eine neue Zeile zu beginnen, drücken Sie <kbd>Strg+Eingabe</kbd>.</li>
-<li>Drücken Sie <kbd>Eingabe</kbd> oder klicken Sie auf <strong>OK</strong>, um zu speichern; drücken Sie <kbd>Esc</kbd> oder klicken Sie auf <strong>Abbrechen</strong>, um abzubrechen. <strong>OK</strong> bleibt nicht verfügbar, solange das Feld leer ist.</li>
+<li>Drücken Sie <kbd>Eingabe</kbd> oder klicken Sie auf <strong>OK</strong>, um zu speichern; drücken Sie <kbd>Esc</kbd> oder klicken Sie auf <strong>Abbrechen</strong>, um abzubrechen. <strong>OK</strong> bleibt nicht verfügbar, solange das Feld leer ist, und <kbd>Eingabe</kbd> sagt dann nur „Geben Sie zuerst eine Notiz ein.“</li>
 </ol>
 <p>PlanCake schreibt die Notiz sofort in die Datei, direkt nach dem Block. Das Dokument aktualisiert sich, die Statusleiste zeigt „Notiz hinzugefügt“, und die neue Notiz steht dort, wo Sie sich gerade befinden. Sie erscheint auch in der Notizliste.</p>
 <p>Ein einzelner Klick genügt; ein Doppelklick bewirkt nicht mehr als ein einzelner Klick. Das Markieren von Text mit der Maus öffnet den Dialog nicht, sodass Sie weiterhin wie gewohnt Text markieren und kopieren können.</p>
@@ -547,7 +547,7 @@ footer {
 <article aria-labelledby="encodings">
 <h2 id="encodings">Dateien, die nicht in UTF-8 vorliegen</h2>
 <p>Fast jede Markdown-Datei liegt heute in UTF-8 vor. Ältere Dateien, besonders in Sprachen wie Russisch oder Hebräisch, sind manchmal stattdessen in einer veralteten Windows-Codierung gespeichert. PlanCake öffnet und zeigt sie korrekt an, schreibt aber standardmäßig nicht in sie: Die Datei öffnet sich schreibgeschützt, und PlanCake sagt Ihnen das und nennt die Codierung, zum Beispiel „Diese Datei ist nicht in UTF-8 und wurde daher schreibgeschützt als Windows-1251 geöffnet. Notizen können nicht hinzugefügt werden. Um sie in UTF-8 zu konvertieren, aktivieren Sie in den Einstellungen das Konvertieren von Dateien, die nicht in UTF-8 vorliegen.“</p>
-<p>Um solchen Dateien Notizen hinzuzufügen, schalten Sie <strong>Dateien, die nicht in UTF-8 vorliegen, beim Öffnen in UTF-8 (ohne BOM) konvertieren</strong> in den <a href="#settings-advanced">erweiterten Einstellungen</a> ein. PlanCake konvertiert dann jede solche Datei in dem Moment, in dem Sie sie öffnen, nach UTF-8 und sagt Ihnen zum Beispiel „Die Datei wurde von Windows-1251 in UTF-8 konvertiert.“ Nur die Codierung ändert sich; der Text und die Zeilenenden bleiben gleich.</p>
+<p>Um solchen Dateien Notizen hinzuzufügen, schalten Sie <strong>Beim Öffnen in UTF-8 konvertieren</strong> in den <a href="#settings-advanced">erweiterten Einstellungen</a> ein. PlanCake konvertiert dann jede solche Datei in dem Moment, in dem Sie sie öffnen, nach UTF-8 und sagt Ihnen zum Beispiel „Die Datei wurde von Windows-1251 in UTF-8 konvertiert.“ Nur die Codierung ändert sich; der Text und die Zeilenenden bleiben gleich.</p>
 <p>Manchmal kann PlanCake nicht sicher sagen, welche Codierung eine Datei verwendet. Eine solche Datei bleibt immer schreibgeschützt, egal was die Einstellung sagt: „Die Codierung dieser Datei konnte nicht erkannt werden, daher wurde sie schreibgeschützt geöffnet und wird nie geändert. Notizen können nicht hinzugefügt werden.“ Das ist eine feste Regel. Eine Datei zu schreiben, die nicht korrekt gelesen wurde, würde die Zeichen zerstören, die PlanCake nicht entziffern konnte, und das tut PlanCake nie.</p>
 <p>Die Einstellung <strong>Dokumentsprache</strong> ist einer der Hinweise, die PlanCake zur Erkennung einer veralteten Codierung nutzt; sie auf die Sprache Ihrer alten Dateien einzustellen, hilft also.</p>
 </article>
@@ -581,11 +581,11 @@ footer {
 <dt>Anfangsmarkierung</dt>
 <dd>Der Text, mit dem eine Notiz in der Datei beginnt. Standard: <code>[usernote]</code>. Sie darf nicht leer sein, nicht mit einem Leerzeichen oder einem doppelten Anführungszeichen beginnen oder enden, und keinen Zeilenumbruch enthalten.</dd>
 <dt>Endmarkierung (leer lassen für eine einzelne Markierung, die bis zum Zeilenende reicht)</dt>
-<dd>Der Text, mit dem eine Notiz endet. Standard: <code>[/usernote]</code>. Sie folgt denselben Regeln und muss sich von der Anfangsmarkierung unterscheiden. Lassen Sie sie leer, läuft eine Notiz von der Anfangsmarkierung bis zum Ende ihrer Zeile; Notizen sind dann immer eine Zeile lang, und Zeilenumbrüche, die Sie in eine Notiz eintippen, werden zu Leerzeichen.</dd>
+<dd>Der Text, mit dem eine Notiz endet. Standard: <code>[/usernote]</code>. Sie folgt denselben Regeln und muss sich von der Anfangsmarkierung unterscheiden. Lassen Sie sie leer, läuft eine Notiz von der Anfangsmarkierung bis zum Ende ihrer Zeile; Notizen sind dann immer eine Zeile lang, und Zeilenumbrüche, die Sie in eine Notiz eintippen, werden zu Leerzeichen. Verstoßen die Markierungen gegen eine dieser Regeln, nennt die Zeile darunter den Grund, beginnend mit „Fehler:“, und ein Screenreader liest ihn vor, sobald Sie beim Tippen innehalten.</dd>
 <dt>Eingabetaste oder Mausklick auf einen Block</dt>
 <dd><strong>Fügt eine Notiz hinzu</strong> (die Voreinstellung) öffnet den Dialog <strong>Notiz hinzufügen</strong>. <strong>Öffnet das Kontextmenü</strong> zeigt stattdessen das Menü des Blocks, in dem Sie <strong>Notiz hinzufügen</strong> oder <strong>Blocktext kopieren</strong> wählen; wählen Sie das, wenn Sie sich dabei ertappen, aus Versehen Notizen hinzuzufügen. Ein Klick oder <kbd>Eingabe</kbd> auf eine bestehende Notiz öffnet sie immer zur Bearbeitung, und ein Rechtsklick, die <kbd>Anwendungstaste</kbd> und <kbd>Umschalt+F10</kbd> öffnen immer das Menü.</dd>
-<dt>Eingabetaste im Notizdialog</dt>
-<dd><strong>Speichert die Notiz (Strg+Eingabe beginnt eine neue Zeile)</strong> ist die Voreinstellung. <strong>Beginnt eine neue Zeile (Strg+Eingabe speichert die Notiz)</strong> eignet sich für lange Notizen mit mehreren Absätzen. Was auch immer Sie wählen, <kbd>Strg+Eingabe</kbd> tut das jeweils andere.</dd>
+<dt>Eingabetaste im Notizdialog (Strg+Eingabe bewirkt das Gegenteil)</dt>
+<dd><strong>Speichert die Notiz</strong> ist die Voreinstellung. <strong>Beginnt eine neue Zeile</strong> eignet sich für lange Notizen mit mehreren Absätzen. Was auch immer Sie wählen, <kbd>Strg+Eingabe</kbd> tut das jeweils andere.</dd>
 </dl>
 <aside role="note" class="warning">
 <p><strong>Warnung: Das Ändern der Markierungen verbirgt bestehende Notizen.</strong> PlanCake liest nur die gerade eingestellten Markierungen. Bereits in einer Datei vorhandene Notizen, die mit anderen Markierungen geschrieben wurden, erscheinen als gewöhnlicher Text: Sie stehen nicht mehr in der Notizliste, <kbd>F9</kbd> überspringt sie, und die Befehlszeile zählt sie nicht mit. In der Datei ändert sich nichts, und nichts geht verloren. Stellen Sie die Markierungen zurück, und diese Notizen sind wieder Notizen.</p>
@@ -594,8 +594,8 @@ footer {
 
 <h3 id="settings-advanced">Erweitert</h3>
 <dl>
-<dt>Dateien, die nicht in UTF-8 vorliegen, beim Öffnen in UTF-8 (ohne BOM) konvertieren. Die Datei auf dem Datenträger wird überschrieben.</dt>
-<dd>Standardmäßig ausgeschaltet, sodass Dateien in veralteten Codierungen schreibgeschützt geöffnet und nie geändert werden. Schalten Sie sie ein, damit PlanCake solche Dateien beim Öffnen in UTF-8 konvertiert, sodass Sie Notizen hinzufügen können. Eine Datei, deren Codierung PlanCake nicht erkennen kann, wird nie konvertiert. Siehe <a href="#encodings">Dateien, die nicht in UTF-8 vorliegen</a>.</dd>
+<dt>Beim Öffnen in UTF-8 konvertieren</dt>
+<dd>Standardmäßig ausgeschaltet, sodass Dateien in veralteten Codierungen schreibgeschützt geöffnet und nie geändert werden. Schalten Sie sie ein, damit PlanCake eine Datei, die nicht in UTF-8 vorliegt, beim Öffnen in UTF-8 ohne Byte Order Mark (BOM) konvertiert, sodass Sie Notizen hinzufügen können. Die Konvertierung überschreibt die Datei auf dem Datenträger. Eine Datei, deren Codierung PlanCake nicht erkennen kann, wird nie konvertiert. Siehe <a href="#encodings">Dateien, die nicht in UTF-8 vorliegen</a>.</dd>
 </dl>
 </article>
 
@@ -881,7 +881,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>Ich kann keine Notizen hinzufügen: Die Datei ist schreibgeschützt</summary>
-<p>Die Datei ist nicht in UTF-8. Schalten Sie <strong>Dateien, die nicht in UTF-8 vorliegen, beim Öffnen in UTF-8 konvertieren</strong> in den erweiterten Einstellungen ein und öffnen Sie die Datei erneut. Sagt PlanCake stattdessen, dass die Codierung nicht erkannt werden konnte, bleibt die Datei schreibgeschützt, was auch immer Sie tun; öffnen Sie sie in einem Texteditor, speichern Sie sie als UTF-8, und öffnen Sie sie erneut in PlanCake.</p>
+<p>Die Datei ist nicht in UTF-8. Schalten Sie <strong>Beim Öffnen in UTF-8 konvertieren</strong> in den erweiterten Einstellungen ein und öffnen Sie die Datei erneut. Sagt PlanCake stattdessen, dass die Codierung nicht erkannt werden konnte, bleibt die Datei schreibgeschützt, was auch immer Sie tun; öffnen Sie sie in einem Texteditor, speichern Sie sie als UTF-8, und öffnen Sie sie erneut in PlanCake.</p>
 <p>Sagt PlanCake stattdessen, dass die Datei nicht mehr vorhanden ist, wurde sie gelöscht, umbenannt oder verschoben, während sie geöffnet war. Legen Sie sie zurück, oder öffnen Sie sie von ihrem neuen Ort aus.</p>
 </details>
 

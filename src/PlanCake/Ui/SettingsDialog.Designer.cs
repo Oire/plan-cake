@@ -33,14 +33,14 @@ partial class SettingsDialog {
 
         notesTab = new TabPage();
         notesLayout = new TableLayoutPanel();
-        openingMarkerLabel = new Label();
+        openingMarkerLabel = new WrappingLabel();
         openingMarkerTextBox = new TextBox();
-        closingMarkerLabel = new Label();
+        closingMarkerLabel = new WrappingLabel();
         closingMarkerTextBox = new TextBox();
-        markersErrorLabel = new Label();
-        blockEnterLabel = new Label();
+        markersErrorLabel = new WrappingLabel();
+        blockEnterLabel = new WrappingLabel();
         blockEnterComboBox = new ComboBox();
-        noteEnterLabel = new Label();
+        noteEnterLabel = new WrappingLabel();
         noteEnterComboBox = new ComboBox();
 
         advancedTab = new TabPage();
@@ -49,6 +49,7 @@ partial class SettingsDialog {
 
         okButton = new Button();
         cancelButton = new Button();
+        buttonLayout = DialogButtons.CreateRow(okButton, cancelButton);
 
         mainLayout.SuspendLayout();
         tabControl.SuspendLayout();
@@ -60,18 +61,15 @@ partial class SettingsDialog {
         advancedLayout.SuspendLayout();
         SuspendLayout();
         //
-        // mainLayout: the tabs across both columns, then OK and Cancel.
+        // mainLayout: the tabs, then OK and Cancel.
         //
-        mainLayout.ColumnCount = 2;
-        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+        mainLayout.ColumnCount = 1;
+        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
         mainLayout.RowCount = 2;
         mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         mainLayout.Controls.Add(tabControl, 0, 0);
-        mainLayout.SetColumnSpan(tabControl, 2);
-        mainLayout.Controls.Add(okButton, 0, 1);
-        mainLayout.Controls.Add(cancelButton, 1, 1);
+        mainLayout.Controls.Add(buttonLayout, 0, 1);
         mainLayout.Dock = DockStyle.Fill;
         mainLayout.Name = "mainLayout";
         mainLayout.Padding = new Padding(12);
@@ -237,10 +235,12 @@ partial class SettingsDialog {
         notesTab.UseVisualStyleBackColor = true;
         //
         // notesLayout: the markers, the reason they cannot be used (if any), then the Enter keys.
+        // Two columns of half the width each: the long labels wrap at a word inside their column,
+        // which hands them its width (a MaximumSize on a label broke Russian and Ukrainian words).
         //
         notesLayout.ColumnCount = 2;
-        notesLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        notesLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        notesLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+        notesLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
         notesLayout.RowCount = 6;
         notesLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         notesLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
@@ -264,7 +264,7 @@ partial class SettingsDialog {
         //
         // openingMarkerLabel
         //
-        openingMarkerLabel.Anchor = AnchorStyles.Left;
+        openingMarkerLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         openingMarkerLabel.AutoSize = true;
         openingMarkerLabel.Margin = new Padding(3, 6, 8, 3);
         openingMarkerLabel.Name = "openingMarkerLabel";
@@ -279,10 +279,9 @@ partial class SettingsDialog {
         //
         // closingMarkerLabel
         //
-        closingMarkerLabel.Anchor = AnchorStyles.Left;
+        closingMarkerLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         closingMarkerLabel.AutoSize = true;
         closingMarkerLabel.Margin = new Padding(3, 6, 8, 3);
-        closingMarkerLabel.MaximumSize = new Size(220, 0);
         closingMarkerLabel.Name = "closingMarkerLabel";
         closingMarkerLabel.TabIndex = 2;
         closingMarkerLabel.Text = "Clo&sing marker (leave empty for a single marker that runs to the end of the line):";
@@ -294,8 +293,9 @@ partial class SettingsDialog {
         closingMarkerTextBox.TabIndex = 3;
         //
         // markersErrorLabel: why the markers cannot be used, next to them; empty while they can.
+        // Its color is set in code, and only outside high contrast.
         //
-        markersErrorLabel.Anchor = AnchorStyles.Left;
+        markersErrorLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         markersErrorLabel.AutoSize = true;
         markersErrorLabel.Margin = new Padding(3, 4, 3, 3);
         markersErrorLabel.Name = "markersErrorLabel";
@@ -304,7 +304,7 @@ partial class SettingsDialog {
         //
         // blockEnterLabel
         //
-        blockEnterLabel.Anchor = AnchorStyles.Left;
+        blockEnterLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         blockEnterLabel.AutoSize = true;
         blockEnterLabel.Margin = new Padding(3, 6, 8, 3);
         blockEnterLabel.Name = "blockEnterLabel";
@@ -318,14 +318,13 @@ partial class SettingsDialog {
         blockEnterComboBox.Name = "blockEnterComboBox";
         blockEnterComboBox.TabIndex = 6;
         //
-        // noteEnterLabel
+        // noteEnterLabel: its text names Ctrl+Enter in the interface language, so it is set in code.
         //
-        noteEnterLabel.Anchor = AnchorStyles.Left;
+        noteEnterLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         noteEnterLabel.AutoSize = true;
         noteEnterLabel.Margin = new Padding(3, 6, 8, 3);
         noteEnterLabel.Name = "noteEnterLabel";
         noteEnterLabel.TabIndex = 7;
-        noteEnterLabel.Text = "Enter in the note dialo&g:";
         //
         // noteEnterComboBox
         //
@@ -359,30 +358,24 @@ partial class SettingsDialog {
         convertToUtf8CheckBox.Anchor = AnchorStyles.Left;
         convertToUtf8CheckBox.AutoSize = true;
         convertToUtf8CheckBox.Margin = new Padding(3, 8, 3, 3);
-        convertToUtf8CheckBox.MaximumSize = new Size(440, 0);
         convertToUtf8CheckBox.Name = "convertToUtf8CheckBox";
         convertToUtf8CheckBox.TabIndex = 0;
-        convertToUtf8CheckBox.Text =
-            "Con&vert files that are not UTF-8 to UTF-8 (without BOM) when opening them. The file on disk is rewritten.";
+        convertToUtf8CheckBox.Text = "Con&vert to UTF-8 on opening";
+        //
+        // buttonLayout: OK, then Cancel, together at the end of the row (DialogButtons).
+        //
+        buttonLayout.TabIndex = 1;
         //
         // okButton
         //
-        okButton.Anchor = AnchorStyles.Right;
-        okButton.AutoSize = true;
         okButton.DialogResult = DialogResult.OK;
-        okButton.Margin = new Padding(0, 8, 6, 0);
         okButton.Name = "okButton";
-        okButton.TabIndex = 1;
         okButton.Text = "&OK";
         //
         // cancelButton
         //
-        cancelButton.Anchor = AnchorStyles.Left;
-        cancelButton.AutoSize = true;
         cancelButton.DialogResult = DialogResult.Cancel;
-        cancelButton.Margin = new Padding(6, 8, 0, 0);
         cancelButton.Name = "cancelButton";
-        cancelButton.TabIndex = 2;
         cancelButton.Text = "&Cancel";
         //
         // SettingsDialog
@@ -439,14 +432,14 @@ partial class SettingsDialog {
 
     private TabPage notesTab;
     private TableLayoutPanel notesLayout;
-    private Label openingMarkerLabel;
+    private WrappingLabel openingMarkerLabel;
     private TextBox openingMarkerTextBox;
-    private Label closingMarkerLabel;
+    private WrappingLabel closingMarkerLabel;
     private TextBox closingMarkerTextBox;
-    private Label markersErrorLabel;
-    private Label blockEnterLabel;
+    private WrappingLabel markersErrorLabel;
+    private WrappingLabel blockEnterLabel;
     private ComboBox blockEnterComboBox;
-    private Label noteEnterLabel;
+    private WrappingLabel noteEnterLabel;
     private ComboBox noteEnterComboBox;
 
     private TabPage advancedTab;
@@ -455,4 +448,5 @@ partial class SettingsDialog {
 
     private Button okButton;
     private Button cancelButton;
+    private TableLayoutPanel buttonLayout;
 }

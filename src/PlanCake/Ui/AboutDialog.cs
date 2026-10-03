@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms.Automation;
 using GetText.WindowsForms;
@@ -25,13 +26,21 @@ internal partial class AboutDialog: Form {
 
         appNameLabel.Text = App.Name;
         versionLabel.Text = _("Version {0}", Application.ProductVersion);
-        copyrightLabel.Text = _("© {0} {1}", DateTime.Now.Year, App.ManufacturerNameFull);
+        copyrightLabel.Text = TextDirection.Embed(Copyright);
+        copyInfoStatusLabel.MinimumSize = new Size(0, copyInfoStatusLabel.Font.Height + copyInfoStatusLabel.Padding.Vertical);
 
         repoLink.LinkClicked += OnRepoLinkClicked;
         copyInfoButton.Click += OnCopyInfoClick;
         copyInfoStatusTimer.Tick += OnCopyInfoStatusTimerTick;
         ActiveControl = okButton;
     }
+
+    /// <summary>
+    /// The copyright line of the executable (<c>Copyright</c> in the project file), the same one
+    /// its file properties and the installer show. A legal notice, so it is not translated.
+    /// </summary>
+    internal static string Copyright =>
+        typeof(AboutDialog).Assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? String.Empty;
 
     /// <summary>What "Copy info" puts on the clipboard. English on purpose: it goes into bug reports.</summary>
     internal static string Info(string version, string osVersion) => String.Join(

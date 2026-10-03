@@ -486,7 +486,7 @@ footer {
 <ol>
 <li>Click the paragraph, heading, list item, table row or code block you want to comment on. The block under the mouse pointer is highlighted, so you can see which one a click adds a note to. From the keyboard, move to it with <kbd>Alt+Shift+Down Arrow</kbd> or <kbd>Alt+Shift+Up Arrow</kbd> (see <a href="#reading-basics">Moving around</a>) and press <kbd>Enter</kbd>. The <strong>Add note</strong> dialog opens. It shows the beginning of the block under <strong>Note on</strong>, so you can check you picked the right one, and puts the cursor in the <strong>Note</strong> box.</li>
 <li>Type your note. To start a new line inside it, press <kbd>Ctrl+Enter</kbd>.</li>
-<li>Press <kbd>Enter</kbd> or click <strong>OK</strong> to save; press <kbd>Escape</kbd> or click <strong>Cancel</strong> to give up. <strong>OK</strong> stays unavailable while the box is empty.</li>
+<li>Press <kbd>Enter</kbd> or click <strong>OK</strong> to save; press <kbd>Escape</kbd> or click <strong>Cancel</strong> to give up. <strong>OK</strong> stays unavailable while the box is empty, and pressing <kbd>Enter</kbd> then says “Type a note first.”</li>
 </ol>
 <p>PlanCake writes the note into the file at once, right after the block. The document updates, the status bar says “Note added”, and the new note is where you are now. It also appears in the notes list.</p>
 <p>A single click is all it takes; double-clicking does nothing more than a single click. Selecting text with the mouse does not open the dialog, so you can still select and copy text as usual.</p>
@@ -547,7 +547,7 @@ footer {
 <article aria-labelledby="encodings">
 <h2 id="encodings">Files that are not in UTF-8</h2>
 <p>Almost every Markdown file today is in UTF-8. Older files, especially in languages such as Russian or Hebrew, are sometimes saved in a legacy Windows encoding instead. PlanCake opens and shows them correctly, but by default it does not write to them: the file opens read-only, and PlanCake tells you so, naming the encoding, for example “This file is not in UTF-8, so it was opened read-only as Windows-1251. Notes cannot be added to it. To convert it to UTF-8, turn on converting files that are not UTF-8 in the settings.”</p>
-<p>To add notes to such files, turn on <strong>Convert files that are not UTF-8 to UTF-8</strong> in the <a href="#settings-advanced">Advanced settings</a>. PlanCake then converts each such file to UTF-8 the moment you open it and tells you, for example “The file was converted from Windows-1251 to UTF-8.” Only the encoding changes; the text and the line endings stay the same.</p>
+<p>To add notes to such files, turn on <strong>Convert to UTF-8 on opening</strong> in the <a href="#settings-advanced">Advanced settings</a>. PlanCake then converts each such file to UTF-8 the moment you open it and tells you, for example “The file was converted from Windows-1251 to UTF-8.” Only the encoding changes; the text and the line endings stay the same.</p>
 <p>Sometimes PlanCake cannot tell for sure which encoding a file uses. Such a file always stays read-only, whatever the setting says: “The encoding of this file could not be recognized, so it was opened read-only and is never changed. Notes cannot be added to it.” This is a firm rule. Writing a file that was not read correctly would destroy the characters PlanCake could not make out, and PlanCake never does that.</p>
 <p>The <strong>Document language</strong> setting is one of the clues PlanCake uses to recognize a legacy encoding, so setting it to the language your old files are written in helps.</p>
 </article>
@@ -581,11 +581,11 @@ footer {
 <dt>Opening marker</dt>
 <dd>The text a note starts with in the file. Default: <code>[usernote]</code>. It cannot be empty, cannot start or end with a space or a double quotation mark, and cannot contain a line break.</dd>
 <dt>Closing marker (leave empty for a single marker that runs to the end of the line)</dt>
-<dd>The text a note ends with. Default: <code>[/usernote]</code>. It follows the same rules and must differ from the opening marker. If you leave it empty, a note runs from the opening marker to the end of its line; notes are then always one line long, and any line breaks you type in a note become spaces.</dd>
+<dd>The text a note ends with. Default: <code>[/usernote]</code>. It follows the same rules and must differ from the opening marker. If you leave it empty, a note runs from the opening marker to the end of its line; notes are then always one line long, and any line breaks you type in a note become spaces. If the markers break one of these rules, the line under them says why, starting with “Error:”, and a screen reader reads it out as soon as you pause typing.</dd>
 <dt>Enter or a click on a block</dt>
 <dd><strong>Adds a note</strong> (the default) opens the <strong>Add note</strong> dialog. <strong>Opens the context menu</strong> shows the block's menu instead, where you choose <strong>Add note</strong> or <strong>Copy block text</strong>; choose this if you find yourself adding notes by accident. A click or <kbd>Enter</kbd> on an existing note always opens it for editing, and a right-click, the <kbd>Applications</kbd> key and <kbd>Shift+F10</kbd> always open the menu.</dd>
-<dt>Enter in the note dialog</dt>
-<dd><strong>Saves the note (Ctrl+Enter starts a new line)</strong> is the default. <strong>Starts a new line (Ctrl+Enter saves the note)</strong> suits long notes with several paragraphs. Whichever you choose, <kbd>Ctrl+Enter</kbd> does the other thing.</dd>
+<dt>Enter in the note dialog (Ctrl+Enter does the other)</dt>
+<dd><strong>Saves the note</strong> is the default. <strong>Starts a new line</strong> suits long notes with several paragraphs. Whichever you choose, <kbd>Ctrl+Enter</kbd> does the other thing.</dd>
 </dl>
 <aside role="note" class="warning">
 <p><strong>Warning: changing the markers hides existing notes.</strong> PlanCake reads only the markers set right now. Notes already in a file that were written with other markers show as ordinary text: they are no longer in the notes list, <kbd>F9</kbd> skips them, and the command line does not count them. Nothing in the file changes, and nothing is lost. Switch the markers back, and those notes are notes again.</p>
@@ -594,8 +594,8 @@ footer {
 
 <h3 id="settings-advanced">Advanced</h3>
 <dl>
-<dt>Convert files that are not UTF-8 to UTF-8 (without BOM) when opening them. The file on disk is rewritten.</dt>
-<dd>Off by default, so files in legacy encodings open read-only and are never changed. Turn it on to have PlanCake convert such files to UTF-8 when you open them, so you can add notes. A file whose encoding PlanCake cannot recognize is never converted. See <a href="#encodings">Files that are not in UTF-8</a>.</dd>
+<dt>Convert to UTF-8 on opening</dt>
+<dd>Off by default, so files in legacy encodings open read-only and are never changed. Turn it on to have PlanCake convert a file that is not in UTF-8 to UTF-8 without a byte order mark (BOM) when you open it, so you can add notes. The conversion rewrites the file on disk. A file whose encoding PlanCake cannot recognize is never converted. See <a href="#encodings">Files that are not in UTF-8</a>.</dd>
 </dl>
 </article>
 
@@ -881,7 +881,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>I cannot add notes: the file is read-only</summary>
-<p>The file is not in UTF-8. Turn on <strong>Convert files that are not UTF-8 to UTF-8</strong> in the Advanced settings and open the file again. If PlanCake says the encoding could not be recognized, the file stays read-only whatever you do; open it in a text editor, save it as UTF-8, and open it in PlanCake again.</p>
+<p>The file is not in UTF-8. Turn on <strong>Convert to UTF-8 on opening</strong> in the Advanced settings and open the file again. If PlanCake says the encoding could not be recognized, the file stays read-only whatever you do; open it in a text editor, save it as UTF-8, and open it in PlanCake again.</p>
 <p>If PlanCake instead says the file is no longer there, it was deleted, renamed or moved while open. Put it back, or open it from its new place.</p>
 </details>
 

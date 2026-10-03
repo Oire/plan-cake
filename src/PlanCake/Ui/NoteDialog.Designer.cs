@@ -15,29 +15,28 @@ partial class NoteDialog {
     private void InitializeComponent() {
         mainLayout = new TableLayoutPanel();
         noteOnLabel = new Label();
-        excerptLabel = new Label();
+        excerptLabel = new WrappingLabel();
         noteLabel = new Label();
         noteTextBox = new TextBox();
         okButton = new Button();
         cancelButton = new Button();
+        buttonLayout = DialogButtons.CreateRow(okButton, cancelButton);
         mainLayout.SuspendLayout();
         SuspendLayout();
         //
         // mainLayout
         //
-        mainLayout.ColumnCount = 3;
+        mainLayout.ColumnCount = 2;
         mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         mainLayout.Controls.Add(noteOnLabel, 0, 0);
         mainLayout.Controls.Add(excerptLabel, 1, 0);
-        mainLayout.SetColumnSpan(excerptLabel, 2);
         mainLayout.Controls.Add(noteLabel, 0, 1);
-        mainLayout.SetColumnSpan(noteLabel, 3);
+        mainLayout.SetColumnSpan(noteLabel, 2);
         mainLayout.Controls.Add(noteTextBox, 0, 2);
-        mainLayout.SetColumnSpan(noteTextBox, 3);
-        mainLayout.Controls.Add(okButton, 0, 3);
-        mainLayout.Controls.Add(cancelButton, 2, 3);
+        mainLayout.SetColumnSpan(noteTextBox, 2);
+        mainLayout.Controls.Add(buttonLayout, 0, 3);
+        mainLayout.SetColumnSpan(buttonLayout, 2);
         mainLayout.Dock = DockStyle.Fill;
         mainLayout.Name = "mainLayout";
         mainLayout.Padding = new Padding(12);
@@ -82,22 +81,20 @@ partial class NoteDialog {
         noteTextBox.TabIndex = 3;
         noteTextBox.WordWrap = true;
         //
+        // buttonLayout: OK, then Cancel, together at the end of the row (DialogButtons).
+        //
+        buttonLayout.TabIndex = 4;
+        //
         // okButton
         //
-        okButton.Anchor = AnchorStyles.Left;
-        okButton.AutoSize = true;
         okButton.DialogResult = DialogResult.OK;
         okButton.Name = "okButton";
-        okButton.TabIndex = 4;
         okButton.Text = "&OK";
         //
         // cancelButton
         //
-        cancelButton.Anchor = AnchorStyles.Right;
-        cancelButton.AutoSize = true;
         cancelButton.DialogResult = DialogResult.Cancel;
         cancelButton.Name = "cancelButton";
-        cancelButton.TabIndex = 5;
         cancelButton.Text = "&Cancel";
         //
         // NoteDialog
@@ -126,9 +123,10 @@ partial class NoteDialog {
 
     private TableLayoutPanel mainLayout;
     private Label noteOnLabel;
-    private Label excerptLabel;
+    private WrappingLabel excerptLabel;
     private Label noteLabel;
     private TextBox noteTextBox;
     private Button okButton;
     private Button cancelButton;
+    private TableLayoutPanel buttonLayout;
 }

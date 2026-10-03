@@ -15,6 +15,7 @@ internal partial class OpenLinkDialog: Form {
         InitializeComponent();
         Localizer.Localize(this, Utils.Localization.Catalog);
         TextDirection.Apply(this);
+        TextDirection.KeepLeftToRight(urlTextBox);
         Text = _("Open from link");
 
         urlTextBox.Text = initialUrl ?? String.Empty;
