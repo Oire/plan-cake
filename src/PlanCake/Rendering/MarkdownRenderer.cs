@@ -196,18 +196,15 @@ internal static class MarkdownRenderer {
     }
 
     private static string NoteHtml(Note note, int index, RenderOptions options) {
-        var strings = options.Strings;
-        var roleDescriptions =
-            $"""role="region" aria-roledescription="{HtmlEncode(strings.NoteRoleDescription)}" """
-            + $"""aria-brailleroledescription="{HtmlEncode(strings.NoteBrailleRoleDescription)}" """;
+        var region = $"""role="region" aria-label="{HtmlEncode(options.Strings.NoteLabel)}" """;
 
         if (options.Mode == RenderMode.Export) {
-            return $"""<div class="note" {roleDescriptions}dir="auto">{NoteBlockHtml(note.Text)}</div>""";
+            return $"""<div class="note" {region}dir="auto">{NoteBlockHtml(note.Text)}</div>""";
         }
 
         var noteIndex = index.ToString(CultureInfo.InvariantCulture);
 
-        return $"""<div class="note" {roleDescriptions}data-note="{noteIndex}" dir="auto">"""
+        return $"""<div class="note" {region}data-note="{noteIndex}" dir="auto">"""
             + $"{NoteBlockHtml(note.Text)}</div>";
     }
 

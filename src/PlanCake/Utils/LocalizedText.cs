@@ -21,6 +21,6 @@ internal static class LocalizedText {
         _ => throw new ArgumentOutOfRangeException(nameof(error), error, null),
     };
 
-    /// <summary>The strings the renderer writes into the document: the note role descriptions.</summary>
-    public static RenderStrings RenderStrings() => new(_("user note"), _("unote"));
+    /// <summary>The strings the renderer writes into the document: the name of a note's region.</summary>
+    public static RenderStrings RenderStrings() => new(_("User note"));
 }

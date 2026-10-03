@@ -7,7 +7,7 @@ using Xunit;
 namespace Oire.PlanCake.Tests;
 
 public class NoteStoreTests: IDisposable {
-    private static readonly RenderStrings _strings = new("user note", "unote");
+    private static readonly RenderStrings _strings = new("User note");
     private static readonly NoteMarkers _singleToken = new("!USERNOTE!");
     private static readonly Encoding _windows1251 = CodePagesEncodingProvider.Instance.GetEncoding(1251)!;
 

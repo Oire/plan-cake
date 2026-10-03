@@ -12,6 +12,7 @@
     <RootNamespace>Oire.PlanCake</RootNamespace>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <ApplicationIcon>PlanCake.ico</ApplicationIcon>
     <!-- Trims the satellite assemblies NuGet packages ship for languages we do not
          serve. UI strings come from gettext catalogs under locale/, not from .resx; this
          lists the languages the app ships a catalog for (LanguageList.SupportedCodes). -->
@@ -67,6 +68,12 @@
     <PackageReference Include="System.CommandLine" Version="2.0.12" />
     <PackageReference Include="sharpconfig-huanlin" Version="4.2.0" />
     <PackageReference Include="UTF.Unknown" Version="2.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ApplicationIcon puts the icon in the exe for File Explorer, shortcuts and the taskbar,
+         but a form still shows the WinForms default: MainWindow loads this copy for its own. -->
+    <EmbeddedResource Include="PlanCake.ico" LogicalName="PlanCake.ico" />
   </ItemGroup>
 
   <ItemGroup>
