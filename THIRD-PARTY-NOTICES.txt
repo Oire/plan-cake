@@ -340,7 +340,7 @@ Oire.WinForms.NativeControls
 
 Native Windows controls that screen readers understand.
 https://github.com/Oire/winforms-native-controls
-Copyright © 2026 André Polykanine, Oire Software, and contributors.
+Copyright © 2026 André Polykanine, Oire Software SARL, and contributors.
 License: Apache License, Version 2.0 (full text at the end of this file)
 
 ==============================================================================
