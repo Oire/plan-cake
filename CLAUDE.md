@@ -82,8 +82,11 @@ decisions.
   left to right through `TextDirection.KeepLeftToRight`.
 - **The user manual follows the UI.** `help/<code>/manual.html` (six languages) is written by
   hand with the `write-manual` skill, using the glossaries in `help/glossaries/`. It repeats
-  menu names, shortcuts and setting labels word for word, and no test checks it. A change to a
-  command, a key, a menu item or a setting updates all six manuals in the same change.
+  menu names, shortcuts and setting labels word for word. `ManualParityTests` checks only that
+  the six have the same ids, tables and keys, that every `#link` lands, and that the keyboard
+  reference lists every `HostCommands` shortcut as the menus spell it; the wording is checked by
+  hand. A change to a command, a key, a menu item or a setting updates all six manuals in the
+  same change.
 
 - The catalog is `PlanCake.po` / `.mo`, named after `App.Name`; the executable is `plancake.exe`
   (`AssemblyName`). The gettext scripts read `App.Name` from `Utils/Constants/App.cs`, not the
@@ -94,8 +97,21 @@ See `src/PlanCake/locale/README.md` for the script workflow.
 ## Versioning
 
 GitVersion owns every version number (`GitVersion.yml`). **Never write a `<Version>` literal
-into a `.csproj`.** A release is a `vX.Y.Z` tag; the fourth field is the commit distance from
-that tag. CI checks out with `fetch-depth: 0` because a shallow clone has no tag history.
+into a `.csproj`.** Every version has four parts, `X.Y.Z.N`, the same model as SIC:
+
+- A three-part tag `vX.Y.Z` (annotated, "Start development of version X.Y.Z") **opens a
+  development cycle**. GitVersion counts from it: every commit after it builds as `X.Y.Z.N`,
+  where `N` is the commit distance from that tag.
+- When the cycle is ready, the release commit gets a **four-part tag `vX.Y.Z.N`** with exactly
+  the version that commit builds as (`v1.0.0.7`). That is the release: on GitHub, on
+  plancake.oire.dev and on winget, and in the installer and zip names. GitVersion does not count
+  from a four-part tag; it only marks the commit.
+- Right after the release, the **next cycle's three-part tag** (`v1.1.0`, or `v1.0.1` for a
+  patch) goes on the next commit, never on the release commit itself: with two tags on one
+  commit GitVersion takes the higher one, and the release commit would then build as `1.1.0.0`.
+
+CI checks out with `fetch-depth: 0` because a shallow clone has no tag history. Releases and
+their files are never built on CI; see Releasing below.
 
 ## Code style
 
@@ -354,21 +370,54 @@ then paste the contents of `keys/NetSparkle_Ed25519.pub` into `App.UpdatePublicK
 compiles the translations with `-Strict`, publishes to `src/PlanCake/bin/x64/Release/publish`,
 compiles `installer/plancake.iss` with Inno Setup 6, and writes to `installer/Output/`
 (gitignored) the installer `plancake-v<VERSION>-setup.exe` and the portable
-`plancake-v<VERSION>-portable.zip`, where `<VERSION>` is the four-part file version.
-`-Appcast` adds `appcast.xml` and its signature, signed with the key in `keys/` (it needs
-`netsparkle-generate-appcast`); `-Deploy` uploads the lot to plancake.oire.dev over SCP with the
-host and path in `installer/deploy.json` (gitignored; copy `deploy.example.json`). Release notes
-come from `changelogs/<X.Y.Z>.md`, named after the tag; the script hands the file to the
-generator under the four-part name it looks for.
+`plancake-v<VERSION>-portable.zip`, where `<VERSION>` is the four-part file version, and keeps
+`plancake.pdb` in `installer/Output/symbols/<VERSION>/` (never shipped; it is what turns a stack
+trace in a user's `errors.log` into source lines). `-Appcast` adds `appcast.xml` and its
+signature, signed with the key in `keys/` (it needs `netsparkle-generate-appcast`); `-Deploy`
+uploads the lot to plancake.oire.dev over SCP with the host and path in
+`installer/deploy.json` (gitignored; copy `deploy.example.json`). Release notes come from
+`changelogs/<X.Y.Z>.md`, named after the three-part version of the cycle, since `N` is only
+known once the release commit exists; the script hands the file to the generator under the
+four-part name it looks for (a `changelogs/<X.Y.Z.N>.md` wins when there is one).
 
-What ships is the same in both: `plancake.exe`, `WebView2Loader.dll`, `web\`, `help\` and
-`locale\**\*.mo`. The publish folder holds more (the `.pdb`, WebView2's XML docs, a second
-`WebView2Loader.dll` under `runtimes\`), so a new file beside the exe must be added to both the
-`[Files]` section of `plancake.iss` and `$ShippedItems` in the script. The installer puts `{app}`
-on the machine `PATH` and takes it off on uninstall, and installs the .NET 10 Desktop Runtime
-and the WebView2 Runtime when missing (`CodeDependencies.iss`, from InnoDependencyInstaller).
-The `AppId` in `plancake.iss` is permanent: Windows and winget know PlanCake by it. The `.iss`
-and `.isl` files are UTF-8 with a BOM, which Inno Setup needs to read them as UTF-8.
+The script refuses a working tree with uncommitted or untracked files (`git status
+--porcelain`), which would ship under the version of a commit that does not hold them;
+`-AllowDirty` overrides that for a trial build that is never released. With `-Appcast` or
+`-Deploy` it warns when HEAD does not carry the tag `v<VERSION>` of the build.
+
+What ships is the same in both: `plancake.exe`, `WebView2Loader.dll`, `web\`, `help\`,
+`locale\**\*.mo`, `LICENSE` and `THIRD-PARTY-NOTICES.txt` (the last two copied next to the exe
+by the `.csproj`; Help → About → Licenses opens them in Notepad). The publish folder holds more
+(the `.pdb`, WebView2's XML docs, a second `WebView2Loader.dll` under `runtimes\`), so a new
+file beside the exe must be added to both the `[Files]` section of `plancake.iss` and
+`$ShippedItems` in the script. The installer puts `{app}` on the machine `PATH` and takes it
+off on uninstall, adds a Start menu shortcut to the manual in the language Setup ran in
+(`help\{language}\manual.html`), shows the Ready to Install page (it lists the runtimes Setup
+is about to download, and its button is the one that says Install), and installs the .NET 10
+Desktop Runtime and the WebView2 Runtime when missing (`CodeDependencies.iss`, from
+InnoDependencyInstaller). The `AppId` in `plancake.iss` is permanent: Windows and winget know
+PlanCake by it. The `.iss` and `.isl` files are UTF-8 with a BOM, which Inno Setup needs to
+read them as UTF-8.
+
+The uninstaller's question about removing settings and logs looks in `{userappdata}` and
+`{localappdata}`, the folders of the account it runs as. When a standard user uninstalls with
+an administrator's password, that is the administrator, so the question is not asked and the
+user's folders stay. Inno Setup cannot reach the original user at uninstall time
+(`ExecAsOriginalUser` is install-only), so this is a known limitation, explained in the
+manuals' Uninstalling section.
+
+`THIRD-PARTY-NOTICES.txt` (repository root) holds the license of every package bundled into
+`plancake.exe` and `WebView2Loader.dll`, with the full text where the license asks for it (the
+MPL 1.1 of UTF.Unknown with its source-availability notice, the BSD texts, Apache 2.0 once at
+the end). `ThirdPartyNoticesTests` walks `plancake.deps.json` and fails when a runtime package
+is not named in it. When a package is added, add its section by hand: the license file in
+`~/.nuget/packages/<id>/<version>/` (its `.nuspec` names it), or, for a license expression, the
+license file of its repository at the commit the `.nuspec` gives. A version bump needs no
+change.
+
+The SDK is pinned by `global.json` (feature band, `rollForward: latestPatch`), and CI's
+`setup-dotnet` reads the same file, so a release built locally and CI use the same band. Bump it
+deliberately: a new band can bring new analyzer warnings, which are errors here.
 
 PlanCake is published to winget as `Oire.PlanCake`. The first release creates the manifest with
 `wingetcreate new` on the release's installer URL; after every later GitHub release, update it:
@@ -379,7 +428,33 @@ wingetcreate update -u 'https://github.com/Oire/plan-cake/releases/download/v<VE
 
 The installer is x64 only, but wingetcreate detects an Inno Setup installer as x86: without the
 `|x64` suffix the update fails with "Multiple matches" (and in `wingetcreate new`, set the
-architecture to x64 by hand).
+architecture to x64 by hand). `<VERSION>` here is the four-part version, as in the tag.
+
+### Releasing
+
+From start to finish, by hand on the maintainer's machine (CI never builds a release):
+
+1. On `master`, with every change for the release merged: run
+   `src/PlanCake/locale/scripts/Extract-Strings.ps1` and `Update-Translations.ps1`, translate
+   anything new in all five catalogs (no fuzzy entries), and check that the six manuals match
+   the UI. Write `changelogs/<X.Y.Z>.md` (the update window's notes) and move the
+   `[Unreleased]` entries of `CHANGELOG.md` under the version. Commit: the tree must be clean.
+2. `./installer/Build-Installer.ps1 -Appcast`, or `-Deploy`, which implies `-Appcast` and
+   uploads the installer, the zip, `appcast.xml` and its signature to plancake.oire.dev (build
+   without `-Deploy` first to try the installer). The file names carry the version:
+   `plancake-v1.0.0.7-setup.exe` comes from the commit at distance 7 from `v1.0.0`.
+3. Tag that commit with the same four-part version and push the tag:
+   `git tag -s v1.0.0.7 -m "Release 1.0.0.7"`, then `git push origin v1.0.0.7`. Tagging before
+   step 2 works too and silences the script's warning. Point the version's link at the end of
+   `CHANGELOG.md` to that tag.
+4. Create the GitHub release from the tag with the installer and the zip from
+   `installer/Output/`:
+   `gh release create v1.0.0.7 installer/Output/plancake-v1.0.0.7-setup.exe installer/Output/plancake-v1.0.0.7-portable.zip --title "PlanCake 1.0.0.7" --notes-file changelogs/1.0.0.md`.
+   Keep `installer/Output/symbols/1.0.0.7/plancake.pdb` somewhere safe.
+5. Update winget with the four-part version (the `wingetcreate update` command above;
+   `wingetcreate new` for the first release).
+6. Open the next cycle on the next commit, not on the release commit:
+   `git tag -s v1.1.0 -m "Start development of version 1.1.0"`, then push it.
 
 ## Error handling at startup
 
@@ -410,10 +485,16 @@ touch `Config` or `Localization` must not run in parallel across classes.
 - `DocumentViewLockdownTests` (trait `Category=WebView2`) runs a real WebView2 in a form that is
   never shown and checks that a plan's raw HTML posts nothing and navigates nowhere. It is
   skipped without the WebView2 Runtime; `--filter "Category!=WebView2"` leaves it out.
-- Coverage: `dotnet test --collect:"XPlat Code Coverage"` writes a Cobertura report, and CI prints
-  its summary. Coverlet needs the app's Debug PDB to stay `portable` and the test project's
+- Coverage is local and on demand, never run in CI: `dotnet test --collect:"XPlat Code Coverage"`
+  writes a Cobertura report under `TestResults\`. Coverlet needs the app's Debug PDB to stay `portable` and the test project's
   `PreserveCompilationContext`, without which it cannot resolve the WinForms and WebView2
   references and instruments nothing.
+- `ManualParityTests` keeps the six manuals in step (see Localization), and
+  `ThirdPartyNoticesTests` keeps `THIRD-PARTY-NOTICES.txt` in step with the packages (see
+  Installer and releases).
+- CI (`.github/workflows/dotnet.yml`) compiles the translations, checks the format, builds and
+  tests, with a 20-minute limit. `codeql.yml` runs CodeQL on the C# and on the page's
+  JavaScript on pushes and pull requests to `master` and weekly.
 - While a PlanCake window is open, `bin\Debug\plancake.exe` is locked: build and test with
   `dotnet build --artifacts-path <temp dir>` (and the same for `dotnet test`) rather than
   closing the user's window.

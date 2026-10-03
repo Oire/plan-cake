@@ -188,6 +188,15 @@ public class CliRunnerTests: IDisposable {
         output.Should().Contain("list").And.Contain("check").And.Contain("clear").And.Contain("export");
     }
 
+    [Fact]
+    public void Run_Help_GivesTheExitCodesAndTheManual() {
+        var (exitCode, output, _) = Run("--help");
+
+        exitCode.Should().Be(ExitCode.Success);
+        output.Should().Contain("Exit codes: 0").And.Contain("3 when \"check\" finds notes").And.Contain("F1");
+        output.Should().Contain(@"help\<language>\manual.html");
+    }
+
     // list
 
     [Fact]

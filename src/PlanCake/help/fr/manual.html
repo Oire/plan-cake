@@ -132,13 +132,15 @@ code {
     background: var(--code-bg);
     padding: 0.05em 0.3em;
     border-radius: 3px;
+    overflow-wrap: anywhere;
 }
 
 pre {
     background: var(--code-bg);
     padding: 0.75rem 1rem;
     border-radius: 4px;
-    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     text-align: start;
 }
 
@@ -150,7 +152,16 @@ pre code {
 table {
     border-collapse: collapse;
     width: 100%;
+}
+
+.table-scroll {
+    overflow-x: auto;
     margin-block: 1rem;
+}
+
+.table-scroll:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
 }
 
 caption {
@@ -231,6 +242,7 @@ footer {
 <ol>
 <li><a href="#installer">Avec le programme d’installation</a></li>
 <li><a href="#portable">La version portable</a></li>
+<li><a href="#uninstalling">Désinstaller PlanCake</a></li>
 <li><a href="#pk-alias">Une commande plus courte&nbsp;: pk</a></li>
 </ol>
 </li>
@@ -352,11 +364,17 @@ footer {
 <h3 id="installer">Avec le programme d’installation</h3>
 <p>Exécutez le programme d’installation et suivez ses étapes. Outre PlanCake lui-même, il s’occupe de ce dont PlanCake a besoin pour fonctionner&nbsp;: il installe le .NET 10 Desktop Runtime et le Microsoft Edge WebView2 Runtime si votre ordinateur ne les possède pas encore. Il ajoute aussi PlanCake à votre PATH, de sorte que la commande <code>plancake</code> fonctionne dans toute nouvelle fenêtre PowerShell ou invite de commandes.</p>
 <p>Vos paramètres sont conservés dans <code>%APPDATA%\Oire\PlanCake</code>.</p>
+<p>Le programme d’installation ajoute PlanCake au menu Démarrer, avec un raccourci vers ce manuel dans la langue que vous avez choisie pour l’installation.</p>
+<p>PlanCake n’est pas signé avec un certificat de signature de code. La première fois que vous lancez le programme d’installation, ou <code>plancake.exe</code> depuis le zip portable, Windows SmartScreen peut afficher « Windows a protégé votre ordinateur » et un éditeur inconnu. Pour continuer, choisissez <strong>Informations complémentaires</strong>, puis <strong>Exécuter quand même</strong>.</p>
 
 <h3 id="portable">La version portable</h3>
 <p>Décompressez le fichier zip dans n’importe quel dossier et exécutez <code>plancake.exe</code> depuis cet endroit. Le zip comprend un dossier vide nommé <code>userdata</code> à côté de <code>plancake.exe</code>&nbsp;; tant que ce dossier est présent, PlanCake y conserve ses paramètres et n’écrit rien dans votre profil utilisateur. Supprimez ou renommez le dossier <code>userdata</code> et PlanCake revient à l’utilisation de <code>%APPDATA%\Oire\PlanCake</code>.</p>
 <p>La version portable n’installe rien, votre ordinateur doit donc déjà disposer du <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> et du <a href="https://developer.microsoft.com/microsoft-edge/webview2/">Microsoft Edge WebView2 Runtime</a>. Windows 11 est livré avec WebView2&nbsp;; s’il est absent, PlanCake vous le signale à son démarrage et propose d’ouvrir la page de téléchargement.</p>
 <p>Pour utiliser la commande <code>plancake</code> avec la version portable, tapez son chemin complet ou ajoutez vous-même son dossier à votre PATH.</p>
+
+<h3 id="uninstalling">Désinstaller PlanCake</h3>
+<p>Désinstallez PlanCake depuis <strong>Applications</strong> dans les Paramètres de Windows, ou avec <strong>Désinstaller PlanCake</strong> dans le menu Démarrer. Le programme de désinstallation retire PlanCake de votre PATH et demande s’il faut aussi supprimer vos paramètres et vos journaux&nbsp;; vos fichiers Markdown et les notes qu’ils contiennent ne sont jamais touchés. La version portable n’installe rien&nbsp;: pour la supprimer, supprimez son dossier.</p>
+<p>Si vous travaillez avec un compte Windows standard et qu’un administrateur saisit son mot de passe pour autoriser la désinstallation, le programme de désinstallation s’exécute en tant que cet administrateur et cherche les paramètres de l’administrateur, pas les vôtres&nbsp;: il ne pose donc pas la question. Vos paramètres et vos journaux restent alors dans <code>%APPDATA%\Oire\PlanCake</code> et <code>%LOCALAPPDATA%\Oire\PlanCake</code>&nbsp;; supprimez vous-même ces dossiers si vous n’en avez plus besoin.</p>
 
 <h3 id="pk-alias">Une commande plus courte&nbsp;: pk</h3>
 <p>Si vous ouvrez des plans depuis la ligne de commande toute la journée, vous pouvez donner à PlanCake un nom de deux lettres. PlanCake ne fait pas cela pour vous&nbsp;; c’est une ligne à ajouter dans votre propre profil de shell.</p>
@@ -559,7 +577,7 @@ footer {
 <h3 id="settings-general">Général</h3>
 <dl>
 <dt>Langue de l’interface</dt>
-<dd>La langue des menus, des boîtes de dialogue et des messages&nbsp;: anglais, Русский (russe), Українська (ukrainien), français, עברית (hébreu) ou Deutsch (allemand). <strong>Langue du système</strong>, la valeur par défaut, suit la langue de Windows, et utilise l’anglais si Windows est dans une langue que PlanCake ne possède pas. En hébreu, toute la fenêtre est disposée de droite à gauche. Vous pouvez aussi la changer depuis <strong>Langue de l’interface</strong> dans le menu <strong>Affichage</strong>. Ce paramètre ne change pas la langue du document.</dd>
+<dd>La langue des menus, des boîtes de dialogue et des messages&nbsp;: anglais, <span lang="ru">Русский</span> (russe), <span lang="uk">Українська</span> (ukrainien), français, <span lang="he" dir="rtl">עברית</span> (hébreu) ou <span lang="de">Deutsch</span> (allemand). <strong>Langue du système</strong>, la valeur par défaut, suit la langue de Windows, et utilise l’anglais si Windows est dans une langue que PlanCake ne possède pas. En hébreu, toute la fenêtre est disposée de droite à gauche. Vous pouvez aussi la changer depuis <strong>Langue de l’interface</strong> dans le menu <strong>Affichage</strong>. Ce paramètre ne change pas la langue du document.</dd>
 <dt>Langue du document</dt>
 <dd>La langue dans laquelle PlanCake suppose qu’un document nouvellement ouvert est rédigé. Par défaut&nbsp;: anglais. Elle ne suit jamais la langue de l’interface ni celle de Windows. Voir <a href="#document-language">La langue du document</a>.</dd>
 <dt>Quand le fichier change sur le disque</dt>
@@ -605,8 +623,9 @@ footer {
 <p>Chaque commande suit le même modèle&nbsp;:</p>
 <pre><code>plancake &lt;command&gt; &lt;file&gt; [options]</code></pre>
 <p>Tapez <code>plancake --help</code> pour la liste des commandes, ou <code>plancake list --help</code> pour les options d’une commande. La sortie est en UTF-8 sans marque d’ordre des octets. Les erreurs vont vers la sortie d’erreur, avec le code de sortie 1. Une commande mal tapée, comme <code>plancake chek</code>, est aussi une erreur (« Commande non reconnue&nbsp;: chek. Vouliez-vous dire check&nbsp;? »)&nbsp;: aucune fenêtre ne s’ouvre alors sur un fichier qui n’existe pas.</p>
+<div class="table-scroll" role="region" aria-labelledby="command-line-caption" tabindex="0">
 <table>
-<caption>Codes de sortie</caption>
+<caption id="command-line-caption">Codes de sortie</caption>
 <thead>
 <tr><th scope="col">Code</th><th scope="col">Signification</th></tr>
 </thead>
@@ -616,6 +635,7 @@ footer {
 <tr><td>3</td><td>Uniquement depuis <code>check</code>&nbsp;: le fichier contient encore des notes.</td></tr>
 </tbody>
 </table>
+</div>
 <p>Les commandes <code>list</code>, <code>check</code> et <code>export</code> ne modifient jamais votre fichier Markdown. Seule <code>clear</code> le fait.</p>
 
 <h3 id="cli-list">Lister les notes</h3>
@@ -640,7 +660,7 @@ footer {
 
 <h3 id="cli-export">Exporter en HTML</h3>
 <pre><code>plancake export plan.md -o plan.html</code></pre>
-<p>Cela écrit une page web autonome du document avec ses notes clairement signalées, à partager avec quelqu’un qui n’utilise pas PlanCake. La page intègre ses styles et ne contient aucun script. L’option <code>-o</code> est obligatoire. La langue de la page est la <strong>Langue du document</strong> définie dans les paramètres&nbsp;; pour en utiliser une autre, ajoutez <code>--lang</code> suivi d’un code de langue, tel que <code>--lang fr</code>. Le titre de la page est le premier titre du document, ou le nom du fichier s’il n’en a aucun.</p>
+<p>Cela écrit une page web autonome du document avec ses notes clairement signalées, à partager avec quelqu’un qui n’utilise pas PlanCake. La page intègre ses styles et ne contient aucun script. L’option <code>-o</code> est obligatoire. La langue de la page est la <strong>Langue du document</strong> définie dans les paramètres&nbsp;; pour en utiliser une autre, ajoutez <code>--lang</code> suivi d’un code de langue, tel que <code>--lang fr</code>. Le titre de la page est le premier titre du document, ou le nom du fichier s’il n’en a aucun. Les images qui sont des fichiers de votre ordinateur, comme <code>![Schéma](diagram.png)</code> à côté du plan, sont intégrées à la page, qui les affiche donc où qu’on l’ouvre&nbsp;; une image de plus de 10 Mo, ou sur le partage réseau d’un autre ordinateur, ne l’est pas. Les images venant du web restent des liens vers le web.</p>
 
 <h3 id="cli-markers">Utiliser d’autres marqueurs pour une seule exécution</h3>
 <p>Par défaut, les commandes utilisent les marqueurs des paramètres. Pour en utiliser d’autres pour une seule exécution, ajoutez&nbsp;:</p>
@@ -674,8 +694,9 @@ cmd /c "plancake check plan.md"</code></pre>
 <p>Ces raccourcis sont fixes&nbsp;; ils ne peuvent pas être modifiés. Vous pouvez aussi tous les consulter dans PlanCake lui-même&nbsp;: choisissez <strong>Raccourcis clavier</strong> dans le menu <strong>Aide</strong>.</p>
 
 <h3 id="keys-window">N’importe où dans la fenêtre</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-window-caption" tabindex="0">
 <table>
-<caption>Raccourcis qui fonctionnent dans le document et dans la liste des notes</caption>
+<caption id="keys-window-caption">Raccourcis qui fonctionnent dans le document et dans la liste des notes</caption>
 <thead>
 <tr><th scope="col">Action</th><th scope="col">Raccourci</th></tr>
 </thead>
@@ -703,10 +724,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Fermer la fenêtre</td><td><kbd>Alt+F4</kbd></td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-document">Dans le document</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-document-caption" tabindex="0">
 <table>
-<caption>Touches et actions de la souris dans le document</caption>
+<caption id="keys-document-caption">Touches et actions de la souris dans le document</caption>
 <thead>
 <tr><th scope="col">Action</th><th scope="col">Clavier</th><th scope="col">Souris</th></tr>
 </thead>
@@ -718,10 +741,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Suivre un lien</td><td><kbd>Entrée</kbd></td><td>Clic</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-list">Dans la liste des notes</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-list-caption" tabindex="0">
 <table>
-<caption>Touches et actions de la souris dans la liste des notes</caption>
+<caption id="keys-list-caption">Touches et actions de la souris dans la liste des notes</caption>
 <thead>
 <tr><th scope="col">Action</th><th scope="col">Clavier</th><th scope="col">Souris</th></tr>
 </thead>
@@ -732,10 +757,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Ouvrir le menu de la note</td><td><kbd>Applications</kbd> ou <kbd>Maj+F10</kbd></td><td>Clic droit</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-dialog">Dans la boîte de dialogue de note</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-dialog-caption" tabindex="0">
 <table>
-<caption>Touches dans la boîte de dialogue Ajouter une note et Modifier la note, avec le réglage par défaut</caption>
+<caption id="keys-dialog-caption">Touches dans la boîte de dialogue Ajouter une note et Modifier la note, avec le réglage par défaut</caption>
 <thead>
 <tr><th scope="col">Action</th><th scope="col">Raccourci</th></tr>
 </thead>
@@ -745,6 +772,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Annuler</td><td><kbd>Échap</kbd>, ou cliquez sur <strong>Annuler</strong></td></tr>
 </tbody>
 </table>
+</div>
 <p>Si vous réglez <strong>Entrée dans la boîte de dialogue de note</strong> sur <strong>Commence une nouvelle ligne</strong>, <kbd>Entrée</kbd> et <kbd>Ctrl+Entrée</kbd> échangent leurs rôles.</p>
 </article>
 
@@ -753,8 +781,9 @@ cmd /c "plancake check plan.md"</code></pre>
 <p>Cliquez sur un nom de menu, appuyez sur <kbd>Alt</kbd> ou <kbd>F10</kbd> pour atteindre la barre de menus, ou ouvrez un menu directement&nbsp;: <kbd>Alt+F</kbd> pour Fichier, <kbd>Alt+D</kbd> pour Édition, <kbd>Alt+A</kbd> pour Affichage, <kbd>Alt+N</kbd> pour Notes, <kbd>Alt+E</kbd> pour Aide. Les commandes qui ne s’appliquent pas pour le moment — <strong>Annuler</strong> sans rien à annuler, <strong>Note suivante</strong> dans un fichier sans notes — sont indisponibles.</p>
 
 <h3 id="menu-file">Fichier</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-file-caption" tabindex="0">
 <table>
-<caption>Menu Fichier</caption>
+<caption id="menu-file-caption">Menu Fichier</caption>
 <thead>
 <tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
 </thead>
@@ -768,10 +797,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Quitter</strong></td><td><kbd>Alt+F4</kbd></td><td>Ferme la fenêtre.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-edit">Édition</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-edit-caption" tabindex="0">
 <table>
-<caption>Menu Édition</caption>
+<caption id="menu-edit-caption">Menu Édition</caption>
 <thead>
 <tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
 </thead>
@@ -781,10 +812,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Supprimer toutes les notes</strong></td><td>Aucun</td><td>Supprime toutes les notes du fichier, après confirmation.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-view">Affichage</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-view-caption" tabindex="0">
 <table>
-<caption>Menu Affichage</caption>
+<caption id="menu-view-caption">Menu Affichage</caption>
 <thead>
 <tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
 </thead>
@@ -803,10 +836,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Recharger</strong></td><td><kbd>F5</kbd></td><td>Relit le fichier depuis le disque.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-notes">Notes</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-notes-caption" tabindex="0">
 <table>
-<caption>Menu Notes</caption>
+<caption id="menu-notes-caption">Menu Notes</caption>
 <thead>
 <tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
 </thead>
@@ -819,10 +854,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Bloc précédent</strong></td><td><kbd>Alt+Maj+Flèche haut</kbd></td><td>Se déplace vers le bloc ou la note précédent dans le document.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-help">Aide</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-help-caption" tabindex="0">
 <table>
-<caption>Menu Aide</caption>
+<caption id="menu-help-caption">Menu Aide</caption>
 <thead>
 <tr><th scope="col">Commande</th><th scope="col">Raccourci</th><th scope="col">Ce qu’elle fait</th></tr>
 </thead>
@@ -830,14 +867,16 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Manuel utilisateur</strong></td><td><kbd>F1</kbd></td><td>Ouvre ce manuel dans votre navigateur web, dans votre langue d’interface quand elle est disponible.</td></tr>
 <tr><td><strong>Raccourcis clavier</strong></td><td>Aucun</td><td>Répertorie tous les raccourcis.</td></tr>
 <tr><td><strong>Vérifier les mises à jour</strong></td><td>Aucun</td><td>Vérifie s’il existe une nouvelle version, tout de suite.</td></tr>
-<tr><td><strong>À propos de PlanCake</strong></td><td><kbd>Maj+F1</kbd></td><td>Affiche la version, avec un lien vers PlanCake sur GitHub et un bouton <strong>Copier les infos</strong>.</td></tr>
+<tr><td><strong>À propos de PlanCake</strong></td><td><kbd>Maj+F1</kbd></td><td>Affiche la version, avec un lien vers PlanCake sur GitHub, un bouton <strong>Copier les infos</strong> et un bouton <strong>Licences</strong>, qui ouvre dans le Bloc-notes la licence de PlanCake et les avis des composants tiers qu’il contient.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-context">Menus contextuels</h3>
 <p>Ouvrez un menu contextuel par un clic droit, ou avec la touche <kbd>Applications</kbd> ou <kbd>Maj+F10</kbd>.</p>
+<div class="table-scroll" role="region" aria-labelledby="menu-context-caption" tabindex="0">
 <table>
-<caption>Commandes des menus contextuels</caption>
+<caption id="menu-context-caption">Commandes des menus contextuels</caption>
 <thead>
 <tr><th scope="col">Où</th><th scope="col">Commandes</th></tr>
 </thead>
@@ -847,6 +886,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Sur une note dans la liste des notes</td><td><strong>Modifier la note</strong>, <strong>Supprimer la note</strong></td></tr>
 </tbody>
 </table>
+</div>
 </article>
 
 <article aria-labelledby="updates">
@@ -933,11 +973,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <details>
 <summary>Comment signaler un problème&nbsp;?</summary>
 <p>Ouvrez <strong>À propos de PlanCake</strong> avec <kbd>Maj+F1</kbd> ou depuis le menu <strong>Aide</strong>, puis cliquez sur <strong>Copier les infos</strong>&nbsp;; la boîte de dialogue affiche « Copié ». Cela place votre version de PlanCake et les détails de Windows dans le presse-papiers. Collez-les dans un nouveau ticket sur <a href="https://github.com/Oire/plan-cake/issues">la page GitHub de PlanCake</a>, avec ce que vous avez fait et ce qui s’est passé.</p>
+<p>Joignez aussi le fichier <code>errors.log</code> du dossier <code>logs</code> (avec les fichiers numérotés à côté, comme <code>errors_001.log</code>), et <code>PlanCake.log</code> si on vous le demande. Le dossier <code>logs</code> est <code>%APPDATA%\Oire\PlanCake\logs</code> avec le programme d’installation, et <code>userdata\logs</code> à côté de <code>plancake.exe</code> dans la version portable. Les journaux nomment les fichiers que vous avez ouverts et les adresses web depuis lesquelles vous avez téléchargé (sans les valeurs de leurs paramètres de requête), mais ne contiennent jamais le texte de vos fichiers ni de vos notes.</p>
 </details>
 </article>
 </main>
 <footer>
-<p>© 2026 Oire Software SARL. PlanCake est open source sous licence Apache 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake sur GitHub</a>.</p>
+<p>© 2026 Oire Software SARL. PlanCake est open source sous licence Apache 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake sur GitHub</a>. Les licences des composants qu’il contient se trouvent dans <code>THIRD-PARTY-NOTICES.txt</code>, à côté de <code>plancake.exe</code>&nbsp;; le bouton <strong>Licences</strong> de <strong>À propos de PlanCake</strong> l’ouvre.</p>
 </footer>
 </body>
 </html>

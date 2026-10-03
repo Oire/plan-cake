@@ -19,6 +19,8 @@ concurrency:
 jobs:
   build:
     runs-on: windows-latest
+    # A hung test (a named pipe, an STA form) would otherwise hold the runner for six hours.
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v7
@@ -29,7 +31,8 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          # The SDK band global.json pins, so CI builds with the SDK a release is built with.
+          global-json-file: global.json
 
       - name: Install gettext
         shell: pwsh
@@ -60,43 +63,4 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Test
-        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory TestResults
-
-      # Coverlet writes a Cobertura report; its totals and a line per namespace go to the job log
-      # and the step summary. The report itself is not uploaded.
-      - name: Coverage summary
-        shell: pwsh
-        run: |
-          $report = Get-ChildItem -Path TestResults -Recurse -Filter coverage.cobertura.xml | Select-Object -First 1
-          if (-not $report) { throw "No coverage report was written" }
-          [xml]$coverage = Get-Content -Raw -LiteralPath $report.FullName
-          $percent = { param($covered, $valid) if ([int]$valid -eq 0) { "n/a" } else { "{0:N1}%" -f (100.0 * $covered / $valid) } }
-          $root = $coverage.coverage
-          $lines = "$(& $percent $root.'lines-covered' $root.'lines-valid') ($($root.'lines-covered') of $($root.'lines-valid'))"
-          $branches = "$(& $percent $root.'branches-covered' $root.'branches-valid') ($($root.'branches-covered') of $($root.'branches-valid'))"
-          $summary = @(
-              "## Code coverage",
-              "",
-              "Lines: $lines. Branches: $branches.",
-              "",
-              "| Namespace | Lines | Branches |",
-              "| --- | --- | --- |"
-          )
-          $coverage.SelectNodes("//class") |
-              Group-Object { $_.name -replace '\.[^.]+$', '' -replace '[+/<].*$', '' } |
-              Sort-Object Name |
-              ForEach-Object {
-                  $all = @($_.Group | ForEach-Object { $_.SelectNodes("lines/line") })
-                  $hit = @($all | Where-Object { [int]$_.hits -gt 0 }).Count
-                  $branchCovered = 0
-                  $branchValid = 0
-                  foreach ($line in $all | Where-Object { $_.branch -eq "True" }) {
-                      if ($line.'condition-coverage' -match '\((\d+)/(\d+)\)') {
-                          $branchCovered += [int]$Matches[1]
-                          $branchValid += [int]$Matches[2]
-                      }
-                  }
-                  $summary += "| $($_.Name) | $(& $percent $hit $all.Count) | $(& $percent $branchCovered $branchValid) |"
-              }
-          $summary | Write-Output
-          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+        run: dotnet test --no-build --verbosity normal

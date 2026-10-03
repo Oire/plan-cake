@@ -1,4 +1,7 @@
-# 🥞 PlanCake
+# PlanCake
+
+[![.NET build and tests](https://github.com/Oire/plan-cake/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Oire/plan-cake/actions/workflows/dotnet.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 Read Markdown files comfortably and leave notes right where they belong.
 
@@ -37,7 +40,12 @@ Download PlanCake from [plancake.oire.dev](https://plancake.oire.dev), in one of
 - **The portable zip** runs from any folder. Keep the empty `userdata` folder next to
   `plancake.exe`, and PlanCake keeps its settings there instead of in `%APPDATA%\Oire\PlanCake`.
 
-Or install it with [winget](https://learn.microsoft.com/windows/package-manager/winget/):
+PlanCake is not signed with a code-signing certificate, so the first time you run the installer
+or `plancake.exe` from the zip, Windows SmartScreen may say "Windows protected your PC" and name
+an unknown publisher. Choose **More info**, then **Run anyway**.
+
+Once the first release is published, PlanCake can also be installed with
+[winget](https://learn.microsoft.com/windows/package-manager/winget/):
 
 ```powershell
 winget install Oire.PlanCake
@@ -53,7 +61,8 @@ Requirements:
 The installer brings both runtimes along; the portable zip needs them already there.
 
 PlanCake speaks English, Russian, Ukrainian, French, Hebrew (with a right-to-left interface) and
-German. Press F1 in PlanCake for the full user manual.
+German. Press F1 in PlanCake for the full user manual, in your language; the installer also puts
+it in the Start menu. The English one is [in this repository](src/PlanCake/help/en/manual.html).
 
 ## Reading and annotating
 
@@ -145,6 +154,9 @@ If you change the markers in PlanCake's settings, change them there too.
 
 ## Building from source
 
+You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0): `global.json`
+pins it to 10.0.401 or a later patch of that feature band, the one CI builds with too.
+
 ```powershell
 # once: gettext's msgfmt, which compiles the translations
 winget install mlocati.GetText
@@ -158,7 +170,7 @@ dotnet format            # --verify-no-changes is what CI runs
 ```
 
 Skip the translations step and the app falls back to English, and the localization tests fail.
-CI runs the same steps in this order.
+CI runs these steps too, with the format check before the build.
 
 The installer and the portable zip are built with [Inno Setup 6](https://jrsoftware.org/isinfo.php):
 
@@ -167,10 +179,13 @@ The installer and the portable zip are built with [Inno Setup 6](https://jrsoftw
 ```
 
 It compiles the translations, publishes a Release build and writes both to `installer/Output/`.
+It refuses to build from a working tree with uncommitted changes unless you pass `-AllowDirty`;
+the release procedure is in `CLAUDE.md` (Releasing).
 
 See `src/PlanCake/locale/README.md` for the translation workflow and `CLAUDE.md` for the
 conventions this repository follows.
 
 ## License
 
-PlanCake is licensed under the [Apache License 2.0](LICENSE).
+PlanCake is licensed under the [Apache License 2.0](LICENSE). The licenses of the components it
+includes are in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt), which ships with it.

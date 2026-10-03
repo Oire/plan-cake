@@ -14,8 +14,9 @@ using App = Oire.PlanCake.Utils.Constants.App;
 namespace Oire.PlanCake.Ui;
 
 /// <summary>
-/// Help → About PlanCake: the product, its version, the copyright, a link to the repository, and
-/// "Copy info", which puts what a bug report needs on the clipboard.
+/// Help → About PlanCake: the product, its version, the copyright, a link to the repository,
+/// "Copy info", which puts what a bug report needs on the clipboard, and "Licenses", which opens
+/// PlanCake's license and the third-party notices.
 /// </summary>
 internal sealed partial class AboutDialog: Form {
     public AboutDialog() {
@@ -31,6 +32,7 @@ internal sealed partial class AboutDialog: Form {
 
         repoLink.LinkClicked += OnRepoLinkClicked;
         copyInfoButton.Click += OnCopyInfoClick;
+        licensesButton.Click += OnLicensesClick;
         copyInfoStatusTimer.Tick += OnCopyInfoStatusTimerTick;
         ActiveControl = okButton;
     }
@@ -59,6 +61,38 @@ internal sealed partial class AboutDialog: Form {
         } catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) {
             Log.Error(ex, "Unable to open {Url}", App.RepoUrl);
             DialogHelper.Show(_("Unable to open {0}", App.RepoUrl), _("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    /// <summary>
+    /// The files "Licenses" opens, next to the executable: PlanCake's own license, then the
+    /// notices of the components it carries (which ends up in front). The installer and the
+    /// portable zip ship both.
+    /// </summary>
+    internal static IReadOnlyList<string> LicenseFiles(string folder) => [
+        Path.Combine(folder, "LICENSE"),
+        Path.Combine(folder, "THIRD-PARTY-NOTICES.txt"),
+    ];
+
+    /// <summary>
+    /// Opens the license files in Notepad. They are the application's own plain-text files, and
+    /// LICENSE has no extension, so no file association is involved.
+    /// </summary>
+    private void OnLicensesClick(object? sender, EventArgs e) {
+        var notepad = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe");
+
+        foreach (var path in LicenseFiles(AppContext.BaseDirectory)) {
+            try {
+                if (!File.Exists(path)) {
+                    throw new FileNotFoundException("The license file is missing", path);
+                }
+
+                Process.Start(new ProcessStartInfo(notepad) { ArgumentList = { path }, UseShellExecute = false })?.Dispose();
+            } catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or FileNotFoundException) {
+                Log.Error(ex, "Unable to open {Path}", path);
+                DialogHelper.Show(_("Unable to open {0}", path), _("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
         }
     }
 
@@ -118,6 +152,7 @@ internal sealed partial class AboutDialog: Form {
     protected override void OnFormClosed(FormClosedEventArgs e) {
         repoLink.LinkClicked -= OnRepoLinkClicked;
         copyInfoButton.Click -= OnCopyInfoClick;
+        licensesButton.Click -= OnLicensesClick;
         copyInfoStatusTimer.Tick -= OnCopyInfoStatusTimerTick;
         copyInfoStatusTimer.Stop();
         base.OnFormClosed(e);

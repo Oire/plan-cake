@@ -279,7 +279,7 @@ internal static class LinkResolver {
     /// False for a UNC path (<c>\\host\share\…</c>) on another host than the open document's, and
     /// for any device path (<c>\\?\…</c>, <c>\\.\…</c>), which no plan needs.
     /// </summary>
-    private static bool IsReachableWithoutAsking(string path, string? documentFolder) {
+    internal static bool IsReachableWithoutAsking(string path, string? documentFolder) {
         var normalized = path.Replace('/', '\\');
 
         if (!normalized.StartsWith(@"\\", StringComparison.Ordinal)) {

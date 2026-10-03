@@ -34,12 +34,17 @@ internal enum RenderMode {
 /// The <c>title</c> of an exported document without a heading (the file name, say), so an
 /// exported file is never left without one.
 /// </param>
+/// <param name="DocumentFolder">
+/// The folder of the Markdown file: an export embeds the local pictures it names
+/// (<see cref="ExportImages"/>), relative paths starting from there.
+/// </param>
 internal sealed record RenderOptions(
     NoteMarkers Markers,
     RenderMode Mode,
     RenderStrings Strings,
     string DocumentLanguage = "en",
-    string? FallbackTitle = null
+    string? FallbackTitle = null,
+    string? DocumentFolder = null
 );
 
 /// <summary>
@@ -56,10 +61,13 @@ internal static partial class MarkdownRenderer {
 
     /// <summary>
     /// The content security policy of an exported file: no script at all, no form that sends
-    /// anywhere and no <c>&lt;base&gt;</c> that moves the plan's relative links.
+    /// anywhere and no <c>&lt;base&gt;</c> that moves the plan's relative links. Pictures come
+    /// from the web or from inside the file (local ones are embedded, see
+    /// <see cref="ExportImages"/>), never from <c>file:</c>, which for a <c>file://host/…</c>
+    /// picture in raw HTML would make the browser reach another computer's share.
     /// </summary>
     public const string ExportContentSecurityPolicy =
-        "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src * data:; "
+        "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src https: http: data:; "
         + "base-uri 'none'; form-action 'none'";
 
     private const string ExportStyle = """
@@ -125,7 +133,11 @@ internal static partial class MarkdownRenderer {
         var body = ToHtml(document, options.Mode, FindMixedTasks(document), walker.TaskLabels);
         var title = walker.Title;
         var html = options.Mode == RenderMode.Export
-            ? ExportDocument(body, title ?? options.FallbackTitle, options.DocumentLanguage)
+            ? ExportDocument(
+                ExportImages.Embed(body, options.DocumentFolder),
+                title ?? options.FallbackTitle,
+                options.DocumentLanguage
+            )
             : body;
 
         return new RenderResult(html, walker.Blocks.Select(block => block.Info).ToList(), notes, title, parse);

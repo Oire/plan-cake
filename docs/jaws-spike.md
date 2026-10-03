@@ -83,6 +83,9 @@ Later decision (Task 7): the `Button` style was dropped altogether. Long button 
 to listen to, and the `role="note"` div already works with Enter and with F9 / Shift+F9, so
 every note is a `role="note"` user note.
 
+Superseded: notes became `role="region"` elements named "User note" (see "Later findings
+(after the plan)", Notes are regions).
+
 ## 8. Host shortcuts
 
 Every shortcut in the plan's Keyboard section was announced by the host, except F8: JAWS
@@ -172,3 +175,25 @@ PlanCake's. Alt+Shift+Down and Alt+Shift+Up are bound to MouseDown and MouseUp, 
 keys to the application unless the JAWS cursor is active. PlanCake uses those. Checked: the keys
 reach PlanCake, JAWS reads each block reached, JAWS stays out of forms mode, and Enter adds a
 note to that block.
+
+## Later findings (after the plan)
+
+### Notes are regions
+
+With real plans, JAWS navigated `role="note"` notes worse than regions: a named region is a
+landmark, which JAWS can list and move to with its region keys. Commit 31e4f4c made every note
+a `role="region"`. It still carried role descriptions, "user note" and "unote" for braille, so
+JAWS read "user note" where it would say "region"; that turned out cumbersome to listen to, note
+after note, so commit 9bfce78 dropped them. A note is now a plain
+region named by `aria-label="User note"`, translated into the interface language, in the window
+and in exported HTML alike.
+
+### The menu bar from the document
+
+Alt and a menu's letter, Alt alone and F10 did nothing while the document had the focus: keys
+pressed in WebView2 never pass through the host's message loop, so Windows never sees them, and
+the browser reports them to the host (`AcceleratorKeyPressed`) without acting on them. The host
+now classifies every key the browser reports (`MenuKeys`, tested
+without a browser): Alt with a letter that is not a host shortcut opens that menu, and Alt
+pressed and released alone, or F10, enters the menu bar, through `WM_SYSCOMMAND` /
+`SC_KEYMENU` as Windows itself does.

@@ -1,20 +1,20 @@
 # Changelog
 
 All notable changes to PlanCake are documented here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
-[semantic versioning](https://semver.org/spec/v2.0.0.html) driven by GitVersion: a release is
-a `vX.Y.Z` tag, and nothing carries a version literal. The release notes shown in the update
-window come from `changelogs/<version>.md`.
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions have four parts, `X.Y.Z.N`,
+set by GitVersion and never written by hand: a `vX.Y.Z` tag opens a development cycle, `N` counts
+the commits since it, and a release is the commit tagged `vX.Y.Z.N`, with the version it builds
+as. Until that tag exists, the changes wait under Unreleased. The release notes shown in the
+update window come from `changelogs/<X.Y.Z>.md`.
 
-## [1.0.0] — unreleased
+## [Unreleased]
 
-### Initial Release
+The first release, 1.0.0. PlanCake lets you read Markdown files comfortably and leave notes
+right where they belong. It was made for the long implementation plans that AI coding assistants
+write, and works with any Markdown file. It runs as a window, or without one from the command
+line.
 
-PlanCake lets you read Markdown files comfortably and leave notes right where they belong. It
-was made for the long implementation plans that AI coding assistants write, and works with any
-Markdown file. It runs as a window, or without one from the command line.
-
-### Features
+### Added
 
 - **Read Markdown as a document**: real headings, lists, tables and code blocks instead of hash
   signs and asterisks, with GitHub-style tables, task lists, footnotes and more. Zoom from 50 to
@@ -40,8 +40,8 @@ Markdown file. It runs as a window, or without one from the command line.
 - **Safe with older files**: a file in a legacy encoding opens read-only unless you let PlanCake
   convert it to UTF-8, and a file whose encoding cannot be recognized is never changed.
 - **Command line** for scripts and AI assistants: `plancake list` (text or JSON), `check` (exit
-  code 3 while notes remain), `clear` and `export` to a standalone HTML page, with other markers
-  for a single run.
+  code 3 while notes remain), `clear` and `export` to a standalone HTML page that carries its
+  local pictures inside it, with other markers for a single run.
 - **Keyboard, mouse and screen readers alike**: every action works from the keyboard alone and
   with the mouse, block-to-block movement with Alt+Shift+Down and Up Arrow, and status messages
   that screen readers speak wherever the focus is. Keyboard shortcuts are listed in the Help
@@ -54,3 +54,11 @@ Markdown file. It runs as a window, or without one from the command line.
 - **Automatic updates**, signed, with adjustable frequency.
 - **Installer, portable zip and winget** (`Oire.PlanCake`). The installer puts `plancake` on the
   `PATH` and installs the .NET 10 Desktop Runtime and the WebView2 Runtime when missing.
+- **Licenses**: PlanCake's license and the notices of the components it includes ship with it,
+  and **Licenses** in About PlanCake opens them.
+
+<!-- When the release is tagged, rename [Unreleased] to [1.0.0.N] - YYYY-MM-DD and start a new
+     empty [Unreleased] above it. Then link [1.0.0.N] to
+     https://github.com/Oire/plan-cake/releases/tag/v1.0.0.N and [Unreleased] to
+     https://github.com/Oire/plan-cake/compare/v1.0.0.N...master (see Releasing in CLAUDE.md). -->
+[Unreleased]: https://github.com/Oire/plan-cake/commits/master

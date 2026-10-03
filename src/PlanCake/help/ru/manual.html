@@ -132,13 +132,15 @@ code {
     background: var(--code-bg);
     padding: 0.05em 0.3em;
     border-radius: 3px;
+    overflow-wrap: anywhere;
 }
 
 pre {
     background: var(--code-bg);
     padding: 0.75rem 1rem;
     border-radius: 4px;
-    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     text-align: start;
 }
 
@@ -150,7 +152,16 @@ pre code {
 table {
     border-collapse: collapse;
     width: 100%;
+}
+
+.table-scroll {
+    overflow-x: auto;
     margin-block: 1rem;
+}
+
+.table-scroll:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
 }
 
 caption {
@@ -231,6 +242,7 @@ footer {
 <ol>
 <li><a href="#installer">С помощью установщика</a></li>
 <li><a href="#portable">Портативная версия</a></li>
+<li><a href="#uninstalling">Удаление PlanCake</a></li>
 <li><a href="#pk-alias">Более короткая команда: pk</a></li>
 </ol>
 </li>
@@ -352,11 +364,17 @@ footer {
 <h3 id="installer">С помощью установщика</h3>
 <p>Запустите установщик и следуйте его шагам. Помимо самого PlanCake, он позаботится о том, что нужно PlanCake для работы: он установит .NET 10 Desktop Runtime и среду выполнения Microsoft Edge WebView2, если их ещё нет на вашем компьютере. Он также добавит PlanCake в переменную PATH, поэтому команда <code>plancake</code> будет работать в любом новом окне PowerShell или командной строки.</p>
 <p>Ваши настройки хранятся в <code>%APPDATA%\Oire\PlanCake</code>.</p>
+<p>Установщик добавляет PlanCake в меню «Пуск» вместе с ярлыком этого руководства на языке, который вы выбрали для установщика.</p>
+<p>PlanCake не подписан сертификатом подписи кода. Поэтому при первом запуске установщика или файла <code>plancake.exe</code> из портативного zip-архива фильтр Windows SmartScreen может показать сообщение «Система Windows защитила ваш компьютер» и неизвестного издателя. Чтобы продолжить, выберите <strong>Подробнее</strong>, а затем <strong>Выполнить в любом случае</strong>.</p>
 
 <h3 id="portable">Портативная версия</h3>
 <p>Распакуйте zip-архив в любую папку и запустите оттуда <code>plancake.exe</code>. В архив входит пустая папка <code>userdata</code> рядом с <code>plancake.exe</code>; пока эта папка на месте, PlanCake хранит настройки в ней и ничего не записывает в ваш профиль пользователя. Удалите или переименуйте папку <code>userdata</code>, и PlanCake снова начнёт использовать <code>%APPDATA%\Oire\PlanCake</code>.</p>
 <p>Портативная версия ничего не устанавливает, поэтому на компьютере уже должны быть <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> и <a href="https://developer.microsoft.com/microsoft-edge/webview2/">среда выполнения Microsoft Edge WebView2</a>. В Windows 11 WebView2 уже есть; если её нет, PlanCake сообщит об этом при запуске и предложит открыть страницу загрузки.</p>
 <p>Чтобы пользоваться командой <code>plancake</code> с портативной версией, либо указывайте полный путь к ней, либо самостоятельно добавьте её папку в PATH.</p>
+
+<h3 id="uninstalling">Удаление PlanCake</h3>
+<p>Удалите PlanCake в разделе «<strong>Приложения</strong>» параметров Windows или командой «<strong>Деинсталлировать PlanCake</strong>» в меню «Пуск». Программа удаления убирает PlanCake из PATH и спрашивает, удалить ли также ваши настройки и журналы; ваши файлы Markdown и заметки в них она никогда не затрагивает. Портативная версия ничего не устанавливает: чтобы удалить её, удалите её папку.</p>
+<p>Если вы работаете в обычной учётной записи Windows, а удаление разрешает администратор, вводя свой пароль, программа удаления работает от имени этого администратора и ищет его настройки, а не ваши, поэтому о них не спрашивает. Тогда ваши настройки и журналы остаются в <code>%APPDATA%\Oire\PlanCake</code> и <code>%LOCALAPPDATA%\Oire\PlanCake</code>; если они вам больше не нужны, удалите эти папки сами.</p>
 
 <h3 id="pk-alias">Более короткая команда: pk</h3>
 <p>Если вы целыми днями открываете планы из командной строки, можно дать PlanCake двухбуквенное имя. Сам PlanCake этого не делает — это одна строка в вашем собственном профиле оболочки.</p>
@@ -559,7 +577,7 @@ footer {
 <h3 id="settings-general">Общие</h3>
 <dl>
 <dt>Язык интерфейса</dt>
-<dd>Язык меню, диалогов и сообщений: English (английский), Русский, Українська (украинский), Français (французский), עברית (иврит) или Deutsch (немецкий). <strong>Язык системы</strong>, значение по умолчанию, следует за языком Windows и использует английский, если Windows работает на языке, которого нет у PlanCake. На иврите всё окно располагается справа налево. Переключить его можно и командой «<strong>Язык интерфейса</strong>» в меню «<strong>Вид</strong>». Эта настройка не меняет язык документа.</dd>
+<dd>Язык меню, диалогов и сообщений: <span lang="en">English</span> (английский), Русский, <span lang="uk">Українська</span> (украинский), <span lang="fr">Français</span> (французский), <span lang="he" dir="rtl">עברית</span> (иврит) или <span lang="de">Deutsch</span> (немецкий). <strong>Язык системы</strong>, значение по умолчанию, следует за языком Windows и использует английский, если Windows работает на языке, которого нет у PlanCake. На иврите всё окно располагается справа налево. Переключить его можно и командой «<strong>Язык интерфейса</strong>» в меню «<strong>Вид</strong>». Эта настройка не меняет язык документа.</dd>
 <dt>Язык документа</dt>
 <dd>Язык, на котором PlanCake предполагает написанным вновь открытый документ. По умолчанию: английский. Он никогда не следует за языком интерфейса или Windows. См. <a href="#document-language">Язык документа</a>.</dd>
 <dt>При изменении файла на диске</dt>
@@ -605,8 +623,9 @@ footer {
 <p>Каждая команда следует одному и тому же образцу:</p>
 <pre><code>plancake &lt;command&gt; &lt;file&gt; [options]</code></pre>
 <p>Введите <code>plancake --help</code> для списка команд или <code>plancake list --help</code> для параметров конкретной команды. Вывод — в UTF-8 без маркера порядка байт. Ошибки идут в поток ошибок, с кодом выхода 1. Ошибкой считается и опечатка в имени команды, например <code>plancake chek</code> («Неизвестная команда: chek. Возможно, вы имели в виду check?»): окно с несуществующим файлом в этом случае не открывается.</p>
+<div class="table-scroll" role="region" aria-labelledby="command-line-caption" tabindex="0">
 <table>
-<caption>Коды выхода</caption>
+<caption id="command-line-caption">Коды выхода</caption>
 <thead>
 <tr><th scope="col">Код</th><th scope="col">Значение</th></tr>
 </thead>
@@ -616,6 +635,7 @@ footer {
 <tr><td>3</td><td>Только для <code>check</code>: в файле всё ещё есть заметки.</td></tr>
 </tbody>
 </table>
+</div>
 <p>Команды <code>list</code>, <code>check</code> и <code>export</code> никогда не изменяют ваш файл Markdown. Только <code>clear</code> делает это.</p>
 
 <h3 id="cli-list">Вывод списка заметок</h3>
@@ -640,7 +660,7 @@ footer {
 
 <h3 id="cli-export">Экспорт в HTML</h3>
 <pre><code>plancake export plan.md -o plan.html</code></pre>
-<p>Эта команда записывает автономную веб-страницу документа с чётко выделенными заметками, чтобы поделиться ею с тем, кто не пользуется PlanCake. Страница содержит собственные стили и не содержит скриптов. Параметр <code>-o</code> обязателен. Язык страницы — это <strong>Язык документа</strong> из настроек; чтобы использовать другой, добавьте <code>--lang</code> и код языка, например <code>--lang fr</code>. Заголовок страницы — это первый заголовок документа либо имя файла, если заголовков нет.</p>
+<p>Эта команда записывает автономную веб-страницу документа с чётко выделенными заметками, чтобы поделиться ею с тем, кто не пользуется PlanCake. Страница содержит собственные стили и не содержит скриптов. Параметр <code>-o</code> обязателен. Язык страницы — это <strong>Язык документа</strong> из настроек; чтобы использовать другой, добавьте <code>--lang</code> и код языка, например <code>--lang fr</code>. Заголовок страницы — это первый заголовок документа либо имя файла, если заголовков нет. Изображения, которые являются файлами на вашем компьютере, например <code>![Схема](diagram.png)</code> рядом с планом, встраиваются в страницу, поэтому она показывает их, где бы её ни открыли; изображение больше 10 МБ или в сетевой папке другого компьютера не встраивается. Изображения из интернета остаются ссылками.</p>
 
 <h3 id="cli-markers">Другие маркеры для одного запуска</h3>
 <p>По умолчанию команды используют маркеры из настроек. Чтобы задействовать другие для одного запуска, добавьте:</p>
@@ -674,8 +694,9 @@ cmd /c "plancake check plan.md"</code></pre>
 <p>Эти сочетания клавиш фиксированы, их нельзя изменить. Все их можно посмотреть и в самом PlanCake: выберите <strong>Сочетания клавиш</strong> в меню «<strong>Справка</strong>».</p>
 
 <h3 id="keys-window">В любом месте окна</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-window-caption" tabindex="0">
 <table>
-<caption>Сочетания клавиш, которые работают в документе и в списке заметок</caption>
+<caption id="keys-window-caption">Сочетания клавиш, которые работают в документе и в списке заметок</caption>
 <thead>
 <tr><th scope="col">Действие</th><th scope="col">Сочетание клавиш</th></tr>
 </thead>
@@ -703,10 +724,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Закрыть окно</td><td><kbd>Alt+F4</kbd></td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-document">В документе</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-document-caption" tabindex="0">
 <table>
-<caption>Клавиши и действия мыши в документе</caption>
+<caption id="keys-document-caption">Клавиши и действия мыши в документе</caption>
 <thead>
 <tr><th scope="col">Действие</th><th scope="col">Клавиатура</th><th scope="col">Мышь</th></tr>
 </thead>
@@ -718,10 +741,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Перейти по ссылке</td><td><kbd>Enter</kbd></td><td>Щелчок</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-list">В списке заметок</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-list-caption" tabindex="0">
 <table>
-<caption>Клавиши и действия мыши в списке заметок</caption>
+<caption id="keys-list-caption">Клавиши и действия мыши в списке заметок</caption>
 <thead>
 <tr><th scope="col">Действие</th><th scope="col">Клавиатура</th><th scope="col">Мышь</th></tr>
 </thead>
@@ -732,10 +757,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Открыть меню заметки</td><td><kbd>Клавиша приложений</kbd> или <kbd>Shift+F10</kbd></td><td>Щелчок правой кнопкой мыши</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-dialog">В диалоге заметки</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-dialog-caption" tabindex="0">
 <table>
-<caption>Клавиши в диалоге добавления и изменения заметки при настройках по умолчанию</caption>
+<caption id="keys-dialog-caption">Клавиши в диалоге добавления и изменения заметки при настройках по умолчанию</caption>
 <thead>
 <tr><th scope="col">Действие</th><th scope="col">Сочетание клавиш</th></tr>
 </thead>
@@ -745,6 +772,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Отмена</td><td><kbd>Escape</kbd> или щелчок по <strong>Отмена</strong></td></tr>
 </tbody>
 </table>
+</div>
 <p>Если вы установите <strong>Enter в диалоге заметки</strong> на <strong>Начинает новую строку</strong>, <kbd>Enter</kbd> и <kbd>Ctrl+Enter</kbd> поменяются местами.</p>
 </article>
 
@@ -753,8 +781,9 @@ cmd /c "plancake check plan.md"</code></pre>
 <p>Щёлкните по названию меню, нажмите <kbd>Alt</kbd> или <kbd>F10</kbd>, чтобы попасть в строку меню, либо откройте меню напрямую: <kbd>Alt+Ф</kbd> для меню Файл, <kbd>Alt+П</kbd> для меню Правка, <kbd>Alt+В</kbd> для меню Вид, <kbd>Alt+З</kbd> для меню Заметки, <kbd>Alt+С</kbd> для меню Справка. Команды, которые сейчас неприменимы — <strong>Отменить</strong>, когда нечего отменять, <strong>Следующая заметка</strong> в файле без заметок, — недоступны.</p>
 
 <h3 id="menu-file">Файл</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-file-caption" tabindex="0">
 <table>
-<caption>Меню Файл</caption>
+<caption id="menu-file-caption">Меню Файл</caption>
 <thead>
 <tr><th scope="col">Команда</th><th scope="col">Сочетание клавиш</th><th scope="col">Что делает</th></tr>
 </thead>
@@ -768,10 +797,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Выход</strong></td><td><kbd>Alt+F4</kbd></td><td>Закрывает окно.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-edit">Правка</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-edit-caption" tabindex="0">
 <table>
-<caption>Меню Правка</caption>
+<caption id="menu-edit-caption">Меню Правка</caption>
 <thead>
 <tr><th scope="col">Команда</th><th scope="col">Сочетание клавиш</th><th scope="col">Что делает</th></tr>
 </thead>
@@ -781,10 +812,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Удалить все заметки</strong></td><td>Нет</td><td>Удаляет из файла все заметки, предварительно спросив.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-view">Вид</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-view-caption" tabindex="0">
 <table>
-<caption>Меню Вид</caption>
+<caption id="menu-view-caption">Меню Вид</caption>
 <thead>
 <tr><th scope="col">Команда</th><th scope="col">Сочетание клавиш</th><th scope="col">Что делает</th></tr>
 </thead>
@@ -803,10 +836,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Перезагрузить</strong></td><td><kbd>F5</kbd></td><td>Читает файл с диска заново.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-notes">Заметки</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-notes-caption" tabindex="0">
 <table>
-<caption>Меню Заметки</caption>
+<caption id="menu-notes-caption">Меню Заметки</caption>
 <thead>
 <tr><th scope="col">Команда</th><th scope="col">Сочетание клавиш</th><th scope="col">Что делает</th></tr>
 </thead>
@@ -819,10 +854,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Предыдущий блок</strong></td><td><kbd>Alt+Shift+Стрелка вверх</kbd></td><td>Переходит к предыдущему блоку или заметке в документе.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-help">Справка</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-help-caption" tabindex="0">
 <table>
-<caption>Меню Справка</caption>
+<caption id="menu-help-caption">Меню Справка</caption>
 <thead>
 <tr><th scope="col">Команда</th><th scope="col">Сочетание клавиш</th><th scope="col">Что делает</th></tr>
 </thead>
@@ -830,14 +867,16 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Руководство пользователя</strong></td><td><kbd>F1</kbd></td><td>Открывает это руководство в вашем браузере, на языке интерфейса, если он доступен.</td></tr>
 <tr><td><strong>Сочетания клавиш</strong></td><td>Нет</td><td>Перечисляет все сочетания клавиш.</td></tr>
 <tr><td><strong>Проверить наличие обновлений</strong></td><td>Нет</td><td>Проверяет наличие новой версии прямо сейчас.</td></tr>
-<tr><td><strong>О программе PlanCake</strong></td><td><kbd>Shift+F1</kbd></td><td>Показывает версию, со ссылкой на PlanCake на GitHub и кнопкой «<strong>Копировать информацию</strong>».</td></tr>
+<tr><td><strong>О программе PlanCake</strong></td><td><kbd>Shift+F1</kbd></td><td>Показывает версию со ссылкой на PlanCake на GitHub и кнопками «<strong>Копировать информацию</strong>» и «<strong>Лицензии</strong>»; вторая открывает в Блокноте лицензию PlanCake и уведомления о входящих в него сторонних компонентах.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-context">Контекстные меню</h3>
 <p>Откройте контекстное меню щелчком правой кнопкой мыши либо клавишей <kbd>Клавиша приложений</kbd> или <kbd>Shift+F10</kbd>.</p>
+<div class="table-scroll" role="region" aria-labelledby="menu-context-caption" tabindex="0">
 <table>
-<caption>Команды контекстных меню</caption>
+<caption id="menu-context-caption">Команды контекстных меню</caption>
 <thead>
 <tr><th scope="col">Где</th><th scope="col">Команды</th></tr>
 </thead>
@@ -847,6 +886,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>На заметке в списке заметок</td><td><strong>Изменить заметку</strong>, <strong>Удалить заметку</strong></td></tr>
 </tbody>
 </table>
+</div>
 </article>
 
 <article aria-labelledby="updates">
@@ -933,11 +973,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <details>
 <summary>Как сообщить о проблеме?</summary>
 <p>Откройте <strong>О программе PlanCake</strong> клавишей <kbd>Shift+F1</kbd> или из меню «<strong>Справка</strong>» и щёлкните <strong>Копировать информацию</strong>; диалог сообщит «Скопировано». Это поместит в буфер обмена версию PlanCake и данные о Windows. Вставьте их в новое обращение на <a href="https://github.com/Oire/plan-cake/issues">странице PlanCake на GitHub</a> вместе с описанием того, что вы делали и что произошло.</p>
+<p>Приложите также файл <code>errors.log</code> из папки <code>logs</code> (вместе с пронумерованными файлами рядом с ним, например <code>errors_001.log</code>), а <code>PlanCake.log</code> — если вас о нём попросят. Папка <code>logs</code> — это <code>%APPDATA%\Oire\PlanCake\logs</code>, если PlanCake установлен, и <code>userdata\logs</code> рядом с <code>plancake.exe</code> в портативной версии. В журналах есть имена открытых вами файлов и веб-адреса, с которых вы загружали файлы (без значений параметров запроса), но никогда нет текста ваших файлов или заметок.</p>
 </details>
 </article>
 </main>
 <footer>
-<p>© 2026 Oire Software SARL. PlanCake распространяется как открытое ПО по лицензии Apache License 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake на GitHub</a>.</p>
+<p>© 2026 Oire Software SARL. PlanCake распространяется как открытое ПО по лицензии Apache License 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake на GitHub</a>. Лицензии входящих в него компонентов собраны в файле <code>THIRD-PARTY-NOTICES.txt</code> рядом с <code>plancake.exe</code>; его открывает кнопка «<strong>Лицензии</strong>» в окне «<strong>О программе PlanCake</strong>».</p>
 </footer>
 </body>
 </html>

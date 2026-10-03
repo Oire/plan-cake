@@ -633,7 +633,8 @@ public class MarkdownRendererTests {
         var html = Render(source, RenderMode.Export, documentLanguage: "fr").Html;
 
         const string meta = """<meta http-equiv="Content-Security-Policy" content="default-src 'none'; """
-            + """script-src 'none'; style-src 'unsafe-inline'; img-src * data:; base-uri 'none'; form-action 'none'">""";
+            + """script-src 'none'; style-src 'unsafe-inline'; img-src https: http: data:; base-uri 'none'; """
+            + """form-action 'none'">""";
         html.Should().StartWith("<!DOCTYPE html>\n<html lang=\"fr\">");
         html.Should().Contain(meta).And.Contain("<title>Plan</title>");
         html.IndexOf("<script>alert(1)</script>", StringComparison.Ordinal)

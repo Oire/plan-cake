@@ -115,6 +115,24 @@ public class LocalizationTests: IDisposable {
         return ids;
     }
 
-    private static string Unquote(string quoted) =>
-        quoted.Trim()[1..^1].Replace("\\\"", "\"", StringComparison.Ordinal).Replace("\\n", "\n", StringComparison.Ordinal);
+    /// <summary>A quoted PO string without its quotes and escapes (<c>\"</c>, <c>\\</c>, <c>\n</c>, <c>\t</c>).</summary>
+    private static string Unquote(string quoted) {
+        var text = quoted.Trim()[1..^1];
+        var result = new StringBuilder(text.Length);
+
+        for (var index = 0; index < text.Length; index++) {
+            if (text[index] == '\\' && index + 1 < text.Length) {
+                index++;
+                result.Append(text[index] switch {
+                    'n' => '\n',
+                    't' => '\t',
+                    var escaped => escaped,
+                });
+            } else {
+                result.Append(text[index]);
+            }
+        }
+
+        return result.ToString();
+    }
 }

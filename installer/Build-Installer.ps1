@@ -8,6 +8,12 @@
 # and optionally uploads the release files to the download server over SCP (-Deploy, which
 # reads installer\deploy.json and implies -Appcast).
 #
+# A release is built from a clean working tree: the script refuses uncommitted or untracked
+# files, which would ship under a committed version number, unless -AllowDirty is given (for a
+# trial build). With -Appcast or -Deploy it warns when HEAD does not carry the four-part tag
+# vX.Y.Z.N of the version it built (see "Releasing" in CLAUDE.md). plancake.pdb, which does not
+# ship, is kept in installer\Output\symbols\<version>\ for reading stack traces from a release.
+#
 
 [CmdletBinding(PositionalBinding=$false)]
 param(
@@ -16,6 +22,7 @@ param(
     [switch]$NoPortable,
     [switch]$Deploy,
     [switch]$OpenOutput,
+    [switch]$AllowDirty,
     [string]$InnoSetupPath = "",
     [string]$BaseUrl = "https://plancake.oire.dev",
     [string]$KeyPath = "",
@@ -38,10 +45,11 @@ $PublishOutputPath = Join-Path $BuildOutputPath "publish"
 
 # What ships, in the installer and in the portable zip alike (plancake.iss lists the same set).
 # The single-file publish leaves everything but the exe beside it: WebView2Loader.dll (a native
-# DLL the bundle cannot hold), web\ (the page WebView2 shows), help\ (the user manual) and
-# locale\ (the compiled .mo catalogs). The publish folder also holds files that do not ship:
-# plancake.pdb, the WebView2 XML docs and a second WebView2Loader.dll under runtimes\.
-$ShippedItems = @("plancake.exe", "WebView2Loader.dll", "web", "help", "locale")
+# DLL the bundle cannot hold), web\ (the page WebView2 shows), help\ (the user manual), locale\
+# (the compiled .mo catalogs), and LICENSE and THIRD-PARTY-NOTICES.txt (Help > About >
+# Licenses opens them). The publish folder also holds files that do not ship: plancake.pdb (kept in
+# Output\symbols instead), the WebView2 XML docs and a second WebView2Loader.dll under runtimes\.
+$ShippedItems = @("plancake.exe", "WebView2Loader.dll", "web", "help", "locale", "LICENSE", "THIRD-PARTY-NOTICES.txt")
 
 Write-Host "PlanCake Installer Build Script" -ForegroundColor Green
 Write-Host "===============================" -ForegroundColor Green
@@ -81,6 +89,25 @@ if ([string]::IsNullOrEmpty($InnoSetupPath) -or !(Test-Path $InnoSetupPath)) {
 }
 
 Write-Host "Using Inno Setup: $InnoSetupPath" -ForegroundColor Yellow
+
+# A release is built from what is committed: an uncommitted change or an untracked file would
+# ship under the version number of the commit, and nobody could rebuild it. -AllowDirty is for
+# trial builds that are never released.
+$GitStatus = @(& git -C $RepoRoot status --porcelain)
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "git status failed in $RepoRoot; a release is built from a git working tree."
+    exit 1
+}
+
+if ($GitStatus.Count -gt 0) {
+    if ($AllowDirty) {
+        Write-Warning "The working tree has uncommitted or untracked files (-AllowDirty): do not release this build."
+    } else {
+        Write-Error "The working tree has uncommitted or untracked files. Commit or remove them, or pass -AllowDirty for a trial build:"
+        $GitStatus | ForEach-Object { Write-Host "  $_" }
+        exit 1
+    }
+}
 
 # Build the application
 if (!$SkipBuild) {
@@ -138,7 +165,9 @@ $RequiredFiles = @(
     "plancake.exe",
     "WebView2Loader.dll",
     "web\index.html",
-    "help\en\manual.html"
+    "help\en\manual.html",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.txt"
 )
 
 foreach ($File in $RequiredFiles) {
@@ -216,6 +245,32 @@ Write-Host "  File: $($Installer.Name)" -ForegroundColor White
 Write-Host "  Size: $FileSize MB" -ForegroundColor White
 Write-Host "  Version: $Version" -ForegroundColor White
 Write-Host "  Path: $($Installer.FullName)" -ForegroundColor White
+
+# The symbols of this build, for reading the stack traces in a user's errors.log. Local only:
+# installer\Output is gitignored and the .pdb never ships.
+$PdbPath = Join-Path $PublishOutputPath "plancake.pdb"
+if (Test-Path $PdbPath) {
+    $SymbolsDir = Join-Path $OutputDir "symbols\$Version"
+    New-Item -ItemType Directory -Path $SymbolsDir -Force | Out-Null
+    Copy-Item -Path $PdbPath -Destination $SymbolsDir -Force
+    Write-Host "  Symbols: $SymbolsDir" -ForegroundColor White
+} else {
+    Write-Warning "plancake.pdb not found in the publish output; no symbols kept for $Version."
+}
+
+# A release is the commit tagged vX.Y.Z.N with the version it builds as (see "Releasing" in
+# CLAUDE.md). Only a warning: the tag can be added after a trial of the appcast.
+if ($Appcast) {
+    $HeadTags = @(& git -C $RepoRoot tag --points-at HEAD)
+    if ($HeadTags -notcontains "v$Version") {
+        $FourPartTags = @($HeadTags | Where-Object { $_ -match '^v\d+\.\d+\.\d+\.\d+$' })
+        if ($FourPartTags.Count -eq 0) {
+            Write-Warning "HEAD has no four-part release tag. Tag the release commit v$Version before publishing it."
+        } else {
+            Write-Warning "HEAD is tagged $($FourPartTags -join ', '), but this build is $Version. The release tag must be v$Version."
+        }
+    }
+}
 
 # Create portable ZIP archive
 if (!$NoPortable) {
@@ -362,9 +417,10 @@ if ($Appcast) {
     )
 
     # Release notes. The generator looks for "<Version>.md" with the full four-part version
-    # (1.0.0.0 at the v1.0.0 tag), while changelogs\ is named after the release tag (1.0.0.md):
-    # take the four-part file if there is one, else the three-part one, and hand it to the
-    # generator under the name it expects.
+    # (1.0.0.7 for the release tagged v1.0.0.7), while changelogs\ is named after the
+    # three-part version the cycle opened with (1.0.0.md), since the fourth field is only known
+    # once the release commit exists: take a four-part file if there is one, else the
+    # three-part one, and hand it to the generator under the name it expects.
     $StagedChangeLogDir = ""
     $ReleaseVersion = ($Version -split '\.')[0..2] -join '.'
     $ChangeLogFile = @(

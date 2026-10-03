@@ -64,8 +64,15 @@ internal sealed class CliRunner {
             }
         });
 
-        _root = new RootCommand(_(
-            "PlanCake: read Markdown files comfortably and leave notes right where they belong. Without a command, \"plancake [file]\" opens the window, with the file if one is given."
+        // System.CommandLine has no epilog: the exit codes and the pointer to the manual end the
+        // root description, which only the root help shows.
+        _root = new RootCommand(String.Join(
+            Environment.NewLine + Environment.NewLine,
+            _(
+                "PlanCake: read Markdown files comfortably and leave notes right where they belong. Without a command, \"plancake [file]\" opens the window, with the file if one is given."
+            ),
+            _("Exit codes: 0 when the command succeeds, 1 on an error, 3 when \"check\" finds notes."),
+            _("The user manual describes every command: press F1 in the window, or open help\\<language>\\manual.html in the folder of plancake.exe.")
         )) {
             _fileArgument,
             ListCommand(),
@@ -449,7 +456,8 @@ internal sealed class CliRunner {
             mode,
             LocalizedText.RenderStrings(),
             language ?? Config.General.DefaultDocumentLanguage,
-            Path.GetFileName(file.Path)
+            Path.GetFileName(file.Path),
+            Path.GetDirectoryName(Path.GetFullPath(file.Path))
         ));
 
     private void WarnAboutUnterminatedNotes(NoteParseResult parse) {

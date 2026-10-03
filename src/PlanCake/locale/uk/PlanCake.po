@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-03 14:45:14+0200\n"
+"POT-Creation-Date: 2026-10-03 15:01:50+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: uk\n"
@@ -14,7 +14,7 @@ msgstr ""
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: GetText.NET Extractor\n"
 
-#: ..\..\Cli\CliRunner.cs:385
+#: ..\..\Cli\CliRunner.cs:392
 msgid "--single-token and --close-marker cannot be used together."
 msgstr "--single-token і --close-marker не можна використовувати разом."
 
@@ -23,7 +23,7 @@ msgstr "--single-token і --close-marker не можна використову�
 msgid "{0} - {1}"
 msgstr "{0} - {1}"
 
-#: ..\..\Cli\CliRunner.cs:407 ..\..\Ui\MainWindow.Opening.cs:57
+#: ..\..\Cli\CliRunner.cs:414 ..\..\Ui\MainWindow.Opening.cs:57
 #, csharp-format
 msgid "{0} is a folder, not a file."
 msgstr "{0} — це папка, а не файл."
@@ -42,12 +42,12 @@ msgstr ""
 "Файлу {0} більше немає: його видалено, перейменовано або переміщено. "
 "Змінювати нотатки не можна, доки він не повернеться."
 
-#: ..\..\Cli\CliRunner.cs:329
+#: ..\..\Cli\CliRunner.cs:336
 #, csharp-format
 msgid "{0} is not a language code."
 msgstr "{0} — не код мови."
 
-#: ..\..\Cli\CliRunner.cs:280
+#: ..\..\Cli\CliRunner.cs:287
 #, csharp-format
 msgid ""
 "{0} is not in UTF-8 but in {1}, and it could not be converted, so PlanCake "
@@ -56,7 +56,7 @@ msgstr ""
 "Файл {0} записано не в UTF-8, а в кодуванні {1}, і його не вдалося "
 "перетворити, тому PlanCake його не змінює."
 
-#: ..\..\Cli\CliRunner.cs:287
+#: ..\..\Cli\CliRunner.cs:294
 #, csharp-format
 msgid ""
 "{0} is not in UTF-8 but in {1}, so PlanCake does not change it. To convert "
@@ -73,7 +73,7 @@ msgstr ""
 msgid "{0} no longer exists and was removed from the history."
 msgstr "Файлу {0} більше немає, і його вилучено з історії."
 
-#: ..\..\Cli\CliRunner.cs:229
+#: ..\..\Cli\CliRunner.cs:236
 #, csharp-format
 msgid "{0} note"
 msgid_plural "{0} notes"
@@ -106,7 +106,7 @@ msgstr "&Додати нотатку..."
 msgid "&Back"
 msgstr "&Назад"
 
-#: ..\..\Ui\OpeningDialog.Designer.cs:66 ..\..\Ui\NoteDialog.Designer.cs:98
+#: ..\..\Ui\NoteDialog.Designer.cs:98 ..\..\Ui\OpeningDialog.Designer.cs:66
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:70
 #: ..\..\Ui\SettingsDialog.Designer.cs:379
 msgid "&Cancel"
@@ -124,7 +124,7 @@ msgstr "&Закрити"
 msgid "&Copy block text"
 msgstr "&Копіювати текст блоку"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:118
+#: ..\..\Ui\AboutDialog.Designer.cs:135
 msgid "&Copy info"
 msgstr "&Копіювати інформацію"
 
@@ -132,8 +132,8 @@ msgstr "&Копіювати інформацію"
 msgid "&Delete all notes"
 msgstr "&Видалити всі нотатки"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:82 ..\..\Ui\MainWindow.Notes.cs:264
-#: ..\..\Ui\MainWindow.Menu.cs:82
+#: ..\..\Ui\MainWindow.Menu.cs:82 ..\..\Ui\MainWindow.Notes.cs:264
+#: ..\..\Ui\MainWindow.NotesList.cs:82
 msgid "&Delete note"
 msgstr "&Видалити нотатку"
 
@@ -149,8 +149,8 @@ msgstr "Мова &документа:"
 msgid "&Edit"
 msgstr "&Редагування"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:81 ..\..\Ui\MainWindow.Notes.cs:260
-#: ..\..\Ui\MainWindow.Menu.cs:81
+#: ..\..\Ui\MainWindow.Menu.cs:81 ..\..\Ui\MainWindow.Notes.cs:260
+#: ..\..\Ui\MainWindow.NotesList.cs:81
 msgid "&Edit note..."
 msgstr "&Редагувати нотатку..."
 
@@ -182,6 +182,10 @@ msgstr "Мова &інтерфейсу:"
 msgid "&Keyboard shortcuts"
 msgstr "&Комбінації клавіш"
 
+#: ..\..\Ui\AboutDialog.Designer.cs:143
+msgid "&Licenses"
+msgstr "&Ліцензії"
+
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:48
 msgid "&Link:"
 msgstr "&Посилання:"
@@ -202,7 +206,7 @@ msgstr "&Нотатки"
 msgid "&Notes list"
 msgstr "&Список нотаток"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:138 ..\..\Ui\NoteDialog.Designer.cs:92
+#: ..\..\Ui\AboutDialog.Designer.cs:163 ..\..\Ui\NoteDialog.Designer.cs:92
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:64
 #: ..\..\Ui\SettingsDialog.Designer.cs:373
 msgid "&OK"
@@ -280,7 +284,7 @@ msgstr ""
 "Нотатка, додана тут, опинилася б усередині незакритого блоку коду й не "
 "вважалася б нотаткою. Спершу закрийте блок коду в редакторі."
 
-#: ..\..\Cli\CliRunner.cs:366
+#: ..\..\Cli\CliRunner.cs:373
 msgid "A note has no closing marker and ends with its line"
 msgstr "Нотатка не має закривального маркера й закінчується разом із рядком"
 
@@ -288,7 +292,7 @@ msgstr "Нотатка не має закривального маркера й 
 msgid "A note has no closing marker, so it runs to the end of the file."
 msgstr "Нотатка не має закривального маркера, тому триває до кінця файлу."
 
-#: ..\..\Ui\AboutDialog.cs:25 ..\..\Ui\HostCommands.cs:130
+#: ..\..\Ui\AboutDialog.cs:26 ..\..\Ui\HostCommands.cs:130
 msgid "About PlanCake"
 msgstr "Про PlanCake"
 
@@ -380,7 +384,7 @@ msgstr "Команда"
 msgid "Con&vert to UTF-8 on opening"
 msgstr "&Перетворювати на UTF-8 під час відкриття"
 
-#: ..\..\Cli\CliRunner.cs:240
+#: ..\..\Cli\CliRunner.cs:247
 msgid ""
 "Convert a file that is not UTF-8 to UTF-8 (without BOM), whatever the "
 "settings say"
@@ -388,7 +392,7 @@ msgstr ""
 "Перетворити файл не в UTF-8 на UTF-8 (без BOM), хоч би що було вказано в "
 "налаштуваннях"
 
-#: ..\..\Ui\AboutDialog.cs:68
+#: ..\..\Ui\AboutDialog.cs:102
 msgid "Copied"
 msgstr "Скопійовано"
 
@@ -463,12 +467,13 @@ msgstr "Enter"
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr "Enter у діалозі но&татки ({0} — навпаки):"
 
-#: ..\..\Ui\AboutDialog.cs:61 ..\..\Ui\MainWindow.cs:233 ..\..\Program.cs:107
-#: ..\..\Program.cs:144 ..\..\Program.cs:150 ..\..\Ui\MainWindow.cs:319
+#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Program.cs:150
+#: ..\..\Ui\AboutDialog.cs:63 ..\..\Ui\AboutDialog.cs:93
+#: ..\..\Ui\MainWindow.cs:233 ..\..\Ui\MainWindow.cs:319
 msgid "Error"
 msgstr "Помилка"
 
-#: ..\..\Program.cs:183 ..\..\Cli\CliRunner.cs:163
+#: ..\..\Program.cs:183 ..\..\Cli\CliRunner.cs:170
 #: ..\..\Ui\SettingsDialog.cs:153
 #, csharp-format
 msgid "Error: {0}"
@@ -482,11 +487,17 @@ msgstr "Раз на 3 дні"
 msgid "Exit"
 msgstr "Вихід"
 
+#: ..\..\Cli\CliRunner.cs:74
+msgid ""
+"Exit codes: 0 when the command succeeds, 1 on an error, 3 when \"check\" "
+"finds notes."
+msgstr "Коди виходу: 0, якщо команду виконано, 1 у разі помилки, 3, якщо «check» знаходить нотатки."
+
 #: ..\..\Ui\MainWindow.Menu.cs:26
 msgid "Export &notes..."
 msgstr "&Експортувати нотатки..."
 
-#: ..\..\Cli\CliRunner.cs:320
+#: ..\..\Cli\CliRunner.cs:327
 msgid "Export a file as standalone HTML with its notes"
 msgstr "Експортувати файл в окремий HTML-файл разом із нотатками"
 
@@ -556,8 +567,8 @@ msgstr "Недопустиме посилання"
 msgid "JSON files"
 msgstr "Файли JSON"
 
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:46 ..\..\Ui\ShortcutsDialog.cs:27
-#: ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.cs:27 ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:46
 msgid "Keyboard shortcuts"
 msgstr "Комбінації клавіш"
 
@@ -569,7 +580,7 @@ msgstr "Стрілка вліво"
 msgid "Lines"
 msgstr "Рядки"
 
-#: ..\..\Cli\CliRunner.cs:182
+#: ..\..\Cli\CliRunner.cs:189
 msgid "List the notes of a file with the blocks they follow"
 msgstr "Вивести нотатки файлу разом із блоками, після яких вони стоять"
 
@@ -699,7 +710,7 @@ msgstr "Нічого повторювати"
 msgid "Nothing to undo"
 msgstr "Нічого скасовувати"
 
-#: ..\..\Cli\CliRunner.cs:274
+#: ..\..\Cli\CliRunner.cs:281
 msgid ""
 "Nothing was removed: a note without a closing marker would take the rest of "
 "the file with it. Add the closing marker first."
@@ -792,7 +803,7 @@ msgstr "Відкриття файлу"
 msgid "Opens the context menu"
 msgstr "Відкриває контекстне меню"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:68
+#: ..\..\Ui\AboutDialog.Designer.cs:71
 msgid "PlanCake"
 msgstr "PlanCake"
 
@@ -830,11 +841,11 @@ msgstr ""
 "Для роботи PlanCake потрібне середовище виконання Microsoft Edge WebView2, а "
 "його не встановлено на цьому комп'ютері."
 
-#: ..\..\Ui\AboutDialog.Designer.cs:108
+#: ..\..\Ui\AboutDialog.Designer.cs:111
 msgid "PlanCake on GitHub"
 msgstr "PlanCake на GitHub"
 
-#: ..\..\Cli\CliRunner.cs:68
+#: ..\..\Cli\CliRunner.cs:72
 msgid ""
 "PlanCake: read Markdown files comfortably and leave notes right where they "
 "belong. Without a command, \"plancake [file]\" opens the window, with the "
@@ -868,11 +879,11 @@ msgstr "Попередній блок"
 msgid "Previous note"
 msgstr "Попередня нотатка"
 
-#: ..\..\Cli\CliRunner.cs:214
+#: ..\..\Cli\CliRunner.cs:221
 msgid "Print how many notes a file has; exit code 3 when it has any"
 msgstr "Вивести кількість нотаток у файлі; код виходу 3, якщо вони є"
 
-#: ..\..\Cli\CliRunner.cs:177
+#: ..\..\Cli\CliRunner.cs:184
 msgid "Print the notes as JSON"
 msgstr "Вивести нотатки у форматі JSON"
 
@@ -880,7 +891,7 @@ msgstr "Вивести нотатки у форматі JSON"
 msgid "R&eset zoom"
 msgstr "Скину&ти масштаб"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:78
+#: ..\..\Ui\AboutDialog.Designer.cs:81
 msgid "Read Markdown files comfortably and leave notes right where they belong"
 msgstr "Зручне читання файлів Markdown і нотатки саме там, де вони потрібні"
 
@@ -924,11 +935,11 @@ msgstr "Перезавантажувати його"
 msgid "Reload the file"
 msgstr "Перезавантажити файл"
 
-#: ..\..\Cli\CliRunner.cs:243
+#: ..\..\Cli\CliRunner.cs:250
 msgid "Remove every note from a file"
 msgstr "Видалити всі нотатки з файлу"
 
-#: ..\..\Cli\CliRunner.cs:302
+#: ..\..\Cli\CliRunner.cs:309
 #, csharp-format
 msgid "Removed {0} note"
 msgid_plural "Removed {0} notes"
@@ -1035,7 +1046,7 @@ msgstr "Не вдалося завантажити файл: сервер від
 msgid "The download took longer than {0} seconds and was stopped."
 msgstr "Завантаження тривало понад {0} секунд, тому його зупинено."
 
-#: ..\..\Cli\CliRunner.cs:266
+#: ..\..\Cli\CliRunner.cs:273
 #, csharp-format
 msgid ""
 "The encoding of {0} could not be recognized, so PlanCake never changes it."
@@ -1051,7 +1062,7 @@ msgstr ""
 "Не вдалося розпізнати кодування цього файлу, тому його відкрито лише для "
 "читання, і він ніколи не змінюється. Додавати до нього нотатки не можна."
 
-#: ..\..\Cli\CliRunner.cs:420 ..\..\Ui\MainWindow.Opening.cs:125
+#: ..\..\Cli\CliRunner.cs:427 ..\..\Ui\MainWindow.Opening.cs:125
 #, csharp-format
 msgid "The file {0} does not exist."
 msgstr "Файл {0} не існує."
@@ -1078,7 +1089,7 @@ msgid "The file is larger than {0} MB, the most PlanCake downloads."
 msgstr ""
 "Файл більший за {0} МБ, а це найбільший розмір, який завантажує PlanCake."
 
-#: ..\..\Cli\CliRunner.cs:256 ..\..\Ui\MainWindow.Opening.cs:231
+#: ..\..\Cli\CliRunner.cs:263 ..\..\Ui\MainWindow.Opening.cs:231
 #, csharp-format
 msgid "The file was converted from {0} to UTF-8."
 msgstr "Файл перетворено з {0} на UTF-8."
@@ -1087,11 +1098,11 @@ msgstr "Файл перетворено з {0} на UTF-8."
 msgid "The file was not reloaded. Press F5 to reload it."
 msgstr "Файл не перезавантажено. Натисніть F5, щоб перезавантажити його."
 
-#: ..\..\Cli\CliRunner.cs:313
+#: ..\..\Cli\CliRunner.cs:320
 msgid "The HTML file to write"
 msgstr "HTML-файл, до якого треба записати результат"
 
-#: ..\..\Cli\CliRunner.cs:317
+#: ..\..\Cli\CliRunner.cs:324
 msgid ""
 "The language of the document, such as en or fr (default: the document "
 "language in the settings)"
@@ -1108,27 +1119,27 @@ msgstr "Остання версія PlanCake — та, яку ви виріши�
 msgid "The link target does not exist: {0}"
 msgstr "Ціль посилання не існує: {0}"
 
-#: ..\..\Cli\CliRunner.cs:212
+#: ..\..\Cli\CliRunner.cs:219
 msgid "The Markdown file to check for notes"
 msgstr "Файл Markdown, у якому треба перевірити нотатки"
 
-#: ..\..\Cli\CliRunner.cs:311
+#: ..\..\Cli\CliRunner.cs:318
 msgid "The Markdown file to export"
 msgstr "Файл Markdown для експорту"
 
-#: ..\..\Cli\CliRunner.cs:176
+#: ..\..\Cli\CliRunner.cs:183
 msgid "The Markdown file to list the notes of"
 msgstr "Файл Markdown, нотатки якого треба вивести"
 
-#: ..\..\Cli\CliRunner.cs:238
+#: ..\..\Cli\CliRunner.cs:245
 msgid "The Markdown file to remove every note from"
 msgstr "Файл Markdown, з якого треба видалити всі нотатки"
 
-#: ..\..\Cli\CliRunner.cs:362
+#: ..\..\Cli\CliRunner.cs:369
 msgid "The marker a note ends with (default: the one in the settings)"
 msgstr "Маркер, яким закінчується нотатка (за замовчуванням — з налаштувань)"
 
-#: ..\..\Cli\CliRunner.cs:358
+#: ..\..\Cli\CliRunner.cs:365
 msgid "The marker a note starts with (default: the one in the settings)"
 msgstr "Маркер, яким починається нотатка (за замовчуванням — з налаштувань)"
 
@@ -1184,13 +1195,13 @@ msgstr ""
 msgid "The opening marker cannot be empty."
 msgstr "Відкривальний маркер не може бути порожнім."
 
-#: ..\..\Cli\CliRunner.cs:196 ..\..\Cli\CliRunner.cs:340
+#: ..\..\Cli\CliRunner.cs:203 ..\..\Cli\CliRunner.cs:347
 #, csharp-format
 msgid "The output file cannot be the file itself: {0}"
 msgstr "Вихідний файл не може збігатися з початковим: {0}"
 
-#: ..\..\Ui\MainWindow.Settings.cs:34 ..\..\Ui\MainWindow.Settings.cs:152
-#: ..\..\Ui\MainWindow.NotesList.cs:182
+#: ..\..\Ui\MainWindow.Settings.cs:34 ..\..\Ui\MainWindow.NotesList.cs:182
+#: ..\..\Ui\MainWindow.Settings.cs:152
 msgid "The settings could not be saved. They apply until PlanCake is closed."
 msgstr "Не вдалося зберегти налаштування. Вони діятимуть до закриття PlanCake."
 
@@ -1201,6 +1212,12 @@ msgstr "Початок документа"
 #: ..\..\Ui\MainWindow.Commands.cs:364
 msgid "The user manual could not be found."
 msgstr "Посібник користувача не знайдено."
+
+#: ..\..\Cli\CliRunner.cs:75
+msgid ""
+"The user manual describes every command: press F1 in the window, or open "
+"help\\<language>\\manual.html in the folder of plancake.exe."
+msgstr "Усі команди описано в посібнику користувача: натисніть F1 у вікні або відкрийте help\\<мова>\\manual.html у папці plancake.exe."
 
 #: ..\..\Notes\NoteActionRunner.cs:179 ..\..\Ui\MainWindow.Notes.cs:344
 msgid "There are no notes to delete."
@@ -1267,16 +1284,17 @@ msgstr "Неможливо перевірити оновлення. Спробу
 msgid "Unable to copy to the clipboard"
 msgstr "Не вдалося скопіювати в буфер обміну"
 
-#: ..\..\Ui\AboutDialog.cs:71
+#: ..\..\Ui\AboutDialog.cs:105
 msgid "Unable to copy to the clipboard."
 msgstr "Не вдалося скопіювати в буфер обміну."
 
-#: ..\..\Ui\AboutDialog.cs:61 ..\..\Ui\MainWindow.Links.cs:82
+#: ..\..\Ui\AboutDialog.cs:63 ..\..\Ui\AboutDialog.cs:93
+#: ..\..\Ui\MainWindow.Links.cs:82
 #, csharp-format
 msgid "Unable to open {0}"
 msgstr "Не вдалося відкрити {0}"
 
-#: ..\..\Cli\CliRunner.cs:426 ..\..\Ui\MainWindow.Opening.cs:50
+#: ..\..\Cli\CliRunner.cs:433 ..\..\Ui\MainWindow.Opening.cs:50
 #: ..\..\Ui\MainWindow.Opening.cs:131
 #, csharp-format
 msgid "Unable to open {0}: {1}"
@@ -1301,8 +1319,8 @@ msgstr "Не вдалося зберегти файл у {0}: {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "Не вдалося запустити перегляд документа: {0}"
 
-#: ..\..\Cli\CliRunner.cs:297 ..\..\Cli\CliRunner.cs:502
-#: ..\..\Ui\MainWindow.Commands.cs:287
+#: ..\..\Ui\MainWindow.Commands.cs:287 ..\..\Cli\CliRunner.cs:304
+#: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"
 msgstr "Не вдалося записати {0}: {1}"
@@ -1370,12 +1388,12 @@ msgstr "Посібник користувача"
 msgid "User note"
 msgstr "Нотатка користувача"
 
-#: ..\..\Ui\AboutDialog.cs:28
+#: ..\..\Ui\AboutDialog.cs:29
 #, csharp-format
 msgid "Version {0}"
 msgstr "Версія {0}"
 
-#: ..\..\Cli\CliRunner.cs:433
+#: ..\..\Cli\CliRunner.cs:440
 #, csharp-format
 msgid ""
 "Warning: {0} is in {1} but has an invalid byte on line {2}, which shows as a "
@@ -1384,7 +1402,7 @@ msgstr ""
 "Попередження: файл {0} у кодуванні {1}, але в рядку {2} є недопустимий байт, "
 "його показано символом заміни."
 
-#: ..\..\Cli\CliRunner.cs:438
+#: ..\..\Cli\CliRunner.cs:445
 #, csharp-format
 msgid ""
 "Warning: the encoding of {0} could not be recognized; what could not be "
@@ -1393,7 +1411,7 @@ msgstr ""
 "Попередження: не вдалося розпізнати кодування {0}; те, що не вдалося "
 "декодувати, показано символами заміни."
 
-#: ..\..\Cli\CliRunner.cs:458
+#: ..\..\Cli\CliRunner.cs:466
 #, csharp-format
 msgid ""
 "Warning: the note on line {0} has no closing marker, so it runs to the end "
@@ -1406,7 +1424,7 @@ msgstr ""
 msgid "WebView2 Runtime not found"
 msgstr "Середовище виконання WebView2 не знайдено"
 
-#: ..\..\Cli\CliRunner.cs:179
+#: ..\..\Cli\CliRunner.cs:186
 msgid "Write to this file (UTF-8 without BOM) instead of the standard output"
 msgstr "Записати в цей файл (UTF-8 без BOM) замість стандартного виводу"
 

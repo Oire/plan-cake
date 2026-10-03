@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-03 14:45:14+0200\n"
+"POT-Creation-Date: 2026-10-03 15:01:50+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: fr\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: GetText.NET Extractor\n"
 
-#: ..\..\Cli\CliRunner.cs:385
+#: ..\..\Cli\CliRunner.cs:392
 msgid "--single-token and --close-marker cannot be used together."
 msgstr ""
 "--single-token et --close-marker ne peuvent pas être utilisés ensemble."
@@ -23,7 +23,7 @@ msgstr ""
 msgid "{0} - {1}"
 msgstr "{0} - {1}"
 
-#: ..\..\Cli\CliRunner.cs:407 ..\..\Ui\MainWindow.Opening.cs:57
+#: ..\..\Cli\CliRunner.cs:414 ..\..\Ui\MainWindow.Opening.cs:57
 #, csharp-format
 msgid "{0} is a folder, not a file."
 msgstr "{0} est un dossier, pas un fichier."
@@ -42,12 +42,12 @@ msgstr ""
 "{0} n'existe plus : il a été supprimé, renommé ou déplacé. Les notes ne "
 "peuvent pas être modifiées tant qu'il n'est pas revenu."
 
-#: ..\..\Cli\CliRunner.cs:329
+#: ..\..\Cli\CliRunner.cs:336
 #, csharp-format
 msgid "{0} is not a language code."
 msgstr "{0} n'est pas un code de langue."
 
-#: ..\..\Cli\CliRunner.cs:280
+#: ..\..\Cli\CliRunner.cs:287
 #, csharp-format
 msgid ""
 "{0} is not in UTF-8 but in {1}, and it could not be converted, so PlanCake "
@@ -56,7 +56,7 @@ msgstr ""
 "{0} n'est pas en UTF-8 mais en {1}, et n'a pas pu être converti, donc "
 "PlanCake ne le modifie pas."
 
-#: ..\..\Cli\CliRunner.cs:287
+#: ..\..\Cli\CliRunner.cs:294
 #, csharp-format
 msgid ""
 "{0} is not in UTF-8 but in {1}, so PlanCake does not change it. To convert "
@@ -72,7 +72,7 @@ msgstr ""
 msgid "{0} no longer exists and was removed from the history."
 msgstr "{0} n'existe plus et a été retiré de l'historique."
 
-#: ..\..\Cli\CliRunner.cs:229
+#: ..\..\Cli\CliRunner.cs:236
 #, csharp-format
 msgid "{0} note"
 msgid_plural "{0} notes"
@@ -103,7 +103,7 @@ msgstr "&Ajouter une note..."
 msgid "&Back"
 msgstr "&Précédent"
 
-#: ..\..\Ui\OpeningDialog.Designer.cs:66 ..\..\Ui\NoteDialog.Designer.cs:98
+#: ..\..\Ui\NoteDialog.Designer.cs:98 ..\..\Ui\OpeningDialog.Designer.cs:66
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:70
 #: ..\..\Ui\SettingsDialog.Designer.cs:379
 msgid "&Cancel"
@@ -121,7 +121,7 @@ msgstr "&Fermer"
 msgid "&Copy block text"
 msgstr "&Copier le texte du bloc"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:118
+#: ..\..\Ui\AboutDialog.Designer.cs:135
 msgid "&Copy info"
 msgstr "&Copier les infos"
 
@@ -129,8 +129,8 @@ msgstr "&Copier les infos"
 msgid "&Delete all notes"
 msgstr "&Supprimer toutes les notes"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:82 ..\..\Ui\MainWindow.Notes.cs:264
-#: ..\..\Ui\MainWindow.Menu.cs:82
+#: ..\..\Ui\MainWindow.Menu.cs:82 ..\..\Ui\MainWindow.Notes.cs:264
+#: ..\..\Ui\MainWindow.NotesList.cs:82
 msgid "&Delete note"
 msgstr "&Supprimer la note"
 
@@ -146,8 +146,8 @@ msgstr "Langue du &document :"
 msgid "&Edit"
 msgstr "É&dition"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:81 ..\..\Ui\MainWindow.Notes.cs:260
-#: ..\..\Ui\MainWindow.Menu.cs:81
+#: ..\..\Ui\MainWindow.Menu.cs:81 ..\..\Ui\MainWindow.Notes.cs:260
+#: ..\..\Ui\MainWindow.NotesList.cs:81
 msgid "&Edit note..."
 msgstr "&Modifier la note..."
 
@@ -179,6 +179,10 @@ msgstr "Langue de l'&interface :"
 msgid "&Keyboard shortcuts"
 msgstr "&Raccourcis clavier"
 
+#: ..\..\Ui\AboutDialog.Designer.cs:143
+msgid "&Licenses"
+msgstr "&Licences"
+
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:48
 msgid "&Link:"
 msgstr "&Lien :"
@@ -199,7 +203,7 @@ msgstr "&Notes"
 msgid "&Notes list"
 msgstr "&Liste des notes"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:138 ..\..\Ui\NoteDialog.Designer.cs:92
+#: ..\..\Ui\AboutDialog.Designer.cs:163 ..\..\Ui\NoteDialog.Designer.cs:92
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:64
 #: ..\..\Ui\SettingsDialog.Designer.cs:373
 msgid "&OK"
@@ -279,7 +283,7 @@ msgstr ""
 "fermé, et ne compterait donc pas comme une note. Fermez d'abord le bloc de "
 "code dans un éditeur."
 
-#: ..\..\Cli\CliRunner.cs:366
+#: ..\..\Cli\CliRunner.cs:373
 msgid "A note has no closing marker and ends with its line"
 msgstr "Une note n'a pas de marqueur de fermeture et se termine avec sa ligne"
 
@@ -289,7 +293,7 @@ msgstr ""
 "Une note n'a pas de marqueur de fermeture, elle s'étend donc jusqu'à la fin "
 "du fichier."
 
-#: ..\..\Ui\AboutDialog.cs:25 ..\..\Ui\HostCommands.cs:130
+#: ..\..\Ui\AboutDialog.cs:26 ..\..\Ui\HostCommands.cs:130
 msgid "About PlanCake"
 msgstr "À propos de PlanCake"
 
@@ -381,7 +385,7 @@ msgstr "Commande"
 msgid "Con&vert to UTF-8 on opening"
 msgstr "&Convertir en UTF-8 à l'ouverture"
 
-#: ..\..\Cli\CliRunner.cs:240
+#: ..\..\Cli\CliRunner.cs:247
 msgid ""
 "Convert a file that is not UTF-8 to UTF-8 (without BOM), whatever the "
 "settings say"
@@ -389,7 +393,7 @@ msgstr ""
 "Convertir en UTF-8 (sans BOM) un fichier qui n'est pas en UTF-8, quels que "
 "soient les paramètres"
 
-#: ..\..\Ui\AboutDialog.cs:68
+#: ..\..\Ui\AboutDialog.cs:102
 msgid "Copied"
 msgstr "Copié"
 
@@ -463,12 +467,13 @@ msgstr "Entrée"
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr "Entrée dans la boîte de dialo&gue de note ({0} fait l'inverse) :"
 
-#: ..\..\Ui\AboutDialog.cs:61 ..\..\Ui\MainWindow.cs:233 ..\..\Program.cs:107
-#: ..\..\Program.cs:144 ..\..\Program.cs:150 ..\..\Ui\MainWindow.cs:319
+#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Program.cs:150
+#: ..\..\Ui\AboutDialog.cs:63 ..\..\Ui\AboutDialog.cs:93
+#: ..\..\Ui\MainWindow.cs:233 ..\..\Ui\MainWindow.cs:319
 msgid "Error"
 msgstr "Erreur"
 
-#: ..\..\Program.cs:183 ..\..\Cli\CliRunner.cs:163
+#: ..\..\Program.cs:183 ..\..\Cli\CliRunner.cs:170
 #: ..\..\Ui\SettingsDialog.cs:153
 #, csharp-format
 msgid "Error: {0}"
@@ -482,11 +487,17 @@ msgstr "Tous les 3 jours"
 msgid "Exit"
 msgstr "Quitter"
 
+#: ..\..\Cli\CliRunner.cs:74
+msgid ""
+"Exit codes: 0 when the command succeeds, 1 on an error, 3 when \"check\" "
+"finds notes."
+msgstr "Codes de sortie : 0 si la commande réussit, 1 en cas d’erreur, 3 si « check » trouve des notes."
+
 #: ..\..\Ui\MainWindow.Menu.cs:26
 msgid "Export &notes..."
 msgstr "&Exporter les notes..."
 
-#: ..\..\Cli\CliRunner.cs:320
+#: ..\..\Cli\CliRunner.cs:327
 msgid "Export a file as standalone HTML with its notes"
 msgstr "Exporter un fichier en HTML autonome avec ses notes"
 
@@ -556,8 +567,8 @@ msgstr "Lien non valide"
 msgid "JSON files"
 msgstr "Fichiers JSON"
 
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:46 ..\..\Ui\ShortcutsDialog.cs:27
-#: ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.cs:27 ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:46
 msgid "Keyboard shortcuts"
 msgstr "Raccourcis clavier"
 
@@ -569,7 +580,7 @@ msgstr "Flèche gauche"
 msgid "Lines"
 msgstr "Lignes"
 
-#: ..\..\Cli\CliRunner.cs:182
+#: ..\..\Cli\CliRunner.cs:189
 msgid "List the notes of a file with the blocks they follow"
 msgstr "Lister les notes d'un fichier avec les blocs qu'elles suivent"
 
@@ -700,7 +711,7 @@ msgstr "Rien à rétablir"
 msgid "Nothing to undo"
 msgstr "Rien à annuler"
 
-#: ..\..\Cli\CliRunner.cs:274
+#: ..\..\Cli\CliRunner.cs:281
 msgid ""
 "Nothing was removed: a note without a closing marker would take the rest of "
 "the file with it. Add the closing marker first."
@@ -793,7 +804,7 @@ msgstr "Ouverture d'un fichier"
 msgid "Opens the context menu"
 msgstr "Ouvre le menu contextuel"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:68
+#: ..\..\Ui\AboutDialog.Designer.cs:71
 msgid "PlanCake"
 msgstr "PlanCake"
 
@@ -831,11 +842,11 @@ msgstr ""
 "PlanCake a besoin du Runtime Microsoft Edge WebView2, qui n'est pas installé "
 "sur cet ordinateur."
 
-#: ..\..\Ui\AboutDialog.Designer.cs:108
+#: ..\..\Ui\AboutDialog.Designer.cs:111
 msgid "PlanCake on GitHub"
 msgstr "PlanCake sur GitHub"
 
-#: ..\..\Cli\CliRunner.cs:68
+#: ..\..\Cli\CliRunner.cs:72
 msgid ""
 "PlanCake: read Markdown files comfortably and leave notes right where they "
 "belong. Without a command, \"plancake [file]\" opens the window, with the "
@@ -869,12 +880,12 @@ msgstr "Bloc précédent"
 msgid "Previous note"
 msgstr "Note précédente"
 
-#: ..\..\Cli\CliRunner.cs:214
+#: ..\..\Cli\CliRunner.cs:221
 msgid "Print how many notes a file has; exit code 3 when it has any"
 msgstr ""
 "Afficher le nombre de notes d'un fichier ; code de sortie 3 s'il en contient"
 
-#: ..\..\Cli\CliRunner.cs:177
+#: ..\..\Cli\CliRunner.cs:184
 msgid "Print the notes as JSON"
 msgstr "Afficher les notes au format JSON"
 
@@ -882,7 +893,7 @@ msgstr "Afficher les notes au format JSON"
 msgid "R&eset zoom"
 msgstr "Réinitiali&ser le zoom"
 
-#: ..\..\Ui\AboutDialog.Designer.cs:78
+#: ..\..\Ui\AboutDialog.Designer.cs:81
 msgid "Read Markdown files comfortably and leave notes right where they belong"
 msgstr ""
 "Lire des fichiers Markdown confortablement et laisser des notes exactement "
@@ -928,11 +939,11 @@ msgstr "Le recharger"
 msgid "Reload the file"
 msgstr "Recharger le fichier"
 
-#: ..\..\Cli\CliRunner.cs:243
+#: ..\..\Cli\CliRunner.cs:250
 msgid "Remove every note from a file"
 msgstr "Supprimer toutes les notes d'un fichier"
 
-#: ..\..\Cli\CliRunner.cs:302
+#: ..\..\Cli\CliRunner.cs:309
 #, csharp-format
 msgid "Removed {0} note"
 msgid_plural "Removed {0} notes"
@@ -1038,7 +1049,7 @@ msgstr "Échec du téléchargement : le serveur a répondu {0} {1}."
 msgid "The download took longer than {0} seconds and was stopped."
 msgstr "Le téléchargement a duré plus de {0} secondes et a été arrêté."
 
-#: ..\..\Cli\CliRunner.cs:266
+#: ..\..\Cli\CliRunner.cs:273
 #, csharp-format
 msgid ""
 "The encoding of {0} could not be recognized, so PlanCake never changes it."
@@ -1054,7 +1065,7 @@ msgstr ""
 "L'encodage de ce fichier n'a pas pu être reconnu : il a donc été ouvert en "
 "lecture seule et ne sera jamais modifié. Impossible d'y ajouter des notes."
 
-#: ..\..\Cli\CliRunner.cs:420 ..\..\Ui\MainWindow.Opening.cs:125
+#: ..\..\Cli\CliRunner.cs:427 ..\..\Ui\MainWindow.Opening.cs:125
 #, csharp-format
 msgid "The file {0} does not exist."
 msgstr "Le fichier {0} n'existe pas."
@@ -1082,7 +1093,7 @@ msgstr "Le fichier a changé. Veuillez réessayer."
 msgid "The file is larger than {0} MB, the most PlanCake downloads."
 msgstr "Le fichier dépasse {0} Mo, la taille maximale que PlanCake télécharge."
 
-#: ..\..\Cli\CliRunner.cs:256 ..\..\Ui\MainWindow.Opening.cs:231
+#: ..\..\Cli\CliRunner.cs:263 ..\..\Ui\MainWindow.Opening.cs:231
 #, csharp-format
 msgid "The file was converted from {0} to UTF-8."
 msgstr "Le fichier a été converti de {0} en UTF-8."
@@ -1091,11 +1102,11 @@ msgstr "Le fichier a été converti de {0} en UTF-8."
 msgid "The file was not reloaded. Press F5 to reload it."
 msgstr "Le fichier n'a pas été rechargé. Appuyez sur F5 pour le recharger."
 
-#: ..\..\Cli\CliRunner.cs:313
+#: ..\..\Cli\CliRunner.cs:320
 msgid "The HTML file to write"
 msgstr "Le fichier HTML à écrire"
 
-#: ..\..\Cli\CliRunner.cs:317
+#: ..\..\Cli\CliRunner.cs:324
 msgid ""
 "The language of the document, such as en or fr (default: the document "
 "language in the settings)"
@@ -1114,27 +1125,27 @@ msgstr ""
 msgid "The link target does not exist: {0}"
 msgstr "La cible du lien n'existe pas : {0}"
 
-#: ..\..\Cli\CliRunner.cs:212
+#: ..\..\Cli\CliRunner.cs:219
 msgid "The Markdown file to check for notes"
 msgstr "Le fichier Markdown dans lequel rechercher des notes"
 
-#: ..\..\Cli\CliRunner.cs:311
+#: ..\..\Cli\CliRunner.cs:318
 msgid "The Markdown file to export"
 msgstr "Le fichier Markdown à exporter"
 
-#: ..\..\Cli\CliRunner.cs:176
+#: ..\..\Cli\CliRunner.cs:183
 msgid "The Markdown file to list the notes of"
 msgstr "Le fichier Markdown dont lister les notes"
 
-#: ..\..\Cli\CliRunner.cs:238
+#: ..\..\Cli\CliRunner.cs:245
 msgid "The Markdown file to remove every note from"
 msgstr "Le fichier Markdown dont supprimer toutes les notes"
 
-#: ..\..\Cli\CliRunner.cs:362
+#: ..\..\Cli\CliRunner.cs:369
 msgid "The marker a note ends with (default: the one in the settings)"
 msgstr "Le marqueur qui termine une note (par défaut : celui des paramètres)"
 
-#: ..\..\Cli\CliRunner.cs:358
+#: ..\..\Cli\CliRunner.cs:365
 msgid "The marker a note starts with (default: the one in the settings)"
 msgstr "Le marqueur qui commence une note (par défaut : celui des paramètres)"
 
@@ -1190,13 +1201,13 @@ msgstr ""
 msgid "The opening marker cannot be empty."
 msgstr "Le marqueur d'ouverture ne peut pas être vide."
 
-#: ..\..\Cli\CliRunner.cs:196 ..\..\Cli\CliRunner.cs:340
+#: ..\..\Cli\CliRunner.cs:203 ..\..\Cli\CliRunner.cs:347
 #, csharp-format
 msgid "The output file cannot be the file itself: {0}"
 msgstr "Le fichier de sortie ne peut pas être le fichier lui-même : {0}"
 
-#: ..\..\Ui\MainWindow.Settings.cs:34 ..\..\Ui\MainWindow.Settings.cs:152
-#: ..\..\Ui\MainWindow.NotesList.cs:182
+#: ..\..\Ui\MainWindow.Settings.cs:34 ..\..\Ui\MainWindow.NotesList.cs:182
+#: ..\..\Ui\MainWindow.Settings.cs:152
 msgid "The settings could not be saved. They apply until PlanCake is closed."
 msgstr ""
 "Impossible d'enregistrer les paramètres. Ils s'appliquent jusqu'à la "
@@ -1209,6 +1220,12 @@ msgstr "Le début du document"
 #: ..\..\Ui\MainWindow.Commands.cs:364
 msgid "The user manual could not be found."
 msgstr "Le manuel utilisateur est introuvable."
+
+#: ..\..\Cli\CliRunner.cs:75
+msgid ""
+"The user manual describes every command: press F1 in the window, or open "
+"help\\<language>\\manual.html in the folder of plancake.exe."
+msgstr "Le manuel utilisateur décrit chaque commande : appuyez sur F1 dans la fenêtre, ou ouvrez help\\<langue>\\manual.html dans le dossier de plancake.exe."
 
 #: ..\..\Notes\NoteActionRunner.cs:179 ..\..\Ui\MainWindow.Notes.cs:344
 msgid "There are no notes to delete."
@@ -1276,16 +1293,17 @@ msgstr "Impossible de vérifier les mises à jour. Veuillez réessayer plus tard
 msgid "Unable to copy to the clipboard"
 msgstr "Impossible de copier dans le presse-papiers"
 
-#: ..\..\Ui\AboutDialog.cs:71
+#: ..\..\Ui\AboutDialog.cs:105
 msgid "Unable to copy to the clipboard."
 msgstr "Impossible de copier dans le presse-papiers."
 
-#: ..\..\Ui\AboutDialog.cs:61 ..\..\Ui\MainWindow.Links.cs:82
+#: ..\..\Ui\AboutDialog.cs:63 ..\..\Ui\AboutDialog.cs:93
+#: ..\..\Ui\MainWindow.Links.cs:82
 #, csharp-format
 msgid "Unable to open {0}"
 msgstr "Impossible d'ouvrir {0}"
 
-#: ..\..\Cli\CliRunner.cs:426 ..\..\Ui\MainWindow.Opening.cs:50
+#: ..\..\Cli\CliRunner.cs:433 ..\..\Ui\MainWindow.Opening.cs:50
 #: ..\..\Ui\MainWindow.Opening.cs:131
 #, csharp-format
 msgid "Unable to open {0}: {1}"
@@ -1310,8 +1328,8 @@ msgstr "Impossible d'enregistrer le fichier dans {0} : {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "Impossible de démarrer l'affichage du document : {0}"
 
-#: ..\..\Cli\CliRunner.cs:297 ..\..\Cli\CliRunner.cs:502
-#: ..\..\Ui\MainWindow.Commands.cs:287
+#: ..\..\Ui\MainWindow.Commands.cs:287 ..\..\Cli\CliRunner.cs:304
+#: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"
 msgstr "Impossible d'écrire {0} : {1}"
@@ -1381,12 +1399,12 @@ msgstr "Manuel utilisateur"
 msgid "User note"
 msgstr "Note de l'utilisateur"
 
-#: ..\..\Ui\AboutDialog.cs:28
+#: ..\..\Ui\AboutDialog.cs:29
 #, csharp-format
 msgid "Version {0}"
 msgstr "Version {0}"
 
-#: ..\..\Cli\CliRunner.cs:433
+#: ..\..\Cli\CliRunner.cs:440
 #, csharp-format
 msgid ""
 "Warning: {0} is in {1} but has an invalid byte on line {2}, which shows as a "
@@ -1395,7 +1413,7 @@ msgstr ""
 "Avertissement : {0} est en {1} mais contient un octet invalide à la ligne "
 "{2}, qui s'affiche sous forme de caractère de remplacement."
 
-#: ..\..\Cli\CliRunner.cs:438
+#: ..\..\Cli\CliRunner.cs:445
 #, csharp-format
 msgid ""
 "Warning: the encoding of {0} could not be recognized; what could not be "
@@ -1404,7 +1422,7 @@ msgstr ""
 "Avertissement : l'encodage de {0} n'a pas pu être reconnu ; ce qui n'a pas "
 "pu être décodé s'affiche sous forme de caractères de remplacement."
 
-#: ..\..\Cli\CliRunner.cs:458
+#: ..\..\Cli\CliRunner.cs:466
 #, csharp-format
 msgid ""
 "Warning: the note on line {0} has no closing marker, so it runs to the end "
@@ -1417,7 +1435,7 @@ msgstr ""
 msgid "WebView2 Runtime not found"
 msgstr "Runtime WebView2 introuvable"
 
-#: ..\..\Cli\CliRunner.cs:179
+#: ..\..\Cli\CliRunner.cs:186
 msgid "Write to this file (UTF-8 without BOM) instead of the standard output"
 msgstr "Écrire dans ce fichier (UTF-8 sans BOM) au lieu de la sortie standard"
 

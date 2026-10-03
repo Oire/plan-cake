@@ -66,7 +66,8 @@ LicenseFile=..\LICENSE
 ; Privileges: the install folder is under Program Files and the PATH entry is machine-wide.
 PrivilegesRequired=admin
 DisableProgramGroupPage=yes
-DisableReadyPage=yes
+; The Ready to Install page stays: it lists the .NET and WebView2 runtimes Setup is about to
+; download (CodeDependencies.iss, UpdateReadyMemo), and its button is the one that says Install.
 
 ; {app} goes on the machine PATH (see [Registry]); tell running programs to reload it.
 ChangesEnvironment=yes
@@ -88,15 +89,20 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 ; The same set Build-Installer.ps1 puts in the portable zip ($ShippedItems there). The single-file
 ; publish leaves these beside the exe: WebView2Loader.dll (the native loader, which a single-file
-; bundle cannot hold), the page WebView2 shows, the user manual and the compiled catalogs.
+; bundle cannot hold), the page WebView2 shows, the user manual, the compiled catalogs, and
+; PlanCake's license and the third-party notices (Help > About > Licenses opens them).
 Source: "{#SourcePath}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\THIRD-PARTY-NOTICES.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}\web\*"; DestDir: "{app}\web"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#SourcePath}\help\*"; DestDir: "{app}\help"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#SourcePath}\locale\*.mo"; DestDir: "{app}\locale"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Comment: "{cm:AppDescription}"
+; The manual in the language Setup ran in: the [Languages] names are the help\<code> folders.
+Name: "{group}\{cm:ManualShortcut}"; Filename: "{app}\help\{language}\manual.html"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Comment: "{cm:AppDescription}"; Tasks: desktopicon
 
@@ -206,6 +212,11 @@ begin
     // Settings and logs (App.DataFolder, roaming) and the WebView2 working files
     // (App.WebView2DataFolder, local). A silent uninstall (winget) keeps them:
     // SuppressibleMsgBox answers No without asking.
+    // {userappdata} and {localappdata} are the folders of the account the uninstaller runs
+    // as. When a standard user uninstalls with an administrator's password, that is the
+    // administrator: the question is not asked and the user's own folders stay. Inno Setup
+    // offers no way to reach the original user here (ExecAsOriginalUser does not work at
+    // uninstall time), so the manuals tell such a user to delete the folders by hand.
     UserDataPath := ExpandConstant('{userappdata}\{#MyAppCompany}\{#MyAppFolderName}');
     LocalDataPath := ExpandConstant('{localappdata}\{#MyAppCompany}\{#MyAppFolderName}');
     if DirExists(UserDataPath) or DirExists(LocalDataPath) then begin
@@ -219,14 +230,4 @@ begin
       end;
     end;
   end;
-end;
-
-procedure CurPageChanged(CurPageID: Integer);
-begin
-  if CurPageID in [wpSelectProgramGroup, wpReady] then
-    WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall)
-  else if CurPageID = wpFinished then
-    WizardForm.NextButton.Caption := SetupMessage(msgButtonFinish)
-  else
-    WizardForm.NextButton.Caption := SetupMessage(msgButtonNext);
 end;

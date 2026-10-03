@@ -75,6 +75,13 @@ public partial class PageSecurityPolicyTests {
     }
 
     [Fact]
+    public void ExportPolicy_ShowsPicturesFromTheWebAndInsideTheFileOnly() {
+        // Local pictures are embedded as data: URIs (ExportImages); file: would let raw HTML in
+        // a plan make the browser reach another computer's share.
+        ExportPolicy()["img-src"].Should().BeEquivalentTo("https:", "http:", "data:");
+    }
+
+    [Fact]
     public void ExportPolicy_KeepsFormsAndTheBaseUrlLockedDown() {
         var policy = ExportPolicy();
 

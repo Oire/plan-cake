@@ -8,7 +8,10 @@ tag-prefix: '[vV]'
 next-version: 'v1.0.0'
 
 # Fourth field is the commit distance from the version source, so every build off the same
-# tag is distinguishable without hand-editing a version anywhere.
+# tag is distinguishable without hand-editing a version anywhere. The version source is the
+# three-part tag that opened the cycle (v1.0.0). A four-part release tag (v1.0.0.7) marks the
+# commit that was released and changes nothing here: GitVersion does not count from it, so the
+# commits after it go on from 1.0.0.8 until the next cycle's tag (see "Releasing" in CLAUDE.md).
 assembly-versioning-format: '{Major}.{Minor}.{Patch}.{VersionSourceDistance}'
 assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{VersionSourceDistance}'
 assembly-informational-format: '{Major}.{Minor}.{Patch}.{VersionSourceDistance}'
