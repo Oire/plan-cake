@@ -536,7 +536,7 @@ footer {
 <pre dir="ltr"><code>Back up the database before you run the migration.
 [usernote]Also back up the uploads folder.[/usernote]</code></pre>
 <p>מי שפותח את הקובץ בעורך טקסט, וכל כלי שקורא אותו, רואה את ההערות שלכם. תוכלו אפילו לכתוב הערות ביד באותה צורה, ו-PlanCake יציג אותן כמו שלו. כדי להשתמש בסמנים שונים, ראו <a href="#settings-notes">הגדרות ההערות</a>.</p>
-<p>סמנים בתוך קוד אינם הערות: בין גרשים הפוכים, כמו ב-<code dir="ltr">`[usernote]`</code>, או בתוך בלוק קוד. תוכנית או מדריך שמציגים את הסמנים כדוגמה שומרים עליהם כפי שהם, והחלון והפקודות לא נוגעים בהם. PlanCake עצמו לעולם לא כותב הערה בתוך קוד: הערה על בלוק קוד נכתבת בשורה שאחריו.</p>
+<p>סמנים בתוך קוד אינם הערות: בין גרשים הפוכים, כמו ב-<code dir="ltr">`[usernote]`</code>, או בתוך בלוק קוד. גם סמנים בתוך HTML גולמי אינם הערות: בין <code dir="ltr">&lt;!--</code> ל-<code dir="ltr">--&gt;</code>, או בתוך בלוק <code dir="ltr">&lt;pre&gt;</code>, <code dir="ltr">&lt;script&gt;</code>, <code dir="ltr">&lt;style&gt;</code> או <code dir="ltr">&lt;textarea&gt;</code>, מהתג הפותח ועד התג הסוגר. אם ההגדרה <strong>סמן פתיחה</strong> מתחילה בעצמה ב-<code dir="ltr">&lt;!--</code>, סמנים בין <code dir="ltr">&lt;!--</code> ל-<code dir="ltr">--&gt;</code> עדיין נחשבים להערות. תוכנית או מדריך שמציגים את הסמנים כדוגמה שומרים עליהם כפי שהם, והחלון והפקודות לא נוגעים בהם. PlanCake עצמו לעולם לא כותב הערה בתוך קוד: הערה על בלוק קוד נכתבת בשורה שאחריו.</p>
 
 <h3 id="copy-block">העתקת הטקסט של בלוק</h3>
 <p>כדי להעתיק פסקה, פריט רשימה או בלוק אחר בלי סימני הפיסוק של Markdown שלו, לחצו לחיצה ימנית עליו, או הקישו את <kbd dir="ltr">מקש יישומים</kbd> או <kbd dir="ltr">Shift+F10</kbd> עליו, ובחרו <strong>העתק טקסט של הבלוק</strong>. שורת המצב אומרת „טקסט הבלוק הועתק”.</p>

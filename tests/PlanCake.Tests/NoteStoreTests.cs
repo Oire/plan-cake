@@ -132,6 +132,19 @@ public class NoteStoreTests: IDisposable {
     }
 
     [Theory]
+    [InlineData("Para.\n<pre>\n[usernote]example[/usernote]\n</pre>\n", "Para.\n[usernote]Real note[/usernote]\n<pre>\n[usernote]example[/usernote]\n</pre>\n")]
+    [InlineData("<!--\n[usernote]example[/usernote]\n-->\nPara.\n", "<!--\n[usernote]example[/usernote]\n-->\nPara.\n[usernote]Real note[/usernote]\n")]
+    [InlineData("<pre>\nx\n</pre>\nPara.\n\nNext.\n", "<pre>\nx\n</pre>\nPara.\n[usernote]Real note[/usernote]\n\nNext.\n")]
+    public void Add_NextToARawHtmlBlockShowingAMarker_IsFoundAndTheMarkerInTheHtmlIsNot(string text, string expected) {
+        var store = Store(text);
+
+        AddAfter(store, BlockKind.Paragraph, "Real note");
+
+        OnDisk.Should().Be(expected);
+        Render(OnDisk).Notes.Should().ContainSingle().Which.Note.Text.Should().Be("Real note");
+    }
+
+    [Theory]
     [InlineData("Example:\n\n    code\n    more\n\nAfter.\n", "Example:\n\n    code\n    more\n    [usernote]Why?[/usernote]\n\nAfter.\n")]
     [InlineData("Example:\n\n    code\n\n    more\n", "Example:\n\n    code\n\n    more\n    [usernote]Why?[/usernote]\n")]
     [InlineData("- item\n\n        code\n", "- item\n\n        code\n        [usernote]Why?[/usernote]\n")]

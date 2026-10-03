@@ -127,6 +127,72 @@ public class MarkdownFileTests: IDisposable {
     }
 
     [Fact]
+    public void OpenWithoutConverting_Windows1251_LeavesTheFileUntilConvertToUtf8() {
+        var bytes = _windows1251.GetBytes("# План\r\nТекст\r\n");
+        var path = WriteBytes(bytes);
+
+        var file = MarkdownFile.OpenWithoutConverting(path, Options(convert: true));
+
+        file.Text.Should().Be("# План\r\nТекст\r\n");
+        file.IsReadOnly.Should().BeTrue();
+        file.ConvertedFrom.Should().BeNull();
+        file.NeedsConversion.Should().BeTrue();
+        File.ReadAllBytes(path).Should().Equal(bytes);
+
+        file.ConvertToUtf8().Should().Be("# План\r\nТекст\r\n");
+
+        file.IsReadOnly.Should().BeFalse();
+        file.ConvertedFrom!.CodePage.Should().Be(1251);
+        file.NeedsConversion.Should().BeFalse();
+        File.ReadAllBytes(path).Should().Equal(Utf8("# План\r\nТекст\r\n"));
+    }
+
+    [Fact]
+    public void ConvertToUtf8_AfterAChangeOnDisk_ConvertsWhatTheFileHoldsNow() {
+        var path = WriteBytes(_windows1251.GetBytes("# План\n"));
+        var file = MarkdownFile.OpenWithoutConverting(path, Options(convert: true));
+        File.WriteAllBytes(path, _windows1251.GetBytes("# План\nНовая строка\n"));
+
+        file.ConvertToUtf8().Should().Be("# План\nНовая строка\n");
+
+        file.Text.Should().Be("# План\nНовая строка\n");
+        File.ReadAllBytes(path).Should().Equal(Utf8("# План\nНовая строка\n"));
+    }
+
+    [Fact]
+    public void ConvertToUtf8_WhenTheOptionsDoNotConvert_LeavesTheFileReadOnly() {
+        var bytes = _windows1251.GetBytes("# План\n");
+        var path = WriteBytes(bytes);
+        var file = MarkdownFile.OpenWithoutConverting(path, Options());
+
+        file.NeedsConversion.Should().BeFalse();
+        file.ConvertToUtf8().Should().Be("# План\n");
+
+        file.IsReadOnly.Should().BeTrue();
+        File.ReadAllBytes(path).Should().Equal(bytes);
+    }
+
+    [Fact]
+    public void ConvertToUtf8_Utf8File_NeedsNoConversion() {
+        var path = WriteBytes(Utf8("# Plan\n"));
+        var file = MarkdownFile.OpenWithoutConverting(path, Options(convert: true));
+
+        file.NeedsConversion.Should().BeFalse();
+        file.IsReadOnly.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Reload_AfterOpenWithoutConverting_FollowsTheOptions() {
+        var path = WriteBytes(_windows1251.GetBytes("# План\n"));
+        var file = MarkdownFile.OpenWithoutConverting(path, Options(convert: true));
+
+        file.Reload();
+
+        file.ConvertedFrom!.CodePage.Should().Be(1251);
+        File.ReadAllBytes(path).Should().Equal(Utf8("# План\n"));
+    }
+
+    [Fact]
     public void Write_LeavesNoTemporaryFileBehind() {
         var path = WriteBytes(Utf8("a\n"));
         var file = MarkdownFile.Open(path, Options());

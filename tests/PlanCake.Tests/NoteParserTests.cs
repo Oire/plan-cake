@@ -338,6 +338,115 @@ public class NoteParserTests {
         Parse(source).Notes.Should().ContainSingle().Which.Text.Should().Be("on b");
     }
 
+    // Raw HTML blocks of CommonMark types 1 (pre, script, style, textarea) and 2 (comments).
+
+    [Theory]
+    [InlineData("<pre>\n[usernote]x[/usernote]\n</pre>\n")]
+    [InlineData("<script>\nvar a = \"[usernote]\";\nvar b = \"[/usernote]\";\n</script>\n")]
+    [InlineData("<style>\n/* [usernote]x[/usernote] */\n</style>\n")]
+    [InlineData("<TEXTAREA rows=\"3\">\n[usernote]x[/usernote]\n</textarea>\n")]
+    [InlineData("<pre>[usernote]x[/usernote]\n</pre>\n")]
+    [InlineData("<!--\n[usernote]x[/usernote]\n-->\n")]
+    [InlineData("<!-- [usernote]x[/usernote] -->\n")]
+    [InlineData("Para.\n<pre>\n\n[usernote]x[/usernote]\n</pre>\n")]
+    [InlineData("- item\n\n  <pre>\n  [usernote]x[/usernote]\n  </pre>\n")]
+    [InlineData("<!-- never closed\n[usernote]x[/usernote]\n")]
+    public void Parse_MarkerInARawHtmlBlock_IsNotANote(string source) {
+        var result = Parse(source);
+
+        result.Notes.Should().BeEmpty();
+        result.StrippedSource.Should().Be(source);
+    }
+
+    [Theory]
+    [InlineData("<pre>\ncode\n</pre>\n")]
+    [InlineData("<script>\nrun();\n</script>\n")]
+    [InlineData("<style>\np {}\n</style>\n")]
+    [InlineData("<textarea>\ntext\n</textarea>\n")]
+    [InlineData("<!--\ncomment\n-->\n")]
+    [InlineData("<!-- [usernote]shown[/usernote] -->\n")]
+    public void Parse_NoteRightAfterARawHtmlBlock_IsANote(string block) {
+        var source = block + "[usernote]after[/usernote]\nNext.\n";
+
+        var result = Parse(source);
+
+        var note = result.Notes.Should().ContainSingle().Subject;
+        note.Text.Should().Be("after");
+        note.StartLine.Should().Be(block.Count(c => c == '\n') + 1);
+        result.StrippedSource.Should().Be(block + "Next.\n");
+    }
+
+    [Theory]
+    [InlineData("\n")]
+    [InlineData("\r\n")]
+    public void Parse_RawHtmlBlocks_KeepTheLineMap(string lineEnding) {
+        var source = String.Join(lineEnding,
+            "Para.",
+            "[usernote]before[/usernote]",
+            "<pre>",
+            "[usernote]shown[/usernote]",
+            "</pre>",
+            "[usernote]after[/usernote]",
+            "<!-- [usernote]shown[/usernote]",
+            "-->",
+            "Last.",
+            ""
+        );
+
+        var result = Parse(source);
+
+        result.Notes.Select(note => note.Text).Should().Equal("before", "after");
+        result.Notes.Select(note => note.StartLine).Should().Equal(2, 6);
+        result.LineMap.Should().Equal(1, 3, 4, 5, 7, 8, 9);
+    }
+
+    [Fact]
+    public void Parse_NoteStartingTheLineOfAnHtmlTag_IsANote() {
+        // Without the note the line opens a <pre> block; in the file it does not.
+        var result = Parse("[usernote]n[/usernote]<pre>\nx\n</pre>\n");
+
+        result.Notes.Should().ContainSingle().Which.Text.Should().Be("n");
+    }
+
+    [Theory]
+    [InlineData("Use <code>[usernote]x[/usernote]</code> here.\n")]
+    [InlineData("A <!-- c --> [usernote]x[/usernote] inline.\n")]
+    [InlineData("<div>\n[usernote]x[/usernote]\n</div>\n")]
+    [InlineData("<details>\n<summary>More</summary>\n[usernote]x[/usernote]\n</details>\n")]
+    public void Parse_MarkerInInlineHtmlOrOtherHtmlBlocks_IsANote(string source) {
+        Parse(source).Notes.Should().ContainSingle().Which.Text.Should().Be("x");
+    }
+
+    [Fact]
+    public void Parse_CommentMarkers_AreNotHiddenByComments() {
+        var markers = new NoteMarkers("<!--note", "-->");
+        const string source = "Para.\n<!-- plain comment\n<!--note inside-->\n-->\n<!--note own line-->\n<pre>\n<!--note shown-->\n</pre>\n";
+
+        var result = NoteParser.Parse(source, markers);
+
+        result.Notes.Select(note => note.Text).Should().Equal("inside", "own line");
+    }
+
+    [Theory]
+    [InlineData("\n")]
+    [InlineData("\r\n")]
+    public void Parse_SingleTokenMarkersInRawHtml_AreNotNotes(string lineEnding) {
+        var source = String.Join(lineEnding,
+            "<pre>",
+            "!USERNOTE! example",
+            "</pre>",
+            "!USERNOTE! real",
+            "<!--",
+            "!USERNOTE! hidden",
+            "-->",
+            ""
+        );
+
+        var note = NoteParser.Parse(source, _singleToken).Notes.Should().ContainSingle().Subject;
+        note.Text.Should().Be("real");
+        note.StartLine.Should().Be(4);
+    }
+
     [Theory]
     [InlineData("\n")]
     [InlineData("\r\n")]

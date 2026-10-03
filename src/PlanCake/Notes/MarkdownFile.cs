@@ -136,11 +136,50 @@ internal sealed class MarkdownFile {
     }
 
     /// <summary>
+    /// Reads the file at <paramref name="path"/> without writing it, even when
+    /// <see cref="MarkdownFileOptions.ConvertToUtf8"/> says to convert it: a file read in the
+    /// background is converted only once the caller takes it, with <see cref="ConvertToUtf8"/>.
+    /// Every later <see cref="Reload"/> follows the options.
+    /// </summary>
+    /// <exception cref="IOException">The file cannot be read, even after the retries.</exception>
+    public static MarkdownFile OpenWithoutConverting(string path, MarkdownFileOptions? options = null) {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        var file = new MarkdownFile(System.IO.Path.GetFullPath(path), options ?? MarkdownFileOptions.Default);
+        file.Load(convert: false);
+
+        return file;
+    }
+
+    /// <summary>
+    /// True when the options say to convert the file and it was read without converting it
+    /// (<see cref="OpenWithoutConverting"/>), although a legacy encoding decodes it cleanly.
+    /// </summary>
+    public bool NeedsConversion => _options.ConvertToUtf8 && IsReadOnly && !IsUnrecognized && !ConversionFailed;
+
+    /// <summary>
+    /// Converts a file <see cref="OpenWithoutConverting"/> left as it was (see
+    /// <see cref="NeedsConversion"/>): reads it again and converts it as <see cref="Reload"/> does,
+    /// so what is written is what the file holds now, not what was read before. Does nothing when
+    /// it needs no conversion.
+    /// </summary>
+    /// <returns>
+    /// The file's text, which differs from <see cref="Text"/> before the call when the file changed
+    /// on disk meanwhile.
+    /// </returns>
+    /// <exception cref="IOException">The file cannot be read, even after the retries.</exception>
+    public string ConvertToUtf8() => NeedsConversion ? Reload() : Text;
+
+    /// <summary>
     /// Reads the file again, detecting its encoding and line ending afresh (converting it when it
     /// is not valid in its encoding and the options say so), and returns its text.
     /// </summary>
     /// <exception cref="IOException">The file cannot be read, even after the retries.</exception>
-    public string Reload() {
+    public string Reload() => Load(_options.ConvertToUtf8);
+
+    /// <inheritdoc cref="Reload"/>
+    /// <param name="convert">Convert a file that is not valid in its encoding to UTF-8.</param>
+    private string Load(bool convert) {
         var bytes = WithRetries(() => ReadAllBytes(Path));
         var ansi = _options.AnsiEncoding ?? _systemAnsi.Value;
         var decoded = Decode(bytes, ansi, _options.DocumentLanguage);
@@ -156,7 +195,7 @@ internal sealed class MarkdownFile {
         ConversionFailed = false;
 
         // Never a lossy decode: the replacement characters would be written over the original bytes.
-        if (decoded.IsFallback && !decoded.IsLossy && _options.ConvertToUtf8) {
+        if (decoded.IsFallback && !decoded.IsLossy && convert) {
             ConvertedFrom = decoded.Encoding;
             Encoding = new UTF8Encoding(false);
             HasBom = false;

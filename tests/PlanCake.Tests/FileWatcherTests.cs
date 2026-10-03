@@ -361,6 +361,86 @@ public class FileWatcherTests: IDisposable {
         nowhere.Start(null).Should().BeFalse();
     }
 
+    [Fact]
+    public void PlainFile_HasNoTarget() {
+        using var watcher = new FileWatcher(_path, new FakeTimer());
+
+        watcher.TargetPath.Should().BeNull();
+    }
+
+    /// <summary>
+    /// A symbolic link in the test folder to a file in a subfolder; <see langword="null"/> when
+    /// links cannot be made here (that takes Developer Mode or elevation).
+    /// </summary>
+    private string? LinkToFileInAnotherFolder(out string target) {
+        var targetFolder = Path.Combine(_folder, "real");
+        Directory.CreateDirectory(targetFolder);
+        target = Path.Combine(targetFolder, "plan.md");
+        File.WriteAllText(target, "# Plan\n\nFirst.\n", _utf8);
+        var link = Path.Combine(_folder, "link.md");
+
+        try {
+            File.CreateSymbolicLink(link, target);
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) {
+            return null;
+        }
+
+        return link;
+    }
+
+    [Fact]
+    public void SymbolicLink_EventAboutItsTarget_IsAChangeReadThroughTheLink() {
+        if (LinkToFileInAnotherFolder(out var target) is not { } link) {
+            return;
+        }
+
+        var read = new List<string>();
+        using var watcher = new FileWatcher(link, _timer, path => {
+            read.Add(path);
+
+            return FileWatcher.ReadText(path);
+        });
+        watcher.FileChanged += (_, e) => _changes.Add(e);
+        watcher.Acknowledge("# Plan\n\nFirst.\n");
+        File.WriteAllText(target, "# Plan\n\nEdited.\n", _utf8);
+
+        watcher.TargetPath.Should().Be(target);
+        watcher.OnFileSystemEvent(
+            null,
+            new FileSystemEventArgs(WatcherChangeTypes.Changed, Path.GetDirectoryName(target)!, "plan.md")
+        );
+        _timer.Fire();
+
+        _changes.Should().ContainSingle().Which.Text.Should().Be("# Plan\n\nEdited.\n");
+        read.Should().Equal(link);
+    }
+
+    [Fact]
+    public void SymbolicLink_TargetInAnotherFolder_IsWatchedThere() {
+        if (LinkToFileInAnotherFolder(out var target) is not { } link) {
+            return;
+        }
+
+        using var timer = new SignalTimer();
+        using var watcher = new FileWatcher(link, timer);
+        watcher.Start(null).Should().BeTrue();
+
+        File.WriteAllText(target, "# Plan\n\nEdited.\n", _utf8);
+
+        timer.Restarted.Wait(TimeSpan.FromSeconds(10)).Should().BeTrue();
+    }
+
+    /// <summary>A debounce timer that only signals a restart, from whatever thread made it.</summary>
+    private sealed class SignalTimer: IDebounceTimer {
+        public ManualResetEventSlim Restarted { get; } = new();
+
+        public void Restart(TimeSpan delay, Action callback) => Restarted.Set();
+
+        public void Stop() { }
+
+        public void Dispose() => Restarted.Dispose();
+    }
+
     /// <summary>A debounce timer the test fires by hand.</summary>
     private sealed class FakeTimer: IDebounceTimer {
         private Action? _pending;

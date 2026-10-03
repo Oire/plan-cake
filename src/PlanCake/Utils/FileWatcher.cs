@@ -82,6 +82,12 @@ internal sealed class UiDebounceTimer: IDebounceTimer {
 /// <remarks>
 /// A change whose text equals the text last acknowledged (<see cref="Acknowledge"/>: what the
 /// window shows, which after a note action is what PlanCake itself wrote) is ignored.
+/// <para>
+/// A symbolic link is watched at both ends: PlanCake writes the file it leads to (see
+/// <see cref="MarkdownFile"/>), and an editor that opened that file saves it under its own name and
+/// folder, so events about either path count, and the target's folder is watched too when it is
+/// another one. The file is still read through the link.
+/// </para>
 /// </remarks>
 internal sealed class FileWatcher: IDisposable {
     /// <summary>How long after the last event the file is looked at.</summary>
@@ -99,7 +105,7 @@ internal sealed class FileWatcher: IDisposable {
 
     private readonly IDebounceTimer _timer;
     private readonly Func<string, string?> _readText;
-    private FileSystemWatcher? _watcher;
+    private readonly List<FileSystemWatcher> _watchers = [];
     private string? _known;
     private bool _missing;
     private bool _disposed;
@@ -124,12 +130,19 @@ internal sealed class FileWatcher: IDisposable {
         ArgumentNullException.ThrowIfNull(timer);
 
         Path = System.IO.Path.GetFullPath(path);
+        TargetPath = FinalTarget(Path);
         _timer = timer;
         _readText = readText ?? (file => ReadText(file));
     }
 
     /// <summary>The watched file's full path.</summary>
     public string Path { get; }
+
+    /// <summary>
+    /// The file a symbolic link at <see cref="Path"/> leads to, resolved once when the watcher is
+    /// made; <see langword="null"/> when <see cref="Path"/> is no link.
+    /// </summary>
+    public string? TargetPath { get; }
 
     /// <summary>True while the file is missing (deleted, or renamed or moved away).</summary>
     public bool IsMissing => _missing;
@@ -138,23 +151,37 @@ internal sealed class FileWatcher: IDisposable {
     public event EventHandler<FileChangeEventArgs>? FileChanged;
 
     /// <summary>
-    /// Starts watching the file's folder. The file system's events are marshaled through
+    /// Starts watching the file's folder, and the folder of the file a symbolic link leads to
+    /// when that is another one. The file system's events are marshaled through
     /// <paramref name="synchronizingObject"/> (the window), so everything runs on the UI thread.
     /// </summary>
-    /// <returns>False when the folder cannot be watched; the failure is logged.</returns>
+    /// <returns>False when the file's folder cannot be watched; the failure is logged.</returns>
     public bool Start(ISynchronizeInvoke? synchronizingObject) {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (_watcher is not null) {
+        if (_watchers.Count > 0) {
             return true;
         }
 
         var folder = System.IO.Path.GetDirectoryName(Path);
 
-        if (String.IsNullOrEmpty(folder)) {
+        if (String.IsNullOrEmpty(folder) || !Watch(folder, Path, synchronizingObject)) {
             return false;
         }
 
+        // Without it outside changes to the target are missed, but the link's folder still tells.
+        var targetFolder = TargetPath is null ? null : System.IO.Path.GetDirectoryName(TargetPath);
+
+        if (!String.IsNullOrEmpty(targetFolder) && !String.Equals(targetFolder, folder, StringComparison.OrdinalIgnoreCase)) {
+            Watch(targetFolder, TargetPath!, synchronizingObject);
+        }
+
+        return true;
+    }
+
+    /// <summary>Watches <paramref name="folder"/> for events about <paramref name="file"/>.</summary>
+    /// <returns>False when the folder cannot be watched; the failure is logged.</returns>
+    private bool Watch(string folder, string file, ISynchronizeInvoke? synchronizingObject) {
         try {
             var watcher = new FileSystemWatcher(folder) {
                 IncludeSubdirectories = false,
@@ -168,14 +195,31 @@ internal sealed class FileWatcher: IDisposable {
             watcher.Renamed += OnFileSystemEvent;
             watcher.Error += OnError;
             watcher.EnableRaisingEvents = true;
-            _watcher = watcher;
-            Log.Debug("Watching {Path} for changes", Path);
+            _watchers.Add(watcher);
+            Log.Debug("Watching {Path} for changes", file);
 
             return true;
         } catch (Exception ex) when (ex is ArgumentException or IOException or PlatformNotSupportedException) {
-            Log.Warning(ex, "Unable to watch {Path} for changes", Path);
+            Log.Warning(ex, "Unable to watch {Path} for changes", file);
 
             return false;
+        }
+    }
+
+    /// <summary>
+    /// The file a symbolic link at <paramref name="path"/> finally leads to, or
+    /// <see langword="null"/> when it is no link or cannot be resolved.
+    /// </summary>
+    private static string? FinalTarget(string path) {
+        try {
+            var target = new FileInfo(path).ResolveLinkTarget(returnFinalTarget: true)?.FullName;
+
+            return target is null || String.Equals(target, path, StringComparison.OrdinalIgnoreCase) ? null : target;
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
+                                         or NotSupportedException) {
+            Log.Debug(ex, "Unable to resolve where {Path} leads", path);
+
+            return null;
         }
     }
 
@@ -216,7 +260,9 @@ internal sealed class FileWatcher: IDisposable {
     }
 
     private bool IsWatchedPath(string? path) =>
-        !String.IsNullOrEmpty(path) && String.Equals(path, Path, StringComparison.OrdinalIgnoreCase);
+        !String.IsNullOrEmpty(path)
+        && (String.Equals(path, Path, StringComparison.OrdinalIgnoreCase)
+            || String.Equals(path, TargetPath, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>Looks at the file once the events have settled, and reports what changed.</summary>
     private void Check() {
@@ -313,7 +359,7 @@ internal sealed class FileWatcher: IDisposable {
         _disposed = true;
         _timer.Dispose();
 
-        if (_watcher is { } watcher) {
+        foreach (var watcher in _watchers) {
             watcher.EnableRaisingEvents = false;
             watcher.Changed -= OnFileSystemEvent;
             watcher.Created -= OnFileSystemEvent;
@@ -321,7 +367,8 @@ internal sealed class FileWatcher: IDisposable {
             watcher.Renamed -= OnFileSystemEvent;
             watcher.Error -= OnError;
             watcher.Dispose();
-            _watcher = null;
         }
+
+        _watchers.Clear();
     }
 }

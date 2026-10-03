@@ -89,23 +89,31 @@ internal sealed partial class MainWindow {
         var renderOptions = RenderOptionsFor(documentLanguage);
 
         // Read, decoded, parsed and rendered off the UI thread, so a large file does not freeze
-        // the window; nothing of the window's state changes until it is done.
-        var work = Task.Run(() => {
-            var opened = MarkdownFile.Open(fullPath, fileOptions);
-            var render = MarkdownRenderer.Render(opened.Text, renderOptions);
-
-            return new PreparedRender(opened.Text, renderOptions, render, opened);
-        });
+        // the window; nothing of the window's state changes until it is done, and the file is
+        // not written (see the conversion below).
+        var canceling = new CancellationTokenSource();
+        var cancellation = canceling.Token;
+        var work = Task.Run(
+            () => PreparedRender.Prepare(fullPath, fileOptions, renderOptions, cancellation),
+            cancellation
+        );
 
         if (!WaitForOpening(work, fullPath)) {
+            canceling.Cancel();
             claim?.Dispose();
             Log.Information("Opening {Path} canceled", fullPath);
 
             // Whatever the work still throws is of no interest any more.
             work.ContinueWith(
-                task => Log.Debug(task.Exception, "Canceled opening of {Path} failed", fullPath),
+                task => {
+                    if (task.IsFaulted) {
+                        Log.Debug(task.Exception, "Canceled opening of {Path} failed", fullPath);
+                    }
+
+                    canceling.Dispose();
+                },
                 CancellationToken.None,
-                TaskContinuationOptions.OnlyOnFaulted,
+                TaskContinuationOptions.None,
                 TaskScheduler.Default
             );
             ReturnFocus();
@@ -113,12 +121,26 @@ internal sealed partial class MainWindow {
             return OpenOutcome.Failed;
         }
 
+        canceling.Dispose();
         MarkdownFile file;
         PreparedRender prepared;
 
         try {
             prepared = work.GetAwaiter().GetResult();
             file = prepared.File;
+
+            // Converted to UTF-8 only now that the window takes the file, on its own thread and
+            // under its claim: a canceled opening never writes the file, and a conversion never
+            // lands after the claim is given up. The file is read again and converted at once, so
+            // what is written is what it holds now; the background render stands when that is
+            // still the text it was made from.
+            if (file.NeedsConversion) {
+                var text = file.ConvertToUtf8();
+
+                if (String.Equals(text, prepared.Text, StringComparison.Ordinal)) {
+                    prepared = prepared with { Text = text };
+                }
+            }
         } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
             claim?.Dispose();
             Log.Warning(ex, "Unable to open {Path}: not found", path);
@@ -248,4 +270,30 @@ internal sealed partial class MainWindow {
 /// <param name="Options">The options it was rendered with.</param>
 /// <param name="Result">The render.</param>
 /// <param name="File">The file.</param>
-internal sealed record PreparedRender(string Text, RenderOptions Options, RenderResult Result, MarkdownFile File);
+internal sealed record PreparedRender(string Text, RenderOptions Options, RenderResult Result, MarkdownFile File) {
+    /// <summary>
+    /// Opens the file at <paramref name="path"/> and renders it, the work done off the UI thread
+    /// while a file opens. The file is never written here, whatever
+    /// <paramref name="fileOptions"/> say about converting it (see
+    /// <see cref="MarkdownFile.OpenWithoutConverting"/>); the window converts it once it takes it.
+    /// </summary>
+    /// <exception cref="OperationCanceledException">
+    /// <paramref name="cancellation"/> was canceled before the file was read or rendered.
+    /// </exception>
+    /// <exception cref="IOException">The file cannot be read.</exception>
+    public static PreparedRender Prepare(
+        string path,
+        MarkdownFileOptions fileOptions,
+        RenderOptions renderOptions,
+        CancellationToken cancellation
+    ) {
+        cancellation.ThrowIfCancellationRequested();
+        var file = MarkdownFile.OpenWithoutConverting(path, fileOptions);
+
+        // Rendering a large file is the longer half: not started for an opening already canceled.
+        cancellation.ThrowIfCancellationRequested();
+        var render = MarkdownRenderer.Render(file.Text, renderOptions);
+
+        return new PreparedRender(file.Text, renderOptions, render, file);
+    }
+}

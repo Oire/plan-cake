@@ -62,18 +62,39 @@ internal static class NoteParser {
 
         var lines = SplitLines(source);
         var inCode = new HashSet<int>();
+        var skipsComments = !markers.Opening.StartsWith("<!--", StringComparison.Ordinal);
+        var rawHtml = new RawHtmlScope(skipsComments, MayHoldRawHtmlBlock(source, skipsComments));
 
-        // A marker in an indented code block is only known once the notes are stripped (see
-        // FindInIndentedCode); each round sets more markers aside, so this ends.
+        // A marker in an indented code block or a raw HTML block is only known once the notes are
+        // stripped (see FindInParsedBlocks); each round sets more markers aside, so this ends.
         while (true) {
             var notes = FindNotes(source, markers, lines, inCode);
             var (stripped, lineMap) = Strip(source, lines, notes);
 
-            if (!FindInIndentedCode(source, lines, notes, stripped, lineMap, inCode)) {
+            if (!FindInParsedBlocks(source, lines, notes, stripped, lineMap, inCode, rawHtml)) {
                 return new NoteParseResult(notes, stripped, lineMap);
             }
         }
     }
+
+    /// <summary>
+    /// Which raw HTML blocks hide markers: <paramref name="SkipsComments"/> is false when the
+    /// opening marker is itself an HTML comment, and <paramref name="MayHoldBlock"/> is false when
+    /// the source has no tag or comment that could start one, so it need not be parsed for them.
+    /// </summary>
+    private readonly record struct RawHtmlScope(bool SkipsComments, bool MayHoldBlock);
+
+    /// <summary>The tags that start a raw HTML block of CommonMark type 1, which ends at a closing tag.</summary>
+    private static readonly string[] _rawHtmlTags = ["<pre", "<script", "<style", "<textarea"];
+
+    /// <summary>
+    /// True when <paramref name="source"/> holds a tag that starts a raw HTML block of CommonMark
+    /// type 1, or an HTML comment (type 2) when <paramref name="skipsComments"/>: a quick look that
+    /// spares the Markdown parse for a source with neither.
+    /// </summary>
+    private static bool MayHoldRawHtmlBlock(string source, bool skipsComments) =>
+        (skipsComments && source.Contains("<!--", StringComparison.Ordinal))
+        || _rawHtmlTags.Any(tag => source.Contains(tag, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     /// Reads a list marker, a bullet (<c>-</c>, <c>*</c>, <c>+</c>) or an ordered marker of up to
@@ -167,9 +188,9 @@ internal static class NoteParser {
     /// <summary>
     /// Finds the notes in source order, skipping every opening marker that is code: inside an
     /// inline code span on its line, inside a fenced code block, or in <paramref name="inCode"/>
-    /// (the markers <see cref="FindInIndentedCode"/> found in indented code blocks). A document
-    /// that shows the markers as code, such as PlanCake's own README, has no notes; PlanCake
-    /// itself never writes a note inside code, only on the lines after a block.
+    /// (the markers <see cref="FindInParsedBlocks"/> found in indented code blocks and in raw HTML
+    /// blocks). A document that shows the markers as code, such as PlanCake's own README, has no
+    /// notes; PlanCake itself never writes a note inside code, only on the lines after a block.
     /// </summary>
     /// <remarks>
     /// The text of a note is never read as Markdown here: a fence or a backtick in a note does not
@@ -177,6 +198,17 @@ internal static class NoteParser {
     /// spans are matched within one line, and a fence opens at any indentation (a fence in a
     /// nested list item is indented too), so a line of a Markdown example in an indented code
     /// block can be taken for a fence.
+    /// <para>
+    /// Raw HTML hides markers only in the blocks of CommonMark types 1 and 2: <c>&lt;pre&gt;</c>,
+    /// <c>&lt;script&gt;</c>, <c>&lt;style&gt;</c> and <c>&lt;textarea&gt;</c>, which end on the
+    /// line of their closing tag, and HTML comments, which end on the line of <c>--&gt;</c>.
+    /// Markdown is still read inside inline HTML such as <c>&lt;code&gt;</c> in a paragraph, so a
+    /// marker there is a note; and an HTML block of the other types (<c>&lt;div&gt;</c>,
+    /// <c>&lt;details&gt;</c> and the like) runs to the next blank line, so it would swallow a note
+    /// written on the line right below it, and does not hide markers either. When the opening
+    /// marker itself starts with <c>&lt;!--</c>, comments do not hide markers, or every note would
+    /// be hidden.
+    /// </para>
     /// </remarks>
     private static List<Note> FindNotes(string source, NoteMarkers markers, List<Line> lines, HashSet<int> inCode) {
         var notes = new List<Note>();
@@ -448,20 +480,29 @@ internal static class NoteParser {
     /// block's indentation. A note on a line of its own after a blank line, indented enough to
     /// start a code block, stays in the parsed text, so a code block made of nothing but a marker
     /// line is code too; PlanCake never writes a note there. Parses only when a note starts on a
-    /// line indented four columns or more, the least an indented code block needs.
+    /// line indented four columns or more, the least an indented code block needs, or when
+    /// <paramref name="rawHtml"/> says the source may hold a raw HTML block.
     /// </summary>
+    /// <remarks>
+    /// A note inside a raw HTML block of CommonMark type 1 or 2 (see <see cref="FindNotes"/>) is
+    /// set aside the same way, from the block's first line to the line it ends on; on the first
+    /// line only a note after the opening tag, since a line that starts with a note opens no HTML
+    /// block in the file. A note on the line after the block is a note.
+    /// </remarks>
     /// <returns>True when a marker was added, so the notes must be found again.</returns>
-    private static bool FindInIndentedCode(
+    private static bool FindInParsedBlocks(
         string source,
         List<Line> lines,
         List<Note> notes,
         string stripped,
         int[] lineMap,
-        HashSet<int> inCode
+        HashSet<int> inCode,
+        RawHtmlScope rawHtml
     ) {
         var indented = notes.Where(note => IsIndentedForCode(source, lines[note.StartLine - 1])).ToList();
+        var inHtml = rawHtml.MayHoldBlock ? notes : [];
 
-        if (indented.Count == 0) {
+        if (indented.Count == 0 && inHtml.Count == 0) {
             return false;
         }
 
@@ -475,22 +516,72 @@ internal static class NoteParser {
         var lineStarts = SplitLines(stripped).Select(line => line.Start).ToArray();
         var added = false;
 
-        foreach (var code in document.Descendants<CodeBlock>()) {
-            if (code.Span.IsEmpty) {
+        foreach (var block in document.Descendants<LeafBlock>()) {
+            var candidates = block switch {
+                CodeBlock => indented,
+                HtmlBlock { Type: HtmlBlockType.ScriptPreOrStyle } => inHtml,
+                HtmlBlock { Type: HtmlBlockType.Comment } when rawHtml.SkipsComments => inHtml,
+                _ => [],
+            };
+
+            if (candidates.Count == 0 || block.Span.IsEmpty) {
                 continue;
             }
 
-            var first = lineMap[LineIndexAt(lineStarts, code.Span.Start)];
-            var last = lineMap[LineIndexAt(lineStarts, Math.Max(code.Span.Start, code.Span.End))];
+            var first = lineMap[LineIndexAt(lineStarts, block.Span.Start)];
+            var last = lineMap[LineIndexAt(lineStarts, Math.Max(block.Span.Start, block.Span.End))];
 
-            foreach (var note in indented) {
-                if (first <= note.StartLine && note.StartLine <= last && inCode.Add(note.Start)) {
+            // An HTML block never closed runs to the end of the file, over the notes after it.
+            if (block is HtmlBlock html && !IsClosed(html, stripped)) {
+                last = lines.Count;
+            }
+
+            foreach (var note in candidates) {
+                if (note.StartLine < first || note.StartLine > last) {
+                    continue;
+                }
+
+                if (block is HtmlBlock && note.StartLine == first && !FollowsATag(source, lines, note)) {
+                    continue;
+                }
+
+                if (inCode.Add(note.Start)) {
                     added = true;
                 }
             }
         }
 
         return added;
+    }
+
+    /// <summary>The closing tags that end a raw HTML block of CommonMark type 1.</summary>
+    private static readonly string[] _rawHtmlClosingTags = ["</pre>", "</script>", "</style>", "</textarea>"];
+
+    /// <summary>
+    /// True when <paramref name="block"/>, a raw HTML block of type 1 or 2, holds the text that
+    /// ends it, rather than running to the end of <paramref name="stripped"/>.
+    /// </summary>
+    private static bool IsClosed(HtmlBlock block, string stripped) {
+        var text = stripped.AsSpan(block.Span.Start, block.Span.Length);
+
+        if (block.Type == HtmlBlockType.Comment) {
+            return text.Contains("-->", StringComparison.Ordinal);
+        }
+
+        foreach (var tag in _rawHtmlClosingTags) {
+            if (text.Contains(tag, StringComparison.OrdinalIgnoreCase)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>True when the text before <paramref name="note"/> on its line holds a <c>&lt;</c>.</summary>
+    private static bool FollowsATag(string source, List<Line> lines, Note note) {
+        var line = lines[note.StartLine - 1];
+
+        return source.AsSpan(line.Start, note.Start - line.Start).Contains('<');
     }
 
     /// <summary>
