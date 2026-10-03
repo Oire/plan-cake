@@ -245,14 +245,13 @@ public class MarkdownRendererTests {
     }
 
     [Fact]
-    public void Render_LongTaskItem_NamesItsCheckboxWithTheExcerpt() {
+    public void Render_LongTaskItem_NamesItsCheckboxWithTheWholeText() {
         var words = String.Join(' ', Enumerable.Repeat("word", 30));
 
-        var result = Render($"- [x] {words}\n");
+        var result = Render($"- [x] {words}\n  continued\n");
 
-        var label = TaskToggle.WithoutMarker(result.Blocks[0].Excerpt);
-        label.Should().EndWith("…");
-        result.Html.Should().Contain($"""aria-label="{label}" checked="checked" />""");
+        result.Blocks[0].Excerpt.Should().EndWith("…");
+        result.Html.Should().Contain($"""aria-label="{words} continued" checked="checked" />""");
     }
 
     [Fact]

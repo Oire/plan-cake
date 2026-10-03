@@ -678,8 +678,10 @@ internal static partial class MarkdownRenderer {
                     var itemText = PlainText(lead);
                     Add(BlockKind.ListItem, lead, itemText, item);
 
+                    // The whole item, not the excerpt: a name cut with an ellipsis tells a screen
+                    // reader user less than the text it stands for.
                     if (TaskOf(item) is { } task) {
-                        TaskLabels[task] = TaskToggle.WithoutMarker(Excerpt(itemText));
+                        TaskLabels[task] = TaskToggle.WithoutMarker(OneLine(itemText));
                     }
 
                     for (var i = 1; i < item.Count; i++) {

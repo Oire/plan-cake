@@ -28,6 +28,7 @@ public class HostCommandsTests {
         { Keys.Back, nameof(HostCommand.Back) },
         { Keys.Alt | Keys.Right, nameof(HostCommand.Forward) },
         { Keys.F6, nameof(HostCommand.SwitchPane) },
+        { Keys.Shift | Keys.F6, nameof(HostCommand.SwitchPane) },
         { Keys.F9, nameof(HostCommand.NextNote) },
         { Keys.Shift | Keys.F9, nameof(HostCommand.PreviousNote) },
         { Keys.Alt | Keys.Shift | Keys.Down, nameof(HostCommand.NextBlock) },
