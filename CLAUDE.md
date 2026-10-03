@@ -493,8 +493,7 @@ touch `Config` or `Localization` must not run in parallel across classes.
   `ThirdPartyNoticesTests` keeps `THIRD-PARTY-NOTICES.txt` in step with the packages (see
   Installer and releases).
 - CI (`.github/workflows/dotnet.yml`) compiles the translations, checks the format, builds and
-  tests, with a 20-minute limit. `codeql.yml` runs CodeQL on the C# and on the page's
-  JavaScript on pushes and pull requests to `master` and weekly.
+  tests, with a 20-minute limit.
 - While a PlanCake window is open, `bin\Debug\plancake.exe` is locked: build and test with
   `dotnet build --artifacts-path <temp dir>` (and the same for `dotnet test`) rather than
   closing the user's window.
