@@ -96,13 +96,13 @@ foreach ($lang in $languages) {
 
         # --check validates the header, the plural rule and every format specifier, so a
         # catalog that would fail silently at runtime fails here instead. --statistics reports
-        # the translated/fuzzy/untranslated counts; both go to stderr, hence the log file.
-        $statsLog = Join-Path ([System.IO.Path]::GetTempPath()) "$catalogName-msgfmt-$lang.log"
-        & "$msgfmt" --check --statistics -o "$moFile" "$poFile" 2>$statsLog
+        # the translated/fuzzy/untranslated counts; both go to stderr. Windows PowerShell 5.1
+        # wraps each stderr line in an ErrorRecord, and redirecting that to a file writes the
+        # whole NativeCommandError text ("At line…", "+ CategoryInfo…"), which would then read
+        # as msgfmt warnings. Merging into the pipeline and taking each record's string gives
+        # msgfmt's own lines in 5.1 and 7 alike.
+        $stats = (& "$msgfmt" --check --statistics -o "$moFile" "$poFile" 2>&1 | ForEach-Object { "$_" }) -join "`n"
         $msgfmtExitCode = $LASTEXITCODE
-
-        $stats = if (Test-Path $statsLog) { (Get-Content -Path $statsLog -Raw) } else { "" }
-        Remove-Item -Path $statsLog -Force -ErrorAction SilentlyContinue
 
         if ($msgfmtExitCode -eq 0) {
             $fuzzy = if ($stats -match '(\d+)\s+fuzzy\s+translation') { [int]$Matches[1] } else { 0 }
