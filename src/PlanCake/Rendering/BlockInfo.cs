@@ -18,8 +18,9 @@ internal enum BlockKind {
 /// <param name="EndLine">The 1-based original line the block ends on, inclusive.</param>
 /// <param name="Text">The block's full plain text (table cells joined with <c> | </c>).</param>
 /// <param name="Excerpt">
-/// The plain text on one line, whitespace collapsed, cut to at most
-/// <see cref="MarkdownRenderer.ExcerptLength"/> characters with an ellipsis.
+/// The first sentence of the plain text on one line, whitespace collapsed; a sentence longer than
+/// <see cref="MarkdownRenderer.ExcerptLength"/> characters is cut at a comma, semicolon, colon or
+/// dash, or else at the end of a word, with an ellipsis.
 /// </param>
 internal sealed record BlockInfo(BlockKind Kind, int StartLine, int EndLine, string Text, string Excerpt) {
     /// <summary>The range as the page's <c>data-lines</c> attribute holds it: <c>start-end</c>.</summary>

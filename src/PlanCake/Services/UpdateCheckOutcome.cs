@@ -1,7 +1,7 @@
 namespace Oire.PlanCake.Services;
 
 /// <summary>How an update check ended.</summary>
-public enum UpdateCheckOutcome {
+internal enum UpdateCheckOutcome {
     /// <summary>A newer version exists; NetSparkle's update window has been shown.</summary>
     UpdateAvailable,
 

@@ -40,12 +40,14 @@ public class PageMessagesTests {
 
     [Fact]
     public void Serialize_Strings_CarriesLanguageAndDirection() {
-        var message = Parse(PageMessages.Serialize(new StringsMessage("he-IL", "rtl", "אין קובץ פתוח.")));
+        var message = Parse(PageMessages.Serialize(new StringsMessage("he-IL", "rtl", "אין קובץ פתוח.", ["F1"])));
 
         message.GetProperty("type").GetString().Should().Be("strings");
         message.GetProperty("uiLang").GetString().Should().Be("he-IL");
         message.GetProperty("uiDir").GetString().Should().Be("rtl");
         message.GetProperty("noDocument").GetString().Should().Be("אין קובץ פתוח.");
+        message.GetProperty("noDocumentHints").EnumerateArray().Select(hint => hint.GetString())
+            .Should().Equal("F1");
     }
 
     [Fact]

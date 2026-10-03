@@ -69,10 +69,24 @@ decisions.
   `TextDirection.Apply(this)`; send every message box through `DialogHelper`; and add the form
   to the lists in `MnemonicTests` and `TextDirectionTests` (both fail until you do: each checks
   that its list covers every `Form` type).
+- **A label that wraps is a `Ui/WrappingLabel`.** With the system code page set to UTF-8 (the
+  "Beta: Use Unicode UTF-8 for worldwide language support" option), Windows text drawing takes
+  every letter outside ASCII for a double-byte character and breaks a line between any two of
+  them, so a stock `Label` splits Russian, Ukrainian and Hebrew words in the middle.
+  `WrappingLabel` measures and draws with `TextFormatFlags.NoFullWidthCharacterBreak`.
+- **Text from the document in a right-to-left interface** (an excerpt, a note) goes through
+  `TextDirection.Embed`: text that starts left to right is wrapped in LEFT-TO-RIGHT EMBEDDING and
+  POP DIRECTIONAL FORMATTING (U+202A … U+202C), so its punctuation stays where it was written.
+  Not the isolates U+2068 and U+2069: GDI, which draws labels, list views and message boxes,
+  shows them as visible boxes. A box that holds code or a link (the note markers, a URL) stays
+  left to right through `TextDirection.KeepLeftToRight`.
 - **The user manual follows the UI.** `help/<code>/manual.html` (six languages) is written by
   hand with the `write-manual` skill, using the glossaries in `help/glossaries/`. It repeats
-  menu names, shortcuts and setting labels word for word, and no test checks it. A change to a
-  command, a key, a menu item or a setting updates all six manuals in the same change.
+  menu names, shortcuts and setting labels word for word. `ManualParityTests` checks only that
+  the six have the same ids, tables and keys, that every `#link` lands, and that the keyboard
+  reference lists every `HostCommands` shortcut as the menus spell it; the wording is checked by
+  hand. A change to a command, a key, a menu item or a setting updates all six manuals in the
+  same change.
 
 - The catalog is `PlanCake.po` / `.mo`, named after `App.Name`; the executable is `plancake.exe`
   (`AssemblyName`). The gettext scripts read `App.Name` from `Utils/Constants/App.cs`, not the
@@ -83,8 +97,21 @@ See `src/PlanCake/locale/README.md` for the script workflow.
 ## Versioning
 
 GitVersion owns every version number (`GitVersion.yml`). **Never write a `<Version>` literal
-into a `.csproj`.** A release is a `vX.Y.Z` tag; the fourth field is the commit distance from
-that tag. CI checks out with `fetch-depth: 0` because a shallow clone has no tag history.
+into a `.csproj`.** Every version has four parts, `X.Y.Z.N`, the same model as SIC:
+
+- A three-part tag `vX.Y.Z` (annotated, "Start development of version X.Y.Z") **opens a
+  development cycle**. GitVersion counts from it: every commit after it builds as `X.Y.Z.N`,
+  where `N` is the commit distance from that tag.
+- When the cycle is ready, the release commit gets a **four-part tag `vX.Y.Z.N`** with exactly
+  the version that commit builds as (`v1.0.0.7`). That is the release: on GitHub, on
+  plancake.oire.dev and on winget, and in the installer and zip names. GitVersion does not count
+  from a four-part tag; it only marks the commit.
+- Right after the release, the **next cycle's three-part tag** (`v1.1.0`, or `v1.0.1` for a
+  patch) goes on the next commit, never on the release commit itself: with two tags on one
+  commit GitVersion takes the higher one, and the release commit would then build as `1.1.0.0`.
+
+CI checks out with `fetch-depth: 0` because a shallow clone has no tag history. Releases and
+their files are never built on CI; see Releasing below.
 
 ## Code style
 
@@ -152,10 +179,13 @@ map.
   `data-lines` sees them; Markdig's 0-based lines are converted at the boundary. The strings the
   renderer writes come in through `RenderStrings`, so it never touches the catalog.
   `PositionRestorer` picks the block to return to after a re-render.
-- **Ui/** holds `MainWindow` (the menu, the notes list, every note action), `DocumentView` (the
-  WebView2 control and its lockdown), `HostCommands` (the one table of commands and keys that
-  the menu, both key paths and the Keyboard shortcuts dialog all read) and `PageMessages` (the
-  page protocol's message shapes).
+- **Ui/** holds `MainWindow` (the menu, the notes list, every note action; a partial class split
+  by subject into `MainWindow.Menu.cs`, `.Keys.cs`, `.Page.cs`, `.Notes.cs`, `.NotesList.cs` and
+  so on), `DocumentView` (the WebView2 control and its lockdown; the navigation rule is
+  `NavigationGate`), `HostCommands` (the one table of commands and keys that the menu, both key
+  paths and the Keyboard shortcuts dialog all read), `PageMessages` (the page protocol's
+  message shapes) and `PageMessageRouter` (what the window does about a page message: UI-free
+  and tested, while `MainWindow` does the dialogs and menus).
 - **Cli/** is `CliRunner` (System.CommandLine 2.x: `list`, `check`, `clear`, `export`) and
   `ConsoleAttacher`. `list`, `check` and `export` never write the Markdown file; `clear` follows
   the conversion setting like the window. `list`'s text lines are data and stay in English;
@@ -171,7 +201,9 @@ map.
   away from the shell (the window offers to show it in File Explorer), and does not follow, or
   even check, a UNC path on another host than the document's, since touching it sends the
   user's credentials there. File → Open in editor uses the "edit" verb or Notepad for anything
-  that is not Markdown, never the default verb.
+  that is not Markdown, never the default verb; a Markdown file gets the default verb unless
+  Windows opens Markdown with PlanCake itself or with nothing (`LinkResolver.DefaultProgramFor`),
+  and then goes the same way.
 - **web/** is the page. `app.js` shows what the host renders, reports which block or note the
   user acts on, and moves focus when the host asks. `morph.js` updates the page in place when
   the same file is rendered again; `blocks.js` picks the block Alt+Shift+Down and Up move to.
@@ -195,7 +227,7 @@ focus), `strings`, `focusNote`, `nextNote` / `previousNote`, `nextBlock` /
 `previousBlock`, `taskState`. Page → host: `activate`, `activateNote`, `contextMenu`,
 `toggleTask`, `position`, `openLink`, `noMoreNotes`, `noMoreBlocks`, `dropFiles`, `goBack`,
 `ready`. Every render carries a `generation`; the host ignores a message from an older render
-(`WhileCurrent` in `MainWindow`). There is no `announce` message: every announcement goes
+(`PageMessageRouter`, and `WhileCurrent` for an action deferred past a re-render). There is no `announce` message: every announcement goes
 through `StatusAnnouncer`.
 
 A different file gets a freshly loaded page (the host navigates to `index.html` again and
@@ -205,7 +237,9 @@ acting on a block carries focus; the rest leave the reader where they are.
 
 ### WebView2
 
-- **User data folder** under `App.DataFolder\WebView2`: the install folder is not writable.
+- **User data folder** `App.WebView2DataFolder`: `%LOCALAPPDATA%\Oire\PlanCake\WebView2`
+  (`userdata\WebView2` when portable). Not the install folder, which is not writable, and not
+  the roaming `App.DataFolder`: a browser cache does not belong in a roaming profile.
 - **The page's own host.** `web\` is mapped to `https://app.plancake/`. The only navigation
   allowed is the host's own `Navigate` to a page there; every other navigation, frame navigation
   and new window is refused, and the CSP in `index.html` allows no script but the app's own.
@@ -214,10 +248,15 @@ acting on a block carries focus; the rest leave the reader where they are.
   are off; dev tools are on in Debug only.
 - **Accelerator keys.** Keys pressed while the page has focus never pass through the host's
   message loop, so the native menu bar's accelerators never see them. The WinForms control does
-  not call `ProcessCmdKey` either: it raises its own `KeyDown` from the browser's
-  `AcceleratorKeyPressed`, which `DocumentView.AcceleratorKeyDown` passes on. `MainWindow`
-  sends that path and `ProcessCmdKey` through `HostCommands`; a new shortcut goes into that
-  table, never into a key handler.
+  not call `ProcessCmdKey` either: it raises its own `KeyDown` (and `KeyUp`) from the browser's
+  `AcceleratorKeyPressed`, which `DocumentView.AcceleratorKeyDown` and `AcceleratorKeyUp` pass
+  on. `MainWindow` sends that path and `ProcessCmdKey` through `HostCommands`; a new shortcut
+  goes into that table, never into a key handler. For the same reason Windows never sees the
+  keys that enter the menu bar from the page: what is not a host command goes through
+  `MenuKeys` (pure, tested), and Alt+letter, Alt pressed and released alone, and F10 post
+  `WM_SYSCOMMAND` / `SC_KEYMENU` to the form (the mnemonic's character on the focused window's
+  keyboard layout, or 0). So a host command must never be Alt+letter, or it hides a menu
+  (`MenuKeysTests` checks).
 - **`BeginInvoke` before any dialog, message box or menu** started from a WebView2 event
   (`WebMessageReceived`, `NavigationStarting`, …) or from a key WebView2 forwarded. A nested
   message loop inside those handlers re-enters WebView2.
@@ -279,13 +318,17 @@ tests need no console.
 
 `App.DataFolder` resolves to `%APPDATA%\Oire\PlanCake`, or to `userdata\` next to the EXE when
 that folder exists (portable mode, detected once at static init). It holds `PlanCake.cfg`
-(written to a temporary file and moved over the old one, since other windows read it),
+(written to a temporary file and moved over the old one, since other windows read it; its
+`[Window]` section is where the last window closed, its size, the notes list's width and the
+zoom, which the next window opens with, moved onto a screen that is still there) and
 `logs\` (Serilog: `PlanCake.log`, `PlanCake-short.log`, `errors.log`, `errors-short.log`,
 `analysis.json`; every window and every CLI run is its own process, so while one holds a log,
-the others write to numbered siblings such as `PlanCake_001.log`) and `WebView2\` (the
-browser's user data folder, `App.WebView2DataFolder`). PlanCake keeps no other user content, so
-`App.DataSubfolder` (`data\`) is unused. The logs are the first thing to read when a user
-reports a problem.
+the others write to numbered siblings such as `PlanCake_001.log`). Each log rolls over at 10 MB
+and keeps ten files, numbered siblings included; a Release build logs from Information up, a
+Debug build from Debug. The browser's user data folder, `App.WebView2DataFolder`, is
+`%LOCALAPPDATA%\Oire\PlanCake\WebView2`, or `userdata\WebView2` when portable; the uninstaller
+offers to remove both folders. PlanCake keeps no other user content. The logs are the first
+thing to read when a user reports a problem.
 
 ## File safety
 
@@ -327,21 +370,54 @@ then paste the contents of `keys/NetSparkle_Ed25519.pub` into `App.UpdatePublicK
 compiles the translations with `-Strict`, publishes to `src/PlanCake/bin/x64/Release/publish`,
 compiles `installer/plancake.iss` with Inno Setup 6, and writes to `installer/Output/`
 (gitignored) the installer `plancake-v<VERSION>-setup.exe` and the portable
-`plancake-v<VERSION>-portable.zip`, where `<VERSION>` is the four-part file version.
-`-Appcast` adds `appcast.xml` and its signature, signed with the key in `keys/` (it needs
-`netsparkle-generate-appcast`); `-Deploy` uploads the lot to plancake.oire.dev over SCP with the
-host and path in `installer/deploy.json` (gitignored; copy `deploy.example.json`). Release notes
-come from `changelogs/<X.Y.Z>.md`, named after the tag; the script hands the file to the
-generator under the four-part name it looks for.
+`plancake-v<VERSION>-portable.zip`, where `<VERSION>` is the four-part file version, and keeps
+`plancake.pdb` in `installer/Output/symbols/<VERSION>/` (never shipped; it is what turns a stack
+trace in a user's `errors.log` into source lines). `-Appcast` adds `appcast.xml` and its
+signature, signed with the key in `keys/` (it needs `netsparkle-generate-appcast`); `-Deploy`
+uploads the lot to plancake.oire.dev over SCP with the host and path in
+`installer/deploy.json` (gitignored; copy `deploy.example.json`). Release notes come from
+`changelogs/<X.Y.Z>.md`, named after the three-part version of the cycle, since `N` is only
+known once the release commit exists; the script hands the file to the generator under the
+four-part name it looks for (a `changelogs/<X.Y.Z.N>.md` wins when there is one).
 
-What ships is the same in both: `plancake.exe`, `WebView2Loader.dll`, `web\`, `help\` and
-`locale\**\*.mo`. The publish folder holds more (the `.pdb`, WebView2's XML docs, a second
-`WebView2Loader.dll` under `runtimes\`), so a new file beside the exe must be added to both the
-`[Files]` section of `plancake.iss` and `$ShippedItems` in the script. The installer puts `{app}`
-on the machine `PATH` and takes it off on uninstall, and installs the .NET 10 Desktop Runtime
-and the WebView2 Runtime when missing (`CodeDependencies.iss`, from InnoDependencyInstaller).
-The `AppId` in `plancake.iss` is permanent: Windows and winget know PlanCake by it. The `.iss`
-and `.isl` files are UTF-8 with a BOM, which Inno Setup needs to read them as UTF-8.
+The script refuses a working tree with uncommitted or untracked files (`git status
+--porcelain`), which would ship under the version of a commit that does not hold them;
+`-AllowDirty` overrides that for a trial build that is never released. With `-Appcast` or
+`-Deploy` it warns when HEAD does not carry the tag `v<VERSION>` of the build.
+
+What ships is the same in both: `plancake.exe`, `WebView2Loader.dll`, `web\`, `help\`,
+`locale\**\*.mo`, `LICENSE` and `THIRD-PARTY-NOTICES.txt` (the last two copied next to the exe
+by the `.csproj`; Help → About → Licenses opens them in Notepad). The publish folder holds more
+(the `.pdb`, WebView2's XML docs, a second `WebView2Loader.dll` under `runtimes\`), so a new
+file beside the exe must be added to both the `[Files]` section of `plancake.iss` and
+`$ShippedItems` in the script. The installer puts `{app}` on the machine `PATH` and takes it
+off on uninstall, adds a Start menu shortcut to the manual in the language Setup ran in
+(`help\{language}\manual.html`), shows the Ready to Install page (it lists the runtimes Setup
+is about to download, and its button is the one that says Install), and installs the .NET 10
+Desktop Runtime and the WebView2 Runtime when missing (`CodeDependencies.iss`, from
+InnoDependencyInstaller). The `AppId` in `plancake.iss` is permanent: Windows and winget know
+PlanCake by it. The `.iss` and `.isl` files are UTF-8 with a BOM, which Inno Setup needs to
+read them as UTF-8.
+
+The uninstaller's question about removing settings and logs looks in `{userappdata}` and
+`{localappdata}`, the folders of the account it runs as. When a standard user uninstalls with
+an administrator's password, that is the administrator, so the question is not asked and the
+user's folders stay. Inno Setup cannot reach the original user at uninstall time
+(`ExecAsOriginalUser` is install-only), so this is a known limitation, explained in the
+manuals' Uninstalling section.
+
+`THIRD-PARTY-NOTICES.txt` (repository root) holds the license of every package bundled into
+`plancake.exe` and `WebView2Loader.dll`, with the full text where the license asks for it (the
+MPL 1.1 of UTF.Unknown with its source-availability notice, the BSD texts, Apache 2.0 once at
+the end). `ThirdPartyNoticesTests` walks `plancake.deps.json` and fails when a runtime package
+is not named in it. When a package is added, add its section by hand: the license file in
+`~/.nuget/packages/<id>/<version>/` (its `.nuspec` names it), or, for a license expression, the
+license file of its repository at the commit the `.nuspec` gives. A version bump needs no
+change.
+
+The SDK is pinned by `global.json` (feature band, `rollForward: latestPatch`), and CI's
+`setup-dotnet` reads the same file, so a release built locally and CI use the same band. Bump it
+deliberately: a new band can bring new analyzer warnings, which are errors here.
 
 PlanCake is published to winget as `Oire.PlanCake`. The first release creates the manifest with
 `wingetcreate new` on the release's installer URL; after every later GitHub release, update it:
@@ -352,7 +428,33 @@ wingetcreate update -u 'https://github.com/Oire/plan-cake/releases/download/v<VE
 
 The installer is x64 only, but wingetcreate detects an Inno Setup installer as x86: without the
 `|x64` suffix the update fails with "Multiple matches" (and in `wingetcreate new`, set the
-architecture to x64 by hand).
+architecture to x64 by hand). `<VERSION>` here is the four-part version, as in the tag.
+
+### Releasing
+
+From start to finish, by hand on the maintainer's machine (CI never builds a release):
+
+1. On `master`, with every change for the release merged: run
+   `src/PlanCake/locale/scripts/Extract-Strings.ps1` and `Update-Translations.ps1`, translate
+   anything new in all five catalogs (no fuzzy entries), and check that the six manuals match
+   the UI. Write `changelogs/<X.Y.Z>.md` (the update window's notes) and move the
+   `[Unreleased]` entries of `CHANGELOG.md` under the version. Commit: the tree must be clean.
+2. `./installer/Build-Installer.ps1 -Appcast`, or `-Deploy`, which implies `-Appcast` and
+   uploads the installer, the zip, `appcast.xml` and its signature to plancake.oire.dev (build
+   without `-Deploy` first to try the installer). The file names carry the version:
+   `plancake-v1.0.0.7-setup.exe` comes from the commit at distance 7 from `v1.0.0`.
+3. Tag that commit with the same four-part version and push the tag:
+   `git tag -s v1.0.0.7 -m "Release 1.0.0.7"`, then `git push origin v1.0.0.7`. Tagging before
+   step 2 works too and silences the script's warning. Point the version's link at the end of
+   `CHANGELOG.md` to that tag.
+4. Create the GitHub release from the tag with the installer and the zip from
+   `installer/Output/`:
+   `gh release create v1.0.0.7 installer/Output/plancake-v1.0.0.7-setup.exe installer/Output/plancake-v1.0.0.7-portable.zip --title "PlanCake 1.0.0.7" --notes-file changelogs/1.0.0.md`.
+   Keep `installer/Output/symbols/1.0.0.7/plancake.pdb` somewhere safe.
+5. Update winget with the four-part version (the `wingetcreate update` command above;
+   `wingetcreate new` for the first release).
+6. Open the next cycle on the next commit, not on the release commit:
+   `git tag -s v1.1.0 -m "Start development of version 1.1.0"`, then push it.
 
 ## Error handling at startup
 
@@ -380,6 +482,18 @@ touch `Config` or `Localization` must not run in parallel across classes.
   disposed, never shown.
 - `web/morph.js` and `web/blocks.js` expose pure functions that `MorphPlanTests` and
   `BlockPickTests` run in Jint, so the page needs no JS toolchain.
+- `DocumentViewLockdownTests` (trait `Category=WebView2`) runs a real WebView2 in a form that is
+  never shown and checks that a plan's raw HTML posts nothing and navigates nowhere. It is
+  skipped without the WebView2 Runtime; `--filter "Category!=WebView2"` leaves it out.
+- Coverage is local and on demand, never run in CI: `dotnet test --collect:"XPlat Code Coverage"`
+  writes a Cobertura report under `TestResults\`. Coverlet needs the app's Debug PDB to stay `portable` and the test project's
+  `PreserveCompilationContext`, without which it cannot resolve the WinForms and WebView2
+  references and instruments nothing.
+- `ManualParityTests` keeps the six manuals in step (see Localization), and
+  `ThirdPartyNoticesTests` keeps `THIRD-PARTY-NOTICES.txt` in step with the packages (see
+  Installer and releases).
+- CI (`.github/workflows/dotnet.yml`) compiles the translations, checks the format, builds and
+  tests, with a 20-minute limit.
 - While a PlanCake window is open, `bin\Debug\plancake.exe` is locked: build and test with
   `dotnet build --artifacts-path <temp dir>` (and the same for `dotnet test`) rather than
   closing the user's window.

@@ -16,6 +16,7 @@
     { "term": "Claude", "rule": "never-translate", "details": "AI assistant name" },
     { "term": "Debussy", "rule": "never-translate", "details": "Claude Code plugin collection name" },
     { "term": "[usernote]", "rule": "never-translate", "details": "Default opening note marker, literal text in code formatting" },
-    { "term": "[/usernote]", "rule": "never-translate", "details": "Default closing note marker, literal text in code formatting" }
+    { "term": "[/usernote]", "rule": "never-translate", "details": "Default closing note marker, literal text in code formatting" },
+    { "term": "native language names", "rule": "markup", "details": "A language named in its own language (English, Русский, Українська, Français, עברית, Deutsch) inside text in another language is wrapped in <span lang=\"code\">, so a screen reader reads it with the right voice: <span lang=\"ru\">Русский</span>. Hebrew in a left-to-right manual also gets dir=\"rtl\"; in the Hebrew manual, a left-to-right name gets dir=\"ltr\". The name of the manual's own language needs no span." }
   ]
 }

@@ -28,6 +28,7 @@ public class HostCommandsTests {
         { Keys.Back, nameof(HostCommand.Back) },
         { Keys.Alt | Keys.Right, nameof(HostCommand.Forward) },
         { Keys.F6, nameof(HostCommand.SwitchPane) },
+        { Keys.Shift | Keys.F6, nameof(HostCommand.SwitchPane) },
         { Keys.F9, nameof(HostCommand.NextNote) },
         { Keys.Shift | Keys.F9, nameof(HostCommand.PreviousNote) },
         { Keys.Alt | Keys.Shift | Keys.Down, nameof(HostCommand.NextBlock) },
@@ -58,7 +59,7 @@ public class HostCommandsTests {
     [InlineData(Keys.Apps)] // So does the Applications key...
     [InlineData(Keys.Shift | Keys.F10)] // ...and its Shift+F10 equivalent.
     [InlineData(Keys.Control | Keys.A)] // JAWS handles Select all in the document itself.
-    [InlineData(Keys.F8)] // JAWS takes F8 for extended select (Task 2 spike): notes use F9.
+    [InlineData(Keys.F8)] // JAWS takes F8 for extended select (docs/jaws-spike.md, item 8): notes use F9.
     [InlineData(Keys.Shift | Keys.F8)]
     [InlineData(Keys.Left)] // Plain arrows move the virtual cursor.
     [InlineData(Keys.Down)] // So do Down and Up: only Alt+Shift+Down and Alt+Shift+Up move from block to block.

@@ -17,6 +17,7 @@ partial class ShortcutsDialog {
         shortcutsLabel = new Label();
         shortcutsList = new Oire.WinForms.NativeControls.NativeListView();
         closeButton = new Button();
+        buttonLayout = DialogButtons.CreateRow(closeButton);
         mainLayout.SuspendLayout();
         SuspendLayout();
         //
@@ -26,7 +27,7 @@ partial class ShortcutsDialog {
         mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
         mainLayout.Controls.Add(shortcutsLabel, 0, 0);
         mainLayout.Controls.Add(shortcutsList, 0, 1);
-        mainLayout.Controls.Add(closeButton, 0, 2);
+        mainLayout.Controls.Add(buttonLayout, 0, 2);
         mainLayout.Dock = DockStyle.Fill;
         mainLayout.Name = "mainLayout";
         mainLayout.Padding = new Padding(12);
@@ -51,15 +52,15 @@ partial class ShortcutsDialog {
         shortcutsList.Name = "shortcutsList";
         shortcutsList.TabIndex = 1;
         //
+        // buttonLayout: Close at the end of the row (DialogButtons).
+        //
+        buttonLayout.TabIndex = 2;
+        //
         // closeButton
         //
-        closeButton.Anchor = AnchorStyles.Right;
-        closeButton.AutoSize = true;
         closeButton.DialogResult = DialogResult.Cancel;
-        closeButton.MinimumSize = new Size(80, 0);
         closeButton.Name = "closeButton";
-        closeButton.TabIndex = 2;
-        closeButton.Text = "Close";
+        closeButton.Text = "&Close";
         //
         // ShortcutsDialog
         //
@@ -87,4 +88,5 @@ partial class ShortcutsDialog {
     private Label shortcutsLabel;
     private Oire.WinForms.NativeControls.NativeListView shortcutsList;
     private Button closeButton;
+    private TableLayoutPanel buttonLayout;
 }

@@ -29,7 +29,7 @@ partial class MainWindow {
         documentView = new DocumentView();
         notesLayout = new TableLayoutPanel();
         notesLabel = new Label();
-        notesList = new Oire.WinForms.NativeControls.NativeListView();
+        notesList = new NotesListView();
         statusStrip = new StatusStrip();
         statusLabel = new ToolStripStatusLabel();
         mainLayout.SuspendLayout();
@@ -128,6 +128,7 @@ partial class MainWindow {
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(1000, 700);
         Controls.Add(mainLayout);
+        MinimumSize = new Size(500, 360);
         Name = "MainWindow";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "PlanCake";
@@ -151,7 +152,7 @@ partial class MainWindow {
     private DocumentView documentView;
     private TableLayoutPanel notesLayout;
     private Label notesLabel;
-    private Oire.WinForms.NativeControls.NativeListView notesList;
+    private NotesListView notesList;
     private StatusStrip statusStrip;
     private ToolStripStatusLabel statusLabel;
 }

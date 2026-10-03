@@ -76,6 +76,24 @@ public class MnemonicTests: IDisposable {
         });
     }
 
+    [Theory]
+    [MemberData(nameof(Languages))]
+    public void Forms_GiveEveryButtonAndCheckBoxAMnemonic(string language) {
+        UseLanguage(language);
+
+        Sta.Run(() => {
+            foreach (var dialog in Forms()) {
+                using (dialog) {
+                    AllControls(dialog)
+                        .OfType<ButtonBase>()
+                        .Where(button => !button.UseMnemonic || MenuTextFormatter.ExtractMnemonic(button.Text) is null)
+                        .Select(button => button.Text)
+                        .Should().BeEmpty("every button of {0} in {1} is reached by Alt and a letter", dialog.GetType().Name, language);
+                }
+            }
+        });
+    }
+
     [Fact]
     public void Forms_CoverEveryFormOfTheApplication() {
         var built = new List<Type>();
@@ -112,11 +130,15 @@ public class MnemonicTests: IDisposable {
             .Select(item => item.Text)
             .Concat(items.Where(item => item.Children is not null).SelectMany(item => ItemsWithoutMnemonic(item.Children!)));
 
-    /// <summary>Every form PlanCake shows; <see cref="Forms_CoverEveryFormOfTheApplication"/> keeps the list whole.</summary>
+    /// <summary>
+    /// Every form PlanCake shows; <see cref="Forms_CoverEveryFormOfTheApplication"/> keeps the list
+    /// whole.
+    /// </summary>
     private static List<Form> Forms() => [
         new MainWindow(),
         new NoteDialog(NoteDialogMode.Add, "Excerpt", String.Empty, _ => null, NoteEnterAction.Save),
         new OpenLinkDialog(),
+        new OpeningDialog("plan.md", Task.CompletedTask),
         new SettingsDialog(),
         new AboutDialog(),
         new ShortcutsDialog(ShortcutsDialog.BuildRows()),

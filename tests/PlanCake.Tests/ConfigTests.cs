@@ -51,7 +51,7 @@ public class ConfigTests: IDisposable {
         ShouldHaveTheDefaults();
 
         var text = File.ReadAllText(FilePath);
-        text.Should().Contain("[General]").And.Contain("[Notes]").And.Contain("[Advanced]");
+        text.Should().Contain("[General]").And.Contain("[Notes]").And.Contain("[Advanced]").And.Contain("[Window]");
     }
 
     [Fact]
@@ -318,6 +318,60 @@ public class ConfigTests: IDisposable {
     }
 
     [Fact]
+    public void SaveWindow_ThenLoad_RoundTripsWhereTheWindowWasAndKeepsTheSettings() {
+        Config.Load();
+
+        // Another window saved a setting since this one read the file.
+        WriteFile("[General]\nLanguage = de\n");
+
+        Config.SaveWindow(new Config.SectionWindow {
+            Left = -1800,
+            Top = 40,
+            Width = 1200,
+            Height = 800,
+            Maximized = true,
+            NotesListWidth = 420,
+            Zoom = 130,
+        }).Should().BeTrue();
+
+        Config.Load();
+
+        Config.Window.Left.Should().Be(-1800);
+        Config.Window.Top.Should().Be(40);
+        Config.Window.Width.Should().Be(1200);
+        Config.Window.Height.Should().Be(800);
+        Config.Window.Maximized.Should().BeTrue();
+        Config.Window.NotesListWidth.Should().Be(420);
+        Config.Window.Zoom.Should().Be(130);
+        Config.General.Language.Should().Be("de");
+        File.ReadAllText(FilePath).Should().Contain("[Window]");
+    }
+
+    [Fact]
+    public void Load_WithAnUnusableWindowSection_FallsBackToNothingSaved() {
+        WriteFile("[Window]\nLeft = 10\nTop = 10\nWidth = -5\nHeight = 600\nNotesListWidth = -1\nZoom = 900\n");
+
+        Config.Load();
+
+        Config.Window.Width.Should().Be(0);
+        Config.Window.Height.Should().Be(0);
+        Config.Window.NotesListWidth.Should().Be(0);
+        Config.Window.Zoom.Should().Be(100);
+    }
+
+    [Fact]
+    public void SaveWindow_WhenTheFileCannotBeRead_LeavesItAlone() {
+        WriteFile("[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n");
+        Config.Load();
+
+        WriteFile(UnparsableFile);
+
+        Config.SaveWindow(new Config.SectionWindow { Width = 800, Height = 600 }).Should().BeFalse();
+
+        File.ReadAllText(FilePath).Should().Be(UnparsableFile);
+    }
+
+    [Fact]
     public void SaveShowNotesList_WhenTheFileCannotBeRead_SetsItWithoutOverwritingTheFile() {
         WriteFile("[Notes]\nOpeningMarker = <<\nClosingMarker = >>\n");
         Config.Load();
@@ -456,5 +510,10 @@ public class ConfigTests: IDisposable {
         Config.Notes.BlockEnterAction.Should().Be(BlockEnterAction.AddNote);
         Config.Notes.NoteEnterAction.Should().Be(NoteEnterAction.Save);
         Config.Advanced.ConvertToUtf8.Should().BeFalse();
+        Config.Window.Width.Should().Be(0, "no window was saved yet");
+        Config.Window.Height.Should().Be(0);
+        Config.Window.Maximized.Should().BeFalse();
+        Config.Window.NotesListWidth.Should().Be(0);
+        Config.Window.Zoom.Should().Be(100);
     }
 }

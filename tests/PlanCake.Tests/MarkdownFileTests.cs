@@ -1,6 +1,8 @@
+using System.Runtime.InteropServices;
 using System.Text;
 using AwesomeAssertions;
 using Oire.PlanCake.Notes;
+using Oire.PlanCake.Utils;
 using Xunit;
 
 namespace Oire.PlanCake.Tests;
@@ -125,6 +127,72 @@ public class MarkdownFileTests: IDisposable {
     }
 
     [Fact]
+    public void OpenWithoutConverting_Windows1251_LeavesTheFileUntilConvertToUtf8() {
+        var bytes = _windows1251.GetBytes("# План\r\nТекст\r\n");
+        var path = WriteBytes(bytes);
+
+        var file = MarkdownFile.OpenWithoutConverting(path, Options(convert: true));
+
+        file.Text.Should().Be("# План\r\nТекст\r\n");
+        file.IsReadOnly.Should().BeTrue();
+        file.ConvertedFrom.Should().BeNull();
+        file.NeedsConversion.Should().BeTrue();
+        File.ReadAllBytes(path).Should().Equal(bytes);
+
+        file.ConvertToUtf8().Should().Be("# План\r\nТекст\r\n");
+
+        file.IsReadOnly.Should().BeFalse();
+        file.ConvertedFrom!.CodePage.Should().Be(1251);
+        file.NeedsConversion.Should().BeFalse();
+        File.ReadAllBytes(path).Should().Equal(Utf8("# План\r\nТекст\r\n"));
+    }
+
+    [Fact]
+    public void ConvertToUtf8_AfterAChangeOnDisk_ConvertsWhatTheFileHoldsNow() {
+        var path = WriteBytes(_windows1251.GetBytes("# План\n"));
+        var file = MarkdownFile.OpenWithoutConverting(path, Options(convert: true));
+        File.WriteAllBytes(path, _windows1251.GetBytes("# План\nНовая строка\n"));
+
+        file.ConvertToUtf8().Should().Be("# План\nНовая строка\n");
+
+        file.Text.Should().Be("# План\nНовая строка\n");
+        File.ReadAllBytes(path).Should().Equal(Utf8("# План\nНовая строка\n"));
+    }
+
+    [Fact]
+    public void ConvertToUtf8_WhenTheOptionsDoNotConvert_LeavesTheFileReadOnly() {
+        var bytes = _windows1251.GetBytes("# План\n");
+        var path = WriteBytes(bytes);
+        var file = MarkdownFile.OpenWithoutConverting(path, Options());
+
+        file.NeedsConversion.Should().BeFalse();
+        file.ConvertToUtf8().Should().Be("# План\n");
+
+        file.IsReadOnly.Should().BeTrue();
+        File.ReadAllBytes(path).Should().Equal(bytes);
+    }
+
+    [Fact]
+    public void ConvertToUtf8_Utf8File_NeedsNoConversion() {
+        var path = WriteBytes(Utf8("# Plan\n"));
+        var file = MarkdownFile.OpenWithoutConverting(path, Options(convert: true));
+
+        file.NeedsConversion.Should().BeFalse();
+        file.IsReadOnly.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Reload_AfterOpenWithoutConverting_FollowsTheOptions() {
+        var path = WriteBytes(_windows1251.GetBytes("# План\n"));
+        var file = MarkdownFile.OpenWithoutConverting(path, Options(convert: true));
+
+        file.Reload();
+
+        file.ConvertedFrom!.CodePage.Should().Be(1251);
+        File.ReadAllBytes(path).Should().Equal(Utf8("# План\n"));
+    }
+
+    [Fact]
     public void Write_LeavesNoTemporaryFileBehind() {
         var path = WriteBytes(Utf8("a\n"));
         var file = MarkdownFile.Open(path, Options());
@@ -161,15 +229,17 @@ public class MarkdownFileTests: IDisposable {
     }
 
     [Fact]
-    public void Write_FileWithTheReadOnlyAttribute_ThrowsIOException() {
+    public void Write_FileWithTheReadOnlyAttribute_ThrowsIOExceptionWithoutRetrying() {
         var path = WriteBytes(Utf8("a\n"));
-        var file = MarkdownFile.Open(path, Options() with { Retries = 1 });
+        var retries = new List<int>();
+        var file = MarkdownFile.Open(path, Options() with { OnRetry = retries.Add });
         File.SetAttributes(path, FileAttributes.ReadOnly);
 
         try {
             var write = () => file.Write("b\n");
 
             write.Should().Throw<IOException>();
+            retries.Should().BeEmpty();
             File.ReadAllText(path).Should().Be("a\n");
             Directory.GetFiles(_folder).Should().Equal(path);
         } finally {
@@ -200,6 +270,61 @@ public class MarkdownFileTests: IDisposable {
 
         failedAttempts.Should().Equal(0);
         File.ReadAllText(path).Should().Be("b\n");
+    }
+
+    [Fact]
+    public void Open_Folder_FailsWithoutRetrying() {
+        var retries = new List<int>();
+
+        var open = () => MarkdownFile.Open(_folder, Options() with { OnRetry = retries.Add });
+
+        open.Should().Throw<IOException>();
+        retries.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Write_ThroughASymbolicLink_WritesTheTargetAndKeepsTheLink() {
+        var target = WriteBytes(Utf8("a\n"), "real.md");
+        var link = Path.Combine(_folder, "link.md");
+
+        try {
+            File.CreateSymbolicLink(link, target);
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) {
+            // Creating a symbolic link takes Developer Mode or elevation; without either there is
+            // nothing to test.
+            return;
+        }
+
+        var file = MarkdownFile.Open(link, Options());
+        file.Write("b\n");
+
+        File.ReadAllText(target).Should().Be("b\n");
+        new FileInfo(link).LinkTarget.Should().Be(target);
+        file.Path.Should().Be(link);
+        Directory.GetFiles(_folder).Order().Should().Equal(link, target);
+    }
+
+    [Fact]
+    public void Write_FileWithASecondHardLink_UpdatesBothNames() {
+        var path = WriteBytes(Utf8("a\n"));
+        var other = Path.Combine(_folder, "other.md");
+        NativeMethods.CreateHardLink(other, path, IntPtr.Zero).Should().BeTrue();
+
+        var file = MarkdownFile.Open(path, Options());
+        file.Write("longer text\n");
+        file.Write("b\n");
+
+        File.ReadAllText(path).Should().Be("b\n");
+        File.ReadAllText(other).Should().Be("b\n");
+        FileIdentity.IsSameFile(path, other).Should().BeTrue();
+        FileIdentity.LinkCount(path).Should().Be(2);
+    }
+
+    private static class NativeMethods {
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true, EntryPoint = "CreateHardLinkW")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CreateHardLink(string fileName, string existingFileName, IntPtr securityAttributes);
     }
 
     [Fact]

@@ -18,7 +18,7 @@ public class NotesListRowTests {
     public void From_OneLineNote_ShowsItsLineTheBlockAndTheText() {
         var row = NotesListRow.From(NoteOf("Looks good.", 5, 5, _block), StartOfDocument);
 
-        row.ToCells().Should().Equal("5", "Some text.", "Looks good.");
+        row.ToCells().Should().Equal("Looks good.", "5", "Some text.");
     }
 
     [Fact]
@@ -34,6 +34,14 @@ public class NotesListRowTests {
         var row = NotesListRow.From(NoteOf("Use `NoteStore` and **not** the file", 5, 5, _block), StartOfDocument);
 
         row.Text.Should().Be("Use NoteStore and not the file");
+    }
+
+    [Fact]
+    public void From_NoteOfSeveralSentences_ShowsTheFirstAndTipsTheWhole() {
+        var note = NoteOf("Rename this. The old name is used in **three** places.", 5, 5, _block);
+
+        NotesListRow.From(note, StartOfDocument).Text.Should().Be("Rename this.");
+        NotesListRow.TipText(note).Should().Be("Rename this. The old name is used in three places.");
     }
 
     [Fact]

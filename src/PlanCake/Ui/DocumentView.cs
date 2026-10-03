@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
+using Oire.PlanCake.Utils;
 using Serilog;
 using App = Oire.PlanCake.Utils.Constants.App;
 
@@ -46,7 +47,7 @@ internal sealed class DocumentView: UserControl {
     /// The one navigation the view may make: the page <see cref="Navigate"/> asked for. Every
     /// other navigation (a link, a form, a <c>meta refresh</c> in a plan's raw HTML) is canceled.
     /// </summary>
-    private string? _allowedNavigation;
+    private readonly NavigationGate _navigation = new();
 
     /// <summary>
     /// Raised on the UI thread for every message the page posts. Do not open a dialog, a
@@ -65,12 +66,20 @@ internal sealed class DocumentView: UserControl {
     /// </summary>
     public event KeyEventHandler? AcceleratorKeyDown;
 
+    /// <summary>
+    /// Raised when an accelerator key (see <see cref="AcceleratorKeyDown"/>) is released while the
+    /// document has focus; Alt released alone is how the window tells a bare Alt, which enters
+    /// the menu bar. The same rules as for <see cref="AcceleratorKeyDown"/> apply.
+    /// </summary>
+    public event KeyEventHandler? AcceleratorKeyUp;
+
     public DocumentView() {
         _webView = new TabWebView {
             Name = "webView",
             Dock = DockStyle.Fill,
         };
         _webView.KeyDown += OnWebViewKeyDown;
+        _webView.KeyUp += OnWebViewKeyUp;
         Controls.Add(_webView);
     }
 
@@ -78,12 +87,15 @@ internal sealed class DocumentView: UserControl {
     public bool IsInitialized => _webView.CoreWebView2 is not null;
 
     /// <summary>
-    /// Starts the browser: a user data folder under <see cref="App.DataFolder"/> (the install
-    /// folder is not writable), the <c>web</c> folder mapped to <see cref="BaseUri"/>, and the
+    /// Starts the browser: its user data folder in <see cref="App.WebView2DataFolder"/> (the
+    /// install folder is not writable), the <c>web</c> folder mapped to <see cref="BaseUri"/>, and the
     /// browser's own context menus, accelerator keys, status bar and (in Release) dev tools off.
     /// </summary>
-    public async Task InitializeAsync() {
-        var userDataFolder = App.WebView2DataFolder;
+    public Task InitializeAsync() => InitializeAsync(App.WebView2DataFolder);
+
+    /// <inheritdoc cref="InitializeAsync()"/>
+    /// <param name="userDataFolder">The browser's user data folder; the tests give it one of its own.</param>
+    internal async Task InitializeAsync(string userDataFolder) {
         var environment = await CoreWebView2Environment.CreateAsync(
             browserExecutableFolder: null,
             userDataFolder: userDataFolder
@@ -125,11 +137,15 @@ internal sealed class DocumentView: UserControl {
     /// </summary>
     public void Navigate(string page) {
         EnsureInitialized();
-        _allowedNavigation = new Uri(BaseUri, page).AbsoluteUri;
-        _webView.CoreWebView2.Navigate(_allowedNavigation);
+        var uri = new Uri(BaseUri, page).AbsoluteUri;
+        _navigation.Allow(uri);
+        _webView.CoreWebView2.Navigate(uri);
     }
 
-    /// <summary>Sends <paramref name="message"/> to the page as JSON (see <see cref="PageMessages.Serialize"/>).</summary>
+    /// <summary>
+    /// Sends <paramref name="message"/> to the page as JSON (see
+    /// <see cref="PageMessages.Serialize"/>).
+    /// </summary>
     public void PostMessage(object message) {
         EnsureInitialized();
         _webView.CoreWebView2.PostWebMessageAsJson(PageMessages.Serialize(message));
@@ -187,9 +203,10 @@ internal sealed class DocumentView: UserControl {
     /// <summary>
     /// Moves keyboard focus into the document, where the screen reader can read it. Does nothing
     /// when the document already has it: focusing the control again takes the focus from the
-    /// browser's own window and hands it back, and a screen reader that sees the document lose
-    /// and regain the focus while the page replaces its content keeps its old place in the
-    /// virtual buffer instead of following the page's focus (Task 8 JAWS check).
+    /// browser's own window and hands it back, and a screen reader that sees the document lose and
+    /// regain the focus while the page replaces its content keeps its old place in the virtual
+    /// buffer instead of following the page's focus (<c>docs/jaws-spike.md</c>, "A followed link
+    /// landed at the end of the new file").
     /// </summary>
     public void FocusDocument() {
         if (!_webView.ContainsFocus) {
@@ -218,31 +235,57 @@ internal sealed class DocumentView: UserControl {
 
     private void OnWebViewKeyDown(object? sender, KeyEventArgs e) => AcceleratorKeyDown?.Invoke(this, e);
 
+    private void OnWebViewKeyUp(object? sender, KeyEventArgs e) => AcceleratorKeyUp?.Invoke(this, e);
+
     private void OnWebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e) {
-        // Only the app's own pages may talk to the host.
-        if (!e.Source.StartsWith(BaseUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase)) {
-            Log.Warning("Page message from an unexpected source ignored: {Source}", e.Source);
+        if (ParsePageMessage(e.Source, e.WebMessageAsJson) is not { } parsed) {
             return;
+        }
+
+        MessageReceived?.Invoke(this, new PageMessageEventArgs(parsed.Type, parsed.Message, FilesOf(e)));
+    }
+
+    /// <summary>
+    /// True when a message from <paramref name="source"/> comes from the app's own pages, the only
+    /// ones that may talk to the host.
+    /// </summary>
+    internal static bool IsTrustedSource(string? source) =>
+        source is not null && source.StartsWith(BaseUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// A page message as the host reads it: from the app's own pages
+    /// (<see cref="IsTrustedSource"/>), a JSON object with a string <c>type</c>.
+    /// </summary>
+    /// <param name="source">The URI of the document that sent it.</param>
+    /// <param name="json">The message, as JSON.</param>
+    /// <returns>
+    /// Its type and the whole message; <see langword="null"/> (and a warning in the log) for
+    /// anything else.
+    /// </returns>
+    internal static (string Type, JsonElement Message)? ParsePageMessage(string? source, string? json) {
+        if (!IsTrustedSource(source)) {
+            Log.Warning("Page message from an unexpected source ignored: {Source}", source);
+            return null;
         }
 
         JsonElement message;
 
         try {
-            using var document = JsonDocument.Parse(e.WebMessageAsJson);
+            using var document = JsonDocument.Parse(json ?? String.Empty);
             message = document.RootElement.Clone();
         } catch (JsonException ex) {
             Log.Warning(ex, "Page message is not valid JSON");
-            return;
+            return null;
         }
 
         if (message.ValueKind != JsonValueKind.Object
             || !message.TryGetProperty("type", out var typeProperty)
             || typeProperty.ValueKind != JsonValueKind.String) {
-            Log.Warning("Page message without a type ignored: {Json}", e.WebMessageAsJson);
-            return;
+            Log.Warning("Page message without a type ignored: {Json}", json);
+            return null;
         }
 
-        MessageReceived?.Invoke(this, new PageMessageEventArgs(typeProperty.GetString()!, message, FilesOf(e)));
+        return (typeProperty.GetString()!, message);
     }
 
     private static List<string> FilesOf(CoreWebView2WebMessageReceivedEventArgs e) {
@@ -263,22 +306,21 @@ internal sealed class DocumentView: UserControl {
     // to the host and scrolls to in-page anchors itself, so any navigation that still starts
     // comes from something the plan's raw HTML did.
     private void OnNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e) {
-        if (_allowedNavigation is not null && String.Equals(e.Uri, _allowedNavigation, StringComparison.Ordinal)) {
-            _allowedNavigation = null;
+        if (_navigation.TryPass(e.Uri)) {
             return;
         }
 
-        Log.Information("Navigation blocked: {Uri}", e.Uri);
+        Log.Information("Navigation blocked: {Uri}", UrlHelper.ForLog(e.Uri));
         e.Cancel = true;
     }
 
     private void OnFrameNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e) {
-        Log.Information("Frame navigation blocked: {Uri}", e.Uri);
+        Log.Information("Frame navigation blocked: {Uri}", UrlHelper.ForLog(e.Uri));
         e.Cancel = true;
     }
 
     private void OnNewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e) {
-        Log.Information("New window blocked: {Uri}", e.Uri);
+        Log.Information("New window blocked: {Uri}", UrlHelper.ForLog(e.Uri));
         e.Handled = true;
     }
 
@@ -303,6 +345,7 @@ internal sealed class DocumentView: UserControl {
             }
 
             _webView.KeyDown -= OnWebViewKeyDown;
+            _webView.KeyUp -= OnWebViewKeyUp;
             _webView.Dispose();
         }
 

@@ -1,7 +1,7 @@
-// Chooses the block Alt+Shift+Down Arrow and Alt+Shift+Up Arrow move to. Tab reaches only links and check
-// boxes, and F9 only notes; a block carries no tabindex (Task 2 spike), so without these keys a
-// keyboard user who does not use a screen reader could not reach an ordinary block to press
-// Enter on it. Screen reader users move with their own reading cursor instead.
+// Chooses the block Alt+Shift+Down Arrow and Alt+Shift+Up Arrow move to. Tab reaches only links and
+// check boxes, and F9 only notes; a block carries no tabindex (docs/jaws-spike.md, item 1), so
+// without these keys a keyboard user who does not use a screen reader could not reach an ordinary
+// block to press Enter on it. Screen reader users move with their own reading cursor instead.
 //
 // pick is pure, so the tests run it without a browser (PlanCake.Tests, BlockPickTests).
 "use strict";

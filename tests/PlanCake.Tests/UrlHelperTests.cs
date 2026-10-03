@@ -42,4 +42,36 @@ public class UrlHelperTests {
     [InlineData("ftp://example.com/plan.md", false)]
     public void OpenLinkDialog_AcceptsOnlyHttpLinks(string text, bool accepted) =>
         (OpenLinkDialog.Validate(text) is null).Should().Be(accepted);
+
+    // ForLog: what a log may hold of a link
+
+    [Theory]
+    [InlineData(
+        "https://user:secret@raw.githubusercontent.com/o/r/main/plan.md?token=SECRET&ref=main#SECRET",
+        "https://raw.githubusercontent.com/o/r/main/plan.md?token&ref"
+    )]
+    [InlineData("https://example.com/plan.md", "https://example.com/plan.md")]
+    [InlineData("http://example.com:8080/a/b.md?x=1", "http://example.com:8080/a/b.md?x")]
+    [InlineData("other.md?token=SECRET#part", "other.md?token#part")]
+    [InlineData("#section", "#section")]
+    [InlineData(@"C:\plans\plan.md", @"C:\plans\plan.md")]
+    [InlineData("mailto:ap@oire.me?subject=SECRET", "mailto:ap@oire.me?subject")]
+    [InlineData("", "")]
+    [InlineData(null, "")]
+    public void ForLog_DropsCredentialsQueryValuesAndFragments(string? text, string expected) {
+        var logged = UrlHelper.ForLog(text);
+
+        logged.Should().Be(expected);
+        logged.Should().NotContain("SECRET").And.NotContain("?token=");
+    }
+
+    [Fact]
+    public void ForLog_OfAUri_NeverHoldsTheToken() {
+        var uri = new Uri("https://someone:secret@raw.githubusercontent.com/o/r/main/plan.md?token=GHSAT0AAAA");
+
+        var logged = UrlHelper.ForLog(uri);
+
+        logged.Should().Be("https://raw.githubusercontent.com/o/r/main/plan.md?token");
+        logged.Should().NotContain("?token=").And.NotContain("GHSAT").And.NotContain("secret").And.NotContain("someone");
+    }
 }

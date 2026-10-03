@@ -57,11 +57,22 @@ internal sealed class CliRunner {
         _fileArgument.Validators.Add(result => {
             if (result.Tokens is [{ Value: ['-', ..] option }]) {
                 result.AddError(_("Unrecognized option: {0}", option));
+            } else if (result.Tokens is [{ Value: var word }] && MistypedCommand(word) is { } command) {
+                // A mistyped command would otherwise open the window on a file that does not exist,
+                // and a script waiting for it would wait until someone closes the window.
+                result.AddError(_("Unrecognized command: {0}. Did you mean {1}?", word, command));
             }
         });
 
-        _root = new RootCommand(_(
-            "PlanCake: read Markdown files comfortably and leave notes right where they belong. Without a command, \"plancake [file]\" opens the window, with the file if one is given."
+        // System.CommandLine has no epilog: the exit codes and the pointer to the manual end the
+        // root description, which only the root help shows.
+        _root = new RootCommand(String.Join(
+            Environment.NewLine + Environment.NewLine,
+            _(
+                "PlanCake: read Markdown files comfortably and leave notes right where they belong. Without a command, \"plancake [file]\" opens the window, with the file if one is given."
+            ),
+            _("Exit codes: 0 when the command succeeds, 1 on an error, 3 when \"check\" finds notes."),
+            _("The user manual describes every command: press F1 in the window, or open help\\<language>\\manual.html in the folder of plancake.exe.")
         )) {
             _fileArgument,
             ListCommand(),
@@ -91,6 +102,56 @@ internal sealed class CliRunner {
         file = opensWindow ? result.GetValue(runner._fileArgument) : null;
 
         return opensWindow;
+    }
+
+    /// <summary>The subcommands, which <see cref="MistypedCommand"/> compares a lone word with.</summary>
+    internal static readonly string[] CommandNames = ["list", "check", "clear", "export"];
+
+    /// <summary>
+    /// The subcommand <paramref name="word"/> is likely a typo of, or <see langword="null"/>: a word
+    /// with no folder and no extension, naming no file or folder, within two edits of a
+    /// subcommand. Any other word is a file to open, so an existing file without an extension
+    /// still opens.
+    /// </summary>
+    internal static string? MistypedCommand(string word) {
+        ArgumentNullException.ThrowIfNull(word);
+
+        if (word.Length == 0 || word.AsSpan().IndexOfAny('\\', '/', ':') >= 0 || Path.HasExtension(word)
+            || File.Exists(word) || Directory.Exists(word)) {
+            return null;
+        }
+
+        var lowered = word.ToLowerInvariant();
+
+        return CommandNames
+            .Select(command => (Command: command, Distance: EditDistance(lowered, command)))
+            .Where(candidate => candidate.Distance <= 2)
+            .OrderBy(candidate => candidate.Distance)
+            .Select(candidate => candidate.Command)
+            .FirstOrDefault();
+    }
+
+    /// <summary>The Levenshtein distance between two words.</summary>
+    private static int EditDistance(string first, string second) {
+        var previous = new int[second.Length + 1];
+        var current = new int[second.Length + 1];
+
+        for (var j = 0; j <= second.Length; j++) {
+            previous[j] = j;
+        }
+
+        for (var i = 1; i <= first.Length; i++) {
+            current[0] = i;
+
+            for (var j = 1; j <= second.Length; j++) {
+                var substitution = previous[j - 1] + (first[i - 1] == second[j - 1] ? 0 : 1);
+                current[j] = Math.Min(substitution, Math.Min(previous[j], current[j - 1]) + 1);
+            }
+
+            (previous, current) = (current, previous);
+        }
+
+        return previous[second.Length];
     }
 
     /// <summary>Runs a subcommand (or prints the help, the version or a parse error).</summary>
@@ -182,18 +243,25 @@ internal sealed class CliRunner {
 
     private Command ClearCommand() {
         var file = FileArgument(_("The Markdown file to remove every note from"));
+        var convert = new Option<bool>("--convert") {
+            Description = _("Convert a file that is not UTF-8 to UTF-8 (without BOM), whatever the settings say"),
+        };
         var markers = new MarkerOptions();
-        var command = new Command("clear", _("Remove every note from a file")) { file };
+        var command = new Command("clear", _("Remove every note from a file")) { file, convert };
         markers.AddTo(command);
 
         command.SetAction(result => {
+            var convertToUtf8 = result.GetValue(convert) || Config.Advanced.ConvertToUtf8;
+
             if (!TryResolveMarkers(result, markers, out var noteMarkers)
-                || !TryOpen(result.GetValue(file)!, Config.Advanced.ConvertToUtf8, null, out var markdown)) {
+                || !TryOpen(result.GetValue(file)!, convertToUtf8, null, out var markdown)) {
                 return ExitCode.Error;
             }
 
             if (markdown.ConvertedFrom is { } convertedFrom) {
-                WriteLine(_output, _("Converted from {0} to UTF-8.", LegacyEncoding.DisplayName(convertedFrom)));
+                WriteLine(
+                    _output, _("The file was converted from {0} to UTF-8.", LegacyEncoding.DisplayName(convertedFrom))
+                );
             }
 
             var parse = NoteParser.Parse(markdown.Text, noteMarkers);
@@ -223,14 +291,14 @@ internal sealed class CliRunner {
 
                 if (markdown.IsReadOnly) {
                     return Fail(_(
-                        "{0} is not in UTF-8 but in {1}, so PlanCake does not change it. To convert it, turn on converting files that are not UTF-8 in PlanCake's settings.",
+                        "{0} is not in UTF-8 but in {1}, so PlanCake does not change it. To convert it, run the command again with --convert, or turn on converting files that are not UTF-8 in PlanCake's settings.",
                         markdown.Path, LegacyEncoding.DisplayName(markdown.Encoding)
                     ));
                 }
 
                 try {
                     new NoteStore(markdown, noteMarkers).Clear(markdown.Text);
-                } catch (Exception ex) when (ex is IOException or StaleFileException or ReadOnlyFileException) {
+                } catch (Exception ex) when (ex is IOException or NoteWriteException) {
                     Log.Error(ex, "CLI: unable to clear the notes of {Path}", markdown.Path);
 
                     return Fail(_("Unable to write {0}: {1}", markdown.Path, ex.Message));
@@ -238,7 +306,7 @@ internal sealed class CliRunner {
             }
 
             Log.Information("CLI: clear {Path}: {Count} notes removed", markdown.Path, parse.Notes.Count);
-            WriteLine(_output, _n("Removed {0} note.", "Removed {0} notes.", parse.Notes.Count, parse.Notes.Count));
+            WriteLine(_output, _n("Removed {0} note", "Removed {0} notes", parse.Notes.Count, parse.Notes.Count));
 
             return ExitCode.Success;
         });
@@ -342,6 +410,12 @@ internal sealed class CliRunner {
     private bool TryOpen(string path, bool convertToUtf8, string? documentLanguage, out MarkdownFile file) {
         file = null!;
 
+        if (Directory.Exists(path)) {
+            Fail(_("{0} is a folder, not a file.", path));
+
+            return false;
+        }
+
         try {
             file = MarkdownFile.Open(path, new MarkdownFileOptions(
                 ConvertToUtf8: convertToUtf8,
@@ -382,7 +456,8 @@ internal sealed class CliRunner {
             mode,
             LocalizedText.RenderStrings(),
             language ?? Config.General.DefaultDocumentLanguage,
-            Path.GetFileName(file.Path)
+            Path.GetFileName(file.Path),
+            Path.GetDirectoryName(Path.GetFullPath(file.Path))
         ));
 
     private void WarnAboutUnterminatedNotes(NoteParseResult parse) {
@@ -396,20 +471,24 @@ internal sealed class CliRunner {
 
     /// <summary>
     /// One line per note: <c>&lt;noteStart&gt;-&lt;noteEnd&gt; after &lt;blockStart&gt;-&lt;blockEnd&gt;
-    /// "&lt;excerpt&gt;": &lt;text&gt;</c>, line breaks in the text shown as <c> / </c>. Empty
-    /// without notes.
+    /// "&lt;excerpt&gt;": &lt;text&gt;</c>, or <c>&lt;noteStart&gt;-&lt;noteEnd&gt; at the start:
+    /// &lt;text&gt;</c> for a note before the first block; line numbers are 1-based, and line
+    /// breaks in the text are shown as <c> / </c>. Empty without notes.
     /// </summary>
     internal static string ListText(IReadOnlyList<RenderedNote> notes) {
         var text = new StringBuilder();
 
         foreach (var rendered in notes) {
             var note = rendered.Note;
-            var block = rendered.Block;
-            text.Append(CultureInfo.InvariantCulture, $"{note.StartLine}-{note.EndLine} after ")
-                .Append(CultureInfo.InvariantCulture, $"{block?.StartLine ?? 0}-{block?.EndLine ?? 0} ")
-                .Append(CultureInfo.InvariantCulture, $"\"{block?.Excerpt}\": ")
-                .Append(note.Text.Replace("\n", " / ", StringComparison.Ordinal))
-                .Append('\n');
+            text.Append(CultureInfo.InvariantCulture, $"{note.StartLine}-{note.EndLine} ");
+
+            if (rendered.Block is { } block) {
+                text.Append(CultureInfo.InvariantCulture, $"after {block.StartLine}-{block.EndLine} \"{block.Excerpt}\": ");
+            } else {
+                text.Append("at the start: ");
+            }
+
+            text.Append(note.Text.Replace("\n", " / ", StringComparison.Ordinal)).Append('\n');
         }
 
         return text.ToString();

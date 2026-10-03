@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using Markdig;
 using Markdig.Extensions.Footnotes;
 using Markdig.Extensions.Tables;
@@ -8,6 +9,7 @@ using Markdig.Helpers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
 using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 using Oire.PlanCake.Notes;
 
 namespace Oire.PlanCake.Rendering;
@@ -32,12 +34,17 @@ internal enum RenderMode {
 /// The <c>title</c> of an exported document without a heading (the file name, say), so an
 /// exported file is never left without one.
 /// </param>
+/// <param name="DocumentFolder">
+/// The folder of the Markdown file: an export embeds the local pictures it names
+/// (<see cref="ExportImages"/>), relative paths starting from there.
+/// </param>
 internal sealed record RenderOptions(
     NoteMarkers Markers,
     RenderMode Mode,
     RenderStrings Strings,
     string DocumentLanguage = "en",
-    string? FallbackTitle = null
+    string? FallbackTitle = null,
+    string? DocumentFolder = null
 );
 
 /// <summary>
@@ -45,13 +52,23 @@ internal sealed record RenderOptions(
 /// they annotate, every annotatable block stamped with its original source line range, per
 /// Technical details → "Annotatable blocks" and "Note placement in the view" in the PlanCake plan.
 /// </summary>
-internal static class MarkdownRenderer {
+internal static partial class MarkdownRenderer {
     /// <summary>The longest a <see cref="BlockInfo.Excerpt"/> gets, ellipsis included.</summary>
     public const int ExcerptLength = 80;
 
-    /// <summary>The content security policy of an exported file: no script at all.</summary>
+    /// <summary>The longest <see cref="FirstSentence"/> gets, ellipsis included.</summary>
+    public const int SentenceLength = 120;
+
+    /// <summary>
+    /// The content security policy of an exported file: no script at all, no form that sends
+    /// anywhere and no <c>&lt;base&gt;</c> that moves the plan's relative links. Pictures come
+    /// from the web or from inside the file (local ones are embedded, see
+    /// <see cref="ExportImages"/>), never from <c>file:</c>, which for a <c>file://host/…</c>
+    /// picture in raw HTML would make the browser reach another computer's share.
+    /// </summary>
     public const string ExportContentSecurityPolicy =
-        "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src * data:";
+        "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src https: http: data:; "
+        + "base-uri 'none'; form-action 'none'";
 
     private const string ExportStyle = """
         body { font-family: "Segoe UI", sans-serif; line-height: 1.5; max-width: 50em; margin: 1em auto; }
@@ -63,13 +80,23 @@ internal static class MarkdownRenderer {
         .note > :last-child { margin-bottom: 0; }
         """;
 
-    /// <summary>The class the page finds a task-list check box by.</summary>
-    public const string TaskCheckboxClass = "task-list-item-checkbox";
+    /// <summary>
+    /// The attribute the page finds a task-list check box by. An attribute, not a class: a class
+    /// in raw HTML can be spelled with character references, an attribute name cannot, so
+    /// <see cref="NeutralizeProtocolMarkers"/> catches every spelling of it.
+    /// </summary>
+    public const string TaskCheckboxAttribute = "data-plancake-task";
+
+    /// <summary>The prefix a protocol attribute written by the plan itself gets, so the page ignores it.</summary>
+    internal const string NeutralizedPrefix = "x-";
 
     private static readonly MarkdownPipeline _pipeline = new MarkdownPipelineBuilder()
         .UseAdvancedExtensions()
         .UsePreciseSourceLocation()
         .Build();
+
+    /// <summary>The pipeline a document is parsed with, for <see cref="NoteParser"/> to find its code blocks.</summary>
+    internal static MarkdownPipeline Pipeline => _pipeline;
 
     /// <summary>
     /// The pipeline a note's own text is rendered with: the document's extensions, except that
@@ -98,27 +125,94 @@ internal static class MarkdownRenderer {
 
         var parse = NoteParser.Parse(source, options.Markers);
         var document = Markdown.Parse(parse.StrippedSource, _pipeline);
+        NeutralizeProtocolMarkers(document);
         var walker = new BlockWalker(parse);
         walker.Walk(document);
 
         var notes = InsertNotes(document, parse.Notes, walker.Blocks, options);
-        var body = ToHtml(document, options.Mode, FindMixedTasks(document));
+        var body = ToHtml(document, options.Mode, FindMixedTasks(document), walker.TaskLabels);
         var title = walker.Title;
         var html = options.Mode == RenderMode.Export
-            ? ExportDocument(body, title ?? options.FallbackTitle, options.DocumentLanguage)
+            ? ExportDocument(
+                ExportImages.Embed(body, options.DocumentFolder),
+                title ?? options.FallbackTitle,
+                options.DocumentLanguage
+            )
             : body;
 
         return new RenderResult(html, walker.Blocks.Select(block => block.Info).ToList(), notes, title, parse);
     }
 
-    private static string ToHtml(MarkdownDocument document, RenderMode mode, IReadOnlySet<TaskList> mixedTasks) {
+    /// <summary>
+    /// Matches, in raw HTML, a name the page and the host trust to come from the renderer
+    /// (<c>data-lines</c>, <c>data-note</c>, <c>data-mixed</c> and every <c>data-plancake-*</c>)
+    /// wherever the browser could read it as an attribute name: after whitespace, a slash or a
+    /// quote, and before whitespace, a slash, <c>&gt;</c>, <c>=</c> or the end of the line. HTML
+    /// lowercases attribute names, so the match ignores case. It may also match such a word in
+    /// the text of a raw HTML block, which then shows with the prefix: a much smaller cost than
+    /// tracking the browser's tokenizer through comments, raw text elements and foreign content.
+    /// </summary>
+    [GeneratedRegex(
+        """(?<=^|[\s/"'])(?:data-lines|data-note|data-mixed|data-plancake-[^\s/>=]*)(?=[\s/>=]|$)""",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
+    )]
+    private static partial Regex ProtocolAttributeName();
+
+    /// <summary>
+    /// Keeps the plan itself from imitating the markers the page acts on. A block or note the user
+    /// clicks is found by <c>data-lines</c> and <c>data-note</c>, a task check box by
+    /// <see cref="TaskCheckboxAttribute"/>; raw HTML or a generic attribute (<c>{data-lines=40-40}</c>)
+    /// carrying one of them would send the user's click to another block, or toggle a task they did
+    /// not touch. Raw HTML gets <see cref="NeutralizedPrefix"/> before such a name; a generic
+    /// attribute with such a name is dropped. Runs before the walker stamps the real ones.
+    /// </summary>
+    internal static void NeutralizeProtocolMarkers(MarkdownDocument document) {
+        foreach (var node in document.Descendants()) {
+            switch (node) {
+                case HtmlBlock block:
+                    block.Lines = NeutralizedLines(block.Lines);
+                    break;
+                case HtmlInline inline:
+                    inline.Tag = NeutralizeRawHtml(inline.Tag);
+                    break;
+            }
+
+            node.TryGetAttributes()?.Properties?.RemoveAll(property => IsProtocolAttribute(property.Key));
+        }
+    }
+
+    /// <summary>Raw HTML with every name the page trusts renamed (see <see cref="ProtocolAttributeName"/>).</summary>
+    internal static string NeutralizeRawHtml(string html) =>
+        ProtocolAttributeName().Replace(html, match => NeutralizedPrefix + match.Value);
+
+    private static bool IsProtocolAttribute(string name) =>
+        ProtocolAttributeName().Match(name) is { Success: true, Index: 0 } match && match.Length == name.Length;
+
+    private static StringLineGroup NeutralizedLines(StringLineGroup lines) {
+        var neutralized = new StringLineGroup(lines.Count);
+
+        foreach (var line in lines.Lines.AsSpan(0, lines.Count)) {
+            var slice = new StringSlice(NeutralizeRawHtml(line.Slice.ToString()), line.Slice.NewLine);
+            var copy = line with { Slice = slice };
+            neutralized.Add(ref copy);
+        }
+
+        return neutralized;
+    }
+
+    private static string ToHtml(
+        MarkdownDocument document,
+        RenderMode mode,
+        IReadOnlySet<TaskList> mixedTasks,
+        IReadOnlyDictionary<TaskList, string> taskLabels
+    ) {
         using var writer = new StringWriter(CultureInfo.InvariantCulture);
         var renderer = new HtmlRenderer(writer);
         _pipeline.Setup(renderer);
 
-        // The window's task-list check boxes can be toggled (Task 7a); an exported file's stay
-        // disabled, as Markdig renders them. Both show a partially checked parent.
-        renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListRenderer(mode, mixedTasks));
+        // The window's task-list check boxes can be toggled; an exported file's stay disabled, as
+        // Markdig renders them. Both show a partially checked parent.
+        renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListRenderer(mode, mixedTasks, taskLabels));
 
         // The block's attributes (data-lines, dir) belong on the <pre> the user lands on, not on
         // the <code> inside it.
@@ -139,52 +233,102 @@ internal static class MarkdownRenderer {
         RenderOptions options
     ) {
         var rendered = new List<RenderedNote>(notes.Count);
-        var insertedAfter = new Dictionary<Block, int>(ReferenceEqualityComparer.Instance);
-        var insertedAtTop = 0;
+        var anchors = FindAnchors(blocks, notes);
+        var atTop = new List<Block>();
+        var after = new Dictionary<Block, List<Block>>(ReferenceEqualityComparer.Instance);
 
         for (var index = 0; index < notes.Count; index++) {
             var note = notes[index];
-            var anchor = FindAnchor(blocks, note.StartLine);
+            var anchor = anchors[index];
             var noteBlock = CreateHtmlBlock(NoteHtml(note, index, options));
 
             if (anchor is null) {
-                document.Insert(insertedAtTop++, noteBlock);
+                atTop.Add(noteBlock);
             } else if (anchor.Target is TableRow row) {
                 // A <div> cannot sit between table rows, so the note goes into the row's last cell.
                 var container = row.Count > 0 && row[^1] is ContainerBlock lastCell ? lastCell : row;
                 container.Add(noteBlock);
+            } else if (after.TryGetValue(anchor.Target, out var list)) {
+                list.Add(noteBlock);
             } else {
-                var parent = anchor.Target.Parent
-                    ?? throw new InvalidOperationException("An annotatable block has no parent.");
-                var alreadyInserted = insertedAfter.GetValueOrDefault(anchor.Target);
-                parent.Insert(parent.IndexOf(anchor.Target) + 1 + alreadyInserted, noteBlock);
-                insertedAfter[anchor.Target] = alreadyInserted + 1;
+                after[anchor.Target] = [noteBlock];
             }
 
             rendered.Add(new RenderedNote(index, note, anchor?.Info));
+        }
+
+        // Each container is rebuilt once with its notes in place, rather than one insert per note.
+        var parents = new HashSet<ContainerBlock>(ReferenceEqualityComparer.Instance);
+
+        foreach (var target in after.Keys) {
+            parents.Add(target.Parent ?? throw new InvalidOperationException("An annotatable block has no parent."));
+        }
+
+        if (atTop.Count > 0) {
+            parents.Add(document);
+        }
+
+        foreach (var parent in parents) {
+            var children = parent.ToArray();
+            parent.Clear();
+
+            if (ReferenceEquals(parent, document)) {
+                atTop.ForEach(parent.Add);
+            }
+
+            foreach (var child in children) {
+                parent.Add(child);
+
+                if (after.TryGetValue(child, out var list)) {
+                    list.ForEach(parent.Add);
+                }
+            }
         }
 
         return rendered;
     }
 
     /// <summary>
-    /// The block containing <paramref name="noteLine"/> (a note written by hand inside a block),
-    /// else the last block ending before it, else <see langword="null"/>.
+    /// For every note, the block containing its first line (a note written by hand inside a
+    /// block), else the last block ending before it, else <see langword="null"/>; ties go to the
+    /// block first in document order. One pass over both: the notes come in source order, and the
+    /// blocks are taken by their first line.
     /// </summary>
-    private static Annotatable? FindAnchor(List<Annotatable> blocks, int noteLine) {
-        Annotatable? anchor = null;
+    private static Annotatable?[] FindAnchors(List<Annotatable> blocks, IReadOnlyList<Note> notes) {
+        var anchors = new Annotatable?[notes.Count];
 
-        foreach (var block in blocks) {
-            if (block.Info.StartLine <= noteLine && noteLine <= block.Info.EndLine) {
-                return block;
+        // Footnotes are rendered at the end, so document order is not line order.
+        var byStart = Enumerable.Range(0, blocks.Count).OrderBy(index => blocks[index].Info.StartLine).ToArray();
+        var next = 0;
+
+        // The blocks started by the note's line, by the line they end on, and by document order.
+        var started = new PriorityQueue<int, (int EndLine, int Index)>();
+        var open = new SortedSet<int>();
+        var lastEnded = -1;
+
+        for (var n = 0; n < notes.Count; n++) {
+            var noteLine = notes[n].StartLine;
+
+            while (next < byStart.Length && blocks[byStart[next]].Info.StartLine <= noteLine) {
+                var index = byStart[next++];
+                started.Enqueue(index, (blocks[index].Info.EndLine, index));
+                open.Add(index);
             }
 
-            if (block.Info.EndLine < noteLine && (anchor is null || block.Info.EndLine > anchor.Info.EndLine)) {
-                anchor = block;
+            while (started.TryPeek(out var index, out var key) && key.EndLine < noteLine) {
+                started.Dequeue();
+                open.Remove(index);
+
+                if (lastEnded < 0 || key.EndLine > blocks[lastEnded].Info.EndLine
+                    || (key.EndLine == blocks[lastEnded].Info.EndLine && index < lastEnded)) {
+                    lastEnded = index;
+                }
             }
+
+            anchors[n] = open.Count > 0 ? blocks[open.Min] : lastEnded >= 0 ? blocks[lastEnded] : null;
         }
 
-        return anchor;
+        return anchors;
     }
 
     private static HtmlBlock CreateHtmlBlock(string html) {
@@ -215,6 +359,7 @@ internal static class MarkdownRenderer {
     /// </summary>
     internal static string NoteBlockHtml(string text) {
         var document = Markdown.Parse(text, _notePipeline);
+        NeutralizeProtocolMarkers(document);
 
         foreach (var block in document.Descendants<Block>()) {
             block.GetAttributes().AddPropertyIfNotExist("dir", "auto");
@@ -291,14 +436,21 @@ internal static class MarkdownRenderer {
         item.Count > 0 && item[0] is ParagraphBlock { Inline.FirstChild: TaskList task } ? task : null;
 
     /// <summary>
-    /// A task-list check box. In the window it is enabled, with a class the page finds it by, and
+    /// A task-list check box. In the window it is enabled, with an attribute the page finds it by, and
     /// the page sends a toggle to the host, which rewrites the marker in the file; a partially
     /// done item carries <c>data-mixed</c>, which the page turns into the check box's
     /// <c>indeterminate</c> state. In an exported file it stays disabled as Markdig renders it,
     /// and a partially done item gets <c>aria-checked="mixed"</c>, since no script runs there.
+    /// Both carry the item's first sentence as their <c>aria-label</c>: an input takes no name from the text
+    /// after it, and a screen reader that focuses the check box (after a toggle, in forms mode)
+    /// would say only "check box". Not a <c>&lt;label&gt;</c> around the text, which would make a
+    /// click on the text toggle the task instead of adding a note.
     /// </summary>
-    private sealed class TaskListRenderer(RenderMode mode, IReadOnlySet<TaskList> mixedTasks)
-        : HtmlObjectRenderer<TaskList> {
+    private sealed class TaskListRenderer(
+        RenderMode mode,
+        IReadOnlySet<TaskList> mixedTasks,
+        IReadOnlyDictionary<TaskList, string> labels
+    ): HtmlObjectRenderer<TaskList> {
         protected override void Write(HtmlRenderer renderer, TaskList obj) {
             if (!renderer.EnableHtmlForInline) {
                 renderer.Write(obj.Checked ? "[x]" : "[ ]");
@@ -308,7 +460,7 @@ internal static class MarkdownRenderer {
             var mixed = mixedTasks.Contains(obj);
 
             if (mode == RenderMode.Interactive) {
-                renderer.Write($"<input class=\"{TaskCheckboxClass}\" type=\"checkbox\"");
+                renderer.Write($"<input {TaskCheckboxAttribute}=\"true\" type=\"checkbox\"");
 
                 if (mixed) {
                     renderer.Write(" data-mixed=\"true\"");
@@ -319,6 +471,10 @@ internal static class MarkdownRenderer {
                 if (mixed) {
                     renderer.Write(" aria-checked=\"mixed\"");
                 }
+            }
+
+            if (labels.TryGetValue(obj, out var label) && label.Length > 0) {
+                renderer.Write($" aria-label=\"{HtmlEncode(label)}\"");
             }
 
             if (obj.Checked) {
@@ -386,25 +542,118 @@ internal static class MarkdownRenderer {
     }
 
     /// <summary>
-    /// Makes a one-line excerpt of <paramref name="text"/>: whitespace runs become one space, and
-    /// text longer than <see cref="ExcerptLength"/> is cut to fit with an ellipsis.
+    /// Makes a one-line excerpt of <paramref name="text"/>: its first sentence (see
+    /// <see cref="FirstSentence"/>), whitespace runs made one space, and a sentence longer than
+    /// <see cref="ExcerptLength"/> cut at a pause in it or at the end of a word (see
+    /// <see cref="Shorten"/>).
     /// </summary>
-    internal static string Excerpt(string text) {
-        var line = String.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+    internal static string Excerpt(string text) => Shorten(SentenceOf(OneLine(text)), ExcerptLength);
 
-        if (line.Length <= ExcerptLength) {
+    /// <summary>
+    /// The first sentence of <paramref name="text"/> on one line, for a cell that shows the start
+    /// of a note: up to the first full stop, question mark, exclamation mark or ellipsis followed by
+    /// a space and not by a lowercase letter (so <c>e.g. this</c> goes on), with any closing quote
+    /// or bracket after it. A text without such an end is a sentence of its own. A sentence longer
+    /// than <see cref="SentenceLength"/> is cut at a pause in it or at the end of a word (see
+    /// <see cref="Shorten"/>).
+    /// </summary>
+    internal static string FirstSentence(string text) => Shorten(SentenceOf(OneLine(text)), SentenceLength);
+
+    private static string SentenceOf(string line) {
+        var end = SentenceEnd(line);
+
+        return end < 0 ? line : line[..end];
+    }
+
+    /// <summary>The text on one line: every run of whitespace becomes one space, none at either end.</summary>
+    internal static string OneLine(string text) =>
+        String.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+
+    /// <summary>
+    /// <paramref name="line"/> cut to at most <paramref name="maxLength"/> characters, ellipsis
+    /// included. The cut goes, in order of preference, at the last pause in the sentence (a comma,
+    /// semicolon or colon followed by a space, or a dash between spaces, the pause itself left out),
+    /// then at the last space, as long as either leaves at least half of the length, so no word is
+    /// cut in two; a single word longer than that (a link, say) is cut where it must, never inside a
+    /// surrogate pair.
+    /// </summary>
+    private static string Shorten(string line, int maxLength) {
+        if (line.Length <= maxLength) {
             return line;
         }
 
-        var cut = ExcerptLength - 1;
+        var limit = maxLength - 1;
 
-        // Never split a surrogate pair.
-        if (Char.IsHighSurrogate(line[cut - 1])) {
-            cut--;
+        if (Char.IsHighSurrogate(line[limit - 1])) {
+            limit--;
         }
+
+        var pause = LastPause(line, limit);
+
+        // A space at the limit itself means the word before it ends there.
+        var space = line.LastIndexOf(' ', limit);
+        var cut = pause >= limit / 2 ? pause : space >= limit / 2 ? space : limit;
 
         return String.Concat(line.AsSpan(0, cut).TrimEnd(), "…");
     }
+
+    /// <summary>
+    /// Where the last pause before <paramref name="limit"/> starts in <paramref name="line"/>, or -1:
+    /// a comma, semicolon or colon (Latin or full-width) with a space after it, or the space before a
+    /// dash that has spaces around it. A comma inside a number (<c>1,000</c>) or a colon inside a
+    /// time (<c>10:30</c>) has no space after it, so it is not a pause.
+    /// </summary>
+    private static int LastPause(string line, int limit) {
+        for (var i = Math.Min(limit, line.Length - 2); i > 0; i--) {
+            if (line[i] is '，' or '；' or '：') {
+                return i;
+            }
+
+            if (line[i] is ',' or ';' or ':' && line[i + 1] == ' ') {
+                return i;
+            }
+
+            if (line[i] == ' ' && i + 2 < line.Length && line[i + 1] is '—' or '–' or '-' && line[i + 2] == ' ') {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Where the first sentence of <paramref name="line"/> ends (see <see cref="FirstSentence"/>), or -1.
+    /// </summary>
+    private static int SentenceEnd(string line) {
+        for (var i = 0; i < line.Length; i++) {
+            if (!IsSentenceEnd(line[i])) {
+                continue;
+            }
+
+            var end = i + 1;
+
+            while (end < line.Length && (IsSentenceEnd(line[end]) || IsClosing(line[end]))) {
+                end++;
+            }
+
+            // The full stops of Chinese and Japanese take no space after them.
+            if (line[i] is '。' or '！' or '？') {
+                return end;
+            }
+
+            if (end + 1 < line.Length && line[end] == ' ' && !Char.IsLower(line[end + 1])) {
+                return end;
+            }
+
+            i = end - 1;
+        }
+
+        return -1;
+    }
+
+    private static bool IsSentenceEnd(char c) => c is '.' or '!' or '?' or '…' or '。' or '！' or '？';
+
+    private static bool IsClosing(char c) => c is '"' or '\'' or ')' or ']' or '»' or '”' or '’' or '“';
 
     /// <summary>
     /// Walks the syntax tree, stamps every block with <c>dir="auto"</c> and every annotatable block
@@ -425,9 +674,17 @@ internal static class MarkdownRenderer {
                 EnableHtmlEscape = false,
             };
             _pipeline.Setup(_plainRenderer);
+
+            // Markdig writes a footnote link as HTML whatever the renderer's settings: the back
+            // link at the end of a footnote and a reference in the text would show as markup in
+            // an excerpt, the copied text and the command line's output.
+            _plainRenderer.ObjectRenderers.Replace<HtmlFootnoteLinkRenderer>(new PlainFootnoteLinkRenderer());
         }
 
         public List<Annotatable> Blocks { get; } = [];
+
+        /// <summary>The text of each task-list item, without its marker, for its check box's name.</summary>
+        public Dictionary<TaskList, string> TaskLabels { get; } = new(ReferenceEqualityComparer.Instance);
 
         public string? Title { get; private set; }
 
@@ -450,7 +707,15 @@ internal static class MarkdownRenderer {
                     // carries the range; the <p> of a loose list gets the same one. Nested lists
                     // after the paragraph get their own.
                     SetDirection(lead);
-                    Add(BlockKind.ListItem, lead, PlainText(lead), item);
+                    var itemText = PlainText(lead);
+                    Add(BlockKind.ListItem, lead, itemText, item);
+
+                    // The first sentence, as long as a note's in the notes list: enough to tell the
+                    // task by when the check box has the focus, and short enough not to make the
+                    // item heard twice over in browse mode, where its text follows the name.
+                    if (TaskOf(item) is { } task) {
+                        TaskLabels[task] = FirstSentence(TaskToggle.WithoutMarker(OneLine(itemText)));
+                    }
 
                     for (var i = 1; i < item.Count; i++) {
                         Visit(item[i]);
@@ -502,6 +767,18 @@ internal static class MarkdownRenderer {
         }
 
         private static void SetDirection(Block block) => block.GetAttributes().AddPropertyIfNotExist("dir", "auto");
+
+        /// <summary>
+        /// A footnote link in plain text: the reference as its number in brackets, the back link
+        /// at the end of a footnote as nothing.
+        /// </summary>
+        private sealed class PlainFootnoteLinkRenderer: HtmlObjectRenderer<FootnoteLink> {
+            protected override void Write(HtmlRenderer renderer, FootnoteLink obj) {
+                if (!obj.IsBackLink) {
+                    renderer.Write(String.Create(CultureInfo.InvariantCulture, $"[{obj.Footnote.Order}]"));
+                }
+            }
+        }
 
         private string PlainText(LeafBlock block) {
             _plainWriter.GetStringBuilder().Clear();

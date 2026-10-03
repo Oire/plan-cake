@@ -132,13 +132,15 @@ code {
     background: var(--code-bg);
     padding: 0.05em 0.3em;
     border-radius: 3px;
+    overflow-wrap: anywhere;
 }
 
 pre {
     background: var(--code-bg);
     padding: 0.75rem 1rem;
     border-radius: 4px;
-    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     text-align: start;
 }
 
@@ -150,7 +152,16 @@ pre code {
 table {
     border-collapse: collapse;
     width: 100%;
+}
+
+.table-scroll {
+    overflow-x: auto;
     margin-block: 1rem;
+}
+
+.table-scroll:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
 }
 
 caption {
@@ -231,6 +242,7 @@ footer {
 <ol>
 <li><a href="#installer">באמצעות תוכנת ההתקנה</a></li>
 <li><a href="#portable">הגרסה הניידת</a></li>
+<li><a href="#uninstalling">הסרת PlanCake</a></li>
 <li><a href="#pk-alias">פקודה קצרה יותר: pk</a></li>
 </ol>
 </li>
@@ -352,11 +364,17 @@ footer {
 <h3 id="installer">באמצעות תוכנת ההתקנה</h3>
 <p>הריצו את תוכנת ההתקנה ועקבו אחר השלבים שלה. מלבד PlanCake עצמו, היא דואגת גם למה ש-PlanCake זקוק לו כדי לפעול: היא מתקינה את .NET 10 Desktop Runtime ואת Microsoft Edge WebView2 Runtime אם המחשב שלכם עדיין לא כולל אותם. היא גם מוסיפה את PlanCake ל-PATH שלכם, כך שהפקודה <code dir="ltr">plancake</code> פועלת בכל חלון PowerShell או שורת הפקודה חדש.</p>
 <p>ההגדרות שלכם נשמרות ב-<code dir="ltr">%APPDATA%\Oire\PlanCake</code>.</p>
+<p>תוכנת ההתקנה מוסיפה את PlanCake לתפריט התחל, יחד עם קיצור דרך למדריך הזה בשפה שבחרתם לתוכנת ההתקנה.</p>
+<p>PlanCake אינו חתום בתעודת חתימת קוד. לכן בפעם הראשונה שתריצו את תוכנת ההתקנה, או את <code dir="ltr">plancake.exe</code> מקובץ ה-zip הנייד, Windows SmartScreen עשוי להציג את ההודעה „Windows הגן על המחשב שלך” ומפרסם לא ידוע. כדי להמשיך, בחרו <strong>מידע נוסף</strong> ואז <strong>הפעל בכל זאת</strong>.</p>
 
 <h3 id="portable">הגרסה הניידת</h3>
 <p>חלצו את קובץ ה-zip לכל תיקייה שתרצו והריצו משם את <code dir="ltr">plancake.exe</code>. קובץ ה-zip כולל תיקייה ריקה בשם <code dir="ltr">userdata</code> לצד <code dir="ltr">plancake.exe</code>; כל עוד תיקייה זו קיימת, PlanCake שומר את ההגדרות שלו בתוכה ואינו כותב דבר לפרופיל המשתמש שלכם. מחקו או שנו את שם התיקייה <code dir="ltr">userdata</code>, ו-PlanCake יחזור להשתמש ב-<code dir="ltr">%APPDATA%\Oire\PlanCake</code>.</p>
 <p>הגרסה הניידת אינה מתקינה דבר, כך שהמחשב שלכם צריך כבר להכיל את <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> ואת <a href="https://developer.microsoft.com/microsoft-edge/webview2/">Microsoft Edge WebView2 Runtime</a>. Windows 11 מגיע עם WebView2 מובנה; אם הוא חסר, PlanCake יגיד לכם זאת עם ההפעלה ויציע לפתוח את עמוד ההורדה.</p>
 <p>כדי להשתמש בפקודה <code dir="ltr">plancake</code> עם הגרסה הניידת, הקלידו את הנתיב המלא שלה או הוסיפו את התיקייה שלה ל-PATH בעצמכם.</p>
+
+<h3 id="uninstalling">הסרת PlanCake</h3>
+<p>הסירו את PlanCake מ<strong>אפליקציות</strong> בהגדרות Windows, או באמצעות <strong>הסר את PlanCake</strong> בתפריט התחל. תוכנת ההסרה מוציאה את PlanCake מה-PATH שלכם ושואלת אם להסיר גם את ההגדרות והיומנים; קובצי ה-Markdown שלכם וההערות שבהם לעולם אינם מושפעים. הגרסה הניידת אינה מתקינה דבר: כדי להסיר אותה, מחקו את התיקייה שלה.</p>
+<p>אם אתם עובדים בחשבון Windows רגיל ומנהל מקליד את הסיסמה שלו כדי לאשר את ההסרה, תוכנת ההסרה פועלת בתור אותו מנהל ומחפשת את ההגדרות שלו, לא שלכם, ולכן אינה שואלת עליהן. ההגדרות והיומנים שלכם נשארים אז ב-<code dir="ltr">%APPDATA%\Oire\PlanCake</code> וב-<code dir="ltr">%LOCALAPPDATA%\Oire\PlanCake</code>; מחקו את התיקיות האלה בעצמכם אם אינכם צריכים אותן עוד.</p>
 
 <h3 id="pk-alias">פקודה קצרה יותר: pk</h3>
 <p>אם אתם פותחים תוכניות משורת הפקודה כל היום, תוכלו לתת ל-PlanCake שם בן שתי אותיות. PlanCake לא מסדר את זה בשבילכם; זוהי שורה אחת בפרופיל המעטפת (shell) שלכם.</p>
@@ -373,6 +391,7 @@ footer {
 <h2 id="main-window">החלון הראשי</h2>
 <p>לחלון יש שורת תפריטים בראש, המסמך מימין, רשימת ההערות משמאל, ושורת מצב בתחתית ממש. שורת הכותרת מציגה את שם הקובץ הפתוח, לדוגמה <strong>plan.md - PlanCake</strong>.</p>
 <p>כדי לתת למסמך או לרשימת ההערות יותר מקום, גררו את הגבול ביניהם. מהמקלדת, בחרו <strong>הרחב רשימת הערות</strong> או <strong>הצר רשימת הערות</strong> בתפריט <strong>תצוגה</strong>: כל אחת מהן מזיזה את הגבול בעשירית מהרוחב ששניהם חולקים, למספר עגול — מ-32 אחוזים, לדוגמה, הרשימה הופכת ל-40 אחוזים ברוחב, או ל-30 אחוזים. שורת המצב מודיעה על החלק החדש, כגון „רשימת הערות 40%”. אף צד לא יכול להצטמצם עד היעלמות: הרשימה נשארת ברוחב של לפחות כ-150 פיקסלים, והמסמך בכ-200. בגבול הזה הגבול נשאר במקומו, ושורת המצב חוזרת על החלק הנוכחי. שתי הפקודות אינן זמינות כאשר רשימת ההערות מוסתרת.</p>
+<p>PlanCake זוכר את הגודל והמיקום של החלון, אם הוא היה מוגדל, את רוחב רשימת ההערות ואת גודל התצוגה: החלון הבא נפתח באותו אופן, על מסך שעדיין מחובר. החלון הראשון לגמרי מותאם למסך שבו הוא נפתח.</p>
 
 <h3 id="document-view">המסמך</h3>
 <p>זהו קובץ ה-Markdown שלכם, מעוצב. כאשר PlanCake פותח קובץ, הוא מתחיל מלמעלה. גם ההערות שלכם מופיעות בתוך המסמך, כל אחת מיד אחרי הבלוק שאליו היא שייכת ומופרדת מהטקסט של התוכנית, כדי שתוכלו לראות במבט חטוף מה שלכם.</p>
@@ -380,12 +399,12 @@ footer {
 <h3 id="notes-list">רשימת ההערות</h3>
 <p>רשימת ההערות אוספת כל הערה בקובץ למקום אחד, לפי סדר הופעתן. יש לה שלוש עמודות:</p>
 <dl>
+<dt>הערה</dt>
+<dd>המשפט הראשון של ההערה בשורה אחת, בלי סימני פיסוק של Markdown. העמודה תופסת את כל הרוחב ששתי האחרות משאירות. השהו את מצביע העכבר על שורה כדי לראות את ההערה כולה.</dd>
 <dt>שורות</dt>
 <dd>היכן ההערה נמצאת בקובץ: <code dir="ltr">12</code> עבור הערה בת שורה אחת, <code dir="ltr">12-14</code> עבור הערה ארוכה יותר.</dd>
 <dt>בלוק</dt>
-<dd>תחילת הבלוק שאחריו באה ההערה, כדי שתדעו על מה מדובר בלי לגשת לשם.</dd>
-<dt>הערה</dt>
-<dd>הטקסט של ההערה בשורה אחת, בלי סימני פיסוק של Markdown.</dd>
+<dd>המשפט הראשון של הבלוק שאחריו באה ההערה, כדי שתדעו על מה מדובר בלי לגשת לשם. בשתי העמודות, משפט ארוך מאוד מקוצר במידת האפשר בפסיק, בנקודתיים או במקף.</dd>
 </dl>
 <p>כדי לעבור להערה במסמך, הקישו <kbd dir="ltr">Enter</kbd> על השורה שלה או לחצו עליה לחיצה כפולה; הפוקוס עובר להערה. כדי למחוק הערה, בחרו אותה והקישו <kbd dir="ltr">Delete</kbd>; הבחירה עוברת אז להערה הקרובה ביותר שנותרה, כך שלעולם לא תאבדו את מיקומכם ברשימה. לחצו לחיצה ימנית על שורה, או הקישו את <kbd dir="ltr">מקש יישומים</kbd> או <kbd dir="ltr">Shift+F10</kbd>, לקבלת תפריט עם <strong>ערוך הערה</strong> ו<strong>מחק הערה</strong>.</p>
 <p>אם תעדיפו את כל החלון עבור המסמך, בחרו <strong>רשימת הערות</strong> בתפריט <strong>תצוגה</strong>. הפעולה מסתירה את הרשימה, ובחירה בה שוב מציגה אותה; שורת המצב אומרת „רשימת ההערות מוסתרת” או „רשימת ההערות מוצגת”. PlanCake זוכר את הבחירה: זו אותה הגדרה כמו <strong>הצג את רשימת ההערות</strong> ב<a href="#settings-general">הגדרות</a>, כך שחלונות חדשים נפתחים באותו אופן, וחלונות פתוחים אחרים מתעדכנים ברגע שתעברו אליהם.</p>
@@ -417,6 +436,7 @@ footer {
 <article aria-labelledby="opening-files">
 <h2 id="opening-files">פתיחת קובץ</h2>
 <p>תוכניות מגיעות אליכם בדרכים רבות: קובץ בדיסק, נתיב שמישהו הדביק בצ'אט, קישור ל-GitHub. PlanCake יכול לפתוח את כולן ישירות, בלי שתצטרכו לשמור דבר קודם. בכל דרך שבה תשתמשו, קובץ שנפתח מחדש מתחיל תמיד מלמעלה.</p>
+<p>כשאין קובץ פתוח, החלון מפרט את הדרכים לפתוח קובץ, עם המקשים שלהן. פתיחת קובץ גדול עשויה להימשך רגע: אם היא נמשכת יותר מחצי שנייה, או שהקובץ גדול מ-1 MB, PlanCake מציג את תיבת הדו-שיח <strong>פתיחת קובץ</strong> עם מחוון התקדמות. הקישו <kbd dir="ltr">Escape</kbd> או לחצו על <strong>ביטול</strong> כדי להפסיק; הקובץ שהיה פתוח נשאר כפי שהיה.</p>
 
 <h3 id="open-command-line">משורת הפקודה</h3>
 <p>הקלידו <code dir="ltr">plancake</code> ואחריו את הקובץ:</p>
@@ -470,7 +490,7 @@ footer {
 <p>פתיחת קובץ בכל דרך אחרת — עם <kbd dir="ltr">Ctrl+O</kbd>, בגרירה, מלוח הגזירים, מקישור — גם מוסיפה אותו להיסטוריה, כך ש<strong>אחורה</strong> תמיד מחזיר אתכם למה שקראתם קודם.</p>
 
 <h3 id="zoom">שינוי גודל התצוגה</h3>
-<p>כדי להגדיל את הטקסט, הקישו <kbd dir="ltr">Ctrl+פלוס</kbd>; כדי להקטין אותו, הקישו <kbd dir="ltr">Ctrl+מינוס</kbd>. גם המקשים במקלדת הנומרית עובדים, וכך גם <strong>הגדל תצוגה</strong> ו<strong>הקטן תצוגה</strong> בתפריט <strong>תצוגה</strong>. כל צעד משנה את הגודל ב-10 אחוזים, בין 50 ל-300 אחוזים, ושורת המצב מציגה את הגודל החדש, לדוגמה „גודל תצוגה 120%”. הקישו <kbd dir="ltr">Ctrl+0</kbd> כדי לחזור ל-100 אחוזים.</p>
+<p>כדי להגדיל את הטקסט, הקישו <kbd dir="ltr">Ctrl+פלוס</kbd>; כדי להקטין אותו, הקישו <kbd dir="ltr">Ctrl+מינוס</kbd>. גם המקשים במקלדת הנומרית עובדים, וכך גם <strong>הגדל תצוגה</strong> ו<strong>הקטן תצוגה</strong> בתפריט <strong>תצוגה</strong>. כל צעד משנה את הגודל ב-10 אחוזים, בין 50 ל-300 אחוזים, ושורת המצב מציגה את הגודל החדש, לדוגמה „גודל תצוגה 120%”. הקישו <kbd dir="ltr">Ctrl+0</kbd> כדי לחזור ל-100 אחוזים. החלון הבא שתפתחו יתחיל באותו גודל תצוגה.</p>
 
 <h3 id="document-language">שפת המסמך</h3>
 <p>PlanCake שומר על הפרדה בין שתי שפות: שפת התפריטים ותיבות הדו-שיח שלו, ושפת הכתיבה של המסמך. מעבר הממשק לצרפתית לא הופך תוכנית באנגלית לצרפתית. שפת המסמך משנה כאשר התוכנית נקראת בקול (ראו <a href="#screen-readers">שימוש בקורא מסך</a>) ועוזרת ל-PlanCake לזהות קידודי קבצים ישנים (ראו <a href="#encodings">קבצים שאינם ב-UTF-8</a>).</p>
@@ -482,9 +502,9 @@ footer {
 
 <h3 id="adding-note">הוספת הערה</h3>
 <ol>
-<li>לחצו על הפסקה, הכותרת, פריט הרשימה, שורת הטבלה או בלוק הקוד שעליו תרצו להעיר. מהמקלדת, עברו אליו עם <kbd dir="ltr">Alt+Shift+חץ למטה</kbd> או <kbd dir="ltr">Alt+Shift+חץ למעלה</kbd> (ראו <a href="#reading-basics">תנועה במסמך</a>) והקישו <kbd dir="ltr">Enter</kbd>. תיבת הדו-שיח <strong>הוספת הערה</strong> נפתחת. היא מציגה את תחילת הבלוק תחת <strong>הערה על</strong>, כדי שתוכלו לוודא שבחרתם בבלוק הנכון, ומעמידה את הסמן בתיבת <strong>ההערה</strong>.</li>
+<li>לחצו על הפסקה, הכותרת, פריט הרשימה, שורת הטבלה או בלוק הקוד שעליו תרצו להעיר. הבלוק שמתחת למצביע העכבר מודגש, כך שרואים לאיזה בלוק לחיצה תוסיף הערה. מהמקלדת, עברו אליו עם <kbd dir="ltr">Alt+Shift+חץ למטה</kbd> או <kbd dir="ltr">Alt+Shift+חץ למעלה</kbd> (ראו <a href="#reading-basics">תנועה במסמך</a>) והקישו <kbd dir="ltr">Enter</kbd>. תיבת הדו-שיח <strong>הוספת הערה</strong> נפתחת. היא מציגה את תחילת הבלוק תחת <strong>הערה על</strong>, כדי שתוכלו לוודא שבחרתם בבלוק הנכון, ומעמידה את הסמן בתיבת <strong>ההערה</strong>.</li>
 <li>הקלידו את ההערה שלכם. כדי להתחיל שורה חדשה בתוכה, הקישו <kbd dir="ltr">Ctrl+Enter</kbd>.</li>
-<li>הקישו <kbd dir="ltr">Enter</kbd> או לחצו על <strong>אישור</strong> כדי לשמור; הקישו <kbd dir="ltr">Escape</kbd> או לחצו על <strong>ביטול</strong> כדי לוותר. <strong>אישור</strong> נשאר לא זמין כל עוד התיבה ריקה.</li>
+<li>הקישו <kbd dir="ltr">Enter</kbd> או לחצו על <strong>אישור</strong> כדי לשמור; הקישו <kbd dir="ltr">Escape</kbd> או לחצו על <strong>ביטול</strong> כדי לוותר. <strong>אישור</strong> נשאר לא זמין כל עוד התיבה ריקה, והקשה על <kbd dir="ltr">Enter</kbd> רק אומרת אז „הקלידו קודם הערה.”</li>
 </ol>
 <p>PlanCake כותב את ההערה לקובץ מיד, ממש אחרי הבלוק. המסמך מתעדכן, שורת המצב אומרת „ההערה נוספה”, וההערה החדשה נמצאת איפה שאתם עכשיו. היא גם מופיעה ברשימת ההערות.</p>
 <p>מספיקה לחיצה אחת; לחיצה כפולה לא עושה יותר מלחיצה אחת. בחירת טקסט עם העכבר אינה פותחת את תיבת הדו-שיח, כך שתוכלו עדיין לבחור ולהעתיק טקסט כרגיל.</p>
@@ -516,6 +536,7 @@ footer {
 <pre dir="ltr"><code>Back up the database before you run the migration.
 [usernote]Also back up the uploads folder.[/usernote]</code></pre>
 <p>מי שפותח את הקובץ בעורך טקסט, וכל כלי שקורא אותו, רואה את ההערות שלכם. תוכלו אפילו לכתוב הערות ביד באותה צורה, ו-PlanCake יציג אותן כמו שלו. כדי להשתמש בסמנים שונים, ראו <a href="#settings-notes">הגדרות ההערות</a>.</p>
+<p>סמנים בתוך קוד אינם הערות: בין גרשים הפוכים, כמו ב-<code dir="ltr">`[usernote]`</code>, או בתוך בלוק קוד. גם סמנים בתוך HTML גולמי אינם הערות: בין <code dir="ltr">&lt;!--</code> ל-<code dir="ltr">--&gt;</code>, או בתוך בלוק <code dir="ltr">&lt;pre&gt;</code>, <code dir="ltr">&lt;script&gt;</code>, <code dir="ltr">&lt;style&gt;</code> או <code dir="ltr">&lt;textarea&gt;</code>, מהתג הפותח ועד התג הסוגר. אם ההגדרה <strong>סמן פתיחה</strong> מתחילה בעצמה ב-<code dir="ltr">&lt;!--</code>, סמנים בין <code dir="ltr">&lt;!--</code> ל-<code dir="ltr">--&gt;</code> עדיין נחשבים להערות. תוכנית או מדריך שמציגים את הסמנים כדוגמה שומרים עליהם כפי שהם, והחלון והפקודות לא נוגעים בהם. PlanCake עצמו לעולם לא כותב הערה בתוך קוד: הערה על בלוק קוד נכתבת בשורה שאחריו.</p>
 
 <h3 id="copy-block">העתקת הטקסט של בלוק</h3>
 <p>כדי להעתיק פסקה, פריט רשימה או בלוק אחר בלי סימני הפיסוק של Markdown שלו, לחצו לחיצה ימנית עליו, או הקישו את <kbd dir="ltr">מקש יישומים</kbd> או <kbd dir="ltr">Shift+F10</kbd> עליו, ובחרו <strong>העתק טקסט של הבלוק</strong>. שורת המצב אומרת „טקסט הבלוק הועתק”.</p>
@@ -543,8 +564,8 @@ footer {
 
 <article aria-labelledby="encodings">
 <h2 id="encodings">קבצים שאינם ב-UTF-8</h2>
-<p>כמעט כל קובץ Markdown היום הוא ב-UTF-8. קבצים ישנים יותר, בעיקר בשפות כמו רוסית או עברית, נשמרים לעיתים בקידוד Windows ישן במקום. PlanCake פותח ומציג אותם כהלכה, אבל כברירת מחדל הוא לא כותב אליהם: הקובץ נפתח לקריאה בלבד, ו-PlanCake אומר לכם זאת, בציון הקידוד, לדוגמה „קובץ זה אינו ב-UTF-8, ולכן הוא נפתח לקריאה בלבד כ-Windows-1251. לא ניתן להוסיף לו הערות.”</p>
-<p>כדי להוסיף הערות לקבצים כאלה, הפעילו את <strong>המר ל-UTF-8 (ללא BOM) קבצים שאינם ב-UTF-8 בעת פתיחתם</strong> ב<a href="#settings-advanced">הגדרות מתקדמות</a>. PlanCake ממיר אז כל קובץ כזה ל-UTF-8 ברגע שתפתחו אותו ומודיע לכם, לדוגמה „הומר מ-Windows-1251 ל-UTF-8.” רק הקידוד משתנה; הטקסט וסופי השורות נשארים אותו הדבר.</p>
+<p>כמעט כל קובץ Markdown היום הוא ב-UTF-8. קבצים ישנים יותר, בעיקר בשפות כמו רוסית או עברית, נשמרים לעיתים בקידוד Windows ישן במקום. PlanCake פותח ומציג אותם כהלכה, אבל כברירת מחדל הוא לא כותב אליהם: הקובץ נפתח לקריאה בלבד, ו-PlanCake אומר לכם זאת, בציון הקידוד, לדוגמה „קובץ זה אינו ב-UTF-8, ולכן הוא נפתח לקריאה בלבד כ-Windows-1251. לא ניתן להוסיף לו הערות. כדי להמיר אותו ל-UTF-8, הפעילו בהגדרות את ההמרה של קבצים שאינם ב-UTF-8.”</p>
+<p>כדי להוסיף הערות לקבצים כאלה, הפעילו את <strong>המר ל-UTF-8 בעת הפתיחה</strong> ב<a href="#settings-advanced">הגדרות מתקדמות</a>. PlanCake ממיר אז כל קובץ כזה ל-UTF-8 ברגע שתפתחו אותו ומודיע לכם, לדוגמה „הקובץ הומר מ-Windows-1251 ל-UTF-8.” רק הקידוד משתנה; הטקסט וסופי השורות נשארים אותו הדבר.</p>
 <p>לפעמים PlanCake לא יכול לדעת בוודאות איזה קידוד קובץ משתמש בו. קובץ כזה נשאר תמיד לקריאה בלבד, לא משנה מה ההגדרה אומרת: „לא ניתן לזהות את הקידוד של קובץ זה, ולכן הוא נפתח לקריאה בלבד ולעולם לא ישתנה. לא ניתן להוסיף לו הערות.” זהו כלל נחרץ. כתיבה לקובץ שלא נקרא נכון הייתה הורסת את התווים ש-PlanCake לא הצליח לפענח, ו-PlanCake לעולם לא עושה זאת.</p>
 <p>ההגדרה <strong>שפת מסמך</strong> היא אחד הרמזים ש-PlanCake משתמש בהם כדי לזהות קידוד ישן, כך שקביעתה לשפה שבה כתובים הקבצים הישנים שלכם עוזרת.</p>
 </article>
@@ -556,7 +577,7 @@ footer {
 <h3 id="settings-general">כללי</h3>
 <dl>
 <dt>שפת ממשק</dt>
-<dd>שפת התפריטים, תיבות הדו-שיח וההודעות: English, Русский (רוסית), Українська (אוקראינית), Français (צרפתית), עברית או Deutsch (גרמנית). <strong>שפת המערכת</strong>, ברירת המחדל, עוקבת אחר שפת ה-Windows שלכם, ומשתמשת באנגלית אם Windows בשפה ש-PlanCake לא כולל. בעברית, כל החלון מסודר מימין לשמאל. תוכלו גם לעבור בין שפות מ<strong>שפת ממשק</strong> בתפריט <strong>תצוגה</strong>. הגדרה זו לא משנה את שפת המסמך.</dd>
+<dd>שפת התפריטים, תיבות הדו-שיח וההודעות: <span lang="en" dir="ltr">English</span>, <span lang="ru" dir="ltr">Русский</span> (רוסית), <span lang="uk" dir="ltr">Українська</span> (אוקראינית), <span lang="fr" dir="ltr">Français</span> (צרפתית), עברית או <span lang="de" dir="ltr">Deutsch</span> (גרמנית). <strong>שפת המערכת</strong>, ברירת המחדל, עוקבת אחר שפת ה-Windows שלכם, ומשתמשת באנגלית אם Windows בשפה ש-PlanCake לא כולל. בעברית, כל החלון מסודר מימין לשמאל. תוכלו גם לעבור בין שפות מ<strong>שפת ממשק</strong> בתפריט <strong>תצוגה</strong>. הגדרה זו לא משנה את שפת המסמך.</dd>
 <dt>שפת מסמך</dt>
 <dd>השפה ש-PlanCake מניח שמסמך שנפתח כעת כתוב בה. ברירת מחדל: אנגלית. היא לעולם לא עוקבת אחר שפת הממשק או אחר Windows. ראו <a href="#document-language">שפת המסמך</a>.</dd>
 <dt>כאשר הקובץ משתנה בדיסק</dt>
@@ -578,11 +599,11 @@ footer {
 <dt>סמן פתיחה</dt>
 <dd>הטקסט שבו הערה מתחילה בקובץ. ברירת מחדל: <code dir="ltr">[usernote]</code>. הוא לא יכול להיות ריק, לא יכול להתחיל או להסתיים ברווח או במירכאות כפולות, ולא יכול להכיל מעבר שורה.</dd>
 <dt>סמן סגירה (השאירו ריק לסמן יחיד שנמשך עד סוף השורה)</dt>
-<dd>הטקסט שבו הערה מסתיימת. ברירת מחדל: <code dir="ltr">[/usernote]</code>. הוא פועל לפי אותם הכללים וחייב להיות שונה מסמן הפתיחה. אם תשאירו אותו ריק, הערה נמשכת מסמן הפתיחה עד סוף השורה שלה; הערות הן אז תמיד באורך שורה אחת, וכל מעבר שורה שתקלידו בהערה הופך לרווח.</dd>
+<dd>הטקסט שבו הערה מסתיימת. ברירת מחדל: <code dir="ltr">[/usernote]</code>. הוא פועל לפי אותם הכללים וחייב להיות שונה מסמן הפתיחה. אם תשאירו אותו ריק, הערה נמשכת מסמן הפתיחה עד סוף השורה שלה; הערות הן אז תמיד באורך שורה אחת, וכל מעבר שורה שתקלידו בהערה הופך לרווח. אם הסמנים מפרים אחד מהכללים האלה, השורה שמתחתם מסבירה מדוע, החל מהמילה „שגיאה:”, וקורא מסך מקריא אותה ברגע שתעצרו את ההקלדה.</dd>
 <dt>Enter או לחיצה על בלוק</dt>
 <dd><strong>מוסיף הערה</strong> (ברירת המחדל) פותח את תיבת הדו-שיח <strong>הוספת הערה</strong>. <strong>פותח את תפריט ההקשר</strong> מציג במקום זאת את התפריט של הבלוק, שבו בוחרים <strong>הוסף הערה</strong> או <strong>העתק טקסט של הבלוק</strong>; בחרו באפשרות זו אם אתם מוצאים את עצמכם מוסיפים הערות בטעות. לחיצה או <kbd dir="ltr">Enter</kbd> על הערה קיימת תמיד פותחים אותה לעריכה, ולחיצה ימנית, <kbd dir="ltr">מקש יישומים</kbd> ו-<kbd dir="ltr">Shift+F10</kbd> תמיד פותחים את התפריט.</dd>
-<dt>Enter בחלון ההערה</dt>
-<dd><strong>שומר את ההערה (Ctrl+Enter מתחיל שורה חדשה)</strong> היא ברירת המחדל. <strong>מתחיל שורה חדשה (Ctrl+Enter שומר את ההערה)</strong> מתאים להערות ארוכות עם כמה פסקאות. בכל אפשרות שתבחרו, <kbd dir="ltr">Ctrl+Enter</kbd> עושה את הדבר ההפוך.</dd>
+<dt>Enter בחלון ההערה (Ctrl+Enter עושה את ההפך)</dt>
+<dd><strong>שומר את ההערה</strong> היא ברירת המחדל. <strong>מתחיל שורה חדשה</strong> מתאים להערות ארוכות עם כמה פסקאות. בכל אפשרות שתבחרו, <kbd dir="ltr">Ctrl+Enter</kbd> עושה את הדבר ההפוך.</dd>
 </dl>
 <aside role="note" class="warning">
 <p><strong>אזהרה: שינוי הסמנים מסתיר הערות קיימות.</strong> PlanCake קורא רק את הסמנים המוגדרים כרגע. הערות שכבר נמצאות בקובץ ושנכתבו עם סמנים אחרים מוצגות כטקסט רגיל: הן כבר לא ברשימת ההערות, <kbd dir="ltr">F9</kbd> מדלג עליהן, ושורת הפקודה לא סופרת אותן. שום דבר בקובץ לא משתנה, ושום דבר לא אובד. החזירו את הסמנים לקדמותם, וההערות האלה שוב הופכות להערות.</p>
@@ -591,8 +612,8 @@ footer {
 
 <h3 id="settings-advanced">מתקדם</h3>
 <dl>
-<dt>המר ל-UTF-8 (ללא BOM) קבצים שאינם ב-UTF-8 בעת פתיחתם. הקובץ בדיסק נכתב מחדש.</dt>
-<dd>כבוי כברירת מחדל, כך שקבצים בקידודים ישנים נפתחים לקריאה בלבד ולעולם לא משתנים. הפעילו אותו כדי ש-PlanCake ימיר קבצים כאלה ל-UTF-8 כשאתם פותחים אותם, כדי שתוכלו להוסיף הערות. קובץ שאת הקידוד שלו PlanCake לא מצליח לזהות לעולם לא מומר. ראו <a href="#encodings">קבצים שאינם ב-UTF-8</a>.</dd>
+<dt>המר ל-UTF-8 בעת הפתיחה</dt>
+<dd>כבוי כברירת מחדל, כך שקבצים בקידודים ישנים נפתחים לקריאה בלבד ולעולם לא משתנים. הפעילו אותו כדי ש-PlanCake ימיר קובץ שאינו ב-UTF-8 ל-UTF-8 בלי סימון סדר בתים (BOM) כשאתם פותחים אותו, כדי שתוכלו להוסיף הערות. ההמרה כותבת מחדש את הקובץ בדיסק. קובץ שאת הקידוד שלו PlanCake לא מצליח לזהות לעולם לא מומר. ראו <a href="#encodings">קבצים שאינם ב-UTF-8</a>.</dd>
 </dl>
 </article>
 
@@ -601,9 +622,10 @@ footer {
 <p>PlanCake יכול גם לעבוד בלי חלון. ארבע פקודות קוראות את ההערות בקובץ, בודקות אם נותרו כאלה, מסירות את כולן, או מייצאות את הקובץ ל-HTML. הן נועדו לסקריפטים ולעוזרי בינה מלאכותית: Claude משתמש בהן כדי לקרוא את ההערות שלכם על תוכנית ולוודא שכל אחת מהן טופלה.</p>
 <p>כל פקודה פועלת לפי אותו תבנית:</p>
 <pre dir="ltr"><code>plancake &lt;command&gt; &lt;file&gt; [options]</code></pre>
-<p>הקלידו <code dir="ltr">plancake --help</code> לרשימת הפקודות, או <code dir="ltr">plancake list --help</code> לאפשרויות של פקודה מסוימת. הפלט הוא UTF-8 בלי סימון סדר בתים (BOM). שגיאות נשלחות לפלט השגיאות, עם קוד יציאה 1.</p>
+<p>הקלידו <code dir="ltr">plancake --help</code> לרשימת הפקודות, או <code dir="ltr">plancake list --help</code> לאפשרויות של פקודה מסוימת. הפלט הוא UTF-8 בלי סימון סדר בתים (BOM). שגיאות נשלחות לפלט השגיאות, עם קוד יציאה 1. גם פקודה עם שגיאת הקלדה, כמו <code dir="ltr">plancake chek</code>, היא שגיאה כזו („פקודה לא מוכרת: chek. האם התכוונתם ל-check?”), במקום שייפתח חלון עם קובץ שאינו קיים.</p>
+<div class="table-scroll" role="region" aria-labelledby="command-line-caption" tabindex="0">
 <table>
-<caption>קודי יציאה</caption>
+<caption id="command-line-caption">קודי יציאה</caption>
 <thead>
 <tr><th scope="col">קוד</th><th scope="col">משמעות</th></tr>
 </thead>
@@ -613,14 +635,17 @@ footer {
 <tr><td>3</td><td>רק מ-<code dir="ltr">check</code>: לקובץ עדיין יש הערות.</td></tr>
 </tbody>
 </table>
+</div>
 <p>הפקודות <code dir="ltr">list</code>, <code dir="ltr">check</code> ו-<code dir="ltr">export</code> לעולם לא משנות את קובץ ה-Markdown שלכם. רק <code dir="ltr">clear</code> עושה זאת.</p>
 
 <h3 id="cli-list">הצגת ההערות</h3>
 <pre dir="ltr"><code>plancake list plan.md</code></pre>
-<p>זה מדפיס שורה אחת לכל הערה: השורות של ההערה, השורות של הבלוק שאחריו היא באה, תחילת אותו בלוק, וההערה עצמה. מעברי שורה בתוך הערה מוצגים כלוכסן.</p>
+<p>זה מדפיס שורה אחת לכל הערה: השורות של ההערה, השורות של הבלוק שאחריו היא באה, תחילת אותו בלוק, וההערה עצמה. השורות ממוספרות החל מ-1, כמו בעורך טקסט. מעברי שורה בתוך הערה מוצגים כלוכסן.</p>
 <pre dir="ltr"><code>43-43 after 41-42 "Back up the database before you run the migration.": Also back up the uploads folder.</code></pre>
-<p>תבנית זו נועדה לסקריפטים, כך שהמילים והפיסוק הקבועים שלה — „after”, המקף, המירכאות — נשארים באנגלית לא משנה מה שפת הממשק שלכם.</p>
-<p>הוסיפו <code dir="ltr">--json</code> עבור JSON: רשימה של אובייקטים עם השדות <code dir="ltr">noteStartLine</code>, <code dir="ltr">noteEndLine</code>, <code dir="ltr">blockStartLine</code>, <code dir="ltr">blockEndLine</code>, <code dir="ltr">blockKind</code>, <code dir="ltr">blockExcerpt</code> ו-<code dir="ltr">text</code>. הוסיפו <code dir="ltr">-o</code> (או <code dir="ltr">--output</code>) ושם קובץ כדי לכתוב את התוצאה לקובץ במקום למסך:</p>
+<p>הערה שלפני הבלוק הראשון בקובץ אינה באה אחרי אף בלוק, והשורה שלה אומרת זאת:</p>
+<pre dir="ltr"><code>1-1 at the start: Read the whole plan before you start.</code></pre>
+<p>תבנית זו נועדה לסקריפטים, כך שהמילים והפיסוק הקבועים שלה — „after”, „at the start”, המקף, המירכאות — נשארים באנגלית לא משנה מה שפת הממשק שלכם.</p>
+<p>הוסיפו <code dir="ltr">--json</code> עבור JSON: רשימה של אובייקטים עם השדות <code dir="ltr">noteStartLine</code>, <code dir="ltr">noteEndLine</code>, <code dir="ltr">blockStartLine</code>, <code dir="ltr">blockEndLine</code>, <code dir="ltr">blockKind</code>, <code dir="ltr">blockExcerpt</code> ו-<code dir="ltr">text</code>. השורות ממוספרות החל מ-1. הערך של <code dir="ltr">blockKind</code> הוא <code dir="ltr">paragraph</code>, <code dir="ltr">heading</code>, <code dir="ltr">listItem</code>, <code dir="ltr">code</code>, <code dir="ltr">tableRow</code>, או <code dir="ltr">start</code> עבור הערה שלפני הבלוק הראשון; אצלה <code dir="ltr">blockStartLine</code> ו-<code dir="ltr">blockEndLine</code> הם <code dir="ltr">null</code>, ו-<code dir="ltr">blockExcerpt</code> ריק. הוסיפו <code dir="ltr">-o</code> (או <code dir="ltr">--output</code>) ושם קובץ כדי לכתוב את התוצאה לקובץ במקום למסך:</p>
 <pre dir="ltr"><code>plancake list plan.md --json -o notes.json</code></pre>
 <p><strong>ייצא הערות</strong> בתפריט <strong>קובץ</strong> שומר את אותו JSON מהחלון.</p>
 
@@ -630,11 +655,12 @@ footer {
 
 <h3 id="cli-clear">מחיקת כל ההערות</h3>
 <pre dir="ltr"><code>plancake clear plan.md</code></pre>
-<p>זה מסיר כל הערה מהקובץ ומדפיס כמה הוסרו, לדוגמה <code>הוסרו 2 הערות.</code> עבור קובץ בקידוד ישן, <code dir="ltr">clear</code> פועל לפי <a href="#settings-advanced">הגדרת ההמרה</a>: כאשר ההמרה כבויה, או שהקידוד לא ניתן לזיהוי, הפקודה מסרבת לשנות קובץ שיש בו הערות ומסבירה מדוע.</p>
+<p>זה מסיר כל הערה מהקובץ ומדפיס כמה הוסרו, לדוגמה <code>הוסרו 2 הערות</code>. עבור קובץ בקידוד ישן, <code dir="ltr">clear</code> פועל לפי <a href="#settings-advanced">הגדרת ההמרה</a>: כאשר ההמרה כבויה, או שהקידוד לא ניתן לזיהוי, הפקודה מסרבת לשנות קובץ שיש בו הערות ומסבירה מדוע. הוסיפו <code dir="ltr">--convert</code> כדי להמיר קובץ כזה ל-UTF-8 בהרצה הזו, ללא קשר להגדרה; קובץ שהקידוד שלו לא ניתן לזיהוי עדיין לעולם לא משתנה.</p>
+<pre dir="ltr"><code>plancake clear old-plan.md --convert</code></pre>
 
 <h3 id="cli-export">ייצוא ל-HTML</h3>
 <pre dir="ltr"><code>plancake export plan.md -o plan.html</code></pre>
-<p>זה כותב עמוד אינטרנט עצמאי של המסמך עם ההערות שלו מסומנות בבירור, לשיתוף עם מישהו שלא משתמש ב-PlanCake. לעמוד יש עיצוב מובנה ואין בו סקריפטים. האפשרות <code dir="ltr">-o</code> נדרשת. שפת העמוד היא <strong>שפת המסמך</strong> מההגדרות; כדי להשתמש בשפה אחרת, הוסיפו <code dir="ltr">--lang</code> וקוד שפה, כגון <code dir="ltr">--lang fr</code>. כותרת העמוד היא הכותרת הראשונה של המסמך, או שם הקובץ אם אין לו כזו.</p>
+<p>זה כותב עמוד אינטרנט עצמאי של המסמך עם ההערות שלו מסומנות בבירור, לשיתוף עם מישהו שלא משתמש ב-PlanCake. לעמוד יש עיצוב מובנה ואין בו סקריפטים. האפשרות <code dir="ltr">-o</code> נדרשת. שפת העמוד היא <strong>שפת המסמך</strong> מההגדרות; כדי להשתמש בשפה אחרת, הוסיפו <code dir="ltr">--lang</code> וקוד שפה, כגון <code dir="ltr">--lang fr</code>. כותרת העמוד היא הכותרת הראשונה של המסמך, או שם הקובץ אם אין לו כזו. תמונות שהן קבצים במחשב שלכם, כמו <code dir="ltr">![Diagram](diagram.png)</code> לצד התוכנית, נכללות בתוך העמוד, כך שהוא מציג אותן בכל מקום שבו הוא נפתח; תמונה גדולה מ-10 MB, או בתיקייה משותפת ברשת של מחשב אחר, אינה נכללת. תמונות מהאינטרנט נשארות קישורים.</p>
 
 <h3 id="cli-markers">שימוש בסמנים אחרים להרצה בודדת</h3>
 <p>כברירת מחדל הפקודות משתמשות בסמנים מההגדרות. כדי להשתמש באחרים להרצה בודדת, הוסיפו:</p>
@@ -668,8 +694,9 @@ cmd /c "plancake check plan.md"</code></pre>
 <p>קיצורים אלה קבועים; לא ניתן לשנות אותם. תוכלו גם לראות את כולם ב-PlanCake עצמו: בחרו <strong>קיצורי מקלדת</strong> בתפריט <strong>עזרה</strong>.</p>
 
 <h3 id="keys-window">בכל מקום בחלון</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-window-caption" tabindex="0">
 <table>
-<caption>קיצורים שפועלים במסמך וברשימת ההערות</caption>
+<caption id="keys-window-caption">קיצורים שפועלים במסמך וברשימת ההערות</caption>
 <thead>
 <tr><th scope="col">פעולה</th><th scope="col">קיצור</th></tr>
 </thead>
@@ -681,7 +708,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>הגדרות</td><td><kbd dir="ltr">Ctrl+פסיק</kbd></td></tr>
 <tr><td>בטל</td><td><kbd dir="ltr">Ctrl+Z</kbd></td></tr>
 <tr><td>בצע שוב</td><td><kbd dir="ltr">Ctrl+Y</kbd></td></tr>
-<tr><td>מעבר בין המסמך לרשימת ההערות</td><td><kbd dir="ltr">F6</kbd></td></tr>
+<tr><td>מעבר בין המסמך לרשימת ההערות</td><td><kbd dir="ltr">F6</kbd> או <kbd dir="ltr">Shift+F6</kbd></td></tr>
 <tr><td>ההערה הבאה</td><td><kbd dir="ltr">F9</kbd></td></tr>
 <tr><td>ההערה הקודמת</td><td><kbd dir="ltr">Shift+F9</kbd></td></tr>
 <tr><td>הבלוק הבא במסמך</td><td><kbd dir="ltr">Alt+Shift+חץ למטה</kbd></td></tr>
@@ -697,10 +724,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>סגירת החלון</td><td><kbd dir="ltr">Alt+F4</kbd></td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-document">במסמך</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-document-caption" tabindex="0">
 <table>
-<caption>מקשים ופעולות עכבר במסמך</caption>
+<caption id="keys-document-caption">מקשים ופעולות עכבר במסמך</caption>
 <thead>
 <tr><th scope="col">פעולה</th><th scope="col">מקלדת</th><th scope="col">עכבר</th></tr>
 </thead>
@@ -712,10 +741,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>מעבר לקישור</td><td><kbd dir="ltr">Enter</kbd></td><td>לחיצה</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-list">ברשימת ההערות</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-list-caption" tabindex="0">
 <table>
-<caption>מקשים ופעולות עכבר ברשימת ההערות</caption>
+<caption id="keys-list-caption">מקשים ופעולות עכבר ברשימת ההערות</caption>
 <thead>
 <tr><th scope="col">פעולה</th><th scope="col">מקלדת</th><th scope="col">עכבר</th></tr>
 </thead>
@@ -726,10 +757,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>פתיחת התפריט של ההערה</td><td><kbd dir="ltr">מקש יישומים</kbd> או <kbd dir="ltr">Shift+F10</kbd></td><td>לחיצה ימנית</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-dialog">בתיבת הדו-שיח של ההערה</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-dialog-caption" tabindex="0">
 <table>
-<caption>מקשים בתיבת הדו-שיח הוספת הערה ועריכת הערה, בהגדרת ברירת המחדל</caption>
+<caption id="keys-dialog-caption">מקשים בתיבת הדו-שיח הוספת הערה ועריכת הערה, בהגדרת ברירת המחדל</caption>
 <thead>
 <tr><th scope="col">פעולה</th><th scope="col">קיצור</th></tr>
 </thead>
@@ -739,16 +772,18 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>ביטול</td><td><kbd dir="ltr">Escape</kbd>, או לחיצה על <strong>ביטול</strong></td></tr>
 </tbody>
 </table>
+</div>
 <p>אם תקבעו את <strong>Enter בחלון ההערה</strong> ל<strong>מתחיל שורה חדשה</strong>, <kbd dir="ltr">Enter</kbd> ו-<kbd dir="ltr">Ctrl+Enter</kbd> מתחלפים.</p>
 </article>
 
 <article aria-labelledby="menus">
 <h2 id="menus">מדריך התפריטים</h2>
-<p>לחצו על שם תפריט, הקישו <kbd dir="ltr">Alt</kbd> כדי להגיע לשורת התפריטים, או פתחו תפריט ישירות: <kbd dir="ltr">Alt+ק</kbd> עבור קובץ, <kbd dir="ltr">Alt+ע</kbd> עבור עריכה, <kbd dir="ltr">Alt+ת</kbd> עבור תצוגה, <kbd dir="ltr">Alt+ה</kbd> עבור הערות, <kbd dir="ltr">Alt+ז</kbd> עבור עזרה. פקודות שלא חלות באותו רגע — <strong>בטל</strong> כשאין מה לבטל, <strong>הערה הבאה</strong> בקובץ בלי הערות — אינן זמינות.</p>
+<p>לחצו על שם תפריט, הקישו <kbd dir="ltr">Alt</kbd> או <kbd dir="ltr">F10</kbd> כדי להגיע לשורת התפריטים, או פתחו תפריט ישירות: <kbd dir="ltr">Alt+ק</kbd> עבור קובץ, <kbd dir="ltr">Alt+ע</kbd> עבור עריכה, <kbd dir="ltr">Alt+ת</kbd> עבור תצוגה, <kbd dir="ltr">Alt+ה</kbd> עבור הערות, <kbd dir="ltr">Alt+ז</kbd> עבור עזרה. פקודות שלא חלות באותו רגע — <strong>בטל</strong> כשאין מה לבטל, <strong>הערה הבאה</strong> בקובץ בלי הערות — אינן זמינות.</p>
 
 <h3 id="menu-file">קובץ</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-file-caption" tabindex="0">
 <table>
-<caption>תפריט קובץ</caption>
+<caption id="menu-file-caption">תפריט קובץ</caption>
 <thead>
 <tr><th scope="col">פקודה</th><th scope="col">קיצור</th><th scope="col">מה הפקודה עושה</th></tr>
 </thead>
@@ -756,16 +791,18 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>פתח</strong></td><td><kbd dir="ltr">Ctrl+O</kbd></td><td>פותח קובץ Markdown מהדיסק שלכם.</td></tr>
 <tr><td><strong>פתח מלוח הגזירים</strong></td><td><kbd dir="ltr">Ctrl+V</kbd></td><td>פותח את הקובץ, הנתיב או הקישור שהעתקתם.</td></tr>
 <tr><td><strong>פתח מקישור</strong></td><td><kbd dir="ltr">Ctrl+L</kbd></td><td>מוריד קובץ Markdown מהאינטרנט ופותח אותו.</td></tr>
-<tr><td><strong>פתח בעורך</strong></td><td><kbd dir="ltr">Ctrl+E</kbd></td><td>פותח את הקובץ בתוכנה ש-Windows משתמש בה עבור קובצי Markdown, כשאתם רוצים לשנות את הטקסט של התוכנית עצמה.</td></tr>
+<tr><td><strong>פתח בעורך</strong></td><td><kbd dir="ltr">Ctrl+E</kbd></td><td>פותח את הקובץ בתוכנה ש-Windows משתמש בה עבור קובצי Markdown, כשאתם רוצים לשנות את הטקסט של התוכנית עצמה. אם התוכנה הזו היא PlanCake עצמו, או שאין כזו, הקובץ נפתח בתוכנה ש-Windows משתמש בה לעריכתו, ואם גם היא אינה קיימת — בפנקס רשימות.</td></tr>
 <tr><td><strong>ייצא הערות</strong></td><td>ללא</td><td>שומר את כל ההערות של הקובץ, עם הבלוקים שהן באות אחריהם, כקובץ JSON. PlanCake לעולם לא קורא אותו בחזרה; זהו עותק עבור כלים אחרים.</td></tr>
 <tr><td><strong>הגדרות</strong></td><td><kbd dir="ltr">Ctrl+פסיק</kbd></td><td>פותח את ההגדרות.</td></tr>
 <tr><td><strong>יציאה</strong></td><td><kbd dir="ltr">Alt+F4</kbd></td><td>סוגר את החלון.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-edit">עריכה</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-edit-caption" tabindex="0">
 <table>
-<caption>תפריט עריכה</caption>
+<caption id="menu-edit-caption">תפריט עריכה</caption>
 <thead>
 <tr><th scope="col">פקודה</th><th scope="col">קיצור</th><th scope="col">מה הפקודה עושה</th></tr>
 </thead>
@@ -775,10 +812,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>מחק את כל ההערות</strong></td><td>ללא</td><td>מסיר כל הערה מהקובץ, לאחר שאילה.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-view">תצוגה</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-view-caption" tabindex="0">
 <table>
-<caption>תפריט תצוגה</caption>
+<caption id="menu-view-caption">תפריט תצוגה</caption>
 <thead>
 <tr><th scope="col">פקודה</th><th scope="col">קיצור</th><th scope="col">מה הפקודה עושה</th></tr>
 </thead>
@@ -797,10 +836,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>טען מחדש</strong></td><td><kbd dir="ltr">F5</kbd></td><td>קורא את הקובץ מהדיסק מחדש.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-notes">הערות</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-notes-caption" tabindex="0">
 <table>
-<caption>תפריט הערות</caption>
+<caption id="menu-notes-caption">תפריט הערות</caption>
 <thead>
 <tr><th scope="col">פקודה</th><th scope="col">קיצור</th><th scope="col">מה הפקודה עושה</th></tr>
 </thead>
@@ -813,10 +854,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>בלוק קודם</strong></td><td><kbd dir="ltr">Alt+Shift+חץ למעלה</kbd></td><td>עובר לבלוק או להערה הקודמים במסמך.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-help">עזרה</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-help-caption" tabindex="0">
 <table>
-<caption>תפריט עזרה</caption>
+<caption id="menu-help-caption">תפריט עזרה</caption>
 <thead>
 <tr><th scope="col">פקודה</th><th scope="col">קיצור</th><th scope="col">מה הפקודה עושה</th></tr>
 </thead>
@@ -824,14 +867,16 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>מדריך המשתמש</strong></td><td><kbd dir="ltr">F1</kbd></td><td>פותח את המדריך הזה בדפדפן שלכם, בשפת הממשק שלכם כאשר היא זמינה.</td></tr>
 <tr><td><strong>קיצורי מקלדת</strong></td><td>ללא</td><td>מציג את כל הקיצורים.</td></tr>
 <tr><td><strong>בדוק עדכונים</strong></td><td>ללא</td><td>בודק אם יש גרסה חדשה, ממש עכשיו.</td></tr>
-<tr><td><strong>אודות PlanCake</strong></td><td><kbd dir="ltr">Shift+F1</kbd></td><td>מציג את הגרסה, עם קישור ל-PlanCake ב-GitHub וכפתור <strong>העתק מידע</strong>.</td></tr>
+<tr><td><strong>אודות PlanCake</strong></td><td><kbd dir="ltr">Shift+F1</kbd></td><td>מציג את הגרסה, עם קישור ל-PlanCake ב-GitHub, כפתור <strong>העתק מידע</strong> וכפתור <strong>רישיונות</strong>, שפותח בפנקס הרשימות את הרישיון של PlanCake ואת ההודעות על רכיבי צד שלישי הכלולים בו.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-context">תפריטי הקשר</h3>
 <p>פתחו תפריט הקשר בלחיצה ימנית, או עם <kbd dir="ltr">מקש יישומים</kbd> או <kbd dir="ltr">Shift+F10</kbd>.</p>
+<div class="table-scroll" role="region" aria-labelledby="menu-context-caption" tabindex="0">
 <table>
-<caption>פקודות תפריט הקשר</caption>
+<caption id="menu-context-caption">פקודות תפריט הקשר</caption>
 <thead>
 <tr><th scope="col">היכן</th><th scope="col">פקודות</th></tr>
 </thead>
@@ -841,6 +886,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>על הערה ברשימת ההערות</td><td><strong>ערוך הערה</strong>, <strong>מחק הערה</strong></td></tr>
 </tbody>
 </table>
+</div>
 </article>
 
 <article aria-labelledby="updates">
@@ -860,7 +906,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <li>עם תוכנת ההתקנה: <code dir="ltr">%APPDATA%\Oire\PlanCake\PlanCake.cfg</code></li>
 <li>ניידת: <code dir="ltr">userdata\PlanCake.cfg</code>, לצד <code dir="ltr">plancake.exe</code></li>
 </ul>
-<p>כדי להעביר את ההגדרות שלכם למחשב אחר, העתיקו את הקובץ הזה לאותו מקום שם. אותה תיקייה מכילה גם תיקיית <code dir="ltr">logs</code>, שרושמת מה PlanCake עשה ועוזרת כשאתם מדווחים על בעיה, וכמה קבצי עבודה של תצוגת המסמך. מחיקת התיקייה הזו מאפסת את PlanCake לברירות המחדל שלו ולעולם לא נוגעת בקובצי ה-Markdown שלכם או בהערות שבהם.</p>
+<p>כדי להעביר את ההגדרות שלכם למחשב אחר, העתיקו את הקובץ הזה לאותו מקום שם. אותה תיקייה מכילה גם תיקיית <code dir="ltr">logs</code>, שרושמת מה PlanCake עשה ועוזרת כשאתם מדווחים על בעיה. קבצי העבודה של תצוגת המסמך נשמרים ב-<code dir="ltr">%LOCALAPPDATA%\Oire\PlanCake</code> בגרסה המותקנת, ובאותה תיקיית <code dir="ltr">userdata</code> בגרסה הניידת. מחיקת התיקיות האלה מאפסת את PlanCake לברירות המחדל שלו ולעולם לא נוגעת בקובצי ה-Markdown שלכם או בהערות שבהם.</p>
 <h3 id="data-privacy">מה עובר ברשת</h3>
 <p>PlanCake מתחבר לאינטרנט רק עבור שני דברים: הורדת קובץ כשאתם פותחים אחד מקישור, ובדיקת עדכונים. הוא לא שולח שום נתוני שימוש לשום מקום.</p>
 </article>
@@ -875,7 +921,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>אני לא מצליח להוסיף הערות: הקובץ לקריאה בלבד</summary>
-<p>הקובץ אינו ב-UTF-8. הפעילו את <strong>המר ל-UTF-8 קבצים שאינם ב-UTF-8</strong> בהגדרות המתקדמות ופתחו את הקובץ שוב. אם PlanCake אומר שלא ניתן היה לזהות את הקידוד, הקובץ נשאר לקריאה בלבד לא משנה מה תעשו; פתחו אותו בעורך טקסט, שמרו אותו כ-UTF-8, ופתחו אותו שוב ב-PlanCake.</p>
+<p>הקובץ אינו ב-UTF-8. הפעילו את <strong>המר ל-UTF-8 בעת הפתיחה</strong> בהגדרות המתקדמות ופתחו את הקובץ שוב. אם PlanCake אומר שלא ניתן היה לזהות את הקידוד, הקובץ נשאר לקריאה בלבד לא משנה מה תעשו; פתחו אותו בעורך טקסט, שמרו אותו כ-UTF-8, ופתחו אותו שוב ב-PlanCake.</p>
 <p>אם PlanCake אומר במקום זאת שהקובץ כבר לא נמצא, הוא נמחק, שמו שונה או הוא הועבר בזמן שהיה פתוח. החזירו אותו למקומו, או פתחו אותו מהמקום החדש שלו.</p>
 </details>
 
@@ -927,11 +973,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <details>
 <summary>איך מדווחים על בעיה?</summary>
 <p>פתחו את <strong>אודות PlanCake</strong> עם <kbd dir="ltr">Shift+F1</kbd> או מתפריט <strong>עזרה</strong> ולחצו <strong>העתק מידע</strong>; תיבת הדו-שיח אומרת „הועתק”. זה מעביר ללוח הגזירים את גרסת ה-PlanCake ופרטי ה-Windows שלכם. הדביקו אותם לתקלה (issue) חדשה ב<a href="https://github.com/Oire/plan-cake/issues">עמוד ה-GitHub של PlanCake</a>, יחד עם מה שעשיתם ומה שקרה.</p>
+<p>צרפו גם את הקובץ <code dir="ltr">errors.log</code> מהתיקייה <code dir="ltr">logs</code> (יחד עם הקבצים הממוספרים לצדו, כמו <code dir="ltr">errors_001.log</code>), ואת <code dir="ltr">PlanCake.log</code> אם יבקשו מכם. התיקייה <code dir="ltr">logs</code> היא <code dir="ltr">%APPDATA%\Oire\PlanCake\logs</code> בגרסה המותקנת, ו-<code dir="ltr">userdata\logs</code> לצד <code dir="ltr">plancake.exe</code> בגרסה הניידת. היומנים מציינים את שמות הקבצים שפתחתם ואת כתובות האינטרנט שמהן הורדתם (בלי ערכי פרמטרי השאילתה), אבל לעולם אינם מכילים את הטקסט של הקבצים או של ההערות שלכם.</p>
 </details>
 </article>
 </main>
 <footer>
-<p>© 2026 Oire Software SARL. PlanCake הוא קוד פתוח תחת רישיון Apache 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake ב-GitHub</a>.</p>
+<p>© 2026 Oire Software SARL. PlanCake הוא קוד פתוח תחת רישיון Apache 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake ב-GitHub</a>. הרישיונות של הרכיבים הכלולים בו נמצאים בקובץ <code dir="ltr">THIRD-PARTY-NOTICES.txt</code> לצד <code dir="ltr">plancake.exe</code>; הכפתור <strong>רישיונות</strong> ב<strong>אודות PlanCake</strong> פותח אותו.</p>
 </footer>
 </body>
 </html>

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms.Automation;
 using GetText.WindowsForms;
@@ -13,10 +14,11 @@ using App = Oire.PlanCake.Utils.Constants.App;
 namespace Oire.PlanCake.Ui;
 
 /// <summary>
-/// Help → About PlanCake: the product, its version, the copyright, a link to the repository, and
-/// "Copy info", which puts what a bug report needs on the clipboard.
+/// Help → About PlanCake: the product, its version, the copyright, a link to the repository,
+/// "Copy info", which puts what a bug report needs on the clipboard, and "Licenses", which opens
+/// PlanCake's license and the third-party notices.
 /// </summary>
-internal partial class AboutDialog: Form {
+internal sealed partial class AboutDialog: Form {
     public AboutDialog() {
         InitializeComponent();
         Localizer.Localize(this, Utils.Localization.Catalog);
@@ -25,13 +27,22 @@ internal partial class AboutDialog: Form {
 
         appNameLabel.Text = App.Name;
         versionLabel.Text = _("Version {0}", Application.ProductVersion);
-        copyrightLabel.Text = _("© {0} {1}", DateTime.Now.Year, App.ManufacturerNameFull);
+        copyrightLabel.Text = TextDirection.Embed(Copyright);
+        copyInfoStatusLabel.MinimumSize = new Size(0, copyInfoStatusLabel.Font.Height + copyInfoStatusLabel.Padding.Vertical);
 
         repoLink.LinkClicked += OnRepoLinkClicked;
         copyInfoButton.Click += OnCopyInfoClick;
+        licensesButton.Click += OnLicensesClick;
         copyInfoStatusTimer.Tick += OnCopyInfoStatusTimerTick;
         ActiveControl = okButton;
     }
+
+    /// <summary>
+    /// The copyright line of the executable (<c>Copyright</c> in the project file), the same one
+    /// its file properties and the installer show. A legal notice, so it is not translated.
+    /// </summary>
+    internal static string Copyright =>
+        typeof(AboutDialog).Assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? String.Empty;
 
     /// <summary>What "Copy info" puts on the clipboard. English on purpose: it goes into bug reports.</summary>
     internal static string Info(string version, string osVersion) => String.Join(
@@ -50,6 +61,38 @@ internal partial class AboutDialog: Form {
         } catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) {
             Log.Error(ex, "Unable to open {Url}", App.RepoUrl);
             DialogHelper.Show(_("Unable to open {0}", App.RepoUrl), _("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    /// <summary>
+    /// The files "Licenses" opens, next to the executable: PlanCake's own license, then the
+    /// notices of the components it carries (which ends up in front). The installer and the
+    /// portable zip ship both.
+    /// </summary>
+    internal static IReadOnlyList<string> LicenseFiles(string folder) => [
+        Path.Combine(folder, "LICENSE"),
+        Path.Combine(folder, "THIRD-PARTY-NOTICES.txt"),
+    ];
+
+    /// <summary>
+    /// Opens the license files in Notepad. They are the application's own plain-text files, and
+    /// LICENSE has no extension, so no file association is involved.
+    /// </summary>
+    private void OnLicensesClick(object? sender, EventArgs e) {
+        var notepad = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe");
+
+        foreach (var path in LicenseFiles(AppContext.BaseDirectory)) {
+            try {
+                if (!File.Exists(path)) {
+                    throw new FileNotFoundException("The license file is missing", path);
+                }
+
+                Process.Start(new ProcessStartInfo(notepad) { ArgumentList = { path }, UseShellExecute = false })?.Dispose();
+            } catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or FileNotFoundException) {
+                Log.Error(ex, "Unable to open {Path}", path);
+                DialogHelper.Show(_("Unable to open {0}", path), _("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
         }
     }
 
@@ -109,6 +152,7 @@ internal partial class AboutDialog: Form {
     protected override void OnFormClosed(FormClosedEventArgs e) {
         repoLink.LinkClicked -= OnRepoLinkClicked;
         copyInfoButton.Click -= OnCopyInfoClick;
+        licensesButton.Click -= OnLicensesClick;
         copyInfoStatusTimer.Tick -= OnCopyInfoStatusTimerTick;
         copyInfoStatusTimer.Stop();
         base.OnFormClosed(e);

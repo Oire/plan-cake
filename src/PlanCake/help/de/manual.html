@@ -132,13 +132,15 @@ code {
     background: var(--code-bg);
     padding: 0.05em 0.3em;
     border-radius: 3px;
+    overflow-wrap: anywhere;
 }
 
 pre {
     background: var(--code-bg);
     padding: 0.75rem 1rem;
     border-radius: 4px;
-    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     text-align: start;
 }
 
@@ -150,7 +152,16 @@ pre code {
 table {
     border-collapse: collapse;
     width: 100%;
+}
+
+.table-scroll {
+    overflow-x: auto;
     margin-block: 1rem;
+}
+
+.table-scroll:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
 }
 
 caption {
@@ -231,6 +242,7 @@ footer {
 <ol>
 <li><a href="#installer">Mit dem Installationsprogramm</a></li>
 <li><a href="#portable">Die portable Version</a></li>
+<li><a href="#uninstalling">PlanCake deinstallieren</a></li>
 <li><a href="#pk-alias">Ein kürzerer Befehl: pk</a></li>
 </ol>
 </li>
@@ -352,11 +364,17 @@ footer {
 <h3 id="installer">Mit dem Installationsprogramm</h3>
 <p>Führen Sie das Installationsprogramm aus und folgen Sie den Schritten. Neben PlanCake selbst kümmert es sich auch darum, was PlanCake zum Laufen braucht: Es installiert die .NET 10 Desktop Runtime und die Microsoft Edge WebView2 Runtime, falls Ihr Computer sie noch nicht hat. Außerdem fügt es PlanCake zu Ihrem PATH hinzu, sodass der Befehl <code>plancake</code> in jedem neuen PowerShell- oder Eingabeaufforderungsfenster funktioniert.</p>
 <p>Ihre Einstellungen werden unter <code>%APPDATA%\Oire\PlanCake</code> gespeichert.</p>
+<p>Das Installationsprogramm fügt PlanCake dem Startmenü hinzu, zusammen mit einer Verknüpfung zu diesem Handbuch in der Sprache, die Sie für die Installation gewählt haben.</p>
+<p>PlanCake ist nicht mit einem Codesignaturzertifikat signiert. Wenn Sie das Installationsprogramm oder <code>plancake.exe</code> aus dem portablen ZIP-Archiv zum ersten Mal ausführen, kann Windows SmartScreen „Der Computer wurde durch Windows geschützt“ und einen unbekannten Herausgeber anzeigen. Um fortzufahren, wählen Sie <strong>Weitere Informationen</strong> und dann <strong>Trotzdem ausführen</strong>.</p>
 
 <h3 id="portable">Die portable Version</h3>
 <p>Entpacken Sie die ZIP-Datei in einen beliebigen Ordner und führen Sie <code>plancake.exe</code> von dort aus. Die ZIP-Datei enthält einen leeren Ordner namens <code>userdata</code> neben <code>plancake.exe</code>; solange dieser Ordner vorhanden ist, bewahrt PlanCake seine Einstellungen darin auf und schreibt nichts in Ihr Benutzerprofil. Löschen oder benennen Sie den Ordner <code>userdata</code> um, verwendet PlanCake wieder <code>%APPDATA%\Oire\PlanCake</code>.</p>
 <p>Die portable Version installiert nichts, daher benötigt Ihr Computer bereits die <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> und die <a href="https://developer.microsoft.com/microsoft-edge/webview2/">Microsoft Edge WebView2 Runtime</a>. Windows 11 bringt WebView2 bereits mit; fehlt es, sagt PlanCake Ihnen das beim Start und bietet an, die Download-Seite zu öffnen.</p>
 <p>Um den Befehl <code>plancake</code> mit der portablen Version zu verwenden, geben Sie entweder seinen vollständigen Pfad ein oder fügen Sie seinen Ordner selbst zu Ihrem PATH hinzu.</p>
+
+<h3 id="uninstalling">PlanCake deinstallieren</h3>
+<p>Deinstallieren Sie PlanCake unter <strong>Apps</strong> in den Windows-Einstellungen oder mit <strong>PlanCake entfernen</strong> im Startmenü. Das Deinstallationsprogramm nimmt PlanCake aus Ihrem PATH und fragt, ob auch Ihre Einstellungen und Protokolle entfernt werden sollen; Ihre Markdown-Dateien und die Notizen darin bleiben immer unberührt. Die portable Version installiert nichts: Um sie zu entfernen, löschen Sie ihren Ordner.</p>
+<p>Wenn Sie mit einem Standardkonto von Windows arbeiten und ein Administrator sein Kennwort eingibt, um die Deinstallation zu erlauben, läuft das Deinstallationsprogramm als dieser Administrator und sucht dessen Einstellungen, nicht Ihre, und fragt deshalb nicht danach. Ihre Einstellungen und Protokolle bleiben dann in <code>%APPDATA%\Oire\PlanCake</code> und <code>%LOCALAPPDATA%\Oire\PlanCake</code>; löschen Sie diese Ordner selbst, wenn Sie sie nicht mehr brauchen.</p>
 
 <h3 id="pk-alias">Ein kürzerer Befehl: pk</h3>
 <p>Wenn Sie den ganzen Tag Pläne über die Befehlszeile öffnen, können Sie PlanCake einen zweibuchstabigen Namen geben. PlanCake richtet das nicht für Sie ein; es ist eine einzige Zeile in Ihrem eigenen Shell-Profil.</p>
@@ -373,6 +391,7 @@ footer {
 <h2 id="main-window">Das Hauptfenster</h2>
 <p>Das Fenster hat oben eine Menüleiste, links das Dokument, rechts die Notizliste und ganz unten eine Statusleiste. Die Titelleiste zeigt den Namen der geöffneten Datei, zum Beispiel <strong>plan.md - PlanCake</strong>.</p>
 <p>Um dem Dokument oder der Notizliste mehr Platz zu geben, ziehen Sie die Trennlinie zwischen ihnen. Über die Tastatur wählen Sie <strong>Notizliste verbreitern</strong> oder <strong>Notizliste verschmälern</strong> im Menü <strong>Ansicht</strong>: Jeder Befehl verschiebt die Trennlinie um ein Zehntel der Breite, die sich beide teilen, auf eine runde Zahl – aus 32 Prozent wird die Liste zum Beispiel 40 Prozent breit, oder 30 Prozent. Die Statusleiste nennt den neuen Anteil, etwa „Notizliste 40 %“. Keine Seite kann wegschrumpfen: Die Liste bleibt mindestens etwa 150 Pixel breit und das Dokument etwa 200. An dieser Grenze bleibt die Trennlinie stehen, und die Statusleiste wiederholt den aktuellen Anteil. Beide Befehle sind nicht verfügbar, während die Notizliste ausgeblendet ist.</p>
+<p>PlanCake merkt sich Größe und Position des Fensters, ob es maximiert war, die Breite der Notizliste und den Zoom: Das nächste Fenster öffnet sich genauso, auf einem Bildschirm, der noch angeschlossen ist. Das allererste Fenster passt sich an den Bildschirm an, auf dem es sich öffnet.</p>
 
 <h3 id="document-view">Das Dokument</h3>
 <p>Das ist Ihre Markdown-Datei, formatiert. Wenn PlanCake eine Datei öffnet, beginnt es ganz oben. Auch Ihre Notizen erscheinen im Dokument, jeweils direkt nach dem Block, zu dem sie gehören, und optisch vom Text des Plans abgesetzt, damit Sie auf einen Blick sehen, was von Ihnen stammt.</p>
@@ -380,12 +399,12 @@ footer {
 <h3 id="notes-list">Die Notizliste</h3>
 <p>Die Notizliste versammelt jede Notiz der Datei an einem Ort, in der Reihenfolge, in der sie vorkommen. Sie hat drei Spalten:</p>
 <dl>
+<dt>Notiz</dt>
+<dd>Der erste Satz der Notiz in einer Zeile, ohne Markdown-Zeichensetzung. Die Spalte nimmt die ganze Breite ein, die die beiden anderen lassen. Lassen Sie den Mauszeiger auf einer Zeile ruhen, um die ganze Notiz zu sehen.</dd>
 <dt>Zeilen</dt>
 <dd>Wo die Notiz in der Datei steht: <code>12</code> für eine einzeilige Notiz, <code>12-14</code> für eine längere.</dd>
 <dt>Block</dt>
-<dd>Der Anfang des Blocks, auf den die Notiz folgt, damit Sie wissen, worum es geht, ohne dorthin zu gehen.</dd>
-<dt>Notiz</dt>
-<dd>Der Text der Notiz in einer Zeile, ohne Markdown-Zeichensetzung.</dd>
+<dd>Der erste Satz des Blocks, auf den die Notiz folgt, damit Sie wissen, worum es geht, ohne dorthin zu gehen. In beiden Spalten wird ein sehr langer Satz nach Möglichkeit an einem Komma, Doppelpunkt oder Gedankenstrich gekürzt.</dd>
 </dl>
 <p>Um im Dokument zu einer Notiz zu springen, drücken Sie <kbd>Eingabe</kbd> auf ihrer Zeile oder doppelklicken Sie sie; der Fokus springt zur Notiz. Um eine Notiz zu löschen, wählen Sie sie aus und drücken <kbd>Entf</kbd>; die Auswahl springt dann zur nächstgelegenen verbleibenden Notiz, sodass Sie Ihre Stelle in der Liste nie verlieren. Klicken Sie eine Zeile mit der rechten Maustaste an, oder drücken Sie die <kbd>Anwendungstaste</kbd> oder <kbd>Umschalt+F10</kbd>, für ein Menü mit <strong>Notiz bearbeiten</strong> und <strong>Notiz löschen</strong>.</p>
 <p>Wenn Sie lieber das ganze Fenster für das Dokument hätten, wählen Sie <strong>Notizliste</strong> im Menü <strong>Ansicht</strong>. Das blendet die Liste aus, und erneutes Wählen zeigt sie wieder; die Statusleiste zeigt „Notizliste ausgeblendet“ oder „Notizliste eingeblendet“. PlanCake merkt sich die Wahl: Es ist dieselbe Einstellung wie <strong>Notizliste anzeigen</strong> in den <a href="#settings-general">Einstellungen</a>, sodass neue Fenster genauso öffnen und andere offene Fenster folgen, sobald Sie zu ihnen wechseln.</p>
@@ -417,6 +436,7 @@ footer {
 <article aria-labelledby="opening-files">
 <h2 id="opening-files">Eine Datei öffnen</h2>
 <p>Pläne erreichen Sie auf viele Arten: eine Datei auf der Festplatte, ein Pfad, den jemand in einen Chat eingefügt hat, ein Link zu GitHub. PlanCake kann alle davon direkt öffnen, ohne dass Sie zuvor etwas speichern müssen. Auf welche Weise auch immer Sie vorgehen, eine neu geöffnete Datei beginnt immer ganz oben.</p>
+<p>Wenn keine Datei geöffnet ist, zählt das Fenster die Wege auf, eine zu öffnen, mit ihren Tasten. Eine große Datei kann einen Moment zum Öffnen brauchen: Dauert es länger als eine halbe Sekunde oder ist die Datei größer als 1 MB, zeigt PlanCake den Dialog <strong>Datei wird geöffnet</strong> mit einer Fortschrittsanzeige. Drücken Sie <kbd>Esc</kbd> oder klicken Sie auf <strong>Abbrechen</strong>, um das Öffnen abzubrechen; die zuvor geöffnete Datei bleibt, wie sie war.</p>
 
 <h3 id="open-command-line">Über die Befehlszeile</h3>
 <p>Geben Sie <code>plancake</code> gefolgt von der Datei ein:</p>
@@ -470,7 +490,7 @@ footer {
 <p>Eine Datei auf jede andere Weise zu öffnen – mit <kbd>Strg+O</kbd>, per Ziehen, aus der Zwischenablage, über einen Link – fügt sie ebenfalls zum Verlauf hinzu, sodass <strong>Zurück</strong> Sie immer zu dem zurückbringt, was Sie zuvor gelesen haben.</p>
 
 <h3 id="zoom">Zoomen</h3>
-<p>Um den Text größer zu machen, drücken Sie <kbd>Strg+Plus</kbd>; um ihn kleiner zu machen, drücken Sie <kbd>Strg+Minus</kbd>. Die Tasten auf dem Ziffernblock funktionieren ebenfalls, ebenso wie <strong>Vergrößern</strong> und <strong>Verkleinern</strong> im Menü <strong>Ansicht</strong>. Jeder Schritt ändert die Größe um 10 Prozent, zwischen 50 und 300 Prozent, und die Statusleiste zeigt die neue Größe, zum Beispiel „Zoom 120 %“. Drücken Sie <kbd>Strg+0</kbd>, um zu 100 Prozent zurückzukehren.</p>
+<p>Um den Text größer zu machen, drücken Sie <kbd>Strg+Plus</kbd>; um ihn kleiner zu machen, drücken Sie <kbd>Strg+Minus</kbd>. Die Tasten auf dem Ziffernblock funktionieren ebenfalls, ebenso wie <strong>Vergrößern</strong> und <strong>Verkleinern</strong> im Menü <strong>Ansicht</strong>. Jeder Schritt ändert die Größe um 10 Prozent, zwischen 50 und 300 Prozent, und die Statusleiste zeigt die neue Größe, zum Beispiel „Zoom 120 %“. Drücken Sie <kbd>Strg+0</kbd>, um zu 100 Prozent zurückzukehren. Das nächste Fenster, das Sie öffnen, beginnt mit demselben Zoom.</p>
 
 <h3 id="document-language">Die Sprache des Dokuments</h3>
 <p>PlanCake hält zwei Sprachen auseinander: die Sprache seiner Menüs und Dialoge, und die Sprache, in der das Dokument geschrieben ist. Die Oberfläche auf Französisch umzustellen macht einen englischen Plan nicht französisch. Die Dokumentsprache ist wichtig, wenn der Plan vorgelesen wird (siehe <a href="#screen-readers">Einen Screenreader verwenden</a>) und hilft PlanCake, alte Dateicodierungen zu erkennen (siehe <a href="#encodings">Dateien, die nicht in UTF-8 vorliegen</a>).</p>
@@ -482,9 +502,9 @@ footer {
 
 <h3 id="adding-note">Eine Notiz hinzufügen</h3>
 <ol>
-<li>Klicken Sie den Absatz, die Überschrift, das Listenelement, die Tabellenzeile oder den Codeblock an, den Sie kommentieren möchten. Von der Tastatur aus bewegen Sie sich mit <kbd>Alt+Umschalt+Nach-unten</kbd> oder <kbd>Alt+Umschalt+Nach-oben</kbd> dorthin (siehe <a href="#reading-basics">Sich im Dokument bewegen</a>) und drücken <kbd>Eingabe</kbd>. Der Dialog <strong>Notiz hinzufügen</strong> öffnet sich. Er zeigt den Anfang des Blocks unter <strong>Notiz zu</strong>, damit Sie prüfen können, ob Sie den richtigen ausgewählt haben, und setzt den Cursor in das Feld <strong>Notiz</strong>.</li>
+<li>Klicken Sie den Absatz, die Überschrift, das Listenelement, die Tabellenzeile oder den Codeblock an, den Sie kommentieren möchten. Der Block unter dem Mauszeiger wird hervorgehoben, sodass Sie sehen, welchem Block ein Klick eine Notiz hinzufügt. Von der Tastatur aus bewegen Sie sich mit <kbd>Alt+Umschalt+Nach-unten</kbd> oder <kbd>Alt+Umschalt+Nach-oben</kbd> dorthin (siehe <a href="#reading-basics">Sich im Dokument bewegen</a>) und drücken <kbd>Eingabe</kbd>. Der Dialog <strong>Notiz hinzufügen</strong> öffnet sich. Er zeigt den Anfang des Blocks unter <strong>Notiz zu</strong>, damit Sie prüfen können, ob Sie den richtigen ausgewählt haben, und setzt den Cursor in das Feld <strong>Notiz</strong>.</li>
 <li>Tippen Sie Ihre Notiz. Um darin eine neue Zeile zu beginnen, drücken Sie <kbd>Strg+Eingabe</kbd>.</li>
-<li>Drücken Sie <kbd>Eingabe</kbd> oder klicken Sie auf <strong>OK</strong>, um zu speichern; drücken Sie <kbd>Esc</kbd> oder klicken Sie auf <strong>Abbrechen</strong>, um abzubrechen. <strong>OK</strong> bleibt nicht verfügbar, solange das Feld leer ist.</li>
+<li>Drücken Sie <kbd>Eingabe</kbd> oder klicken Sie auf <strong>OK</strong>, um zu speichern; drücken Sie <kbd>Esc</kbd> oder klicken Sie auf <strong>Abbrechen</strong>, um abzubrechen. <strong>OK</strong> bleibt nicht verfügbar, solange das Feld leer ist, und <kbd>Eingabe</kbd> sagt dann nur „Geben Sie zuerst eine Notiz ein.“</li>
 </ol>
 <p>PlanCake schreibt die Notiz sofort in die Datei, direkt nach dem Block. Das Dokument aktualisiert sich, die Statusleiste zeigt „Notiz hinzugefügt“, und die neue Notiz steht dort, wo Sie sich gerade befinden. Sie erscheint auch in der Notizliste.</p>
 <p>Ein einzelner Klick genügt; ein Doppelklick bewirkt nicht mehr als ein einzelner Klick. Das Markieren von Text mit der Maus öffnet den Dialog nicht, sodass Sie weiterhin wie gewohnt Text markieren und kopieren können.</p>
@@ -516,6 +536,7 @@ footer {
 <pre><code>Back up the database before you run the migration.
 [usernote]Also back up the uploads folder.[/usernote]</code></pre>
 <p>Wer die Datei in einem Texteditor öffnet, und jedes Tool, das sie liest, sieht Ihre Notizen. Sie können Notizen sogar von Hand in derselben Form schreiben, und PlanCake zeigt sie wie seine eigenen an. Um andere Markierungen zu verwenden, siehe <a href="#settings-notes">Notizen-Einstellungen</a>.</p>
+<p>Markierungen in Code sind keine Notizen: zwischen Backticks, wie in <code>`[usernote]`</code>, oder in einem Codeblock. Auch Markierungen in rohem HTML sind keine Notizen: in einem HTML-Kommentar, <code>&lt;!-- … --&gt;</code>, oder in einem <code>&lt;pre&gt;</code>-, <code>&lt;script&gt;</code>-, <code>&lt;style&gt;</code>- oder <code>&lt;textarea&gt;</code>-Block, vom öffnenden bis zum schließenden Tag. Beginnt die <strong>Anfangsmarkierung</strong> selbst mit <code>&lt;!--</code>, bleiben Markierungen in Kommentaren Notizen. Ein Plan oder Handbuch, das die Markierungen als Beispiel zeigt, behält sie unverändert, und weder das Fenster noch die Befehle rühren sie an. PlanCake selbst schreibt nie eine Notiz in Code: Eine Notiz zu einem Codeblock kommt in die Zeile danach.</p>
 
 <h3 id="copy-block">Den Text eines Blocks kopieren</h3>
 <p>Um einen Absatz, ein Listenelement oder einen anderen Block ohne seine Markdown-Zeichensetzung zu kopieren, klicken Sie ihn mit der rechten Maustaste an, oder drücken Sie die <kbd>Anwendungstaste</kbd> oder <kbd>Umschalt+F10</kbd> darauf, und wählen Sie <strong>Blocktext kopieren</strong>. Die Statusleiste zeigt „Blocktext kopiert“.</p>
@@ -543,8 +564,8 @@ footer {
 
 <article aria-labelledby="encodings">
 <h2 id="encodings">Dateien, die nicht in UTF-8 vorliegen</h2>
-<p>Fast jede Markdown-Datei liegt heute in UTF-8 vor. Ältere Dateien, besonders in Sprachen wie Russisch oder Hebräisch, sind manchmal stattdessen in einer veralteten Windows-Codierung gespeichert. PlanCake öffnet und zeigt sie korrekt an, schreibt aber standardmäßig nicht in sie: Die Datei öffnet sich schreibgeschützt, und PlanCake sagt Ihnen das und nennt die Codierung, zum Beispiel „Diese Datei ist nicht in UTF-8 und wurde daher schreibgeschützt als Windows-1251 geöffnet. Notizen können nicht hinzugefügt werden.“</p>
-<p>Um solchen Dateien Notizen hinzuzufügen, schalten Sie <strong>Dateien, die nicht in UTF-8 vorliegen, beim Öffnen in UTF-8 (ohne BOM) konvertieren</strong> in den <a href="#settings-advanced">erweiterten Einstellungen</a> ein. PlanCake konvertiert dann jede solche Datei in dem Moment, in dem Sie sie öffnen, nach UTF-8 und sagt Ihnen zum Beispiel „Von Windows-1251 in UTF-8 konvertiert.“ Nur die Codierung ändert sich; der Text und die Zeilenenden bleiben gleich.</p>
+<p>Fast jede Markdown-Datei liegt heute in UTF-8 vor. Ältere Dateien, besonders in Sprachen wie Russisch oder Hebräisch, sind manchmal stattdessen in einer veralteten Windows-Codierung gespeichert. PlanCake öffnet und zeigt sie korrekt an, schreibt aber standardmäßig nicht in sie: Die Datei öffnet sich schreibgeschützt, und PlanCake sagt Ihnen das und nennt die Codierung, zum Beispiel „Diese Datei ist nicht in UTF-8 und wurde daher schreibgeschützt als Windows-1251 geöffnet. Notizen können nicht hinzugefügt werden. Um sie in UTF-8 zu konvertieren, aktivieren Sie in den Einstellungen das Konvertieren von Dateien, die nicht in UTF-8 vorliegen.“</p>
+<p>Um solchen Dateien Notizen hinzuzufügen, schalten Sie <strong>Beim Öffnen in UTF-8 konvertieren</strong> in den <a href="#settings-advanced">erweiterten Einstellungen</a> ein. PlanCake konvertiert dann jede solche Datei in dem Moment, in dem Sie sie öffnen, nach UTF-8 und sagt Ihnen zum Beispiel „Die Datei wurde von Windows-1251 in UTF-8 konvertiert.“ Nur die Codierung ändert sich; der Text und die Zeilenenden bleiben gleich.</p>
 <p>Manchmal kann PlanCake nicht sicher sagen, welche Codierung eine Datei verwendet. Eine solche Datei bleibt immer schreibgeschützt, egal was die Einstellung sagt: „Die Codierung dieser Datei konnte nicht erkannt werden, daher wurde sie schreibgeschützt geöffnet und wird nie geändert. Notizen können nicht hinzugefügt werden.“ Das ist eine feste Regel. Eine Datei zu schreiben, die nicht korrekt gelesen wurde, würde die Zeichen zerstören, die PlanCake nicht entziffern konnte, und das tut PlanCake nie.</p>
 <p>Die Einstellung <strong>Dokumentsprache</strong> ist einer der Hinweise, die PlanCake zur Erkennung einer veralteten Codierung nutzt; sie auf die Sprache Ihrer alten Dateien einzustellen, hilft also.</p>
 </article>
@@ -556,7 +577,7 @@ footer {
 <h3 id="settings-general">Allgemein</h3>
 <dl>
 <dt>Oberflächensprache</dt>
-<dd>Die Sprache der Menüs, Dialoge und Meldungen: English (Englisch), Русский (Russisch), Українська (Ukrainisch), Français (Französisch), עברית (Hebräisch) oder Deutsch. <strong>Systemsprache</strong>, die Voreinstellung, folgt Ihrer Windows-Sprache und verwendet Englisch, wenn Windows in einer Sprache läuft, die PlanCake nicht hat. Auf Hebräisch wird das gesamte Fenster von rechts nach links angeordnet. Sie können sie auch über <strong>Oberflächensprache</strong> im Menü <strong>Ansicht</strong> wechseln. Diese Einstellung ändert nicht die Dokumentsprache.</dd>
+<dd>Die Sprache der Menüs, Dialoge und Meldungen: <span lang="en">English</span> (Englisch), <span lang="ru">Русский</span> (Russisch), <span lang="uk">Українська</span> (Ukrainisch), <span lang="fr">Français</span> (Französisch), <span lang="he" dir="rtl">עברית</span> (Hebräisch) oder Deutsch. <strong>Systemsprache</strong>, die Voreinstellung, folgt Ihrer Windows-Sprache und verwendet Englisch, wenn Windows in einer Sprache läuft, die PlanCake nicht hat. Auf Hebräisch wird das gesamte Fenster von rechts nach links angeordnet. Sie können sie auch über <strong>Oberflächensprache</strong> im Menü <strong>Ansicht</strong> wechseln. Diese Einstellung ändert nicht die Dokumentsprache.</dd>
 <dt>Dokumentsprache</dt>
 <dd>Die Sprache, in der PlanCake ein neu geöffnetes Dokument vermutet. Standard: Englisch. Sie folgt nie der Oberflächensprache oder Windows. Siehe <a href="#document-language">Die Sprache des Dokuments</a>.</dd>
 <dt>Wenn sich die Datei auf dem Datenträger ändert</dt>
@@ -578,11 +599,11 @@ footer {
 <dt>Anfangsmarkierung</dt>
 <dd>Der Text, mit dem eine Notiz in der Datei beginnt. Standard: <code>[usernote]</code>. Sie darf nicht leer sein, nicht mit einem Leerzeichen oder einem doppelten Anführungszeichen beginnen oder enden, und keinen Zeilenumbruch enthalten.</dd>
 <dt>Endmarkierung (leer lassen für eine einzelne Markierung, die bis zum Zeilenende reicht)</dt>
-<dd>Der Text, mit dem eine Notiz endet. Standard: <code>[/usernote]</code>. Sie folgt denselben Regeln und muss sich von der Anfangsmarkierung unterscheiden. Lassen Sie sie leer, läuft eine Notiz von der Anfangsmarkierung bis zum Ende ihrer Zeile; Notizen sind dann immer eine Zeile lang, und Zeilenumbrüche, die Sie in eine Notiz eintippen, werden zu Leerzeichen.</dd>
+<dd>Der Text, mit dem eine Notiz endet. Standard: <code>[/usernote]</code>. Sie folgt denselben Regeln und muss sich von der Anfangsmarkierung unterscheiden. Lassen Sie sie leer, läuft eine Notiz von der Anfangsmarkierung bis zum Ende ihrer Zeile; Notizen sind dann immer eine Zeile lang, und Zeilenumbrüche, die Sie in eine Notiz eintippen, werden zu Leerzeichen. Verstoßen die Markierungen gegen eine dieser Regeln, nennt die Zeile darunter den Grund, beginnend mit „Fehler:“, und ein Screenreader liest ihn vor, sobald Sie beim Tippen innehalten.</dd>
 <dt>Eingabetaste oder Mausklick auf einen Block</dt>
 <dd><strong>Fügt eine Notiz hinzu</strong> (die Voreinstellung) öffnet den Dialog <strong>Notiz hinzufügen</strong>. <strong>Öffnet das Kontextmenü</strong> zeigt stattdessen das Menü des Blocks, in dem Sie <strong>Notiz hinzufügen</strong> oder <strong>Blocktext kopieren</strong> wählen; wählen Sie das, wenn Sie sich dabei ertappen, aus Versehen Notizen hinzuzufügen. Ein Klick oder <kbd>Eingabe</kbd> auf eine bestehende Notiz öffnet sie immer zur Bearbeitung, und ein Rechtsklick, die <kbd>Anwendungstaste</kbd> und <kbd>Umschalt+F10</kbd> öffnen immer das Menü.</dd>
-<dt>Eingabetaste im Notizdialog</dt>
-<dd><strong>Speichert die Notiz (Strg+Eingabe beginnt eine neue Zeile)</strong> ist die Voreinstellung. <strong>Beginnt eine neue Zeile (Strg+Eingabe speichert die Notiz)</strong> eignet sich für lange Notizen mit mehreren Absätzen. Was auch immer Sie wählen, <kbd>Strg+Eingabe</kbd> tut das jeweils andere.</dd>
+<dt>Eingabetaste im Notizdialog (Strg+Eingabe bewirkt das Gegenteil)</dt>
+<dd><strong>Speichert die Notiz</strong> ist die Voreinstellung. <strong>Beginnt eine neue Zeile</strong> eignet sich für lange Notizen mit mehreren Absätzen. Was auch immer Sie wählen, <kbd>Strg+Eingabe</kbd> tut das jeweils andere.</dd>
 </dl>
 <aside role="note" class="warning">
 <p><strong>Warnung: Das Ändern der Markierungen verbirgt bestehende Notizen.</strong> PlanCake liest nur die gerade eingestellten Markierungen. Bereits in einer Datei vorhandene Notizen, die mit anderen Markierungen geschrieben wurden, erscheinen als gewöhnlicher Text: Sie stehen nicht mehr in der Notizliste, <kbd>F9</kbd> überspringt sie, und die Befehlszeile zählt sie nicht mit. In der Datei ändert sich nichts, und nichts geht verloren. Stellen Sie die Markierungen zurück, und diese Notizen sind wieder Notizen.</p>
@@ -591,8 +612,8 @@ footer {
 
 <h3 id="settings-advanced">Erweitert</h3>
 <dl>
-<dt>Dateien, die nicht in UTF-8 vorliegen, beim Öffnen in UTF-8 (ohne BOM) konvertieren. Die Datei auf dem Datenträger wird überschrieben.</dt>
-<dd>Standardmäßig ausgeschaltet, sodass Dateien in veralteten Codierungen schreibgeschützt geöffnet und nie geändert werden. Schalten Sie sie ein, damit PlanCake solche Dateien beim Öffnen in UTF-8 konvertiert, sodass Sie Notizen hinzufügen können. Eine Datei, deren Codierung PlanCake nicht erkennen kann, wird nie konvertiert. Siehe <a href="#encodings">Dateien, die nicht in UTF-8 vorliegen</a>.</dd>
+<dt>Beim Öffnen in UTF-8 konvertieren</dt>
+<dd>Standardmäßig ausgeschaltet, sodass Dateien in veralteten Codierungen schreibgeschützt geöffnet und nie geändert werden. Schalten Sie sie ein, damit PlanCake eine Datei, die nicht in UTF-8 vorliegt, beim Öffnen in UTF-8 ohne Byte Order Mark (BOM) konvertiert, sodass Sie Notizen hinzufügen können. Die Konvertierung überschreibt die Datei auf dem Datenträger. Eine Datei, deren Codierung PlanCake nicht erkennen kann, wird nie konvertiert. Siehe <a href="#encodings">Dateien, die nicht in UTF-8 vorliegen</a>.</dd>
 </dl>
 </article>
 
@@ -601,9 +622,10 @@ footer {
 <p>PlanCake kann auch ohne Fenster arbeiten. Vier Befehle lesen die Notizen einer Datei, prüfen, ob noch welche übrig sind, entfernen sie alle oder exportieren die Datei nach HTML. Sie sind für Skripte und für KI-Assistenten gemacht: Claude verwendet sie, um Ihre Notizen zu einem Plan zu lesen und zu bestätigen, dass jede davon bearbeitet wurde.</p>
 <p>Jeder Befehl folgt demselben Muster:</p>
 <pre><code>plancake &lt;command&gt; &lt;file&gt; [options]</code></pre>
-<p>Geben Sie <code>plancake --help</code> ein für die Liste der Befehle, oder <code>plancake list --help</code> für die Optionen eines einzelnen Befehls. Die Ausgabe ist UTF-8 ohne Byte Order Mark. Fehler gehen an die Fehlerausgabe, mit Exitcode 1.</p>
+<p>Geben Sie <code>plancake --help</code> ein für die Liste der Befehle, oder <code>plancake list --help</code> für die Optionen eines einzelnen Befehls. Die Ausgabe ist UTF-8 ohne Byte Order Mark. Fehler gehen an die Fehlerausgabe, mit Exitcode 1. Auch ein falsch geschriebener Befehl wie <code>plancake chek</code> ist ein solcher Fehler („Unbekannter Befehl: chek. Meinten Sie check?“), statt dass sich ein Fenster mit einer Datei öffnet, die es nicht gibt.</p>
+<div class="table-scroll" role="region" aria-labelledby="command-line-caption" tabindex="0">
 <table>
-<caption>Exitcodes</caption>
+<caption id="command-line-caption">Exitcodes</caption>
 <thead>
 <tr><th scope="col">Code</th><th scope="col">Bedeutung</th></tr>
 </thead>
@@ -613,14 +635,17 @@ footer {
 <tr><td>3</td><td>Nur bei <code>check</code>: Die Datei hat noch Notizen.</td></tr>
 </tbody>
 </table>
+</div>
 <p>Die Befehle <code>list</code>, <code>check</code> und <code>export</code> ändern nie Ihre Markdown-Datei. Nur <code>clear</code> tut das.</p>
 
 <h3 id="cli-list">Die Notizen auflisten</h3>
 <pre><code>plancake list plan.md</code></pre>
-<p>Das gibt eine Zeile pro Notiz aus: die Zeilen der Notiz, die Zeilen des Blocks, auf den sie folgt, den Anfang dieses Blocks und die Notiz selbst. Zeilenumbrüche innerhalb einer Notiz werden als Schrägstrich dargestellt.</p>
+<p>Das gibt eine Zeile pro Notiz aus: die Zeilen der Notiz, die Zeilen des Blocks, auf den sie folgt, den Anfang dieses Blocks und die Notiz selbst. Die Zeilen werden ab 1 gezählt, wie in einem Texteditor. Zeilenumbrüche innerhalb einer Notiz werden als Schrägstrich dargestellt.</p>
 <pre><code>43-43 after 41-42 "Back up the database before you run the migration.": Also back up the uploads folder.</code></pre>
-<p>Dieses Format ist für Skripte gedacht, daher bleiben seine festen Wörter und Zeichensetzung — „after“, der Bindestrich, die Anführungszeichen — auf Englisch, unabhängig von Ihrer Oberflächensprache.</p>
-<p>Fügen Sie <code>--json</code> hinzu für JSON: eine Liste von Objekten mit den Feldern <code>noteStartLine</code>, <code>noteEndLine</code>, <code>blockStartLine</code>, <code>blockEndLine</code>, <code>blockKind</code>, <code>blockExcerpt</code> und <code>text</code>. Fügen Sie <code>-o</code> (oder <code>--output</code>) und einen Dateinamen hinzu, um das Ergebnis in eine Datei statt auf den Bildschirm zu schreiben:</p>
+<p>Eine Notiz vor dem ersten Block der Datei folgt auf keinen Block, und ihre Zeile sagt das:</p>
+<pre><code>1-1 at the start: Read the whole plan before you start.</code></pre>
+<p>Dieses Format ist für Skripte gedacht, daher bleiben seine festen Wörter und Zeichensetzung — „after“, „at the start“, der Bindestrich, die Anführungszeichen — auf Englisch, unabhängig von Ihrer Oberflächensprache.</p>
+<p>Fügen Sie <code>--json</code> hinzu für JSON: eine Liste von Objekten mit den Feldern <code>noteStartLine</code>, <code>noteEndLine</code>, <code>blockStartLine</code>, <code>blockEndLine</code>, <code>blockKind</code>, <code>blockExcerpt</code> und <code>text</code>. Die Zeilen werden ab 1 gezählt. <code>blockKind</code> ist <code>paragraph</code>, <code>heading</code>, <code>listItem</code>, <code>code</code>, <code>tableRow</code> oder <code>start</code> für eine Notiz vor dem ersten Block; bei ihr sind <code>blockStartLine</code> und <code>blockEndLine</code> <code>null</code>, und <code>blockExcerpt</code> ist leer. Fügen Sie <code>-o</code> (oder <code>--output</code>) und einen Dateinamen hinzu, um das Ergebnis in eine Datei statt auf den Bildschirm zu schreiben:</p>
 <pre><code>plancake list plan.md --json -o notes.json</code></pre>
 <p><strong>Notizen exportieren</strong> im Menü <strong>Datei</strong> speichert dasselbe JSON aus dem Fenster.</p>
 
@@ -630,11 +655,12 @@ footer {
 
 <h3 id="cli-clear">Alle Notizen entfernen</h3>
 <pre><code>plancake clear plan.md</code></pre>
-<p>Das entfernt jede Notiz aus der Datei und gibt aus, wie viele entfernt wurden, zum Beispiel <code>2 Notizen entfernt.</code> Bei einer Datei in einer veralteten Codierung folgt <code>clear</code> der <a href="#settings-advanced">Konvertierungseinstellung</a>: Ist die Konvertierung ausgeschaltet, oder kann die Codierung nicht erkannt werden, weigert es sich, eine Datei zu ändern, die Notizen enthält, und erklärt, warum.</p>
+<p>Das entfernt jede Notiz aus der Datei und gibt aus, wie viele entfernt wurden, zum Beispiel <code>2 Notizen entfernt</code>. Bei einer Datei in einer veralteten Codierung folgt <code>clear</code> der <a href="#settings-advanced">Konvertierungseinstellung</a>: Ist die Konvertierung ausgeschaltet, oder kann die Codierung nicht erkannt werden, weigert es sich, eine Datei zu ändern, die Notizen enthält, und erklärt, warum. Fügen Sie <code>--convert</code> hinzu, um eine solche Datei für diesen Aufruf unabhängig von der Einstellung in UTF-8 zu konvertieren; eine Datei, deren Codierung nicht erkannt werden kann, wird weiterhin nie geändert.</p>
+<pre><code>plancake clear old-plan.md --convert</code></pre>
 
 <h3 id="cli-export">Nach HTML exportieren</h3>
 <pre><code>plancake export plan.md -o plan.html</code></pre>
-<p>Das schreibt eine eigenständige Webseite des Dokuments mit seinen deutlich markierten Notizen, um sie mit jemandem zu teilen, der PlanCake nicht verwendet. Die Seite hat ihre Stile eingebaut und enthält keine Skripte. Die Option <code>-o</code> ist erforderlich. Die Sprache der Seite ist die <strong>Dokumentsprache</strong> aus den Einstellungen; um eine andere zu verwenden, fügen Sie <code>--lang</code> und einen Sprachcode hinzu, etwa <code>--lang fr</code>. Der Seitentitel ist die erste Überschrift des Dokuments, oder der Dateiname, wenn es keine hat.</p>
+<p>Das schreibt eine eigenständige Webseite des Dokuments mit seinen deutlich markierten Notizen, um sie mit jemandem zu teilen, der PlanCake nicht verwendet. Die Seite hat ihre Stile eingebaut und enthält keine Skripte. Die Option <code>-o</code> ist erforderlich. Die Sprache der Seite ist die <strong>Dokumentsprache</strong> aus den Einstellungen; um eine andere zu verwenden, fügen Sie <code>--lang</code> und einen Sprachcode hinzu, etwa <code>--lang fr</code>. Der Seitentitel ist die erste Überschrift des Dokuments, oder der Dateiname, wenn es keine hat. Bilder, die Dateien auf Ihrem Computer sind, etwa <code>![Diagramm](diagram.png)</code> neben dem Plan, werden in die Seite eingebettet, sodass sie sie überall zeigt, wo sie geöffnet wird; ein Bild über 10 MB oder auf der Netzwerkfreigabe eines anderen Computers wird nicht eingebettet. Bilder aus dem Web bleiben Links ins Web.</p>
 
 <h3 id="cli-markers">Andere Markierungen für einen einzelnen Durchlauf verwenden</h3>
 <p>Standardmäßig verwenden die Befehle die Markierungen aus den Einstellungen. Um für einen einzelnen Durchlauf andere zu verwenden, fügen Sie hinzu:</p>
@@ -668,8 +694,9 @@ cmd /c "plancake check plan.md"</code></pre>
 <p>Diese Tastenkombinationen sind fest vorgegeben; sie können nicht geändert werden. Sie können sie auch alle in PlanCake selbst einsehen: Wählen Sie <strong>Tastenkombinationen</strong> im Menü <strong>Hilfe</strong>.</p>
 
 <h3 id="keys-window">Überall im Fenster</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-window-caption" tabindex="0">
 <table>
-<caption>Tastenkombinationen, die im Dokument und in der Notizliste funktionieren</caption>
+<caption id="keys-window-caption">Tastenkombinationen, die im Dokument und in der Notizliste funktionieren</caption>
 <thead>
 <tr><th scope="col">Aktion</th><th scope="col">Tastenkombination</th></tr>
 </thead>
@@ -681,7 +708,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Einstellungen</td><td><kbd>Strg+Komma</kbd></td></tr>
 <tr><td>Rückgängig</td><td><kbd>Strg+Z</kbd></td></tr>
 <tr><td>Wiederholen</td><td><kbd>Strg+Y</kbd></td></tr>
-<tr><td>Zwischen Dokument und Notizliste wechseln</td><td><kbd>F6</kbd></td></tr>
+<tr><td>Zwischen Dokument und Notizliste wechseln</td><td><kbd>F6</kbd> oder <kbd>Umschalt+F6</kbd></td></tr>
 <tr><td>Nächste Notiz</td><td><kbd>F9</kbd></td></tr>
 <tr><td>Vorherige Notiz</td><td><kbd>Umschalt+F9</kbd></td></tr>
 <tr><td>Nächster Block im Dokument</td><td><kbd>Alt+Umschalt+Nach-unten</kbd></td></tr>
@@ -697,10 +724,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Das Fenster schließen</td><td><kbd>Alt+F4</kbd></td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-document">Im Dokument</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-document-caption" tabindex="0">
 <table>
-<caption>Tasten und Mausaktionen im Dokument</caption>
+<caption id="keys-document-caption">Tasten und Mausaktionen im Dokument</caption>
 <thead>
 <tr><th scope="col">Aktion</th><th scope="col">Tastatur</th><th scope="col">Maus</th></tr>
 </thead>
@@ -712,10 +741,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Einem Link folgen</td><td><kbd>Eingabe</kbd></td><td>Klick</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-list">In der Notizliste</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-list-caption" tabindex="0">
 <table>
-<caption>Tasten und Mausaktionen in der Notizliste</caption>
+<caption id="keys-list-caption">Tasten und Mausaktionen in der Notizliste</caption>
 <thead>
 <tr><th scope="col">Aktion</th><th scope="col">Tastatur</th><th scope="col">Maus</th></tr>
 </thead>
@@ -726,10 +757,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Das Menü der Notiz öffnen</td><td><kbd>Anwendungstaste</kbd> oder <kbd>Umschalt+F10</kbd></td><td>Rechtsklick</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-dialog">Im Notizdialog</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-dialog-caption" tabindex="0">
 <table>
-<caption>Tasten im Dialog Notiz hinzufügen und Notiz bearbeiten, mit der Standardeinstellung</caption>
+<caption id="keys-dialog-caption">Tasten im Dialog Notiz hinzufügen und Notiz bearbeiten, mit der Standardeinstellung</caption>
 <thead>
 <tr><th scope="col">Aktion</th><th scope="col">Tastenkombination</th></tr>
 </thead>
@@ -739,16 +772,18 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Abbrechen</td><td><kbd>Esc</kbd>, oder auf <strong>Abbrechen</strong> klicken</td></tr>
 </tbody>
 </table>
+</div>
 <p>Stellen Sie <strong>Eingabetaste im Notizdialog</strong> auf <strong>Beginnt eine neue Zeile</strong>, tauschen <kbd>Eingabe</kbd> und <kbd>Strg+Eingabe</kbd> die Rollen.</p>
 </article>
 
 <article aria-labelledby="menus">
 <h2 id="menus">Menüreferenz</h2>
-<p>Klicken Sie einen Menünamen an, drücken Sie <kbd>Alt</kbd>, um die Menüleiste zu erreichen, oder öffnen Sie ein Menü direkt: <kbd>Alt+D</kbd> für Datei, <kbd>Alt+B</kbd> für Bearbeiten, <kbd>Alt+A</kbd> für Ansicht, <kbd>Alt+N</kbd> für Notizen, <kbd>Alt+H</kbd> für Hilfe. Befehle, die gerade nicht zutreffen — <strong>Rückgängig</strong>, wenn es nichts rückgängig zu machen gibt, <strong>Nächste Notiz</strong> in einer Datei ohne Notizen —, sind nicht verfügbar.</p>
+<p>Klicken Sie einen Menünamen an, drücken Sie <kbd>Alt</kbd> oder <kbd>F10</kbd>, um die Menüleiste zu erreichen, oder öffnen Sie ein Menü direkt: <kbd>Alt+D</kbd> für Datei, <kbd>Alt+B</kbd> für Bearbeiten, <kbd>Alt+A</kbd> für Ansicht, <kbd>Alt+N</kbd> für Notizen, <kbd>Alt+H</kbd> für Hilfe. Befehle, die gerade nicht zutreffen — <strong>Rückgängig</strong>, wenn es nichts rückgängig zu machen gibt, <strong>Nächste Notiz</strong> in einer Datei ohne Notizen —, sind nicht verfügbar.</p>
 
 <h3 id="menu-file">Datei</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-file-caption" tabindex="0">
 <table>
-<caption>Menü Datei</caption>
+<caption id="menu-file-caption">Menü Datei</caption>
 <thead>
 <tr><th scope="col">Befehl</th><th scope="col">Tastenkombination</th><th scope="col">Was er tut</th></tr>
 </thead>
@@ -756,16 +791,18 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Öffnen</strong></td><td><kbd>Strg+O</kbd></td><td>Öffnet eine Markdown-Datei von Ihrer Festplatte.</td></tr>
 <tr><td><strong>Aus der Zwischenablage öffnen</strong></td><td><kbd>Strg+V</kbd></td><td>Öffnet die Datei, den Pfad oder den Link, den Sie kopiert haben.</td></tr>
 <tr><td><strong>Über Link öffnen</strong></td><td><kbd>Strg+L</kbd></td><td>Lädt eine Markdown-Datei aus dem Web herunter und öffnet sie.</td></tr>
-<tr><td><strong>Im Editor öffnen</strong></td><td><kbd>Strg+E</kbd></td><td>Öffnet die Datei in dem Programm, das Windows für Markdown-Dateien verwendet, wenn Sie den Text des Plans selbst ändern möchten.</td></tr>
+<tr><td><strong>Im Editor öffnen</strong></td><td><kbd>Strg+E</kbd></td><td>Öffnet die Datei in dem Programm, das Windows für Markdown-Dateien verwendet, wenn Sie den Text des Plans selbst ändern möchten. Ist dieses Programm PlanCake selbst oder gibt es keines, öffnet sich die Datei in dem Programm, mit dem Windows sie bearbeitet, oder sonst im Windows-Editor (Notepad).</td></tr>
 <tr><td><strong>Notizen exportieren</strong></td><td>Keine</td><td>Speichert alle Notizen der Datei, mit den Blöcken, auf die sie folgen, als JSON-Datei. PlanCake liest sie nie zurück; sie ist eine Kopie für andere Werkzeuge.</td></tr>
 <tr><td><strong>Einstellungen</strong></td><td><kbd>Strg+Komma</kbd></td><td>Öffnet die Einstellungen.</td></tr>
 <tr><td><strong>Beenden</strong></td><td><kbd>Alt+F4</kbd></td><td>Schließt das Fenster.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-edit">Bearbeiten</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-edit-caption" tabindex="0">
 <table>
-<caption>Menü Bearbeiten</caption>
+<caption id="menu-edit-caption">Menü Bearbeiten</caption>
 <thead>
 <tr><th scope="col">Befehl</th><th scope="col">Tastenkombination</th><th scope="col">Was er tut</th></tr>
 </thead>
@@ -775,10 +812,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Alle Notizen löschen</strong></td><td>Keine</td><td>Entfernt nach Rückfrage jede Notiz aus der Datei.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-view">Ansicht</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-view-caption" tabindex="0">
 <table>
-<caption>Menü Ansicht</caption>
+<caption id="menu-view-caption">Menü Ansicht</caption>
 <thead>
 <tr><th scope="col">Befehl</th><th scope="col">Tastenkombination</th><th scope="col">Was er tut</th></tr>
 </thead>
@@ -797,10 +836,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Neu laden</strong></td><td><kbd>F5</kbd></td><td>Liest die Datei erneut von der Festplatte.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-notes">Notizen</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-notes-caption" tabindex="0">
 <table>
-<caption>Menü Notizen</caption>
+<caption id="menu-notes-caption">Menü Notizen</caption>
 <thead>
 <tr><th scope="col">Befehl</th><th scope="col">Tastenkombination</th><th scope="col">Was er tut</th></tr>
 </thead>
@@ -813,10 +854,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Vorheriger Block</strong></td><td><kbd>Alt+Umschalt+Nach-oben</kbd></td><td>Springt zum vorherigen Block oder zur vorherigen Notiz im Dokument.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-help">Hilfe</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-help-caption" tabindex="0">
 <table>
-<caption>Menü Hilfe</caption>
+<caption id="menu-help-caption">Menü Hilfe</caption>
 <thead>
 <tr><th scope="col">Befehl</th><th scope="col">Tastenkombination</th><th scope="col">Was er tut</th></tr>
 </thead>
@@ -824,14 +867,16 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Benutzerhandbuch</strong></td><td><kbd>F1</kbd></td><td>Öffnet dieses Handbuch in Ihrem Webbrowser, in Ihrer Oberflächensprache, sofern verfügbar.</td></tr>
 <tr><td><strong>Tastenkombinationen</strong></td><td>Keine</td><td>Listet jede Tastenkombination auf.</td></tr>
 <tr><td><strong>Nach Updates suchen</strong></td><td>Keine</td><td>Prüft sofort auf eine neue Version.</td></tr>
-<tr><td><strong>Über PlanCake</strong></td><td><kbd>Umschalt+F1</kbd></td><td>Zeigt die Version, mit einem Link zu PlanCake auf GitHub und einer Schaltfläche <strong>Info kopieren</strong>.</td></tr>
+<tr><td><strong>Über PlanCake</strong></td><td><kbd>Umschalt+F1</kbd></td><td>Zeigt die Version, mit einem Link zu PlanCake auf GitHub, einer Schaltfläche <strong>Info kopieren</strong> und einer Schaltfläche <strong>Lizenzen</strong>, die die Lizenz von PlanCake und die Hinweise zu den enthaltenen Komponenten von Drittanbietern im Editor öffnet.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-context">Kontextmenüs</h3>
 <p>Öffnen Sie ein Kontextmenü mit der rechten Maustaste, oder mit der <kbd>Anwendungstaste</kbd> oder <kbd>Umschalt+F10</kbd>.</p>
+<div class="table-scroll" role="region" aria-labelledby="menu-context-caption" tabindex="0">
 <table>
-<caption>Befehle der Kontextmenüs</caption>
+<caption id="menu-context-caption">Befehle der Kontextmenüs</caption>
 <thead>
 <tr><th scope="col">Wo</th><th scope="col">Befehle</th></tr>
 </thead>
@@ -841,6 +886,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Auf einer Notiz in der Notizliste</td><td><strong>Notiz bearbeiten</strong>, <strong>Notiz löschen</strong></td></tr>
 </tbody>
 </table>
+</div>
 </article>
 
 <article aria-labelledby="updates">
@@ -860,7 +906,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <li>Mit dem Installationsprogramm: <code>%APPDATA%\Oire\PlanCake\PlanCake.cfg</code></li>
 <li>Portabel: <code>userdata\PlanCake.cfg</code>, neben <code>plancake.exe</code></li>
 </ul>
-<p>Um Ihre Einstellungen auf einen anderen Computer mitzunehmen, kopieren Sie diese Datei dort an denselben Ort. Derselbe Ordner enthält einen Ordner <code>logs</code>, der aufzeichnet, was PlanCake getan hat, und beim Melden eines Problems hilft, sowie einige Arbeitsdateien der Dokumentansicht. Das Löschen dieses Ordners setzt PlanCake auf seine Standardwerte zurück und rührt nie Ihre Markdown-Dateien oder die Notizen darin an.</p>
+<p>Um Ihre Einstellungen auf einen anderen Computer mitzunehmen, kopieren Sie diese Datei dort an denselben Ort. Derselbe Ordner enthält einen Ordner <code>logs</code>, der aufzeichnet, was PlanCake getan hat, und beim Melden eines Problems hilft. Die Arbeitsdateien der Dokumentansicht liegen mit dem Installationsprogramm in <code>%LOCALAPPDATA%\Oire\PlanCake</code> und in der portablen Version im selben Ordner <code>userdata</code>. Das Löschen dieser Ordner setzt PlanCake auf seine Standardwerte zurück und rührt nie Ihre Markdown-Dateien oder die Notizen darin an.</p>
 <h3 id="data-privacy">Was über das Netzwerk übertragen wird</h3>
 <p>PlanCake verbindet sich nur für zwei Dinge mit dem Internet: um eine Datei herunterzuladen, wenn Sie eine über einen Link öffnen, und um nach Updates zu suchen. Es sendet keine Nutzungsdaten irgendwohin.</p>
 </article>
@@ -875,7 +921,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>Ich kann keine Notizen hinzufügen: Die Datei ist schreibgeschützt</summary>
-<p>Die Datei ist nicht in UTF-8. Schalten Sie <strong>Dateien, die nicht in UTF-8 vorliegen, beim Öffnen in UTF-8 konvertieren</strong> in den erweiterten Einstellungen ein und öffnen Sie die Datei erneut. Sagt PlanCake stattdessen, dass die Codierung nicht erkannt werden konnte, bleibt die Datei schreibgeschützt, was auch immer Sie tun; öffnen Sie sie in einem Texteditor, speichern Sie sie als UTF-8, und öffnen Sie sie erneut in PlanCake.</p>
+<p>Die Datei ist nicht in UTF-8. Schalten Sie <strong>Beim Öffnen in UTF-8 konvertieren</strong> in den erweiterten Einstellungen ein und öffnen Sie die Datei erneut. Sagt PlanCake stattdessen, dass die Codierung nicht erkannt werden konnte, bleibt die Datei schreibgeschützt, was auch immer Sie tun; öffnen Sie sie in einem Texteditor, speichern Sie sie als UTF-8, und öffnen Sie sie erneut in PlanCake.</p>
 <p>Sagt PlanCake stattdessen, dass die Datei nicht mehr vorhanden ist, wurde sie gelöscht, umbenannt oder verschoben, während sie geöffnet war. Legen Sie sie zurück, oder öffnen Sie sie von ihrem neuen Ort aus.</p>
 </details>
 
@@ -927,11 +973,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <details>
 <summary>Wie melde ich ein Problem?</summary>
 <p>Öffnen Sie <strong>Über PlanCake</strong> mit <kbd>Umschalt+F1</kbd> oder über das Menü <strong>Hilfe</strong> und klicken Sie auf <strong>Info kopieren</strong>; der Dialog zeigt „Kopiert“. Das legt Ihre PlanCake-Version und Windows-Details in die Zwischenablage. Fügen Sie sie in ein neues Issue auf <a href="https://github.com/Oire/plan-cake/issues">PlanCakes GitHub-Seite</a> ein, zusammen mit dem, was Sie getan haben und was passiert ist.</p>
+<p>Hängen Sie auch die Datei <code>errors.log</code> aus dem Ordner <code>logs</code> an (mit den nummerierten Dateien daneben, etwa <code>errors_001.log</code>), und <code>PlanCake.log</code>, wenn Sie darum gebeten werden. Der Ordner <code>logs</code> ist <code>%APPDATA%\Oire\PlanCake\logs</code> mit dem Installationsprogramm und <code>userdata\logs</code> neben <code>plancake.exe</code> in der portablen Version. Die Protokolle nennen die Dateien, die Sie geöffnet haben, und die Webadressen, von denen Sie heruntergeladen haben (ohne die Werte ihrer Abfrageparameter), enthalten aber nie den Text Ihrer Dateien oder Notizen.</p>
 </details>
 </article>
 </main>
 <footer>
-<p>© 2026 Oire Software SARL. PlanCake ist Open Source unter der Apache License 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake auf GitHub</a>.</p>
+<p>© 2026 Oire Software SARL. PlanCake ist Open Source unter der Apache License 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake auf GitHub</a>. Die Lizenzen der enthaltenen Komponenten stehen in <code>THIRD-PARTY-NOTICES.txt</code> neben <code>plancake.exe</code>; die Schaltfläche <strong>Lizenzen</strong> in <strong>Über PlanCake</strong> öffnet sie.</p>
 </footer>
 </body>
 </html>

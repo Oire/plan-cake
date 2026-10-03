@@ -28,7 +28,7 @@ internal enum NoteKeyAction {
 /// Asks for the text of a note to add or edit, showing which block it goes on. The text is
 /// checked before the dialog closes, so a text that cannot be written keeps the dialog open.
 /// </summary>
-internal partial class NoteDialog: Form {
+internal sealed partial class NoteDialog: Form {
     private readonly Func<string, string?> _validate;
     private readonly NoteEnterAction _enterAction;
 
@@ -56,7 +56,7 @@ internal partial class NoteDialog: Form {
         _validate = validate;
         _enterAction = enterAction;
 
-        excerptLabel.Text = excerpt;
+        excerptLabel.Text = TextDirection.Embed(excerpt);
         noteTextBox.Text = text;
         noteTextBox.SelectionStart = noteTextBox.TextLength;
         noteTextBox.TextChanged += OnNoteTextChanged;
@@ -67,7 +67,10 @@ internal partial class NoteDialog: Form {
     /// <summary>The text the user typed, as typed.</summary>
     public string NoteText => noteTextBox.Text;
 
-    /// <summary>What <paramref name="keyData"/> does in the note text box with <paramref name="enterAction"/>.</summary>
+    /// <summary>
+    /// What <paramref name="keyData"/> does in the note text box with
+    /// <paramref name="enterAction"/>.
+    /// </summary>
     internal static NoteKeyAction KeyAction(Keys keyData, NoteEnterAction enterAction) => keyData switch {
         Keys.Enter => enterAction == NoteEnterAction.Save ? NoteKeyAction.Save : NoteKeyAction.NewLine,
         Keys.Control | Keys.Enter => enterAction == NoteEnterAction.Save ? NoteKeyAction.NewLine : NoteKeyAction.Save,
@@ -80,6 +83,9 @@ internal partial class NoteDialog: Form {
                 case NoteKeyAction.Save:
                     if (okButton.Enabled) {
                         okButton.PerformClick();
+                    } else {
+                        // OK is off while the box is empty; say why the key did nothing.
+                        StatusAnnouncer.Speak(noteTextBox, _("Type a note first."));
                     }
 
                     return true;

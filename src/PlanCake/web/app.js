@@ -10,13 +10,17 @@
     const webview = window.chrome && window.chrome.webview;
     const main = document.getElementById("document");
 
+    // Only the host writes these attributes: it renames them where the plan's own raw HTML
+    // carries them (MarkdownRenderer.NeutralizeProtocolMarkers), so a plan cannot pass an
+    // element of its own off as a block, a note or a task.
     const blockSelector = "[data-lines]";
     const noteSelector = "[data-note]";
     const targetSelector = noteSelector + ", " + blockSelector;
 
-    // A task-list check box the host rendered enabled (Task 7a). Toggling one asks the host to
-    // rewrite the item's marker in the file.
-    const taskSelector = "input.task-list-item-checkbox";
+    // A task-list check box the host rendered enabled. Toggling one asks the host to rewrite the
+    // item's marker in the file. Found by an attribute, not a class: a class can be spelled with
+    // character references in raw HTML, an attribute name cannot.
+    const taskSelector = "input[data-plancake-task]";
 
     // Elements with a behavior of their own: a click or Enter on one inside a block does not
     // activate the block.
@@ -33,13 +37,12 @@
     // and Shift+F9 start from.
     let current = null;
 
-    // The element the page last moved the focus to (a block or note with Alt+Shift+Down, F9
-    // or a focus the host asks for; a check box; an anchor's target). It carries this
-    // attribute, and app.css draws the focus outline from it, so the outline does not depend on
-    // when Chromium matches :focus or :focus-visible: with Alt+Shift+Down the :focus outline did
-    // not show at all (Task 15a check). The mark goes when another block or note becomes
-    // current, when the focus moves to another element of the document, and when the document
-    // loses the focus.
+    // The element the page last moved the focus to (a block or note with Alt+Shift+Down, F9 or a
+    // focus the host asks for; a check box; an anchor's target). It carries this attribute, and
+    // app.css draws the focus outline from it, so the outline does not depend on when Chromium
+    // matches :focus or :focus-visible: with Alt+Shift+Down the :focus outline did not show at all.
+    // The mark goes when another block or note becomes current, when the focus moves to another
+    // element of the document, and when the document loses the focus.
     const currentAttribute = "data-plancake-current";
     let marked = null;
 
@@ -168,7 +171,8 @@
 
     // Moves the virtual cursor to `element` and marks it for the focus outline. A block gets
     // tabindex="-1" only while it has focus: a permanent one makes JAWS switch to forms mode on
-    // Enter (Task 2 spike). The mark comes first, so the focusin of this very focus keeps it.
+    // Enter (docs/jaws-spike.md, item 1). The mark comes first, so the focusin of this very focus
+    // keeps it.
     function focusElement(element) {
         if (!element.matches(focusableSelector)) {
             element.setAttribute("tabindex", "-1");
@@ -320,6 +324,7 @@
         focusElement(next);
     }
 
+    // The empty window: what it is, and how to open a file (keys from the host's own table).
     function showNoDocument() {
         main.textContent = "";
         main.removeAttribute("lang");
@@ -329,12 +334,25 @@
             paragraph.textContent = strings.noDocument;
             main.append(paragraph);
         }
+
+        if (Array.isArray(strings.noDocumentHints) && strings.noDocumentHints.length > 0) {
+            const list = document.createElement("ul");
+
+            strings.noDocumentHints.forEach(function (hint) {
+                const item = document.createElement("li");
+                item.textContent = hint;
+                list.append(item);
+            });
+
+            main.append(list);
+        }
     }
 
     function render(message) {
-        // A page shows one file: another file gets a freshly loaded page (Task 8). So a page that
-        // already shows a document is getting the same file again, and is updated in place, so
-        // that the nodes JAWS's virtual cursor sits on survive (morph.js).
+        // A page shows one file: another file gets a freshly loaded page (docs/jaws-spike.md, "A
+        // followed link landed at the end of the new file"). So a page that already shows a
+        // document is getting the same file again, and is updated in place, so that the nodes
+        // JAWS's virtual cursor sits on survive (morph.js).
         const again = hasDocument;
         generation = message.generation;
         hasDocument = true;

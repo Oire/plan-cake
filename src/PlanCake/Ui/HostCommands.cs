@@ -47,6 +47,8 @@ internal static class HostCommands {
         (Keys.Control | Keys.Z, HostCommand.Undo),
         (Keys.Control | Keys.Y, HostCommand.Redo),
         (Keys.F6, HostCommand.SwitchPane),
+        // With two panes, the next pane and the previous pane are the same one.
+        (Keys.Shift | Keys.F6, HostCommand.SwitchPane),
         (Keys.Control | Keys.Oemplus, HostCommand.ZoomIn),
         (Keys.Control | Keys.Add, HostCommand.ZoomIn),
         (Keys.Control | Keys.OemMinus, HostCommand.ZoomOut),

@@ -34,13 +34,26 @@ internal sealed class StatusAnnouncer {
         }
 
         _label.Text = message;
+        Speak(_notifier, message);
+    }
 
-        if (_notifier.IsHandleCreated) {
-            _notifier.AccessibilityObject.RaiseAutomationNotification(
-                AutomationNotificationKind.ActionCompleted,
-                AutomationNotificationProcessing.ImportantMostRecent,
-                message
-            );
+    /// <summary>
+    /// Has the screen reader speak <paramref name="message"/> through a UI Automation notification
+    /// that <paramref name="notifier"/> raises, with no status strip involved: what a dialog uses
+    /// for a message it shows nowhere else, or shows in a label, which is silent. Does nothing
+    /// before <paramref name="notifier"/> has a handle. Call it on the UI thread.
+    /// </summary>
+    public static void Speak(Control notifier, string message) {
+        ArgumentNullException.ThrowIfNull(notifier);
+
+        if (notifier.IsDisposed || !notifier.IsHandleCreated) {
+            return;
         }
+
+        notifier.AccessibilityObject.RaiseAutomationNotification(
+            AutomationNotificationKind.ActionCompleted,
+            AutomationNotificationProcessing.ImportantMostRecent,
+            message
+        );
     }
 }

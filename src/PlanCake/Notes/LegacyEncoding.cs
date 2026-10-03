@@ -121,7 +121,10 @@ internal static class LegacyEncoding {
     /// per invalid byte. Decoding such a file with a single-byte code page would turn every
     /// character outside ASCII into two or three wrong ones (<c>с</c> into <c>СЃ</c>).
     /// </summary>
-    /// <returns>The offset of the first invalid byte, or <see langword="null"/> when the bytes do not look like UTF-8.</returns>
+    /// <returns>
+    /// The offset of the first invalid byte, or <see langword="null"/> when the bytes do not look
+    /// like UTF-8.
+    /// </returns>
     public static int? FindDamagedUtf8(ReadOnlySpan<byte> bytes) {
         var valid = 0;
         var invalid = 0;
@@ -155,7 +158,10 @@ internal static class LegacyEncoding {
             : encoding.WebName.ToUpperInvariant();
     }
 
-    /// <summary>The detector's code page for the bytes when it is confident enough, else <see langword="null"/>.</summary>
+    /// <summary>
+    /// The detector's code page for the bytes when it is confident enough, else
+    /// <see langword="null"/>.
+    /// </summary>
     private static int? Detect(byte[] bytes) {
         if (bytes.Count(b => b >= 0x80) < MinimumNonAsciiBytes) {
             return null;

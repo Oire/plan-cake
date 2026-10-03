@@ -4,7 +4,7 @@ namespace Oire.PlanCake.Notes;
 /// The file is open read-only because it is not valid in its detected encoding, and PlanCake
 /// never writes it (see <see cref="MarkdownFile.IsReadOnly"/>).
 /// </summary>
-public sealed class ReadOnlyFileException: InvalidOperationException {
+internal sealed class ReadOnlyFileException: NoteWriteException {
     public ReadOnlyFileException() : base("The file is open read-only.") { }
 
     public ReadOnlyFileException(string message) : base(message) { }

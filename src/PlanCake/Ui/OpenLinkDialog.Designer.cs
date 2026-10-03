@@ -18,20 +18,19 @@ partial class OpenLinkDialog {
         urlTextBox = new TextBox();
         okButton = new Button();
         cancelButton = new Button();
+        buttonLayout = DialogButtons.CreateRow(okButton, cancelButton);
         mainLayout.SuspendLayout();
         SuspendLayout();
         //
         // mainLayout
         //
-        mainLayout.ColumnCount = 3;
+        mainLayout.ColumnCount = 2;
         mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         mainLayout.Controls.Add(urlLabel, 0, 0);
         mainLayout.Controls.Add(urlTextBox, 1, 0);
-        mainLayout.SetColumnSpan(urlTextBox, 2);
-        mainLayout.Controls.Add(okButton, 0, 1);
-        mainLayout.Controls.Add(cancelButton, 2, 1);
+        mainLayout.Controls.Add(buttonLayout, 0, 1);
+        mainLayout.SetColumnSpan(buttonLayout, 2);
         mainLayout.Dock = DockStyle.Fill;
         mainLayout.Name = "mainLayout";
         mainLayout.Padding = new Padding(12);
@@ -54,22 +53,20 @@ partial class OpenLinkDialog {
         urlTextBox.Name = "urlTextBox";
         urlTextBox.TabIndex = 1;
         //
+        // buttonLayout: OK, then Cancel, together at the end of the row (DialogButtons).
+        //
+        buttonLayout.TabIndex = 2;
+        //
         // okButton
         //
-        okButton.Anchor = AnchorStyles.Left;
-        okButton.AutoSize = true;
         okButton.DialogResult = DialogResult.OK;
         okButton.Name = "okButton";
-        okButton.TabIndex = 2;
         okButton.Text = "&OK";
         //
         // cancelButton
         //
-        cancelButton.Anchor = AnchorStyles.Right;
-        cancelButton.AutoSize = true;
         cancelButton.DialogResult = DialogResult.Cancel;
         cancelButton.Name = "cancelButton";
-        cancelButton.TabIndex = 3;
         cancelButton.Text = "&Cancel";
         //
         // OpenLinkDialog
@@ -101,4 +98,5 @@ partial class OpenLinkDialog {
     private TextBox urlTextBox;
     private Button okButton;
     private Button cancelButton;
+    private TableLayoutPanel buttonLayout;
 }

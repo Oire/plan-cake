@@ -20,10 +20,10 @@ internal enum ClaimOutcome {
 }
 
 /// <summary>
-/// One window per file (Task 10 of the plan). The window showing a file owns a named pipe named
-/// after the file's normalized full path; a second attempt to open the same file, from another
-/// PlanCake process or from another window's link or history, connects to that pipe, asks the
-/// owner to come to the front, and opens nothing itself.
+/// One window per file, so two windows never write conflicting notes into one file. The window
+/// showing a file owns a named pipe named after the file's normalized full path; a second
+/// attempt to open the same file, from another PlanCake process or from another window's link or
+/// history, connects to that pipe, asks the owner to come to the front, and opens nothing itself.
 /// </summary>
 internal sealed class SingleInstance: IDisposable {
     /// <summary>The one request the pipe understands.</summary>
@@ -33,6 +33,12 @@ internal sealed class SingleInstance: IDisposable {
     internal const string Acknowledgement = "ok";
 
     private const int ErrorFileNotFound = 2;
+
+    /// <summary>The buffer <see cref="FinalPath"/> starts with; a longer path gets a larger one.</summary>
+    private const int MaxPathLength = 260;
+
+    private const string LongPathPrefix = @"\\?\";
+    private const string UncPrefix = @"\\?\UNC\";
 
     /// <summary>How many times <see cref="TryClaim"/> tries to register, then to activate the owner.</summary>
     private const int ClaimAttempts = 3;
@@ -66,18 +72,82 @@ internal sealed class SingleInstance: IDisposable {
     public string Path { get; }
 
     /// <summary>
-    /// The path as it names a pipe: full (<c>..</c> resolved), without a trailing separator,
-    /// upper-cased, since Windows paths are case-insensitive.
+    /// The path as it names a pipe: the file's final path when it exists (see
+    /// <see cref="FinalPath"/>), else the full path (<c>..</c> resolved); without a trailing
+    /// separator, and upper-cased, since Windows paths are case-insensitive.
     /// </summary>
     public static string NormalizePath(string path) {
         ArgumentException.ThrowIfNullOrEmpty(path);
+        var fullPath = System.IO.Path.GetFullPath(path);
 
-        return System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(path)).ToUpperInvariant();
+        return System.IO.Path.TrimEndingDirectorySeparator(FinalPath(fullPath) ?? fullPath).ToUpperInvariant();
     }
 
-    /// <summary>The pipe name for <paramref name="path"/>: <c>PlanCake-&lt;SHA-256 of the normalized path&gt;</c>.</summary>
-    public static string PipeName(string path) =>
-        $"PlanCake-{Convert.ToHexString(SHA256.HashData(_utf8.GetBytes(NormalizePath(path))))}";
+    /// <summary>
+    /// The path Windows resolves <paramref name="fullPath"/> to: through junctions, symbolic links
+    /// and subst drives, with 8.3 names made long, so that every way to name one file names one
+    /// pipe. Not the file ID: notes are written through <see cref="File.Replace(String, String, String)"/>,
+    /// which gives the file a new one. Two hard links to one file still name two pipes, and a
+    /// <c>\\localhost\c$</c> path stays a network path; the check that the file on disk is the
+    /// text the window last rendered (<c>StaleFileException</c>) still keeps a second window on
+    /// such a path from writing over the first one's notes.
+    /// </summary>
+    /// <returns>
+    /// The final path, or <see langword="null"/> when the file cannot be opened (it does not exist,
+    /// say).
+    /// </returns>
+    internal static string? FinalPath(string fullPath) {
+        // No access asked for, only a handle: it opens whoever else has the file open.
+        using var handle = NativeMethods.CreateFile(
+            fullPath,
+            0,
+            FileShare.ReadWrite | FileShare.Delete,
+            IntPtr.Zero,
+            FileMode.Open,
+            0,
+            IntPtr.Zero
+        );
+
+        if (handle.IsInvalid) {
+            return null;
+        }
+
+        var buffer = new char[MaxPathLength];
+
+        while (true) {
+            var length = NativeMethods.GetFinalPathNameByHandle(handle, buffer, (uint)buffer.Length, 0);
+
+            if (length == 0) {
+                Log.Debug("No final path for {Path}: error {Error}", fullPath, Marshal.GetLastPInvokeError());
+                return null;
+            }
+
+            // A buffer too small gets back the length it needs, the terminating null included.
+            if (length >= buffer.Length) {
+                buffer = new char[length];
+                continue;
+            }
+
+            var finalPath = new string(buffer, 0, (int)length);
+
+            if (finalPath.StartsWith(UncPrefix, StringComparison.OrdinalIgnoreCase)) {
+                return @"\\" + finalPath[UncPrefix.Length..];
+            }
+
+            return finalPath.StartsWith(LongPathPrefix, StringComparison.Ordinal)
+                ? finalPath[LongPathPrefix.Length..]
+                : finalPath;
+        }
+    }
+
+    /// <summary>
+    /// The pipe name for <paramref name="path"/>: <c>PlanCake-&lt;SHA-256 of the normalized
+    /// path&gt;</c>.
+    /// </summary>
+    public static string PipeName(string path) => PipeNameOfNormalized(NormalizePath(path));
+
+    private static string PipeNameOfNormalized(string normalizedPath) =>
+        $"PlanCake-{Convert.ToHexString(SHA256.HashData(_utf8.GetBytes(normalizedPath)))}";
 
     /// <summary>
     /// Registers this window as the one showing <paramref name="path"/>.
@@ -89,18 +159,22 @@ internal sealed class SingleInstance: IDisposable {
 
     /// <inheritdoc cref="TryRegister(String, Action)"/>
     /// <param name="path">The file to register.</param>
-    /// <param name="onActivate">Runs when another attempt to open the file asks this window to come to the front.</param>
+    /// <param name="onActivate">
+    /// Runs when another attempt to open the file asks this window to come to the front.
+    /// </param>
     /// <param name="hooks">Where tests step into the listener; <see langword="null"/> outside tests.</param>
     internal static SingleInstance? TryRegister(string path, Action onActivate, ListenerHooks? hooks) {
         ArgumentNullException.ThrowIfNull(onActivate);
-        string name;
+        string normalized;
 
         try {
-            name = PipeName(path);
+            normalized = NormalizePath(path);
         } catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException) {
             Log.Warning(ex, "Unable to register {Path} for one window per file", path);
             return null;
         }
+
+        var name = PipeNameOfNormalized(normalized);
 
         try {
             // FirstPipeInstance: the creation fails when the pipe exists, which is the whole test.
@@ -112,7 +186,7 @@ internal sealed class SingleInstance: IDisposable {
                 PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly | PipeOptions.FirstPipeInstance
             );
 
-            return new SingleInstance(NormalizePath(path), server, onActivate, hooks);
+            return new SingleInstance(normalized, server, onActivate, hooks);
         } catch (Exception ex) when (ex is UnauthorizedAccessException or IOException) {
             Log.Information("{Path} is already registered by another window", path);
             return null;
@@ -127,7 +201,10 @@ internal sealed class SingleInstance: IDisposable {
     /// </summary>
     /// <param name="path">The file to claim.</param>
     /// <param name="onActivate">As for <see cref="TryRegister"/>.</param>
-    /// <param name="registration">The registration when the outcome is <see cref="ClaimOutcome.Registered"/>, else <see langword="null"/>.</param>
+    /// <param name="registration">
+    /// The registration when the outcome is <see cref="ClaimOutcome.Registered"/>, else
+    /// <see langword="null"/>.
+    /// </param>
     /// <param name="timeout">As for <see cref="TryActivate"/>.</param>
     public static ClaimOutcome TryClaim(
         string path,
@@ -206,7 +283,10 @@ internal sealed class SingleInstance: IDisposable {
         return Task.Run(() => ActivateAsync(client, cancellation.Token)).GetAwaiter().GetResult();
     }
 
-    /// <summary>Asks the window at the other end of <paramref name="client"/> to come to the front; disposes the client.</summary>
+    /// <summary>
+    /// Asks the window at the other end of <paramref name="client"/> to come to the front; disposes
+    /// the client.
+    /// </summary>
     private static async Task<bool> ActivateAsync(NamedPipeClientStream client, CancellationToken token) {
         await using var connection = client;
 
@@ -378,6 +458,27 @@ internal sealed class SingleInstance: IDisposable {
     }
 
     private static class NativeMethods {
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CreateFileW")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        public static extern SafeFileHandle CreateFile(
+            string fileName,
+            uint desiredAccess,
+            FileShare shareMode,
+            IntPtr securityAttributes,
+            FileMode creationDisposition,
+            uint flagsAndAttributes,
+            IntPtr templateFile
+        );
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "GetFinalPathNameByHandleW")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        public static extern uint GetFinalPathNameByHandle(
+            SafeFileHandle file,
+            [Out] char[] filePath,
+            uint filePathLength,
+            uint flags
+        );
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "WaitNamedPipeW")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [return: MarshalAs(UnmanagedType.Bool)]

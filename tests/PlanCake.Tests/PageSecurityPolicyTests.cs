@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using AwesomeAssertions;
+using Oire.PlanCake.Rendering;
 using Oire.PlanCake.Ui;
 using Oire.PlanCake.Utils.Constants;
 using Xunit;
@@ -52,6 +53,37 @@ public partial class PageSecurityPolicyTests {
     [Fact]
     public void Policy_KeepsFormsAndTheBaseUrlLockedDown() {
         var policy = Policy();
+
+        policy["base-uri"].Should().Equal("'none'");
+        policy["form-action"].Should().Equal("'none'");
+    }
+
+    // The policy of an exported file (plancake export), which a browser opens from the disk
+
+    private static Dictionary<string, string[]> ExportPolicy() =>
+        MarkdownRenderer.ExportContentSecurityPolicy
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(directive => directive.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            .ToDictionary(parts => parts[0], parts => parts[1..], StringComparer.OrdinalIgnoreCase);
+
+    [Fact]
+    public void ExportPolicy_RunsNoScript() {
+        var policy = ExportPolicy();
+
+        policy["default-src"].Should().Equal("'none'");
+        policy["script-src"].Should().Equal("'none'");
+    }
+
+    [Fact]
+    public void ExportPolicy_ShowsPicturesFromTheWebAndInsideTheFileOnly() {
+        // Local pictures are embedded as data: URIs (ExportImages); file: would let raw HTML in
+        // a plan make the browser reach another computer's share.
+        ExportPolicy()["img-src"].Should().BeEquivalentTo("https:", "http:", "data:");
+    }
+
+    [Fact]
+    public void ExportPolicy_KeepsFormsAndTheBaseUrlLockedDown() {
+        var policy = ExportPolicy();
 
         policy["base-uri"].Should().Equal("'none'");
         policy["form-action"].Should().Equal("'none'");

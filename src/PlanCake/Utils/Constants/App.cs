@@ -10,14 +10,13 @@ namespace Oire.PlanCake.Utils.Constants;
 /// file that imports it, and the resulting errors are confusing. Import it as
 /// <c>using App = Oire.PlanCake.Utils.Constants.App;</c> where needed.
 /// </remarks>
-public static class App {
+internal static class App {
     /// <summary>
     /// Product name. Drives the data folder, the config file name and the gettext catalog
     /// name (<c>locale/&lt;code&gt;/PlanCake.mo</c>); the translation scripts read it from here.
     /// </summary>
     public const string Name = "PlanCake";
     public const string ManufacturerNameShort = "Oire";
-    public const string ManufacturerNameFull = "Oire Software";
     public const string ConfigFileExtension = "cfg";
 
     /// <summary>The source repository, linked from the About dialog.</summary>
@@ -35,13 +34,6 @@ public static class App {
     /// <c>UpdateServiceTests</c> checks that it is base64 of 32 bytes.
     /// </remarks>
     public const string UpdatePublicKey = "3grlY7WRufCg+1vbmTzxPu8uSBDDo/BV887KX0pwDfM=";
-
-    /// <summary>
-    /// Subfolder of <see cref="DataFolder"/> that holds user-generated content.
-    /// Config files stay at the root of <see cref="DataFolder"/>
-    /// so that wiping user data never takes the settings with it.
-    /// </summary>
-    public const string DataSubfolder = "data";
 
     /// <summary>
     /// When <c>true</c>, user data lives next to the executable under <c>userdata/</c>
@@ -83,8 +75,18 @@ public static class App {
     public static readonly string WebFolder = Path.Combine(AppContext.BaseDirectory, "web");
 
     /// <summary>
-    /// The WebView2 user data folder (the browser's cache and state), under <see cref="DataFolder"/>
-    /// because the install folder is not writable.
+    /// The WebView2 user data folder (the browser's cache and state). Not in the install folder,
+    /// which is not writable, and not under <see cref="DataFolder"/> in the user profile: a
+    /// browser cache does not belong in the roaming profile, which a domain copies to its server
+    /// at every logoff. It goes under the local application data folder instead, as Microsoft
+    /// recommends; a portable copy keeps it in <c>userdata\</c> with everything else.
     /// </summary>
-    public static readonly string WebView2DataFolder = Path.Combine(DataFolder, "WebView2");
+    public static readonly string WebView2DataFolder = IsPortable
+        ? Path.Combine(DataFolder, "WebView2")
+        : Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            ManufacturerNameShort,
+            Name,
+            "WebView2"
+        );
 }

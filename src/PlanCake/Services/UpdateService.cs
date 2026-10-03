@@ -1,3 +1,4 @@
+using System.Globalization;
 using NetSparkleUpdater;
 using NetSparkleUpdater.Enums;
 using NetSparkleUpdater.SignatureVerifiers;
@@ -9,10 +10,15 @@ using App = Oire.PlanCake.Utils.Constants.App;
 
 namespace Oire.PlanCake.Services;
 
-/// <summary>Routes NetSparkle's log output through Serilog, so it ends up in PlanCake's log.</summary>
+/// <summary>
+/// Routes NetSparkle's log output through Serilog, so it ends up in PlanCake's log. NetSparkle's
+/// message is a .NET format string, not a Serilog template: it is formatted here and logged under
+/// one constant template. NetSparkle gives no level; a failed check is logged at Warning by
+/// <see cref="UpdateService.CheckForUpdatesAsync"/>, so it reaches the errors logs.
+/// </summary>
 file sealed class SerilogSparkleLogWriter: NetSparkleUpdater.Interfaces.ILogger {
     public void PrintMessage(string message, params object[]? arguments) =>
-        Log.Information("NetSparkle: " + message, arguments);
+        Log.Information("NetSparkle: {Message}", UpdateService.FormatSparkleMessage(message, arguments));
 }
 
 /// <summary>
@@ -97,6 +103,17 @@ internal sealed class UpdateService: IDisposable {
     /// </param>
     public static UpdateService? Create(Func<UpdateCheckInterval?> currentInterval) {
         ArgumentNullException.ThrowIfNull(currentInterval);
+
+        // NetSparkle's checker takes any string without complaint, and every check would then
+        // fail its signature check: a fork that has not made its own key pair gets no checks.
+        if (!IsValidPublicKey(App.UpdatePublicKey)) {
+            Log.Warning(
+                "UpdateService: update checks are off: App.UpdatePublicKey is not a base64 Ed25519 key of 32 bytes"
+            );
+
+            return null;
+        }
+
         var backgroundChecks = TryClaimBackgroundChecks(BackgroundChecksName);
 
         try {
@@ -106,6 +123,39 @@ internal sealed class UpdateService: IDisposable {
             backgroundChecks?.Dispose();
 
             return null;
+        }
+    }
+
+    /// <summary>
+    /// True when <paramref name="key"/> has the shape of an Ed25519 public key as
+    /// <c>netsparkle-generate-appcast</c> writes it: base64 of exactly 32 bytes.
+    /// </summary>
+    internal static bool IsValidPublicKey(string? key) {
+        if (String.IsNullOrWhiteSpace(key)) {
+            return false;
+        }
+
+        // Room for more than 32 bytes, so a longer key is read whole and rejected by its length.
+        Span<byte> bytes = stackalloc byte[64];
+
+        return Convert.TryFromBase64String(key.Trim(), bytes, out var written) && written == 32;
+    }
+
+    /// <summary>
+    /// NetSparkle's log message with its arguments filled in. A message that does not format
+    /// (its braces are text, say) is returned as it is, with no argument lost from the log.
+    /// </summary>
+    internal static string FormatSparkleMessage(string? message, object?[]? arguments) {
+        message ??= String.Empty;
+
+        if (arguments is not { Length: > 0 }) {
+            return message;
+        }
+
+        try {
+            return String.Format(CultureInfo.InvariantCulture, message, arguments);
+        } catch (FormatException) {
+            return message + " " + String.Join(", ", arguments);
         }
     }
 
@@ -256,7 +306,14 @@ internal sealed class UpdateService: IDisposable {
         try {
             var result = await _sparkle.CheckForUpdatesQuietly();
             var status = result?.Status ?? UpdateStatus.CouldNotDetermine;
-            Log.Information("UpdateService: update check result: {Status}", status);
+
+            // A check that could not decide (a 404, a bad signature, no network without an
+            // exception) is a failure the user may report: it goes to the errors logs too.
+            if (ToOutcome(status) == UpdateCheckOutcome.Failed) {
+                Log.Warning("UpdateService: update check result: {Status}", status);
+            } else {
+                Log.Information("UpdateService: update check result: {Status}", status);
+            }
 
             if (status == UpdateStatus.UpdateAvailable && !_disposed) {
                 _sparkle.ShowUpdateNeededUI(result!.Updates);

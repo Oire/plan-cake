@@ -9,12 +9,13 @@ namespace Oire.PlanCake.Ui;
 /// File → Open from link: asks for the link of a Markdown file to download and open. The link is
 /// checked before the dialog closes, so a link that is not http(s) keeps the dialog open.
 /// </summary>
-internal partial class OpenLinkDialog: Form {
+internal sealed partial class OpenLinkDialog: Form {
     /// <param name="initialUrl">The link the box starts with (one found on the clipboard), if any.</param>
     public OpenLinkDialog(string? initialUrl = null) {
         InitializeComponent();
         Localizer.Localize(this, Utils.Localization.Catalog);
         TextDirection.Apply(this);
+        TextDirection.KeepLeftToRight(urlTextBox);
         Text = _("Open from link");
 
         urlTextBox.Text = initialUrl ?? String.Empty;
@@ -44,7 +45,7 @@ internal partial class OpenLinkDialog: Form {
         }
 
         if (Validate(urlTextBox.Text) is { } error) {
-            Log.Debug("Link rejected: {Url}", urlTextBox.Text.Trim());
+            Log.Debug("Link rejected: {Url}", UrlHelper.ForLog(urlTextBox.Text.Trim()));
             DialogHelper.Show(error, _("Invalid link"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             e.Cancel = true;
             urlTextBox.Focus();

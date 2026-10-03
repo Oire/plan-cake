@@ -30,22 +30,6 @@ public class LocalizationTests: IDisposable {
     }
 
     [Fact]
-    public void SetLanguage_RaisesLanguageChanged() {
-        var raised = false;
-        EventHandler handler = (_, _) => raised = true;
-
-        Localization.LanguageChanged += handler;
-
-        try {
-            Localization.SetLanguage(App.SystemLanguageName);
-        } finally {
-            Localization.LanguageChanged -= handler;
-        }
-
-        raised.Should().BeTrue();
-    }
-
-    [Fact]
     public void Underscore_WithNoCatalog_ReturnsTheSourceString() {
         Localization.SetLanguage("en-US");
 
@@ -61,7 +45,7 @@ public class LocalizationTests: IDisposable {
 
         Localization.GetCurrentCulture().Name.Should().Be(language);
         Localization._("&File").Should().NotBe("&File");
-        Localization._n("Removed {0} note.", "Removed {0} notes.", 5, 5).Should().Contain("5").And.NotBe("Removed 5 notes.");
+        Localization._n("Removed {0} note", "Removed {0} notes", 5, 5).Should().Contain("5").And.NotBe("Removed 5 notes");
     }
 
     [Theory]
@@ -131,6 +115,24 @@ public class LocalizationTests: IDisposable {
         return ids;
     }
 
-    private static string Unquote(string quoted) =>
-        quoted.Trim()[1..^1].Replace("\\\"", "\"", StringComparison.Ordinal).Replace("\\n", "\n", StringComparison.Ordinal);
+    /// <summary>A quoted PO string without its quotes and escapes (<c>\"</c>, <c>\\</c>, <c>\n</c>, <c>\t</c>).</summary>
+    private static string Unquote(string quoted) {
+        var text = quoted.Trim()[1..^1];
+        var result = new StringBuilder(text.Length);
+
+        for (var index = 0; index < text.Length; index++) {
+            if (text[index] == '\\' && index + 1 < text.Length) {
+                index++;
+                result.Append(text[index] switch {
+                    'n' => '\n',
+                    't' => '\t',
+                    var escaped => escaped,
+                });
+            } else {
+                result.Append(text[index]);
+            }
+        }
+
+        return result.ToString();
+    }
 }

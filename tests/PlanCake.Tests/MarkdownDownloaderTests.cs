@@ -17,7 +17,10 @@ public sealed class MarkdownDownloaderTests: IDisposable {
         }
     }
 
-    /// <summary>Answers every request from <c>respond</c>, recording what was asked; never touches the network.</summary>
+    /// <summary>
+    /// Answers every request from <c>respond</c>, recording what was asked; never touches the
+    /// network.
+    /// </summary>
     private sealed class FakeHandler(Func<HttpRequestMessage, HttpResponseMessage> respond): HttpMessageHandler {
         public List<Uri> Requests { get; } = [];
 

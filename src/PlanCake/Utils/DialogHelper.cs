@@ -41,7 +41,10 @@ internal static class DialogHelper {
         return page;
     }
 
-    /// <summary>The answer a closed confirmation gives: Yes, or No for anything else (No, Escape, the close button).</summary>
+    /// <summary>
+    /// The answer a closed confirmation gives: Yes, or No for anything else (No, Escape, the close
+    /// button).
+    /// </summary>
     internal static bool IsYes(TaskDialogButton? button) => button == TaskDialogButton.Yes;
 
     private static TaskDialogIcon? ToTaskDialogIcon(MessageBoxIcon icon) => icon switch {

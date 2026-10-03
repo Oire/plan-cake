@@ -49,6 +49,19 @@ if (!$msgmerge) {
 
 Write-Host "Using msgmerge: $msgmerge" -ForegroundColor Gray
 
+# msgmerge keeps a string that left the code as an obsolete "#~" entry; msgattrib drops those,
+# so a catalog holds only what the code still uses. It comes with msgmerge.
+$msgattrib = Join-Path (Split-Path $msgmerge -Parent) "msgattrib.exe"
+
+if (!(Test-Path $msgattrib)) {
+    $msgattrib = (Get-Command "msgattrib" -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1).Source
+}
+
+if (!$msgattrib) {
+    Write-Error "❌ msgattrib not found. It comes with the gettext tools: winget install mlocati.GetText"
+    exit 1
+}
+
 # Get languages to update
 $languages = @()
 if ($Language) {
@@ -81,15 +94,19 @@ foreach ($lang in $languages) {
         # Create backup
         Copy-Item $poFile $backupFile
 
-        # Merge new strings
+        # Merge new strings, then drop the obsolete ones
         & "$msgmerge" --update --backup=off "$poFile" "$PotPath"
+
+        if ($LASTEXITCODE -eq 0) {
+            & "$msgattrib" --no-obsolete --output-file="$poFile" "$poFile"
+        }
 
         if ($LASTEXITCODE -eq 0) {
             Write-Host "✅ Updated $lang successfully" -ForegroundColor Green
             # Remove backup on success
             Remove-Item $backupFile -ErrorAction SilentlyContinue
         } else {
-            Write-Warning "⚠️ msgmerge failed for $lang. Restoring backup."
+            Write-Warning "⚠️ Updating $lang failed. Restoring backup."
             Move-Item $backupFile $poFile -Force
         }
     } catch {

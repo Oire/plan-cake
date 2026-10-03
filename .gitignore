@@ -420,6 +420,7 @@ FodyWeavers.xsd
 # Claude Code: the shared settings.json is committed, per-machine overrides are not.
 .claude/settings.local.json
 .claude/agent-memory/
+.claude/project-audit/
 
 # Compiled gettext catalogs are build output: CI compiles them from the .po sources.
 *.mo

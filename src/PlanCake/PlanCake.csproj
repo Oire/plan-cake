@@ -23,8 +23,11 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Product>PlanCake</Product>
+    <!-- The FileDescription of the exe, which Task Manager, "Open with" and SmartScreen show;
+         without it they show the assembly name, plancake. -->
+    <AssemblyTitle>PlanCake</AssemblyTitle>
     <Description>Read Markdown files comfortably and leave notes right where they belong</Description>
-    <Company>Oire Software</Company>
+    <Company>Oire Software SARL</Company>
     <Copyright>Copyright © 2026 Oire Software SARL.</Copyright>
     <!-- Version numbers come from GitVersion (see GitVersion.yml), never from a literal here.
          The +sha suffix would otherwise end up in the informational version and in the
@@ -34,7 +37,9 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <!-- Portable, not full: coverlet reads only portable PDBs, and with a Windows PDB the
+         coverage run instruments nothing. -->
+    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
   </PropertyGroup>
 
@@ -56,7 +61,6 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Markdig" Version="1.4.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.401" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
     <PackageReference Include="NetSparkleUpdater.SparkleUpdater" Version="3.1.0" />
@@ -97,6 +101,13 @@
     <!-- The translation glossaries beside the manuals are for writing them, not for shipping. -->
     <None Update="help\glossaries\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <!-- PlanCake's license and the third-party notices, next to the exe: Help > About >
+         Licenses opens them, and the installer and the portable zip ship them. -->
+    <None Include="..\..\LICENSE;..\..\THIRD-PARTY-NOTICES.txt">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
   </ItemGroup>
 

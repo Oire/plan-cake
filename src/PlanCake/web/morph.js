@@ -1,10 +1,11 @@
 // Updates the document in place when the same file is rendered again (an outside change, a
 // reload, a note action, undo and redo), instead of replacing it. JAWS keeps its virtual cursor
 // on DOM nodes: replacing the whole content destroyed the node it was on and sent it back to the
-// top of the document (Task 10 JAWS check). Here every node whose content did not change is
-// kept as the same object, with only its attributes patched (data-lines shift when lines are
-// added above it); a node whose content changed is patched in place when it is the same kind of
-// element, and only what was really added or removed is inserted or removed.
+// top of the document (docs/jaws-spike.md, "An outside edit threw the reader to the top"). Here
+// every node whose content did not change is kept as the same object, with only its attributes
+// patched (data-lines shift when lines are added above it); a node whose content changed is
+// patched in place when it is the same kind of element, and only what was really added or
+// removed is inserted or removed.
 //
 // planMatches is pure, so the tests run it without a browser (PlanCake.Tests, MorphPlanTests).
 "use strict";

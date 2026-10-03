@@ -132,13 +132,15 @@ code {
     background: var(--code-bg);
     padding: 0.05em 0.3em;
     border-radius: 3px;
+    overflow-wrap: anywhere;
 }
 
 pre {
     background: var(--code-bg);
     padding: 0.75rem 1rem;
     border-radius: 4px;
-    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     text-align: start;
 }
 
@@ -150,7 +152,16 @@ pre code {
 table {
     border-collapse: collapse;
     width: 100%;
+}
+
+.table-scroll {
+    overflow-x: auto;
     margin-block: 1rem;
+}
+
+.table-scroll:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
 }
 
 caption {
@@ -231,6 +242,7 @@ footer {
 <ol>
 <li><a href="#installer">With the installer</a></li>
 <li><a href="#portable">The portable version</a></li>
+<li><a href="#uninstalling">Uninstalling PlanCake</a></li>
 <li><a href="#pk-alias">A shorter command: pk</a></li>
 </ol>
 </li>
@@ -352,11 +364,17 @@ footer {
 <h3 id="installer">With the installer</h3>
 <p>Run the installer and follow its steps. Besides PlanCake itself, it takes care of what PlanCake needs to run: it installs the .NET 10 Desktop Runtime and the Microsoft Edge WebView2 Runtime if your computer does not have them yet. It also adds PlanCake to your PATH, so the <code>plancake</code> command works in any new PowerShell or Command Prompt window.</p>
 <p>Your settings are kept in <code>%APPDATA%\Oire\PlanCake</code>.</p>
+<p>The installer adds PlanCake to the Start menu, together with a shortcut to this manual in the language you chose for the installer.</p>
+<p>PlanCake is not signed with a code-signing certificate. The first time you run the installer, or <code>plancake.exe</code> from the portable zip, Windows SmartScreen may show “Windows protected your PC” and an unknown publisher. To go on, choose <strong>More info</strong>, then <strong>Run anyway</strong>.</p>
 
 <h3 id="portable">The portable version</h3>
 <p>Unpack the zip file into any folder and run <code>plancake.exe</code> from there. The zip includes an empty folder named <code>userdata</code> next to <code>plancake.exe</code>; as long as that folder is there, PlanCake keeps its settings inside it and writes nothing to your user profile. Delete or rename the <code>userdata</code> folder and PlanCake goes back to using <code>%APPDATA%\Oire\PlanCake</code>.</p>
 <p>The portable version does not install anything, so your computer needs the <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> and the <a href="https://developer.microsoft.com/microsoft-edge/webview2/">Microsoft Edge WebView2 Runtime</a> already. Windows 11 comes with WebView2; if it is missing, PlanCake tells you so when it starts and offers to open the download page.</p>
 <p>To use the <code>plancake</code> command with the portable version, either type its full path or add its folder to your PATH yourself.</p>
+
+<h3 id="uninstalling">Uninstalling PlanCake</h3>
+<p>Uninstall PlanCake from <strong>Apps</strong> in Windows Settings, or with <strong>Uninstall PlanCake</strong> in the Start menu. The uninstaller takes PlanCake off your PATH and asks whether to remove your settings and logs as well; your Markdown files and the notes in them are never touched. The portable version installs nothing: to remove it, delete its folder.</p>
+<p>If you work in a standard Windows account and an administrator types their password to allow the uninstall, the uninstaller runs as that administrator and looks for the administrator's settings, not yours, so it does not ask about them. Your settings and logs then stay in <code>%APPDATA%\Oire\PlanCake</code> and <code>%LOCALAPPDATA%\Oire\PlanCake</code>; delete those folders yourself if you no longer need them.</p>
 
 <h3 id="pk-alias">A shorter command: pk</h3>
 <p>If you open plans from the command line all day, you can give PlanCake a two-letter name. PlanCake does not set this up for you; it is one line in your own shell profile.</p>
@@ -373,6 +391,7 @@ footer {
 <h2 id="main-window">The main window</h2>
 <p>The window has a menu bar at the top, the document on the left, the notes list on the right, and a status bar at the very bottom. The title bar shows the name of the open file, for example <strong>plan.md - PlanCake</strong>.</p>
 <p>To give the document or the notes list more room, drag the border between them. From the keyboard, choose <strong>Wider notes list</strong> or <strong>Narrower notes list</strong> in the <strong>View</strong> menu: each moves the border by a tenth of the width the two share, to a round figure — from 32 percent, for example, the list becomes 40 percent wide, or 30 percent. The status bar tells you the new share, such as “Notes list 40%”. Neither side can shrink away: the list stays at least about 150 pixels wide and the document about 200. At that limit the border stays put, and the status bar repeats the current share. Both commands are unavailable while the notes list is hidden.</p>
+<p>PlanCake remembers the window’s size and place, whether it was maximized, the width of the notes list and the zoom: the next window opens the same way, on a screen that is still there. The very first window fits the screen it opens on.</p>
 
 <h3 id="document-view">The document</h3>
 <p>This is your Markdown file, formatted. When PlanCake opens a file, it starts at the top. Your notes appear inside the document too, each right after the block it belongs to and set apart from the text of the plan, so you can see at a glance what is yours.</p>
@@ -380,12 +399,12 @@ footer {
 <h3 id="notes-list">The notes list</h3>
 <p>The notes list gathers every note in the file in one place, in the order they appear. It has three columns:</p>
 <dl>
+<dt>Note</dt>
+<dd>The first sentence of the note, on one line, without Markdown punctuation. The column takes all the width the other two leave. Rest the mouse pointer on a row to see the whole note.</dd>
 <dt>Lines</dt>
 <dd>Where the note sits in the file: <code>12</code> for a one-line note, <code>12-14</code> for a longer one.</dd>
 <dt>Block</dt>
-<dd>The beginning of the block the note follows, so you know what it is about without going there.</dd>
-<dt>Note</dt>
-<dd>The text of the note on one line, without Markdown punctuation.</dd>
+<dd>The first sentence of the block the note follows, so you know what it is about without going there. In both columns, a very long sentence is shortened at a comma, colon or dash where it can be.</dd>
 </dl>
 <p>To go to a note in the document, press <kbd>Enter</kbd> on its row or double-click it; focus moves to the note. To delete a note, select it and press <kbd>Delete</kbd>; the selection then moves to the nearest remaining note, so you never lose your place in the list. Right-click a row, or press the <kbd>Applications</kbd> key or <kbd>Shift+F10</kbd>, for a menu with <strong>Edit note</strong> and <strong>Delete note</strong>.</p>
 <p>If you would rather have the whole window for the document, choose <strong>Notes list</strong> in the <strong>View</strong> menu. It hides the list, and choosing it again shows it; the status bar says “Notes list hidden” or “Notes list shown”. PlanCake remembers the choice: this is the same switch as <strong>Show the notes list</strong> in <a href="#settings-general">Settings</a>, so new windows open the same way, and other open windows follow as soon as you switch to them.</p>
@@ -417,6 +436,7 @@ footer {
 <article aria-labelledby="opening-files">
 <h2 id="opening-files">Opening a file</h2>
 <p>Plans reach you in many ways: a file on disk, a path someone pasted in a chat, a link to GitHub. PlanCake can open all of them directly, without you saving anything first. Whichever way you use, a newly opened file always starts at the top.</p>
+<p>When no file is open, the window lists the ways to open one, with their keys. A large file can take a moment to open: if it takes more than half a second, or the file is larger than 1 MB, PlanCake shows the <strong>Opening a file</strong> dialog with a progress bar. Press <kbd>Escape</kbd> or click <strong>Cancel</strong> to stop; the file you had open stays as it was.</p>
 
 <h3 id="open-command-line">From the command line</h3>
 <p>Type <code>plancake</code> followed by the file:</p>
@@ -470,7 +490,7 @@ footer {
 <p>Opening a file in any other way — with <kbd>Ctrl+O</kbd>, by dragging, from the clipboard, from a link — also adds it to the history, so <strong>Back</strong> always brings you back to what you were reading before.</p>
 
 <h3 id="zoom">Zooming</h3>
-<p>To make the text larger, press <kbd>Ctrl+Plus</kbd>; to make it smaller, press <kbd>Ctrl+Minus</kbd>. The keys on the numeric keypad work too, and so do <strong>Zoom in</strong> and <strong>Zoom out</strong> in the <strong>View</strong> menu. Each step changes the size by 10 percent, between 50 and 300 percent, and the status bar shows the new size, for example “Zoom 120%”. Press <kbd>Ctrl+0</kbd> to go back to 100 percent.</p>
+<p>To make the text larger, press <kbd>Ctrl+Plus</kbd>; to make it smaller, press <kbd>Ctrl+Minus</kbd>. The keys on the numeric keypad work too, and so do <strong>Zoom in</strong> and <strong>Zoom out</strong> in the <strong>View</strong> menu. Each step changes the size by 10 percent, between 50 and 300 percent, and the status bar shows the new size, for example “Zoom 120%”. Press <kbd>Ctrl+0</kbd> to go back to 100 percent. The next window you open starts at the same zoom.</p>
 
 <h3 id="document-language">The document's language</h3>
 <p>PlanCake keeps two languages apart: the language of its menus and dialogs, and the language the document is written in. Switching the interface to French does not make an English plan French. The document language matters when the plan is read aloud (see <a href="#screen-readers">Using a screen reader</a>) and helps PlanCake recognize old file encodings (see <a href="#encodings">Files that are not in UTF-8</a>).</p>
@@ -482,9 +502,9 @@ footer {
 
 <h3 id="adding-note">Adding a note</h3>
 <ol>
-<li>Click the paragraph, heading, list item, table row or code block you want to comment on. From the keyboard, move to it with <kbd>Alt+Shift+Down Arrow</kbd> or <kbd>Alt+Shift+Up Arrow</kbd> (see <a href="#reading-basics">Moving around</a>) and press <kbd>Enter</kbd>. The <strong>Add note</strong> dialog opens. It shows the beginning of the block under <strong>Note on</strong>, so you can check you picked the right one, and puts the cursor in the <strong>Note</strong> box.</li>
+<li>Click the paragraph, heading, list item, table row or code block you want to comment on. The block under the mouse pointer is highlighted, so you can see which one a click adds a note to. From the keyboard, move to it with <kbd>Alt+Shift+Down Arrow</kbd> or <kbd>Alt+Shift+Up Arrow</kbd> (see <a href="#reading-basics">Moving around</a>) and press <kbd>Enter</kbd>. The <strong>Add note</strong> dialog opens. It shows the beginning of the block under <strong>Note on</strong>, so you can check you picked the right one, and puts the cursor in the <strong>Note</strong> box.</li>
 <li>Type your note. To start a new line inside it, press <kbd>Ctrl+Enter</kbd>.</li>
-<li>Press <kbd>Enter</kbd> or click <strong>OK</strong> to save; press <kbd>Escape</kbd> or click <strong>Cancel</strong> to give up. <strong>OK</strong> stays unavailable while the box is empty.</li>
+<li>Press <kbd>Enter</kbd> or click <strong>OK</strong> to save; press <kbd>Escape</kbd> or click <strong>Cancel</strong> to give up. <strong>OK</strong> stays unavailable while the box is empty, and pressing <kbd>Enter</kbd> then says “Type a note first.”</li>
 </ol>
 <p>PlanCake writes the note into the file at once, right after the block. The document updates, the status bar says “Note added”, and the new note is where you are now. It also appears in the notes list.</p>
 <p>A single click is all it takes; double-clicking does nothing more than a single click. Selecting text with the mouse does not open the dialog, so you can still select and copy text as usual.</p>
@@ -503,7 +523,7 @@ footer {
 <p>Press <kbd>F9</kbd> for the next note and <kbd>Shift+F9</kbd> for the previous one, or use <strong>Next note</strong> and <strong>Previous note</strong> in the <strong>Notes</strong> menu. In the document, this takes you to the note; in the notes list, it moves the selection. After the last note or before the first, the status bar says “No more notes”.</p>
 
 <h3 id="undo">Undoing a change</h3>
-<p>Press <kbd>Ctrl+Z</kbd> to undo and <kbd>Ctrl+Y</kbd> to redo, or use <strong>Undo</strong> and <strong>Redo</strong> in the <strong>Edit</strong> menu. This covers everything PlanCake writes: adding, editing and deleting notes, deleting all notes, and checking or unchecking tasks. The status bar tells you what was undone or redone, for example “Note added undone” or “Task checked redone”, and “Nothing to undo” when there is nothing left.</p>
+<p>Press <kbd>Ctrl+Z</kbd> to undo and <kbd>Ctrl+Y</kbd> to redo, or use <strong>Undo</strong> and <strong>Redo</strong> in the <strong>Edit</strong> menu. This covers everything PlanCake writes: adding, editing and deleting notes, deleting all notes, and checking or unchecking tasks. The status bar tells you what was undone or redone, for example “Undone: note added” or “Redone: task checked”, and “Nothing to undo” when there is nothing left.</p>
 <p>Undo works only while the file still holds what PlanCake last wrote. If something else has changed the file since, PlanCake does not undo over that change; it says “The file changed, so there is nothing more to undo or redo.”</p>
 
 <h3 id="note-markdown">Formatting inside a note</h3>
@@ -516,6 +536,7 @@ footer {
 <pre><code>Back up the database before you run the migration.
 [usernote]Also back up the uploads folder.[/usernote]</code></pre>
 <p>Anyone who opens the file in a text editor, and any tool that reads it, sees your notes. You can even write notes by hand in the same form, and PlanCake shows them like its own. To use different markers, see <a href="#settings-notes">Notes settings</a>.</p>
+<p>Markers inside code are not notes: between backticks, as in <code>`[usernote]`</code>, or in a code block. Nor are markers in raw HTML: inside an HTML comment, <code>&lt;!-- … --&gt;</code>, or in a <code>&lt;pre&gt;</code>, <code>&lt;script&gt;</code>, <code>&lt;style&gt;</code> or <code>&lt;textarea&gt;</code> block, from its opening tag to its closing one. If the <strong>Opening marker</strong> itself starts with <code>&lt;!--</code>, markers inside comments still count as notes. A plan or a manual that shows the markers as an example keeps them as they are, and the window and the commands all leave them alone. PlanCake itself never writes a note inside code: a note on a code block goes on the line after it.</p>
 
 <h3 id="copy-block">Copying the text of a block</h3>
 <p>To copy a paragraph, list item or other block without its Markdown punctuation, right-click it, or press the <kbd>Applications</kbd> key or <kbd>Shift+F10</kbd> on it, and choose <strong>Copy block text</strong>. The status bar says “Block text copied”.</p>
@@ -543,8 +564,8 @@ footer {
 
 <article aria-labelledby="encodings">
 <h2 id="encodings">Files that are not in UTF-8</h2>
-<p>Almost every Markdown file today is in UTF-8. Older files, especially in languages such as Russian or Hebrew, are sometimes saved in a legacy Windows encoding instead. PlanCake opens and shows them correctly, but by default it does not write to them: the file opens read-only, and PlanCake tells you so, naming the encoding, for example “This file is not in UTF-8, so it was opened read-only as Windows-1251. Notes cannot be added to it.”</p>
-<p>To add notes to such files, turn on <strong>Convert files that are not UTF-8 to UTF-8</strong> in the <a href="#settings-advanced">Advanced settings</a>. PlanCake then converts each such file to UTF-8 the moment you open it and tells you, for example “Converted from Windows-1251 to UTF-8.” Only the encoding changes; the text and the line endings stay the same.</p>
+<p>Almost every Markdown file today is in UTF-8. Older files, especially in languages such as Russian or Hebrew, are sometimes saved in a legacy Windows encoding instead. PlanCake opens and shows them correctly, but by default it does not write to them: the file opens read-only, and PlanCake tells you so, naming the encoding, for example “This file is not in UTF-8, so it was opened read-only as Windows-1251. Notes cannot be added to it. To convert it to UTF-8, turn on converting files that are not UTF-8 in the settings.”</p>
+<p>To add notes to such files, turn on <strong>Convert to UTF-8 on opening</strong> in the <a href="#settings-advanced">Advanced settings</a>. PlanCake then converts each such file to UTF-8 the moment you open it and tells you, for example “The file was converted from Windows-1251 to UTF-8.” Only the encoding changes; the text and the line endings stay the same.</p>
 <p>Sometimes PlanCake cannot tell for sure which encoding a file uses. Such a file always stays read-only, whatever the setting says: “The encoding of this file could not be recognized, so it was opened read-only and is never changed. Notes cannot be added to it.” This is a firm rule. Writing a file that was not read correctly would destroy the characters PlanCake could not make out, and PlanCake never does that.</p>
 <p>The <strong>Document language</strong> setting is one of the clues PlanCake uses to recognize a legacy encoding, so setting it to the language your old files are written in helps.</p>
 </article>
@@ -556,7 +577,7 @@ footer {
 <h3 id="settings-general">General</h3>
 <dl>
 <dt>Interface language</dt>
-<dd>The language of menus, dialogs and messages: English, Русский (Russian), Українська (Ukrainian), Français (French), עברית (Hebrew) or Deutsch (German). <strong>System default</strong>, the default, follows your Windows language, and uses English if Windows is in a language PlanCake does not have. In Hebrew, the whole window is laid out right to left. You can also switch it from <strong>Interface language</strong> in the <strong>View</strong> menu. This setting does not change the document language.</dd>
+<dd>The language of menus, dialogs and messages: English, <span lang="ru">Русский</span> (Russian), <span lang="uk">Українська</span> (Ukrainian), <span lang="fr">Français</span> (French), <span lang="he" dir="rtl">עברית</span> (Hebrew) or <span lang="de">Deutsch</span> (German). <strong>System default</strong>, the default, follows your Windows language, and uses English if Windows is in a language PlanCake does not have. In Hebrew, the whole window is laid out right to left. You can also switch it from <strong>Interface language</strong> in the <strong>View</strong> menu. This setting does not change the document language.</dd>
 <dt>Document language</dt>
 <dd>The language PlanCake assumes a newly opened document is written in. Default: English. It never follows the interface language or Windows. See <a href="#document-language">The document's language</a>.</dd>
 <dt>When the file changes on disk</dt>
@@ -578,11 +599,11 @@ footer {
 <dt>Opening marker</dt>
 <dd>The text a note starts with in the file. Default: <code>[usernote]</code>. It cannot be empty, cannot start or end with a space or a double quotation mark, and cannot contain a line break.</dd>
 <dt>Closing marker (leave empty for a single marker that runs to the end of the line)</dt>
-<dd>The text a note ends with. Default: <code>[/usernote]</code>. It follows the same rules and must differ from the opening marker. If you leave it empty, a note runs from the opening marker to the end of its line; notes are then always one line long, and any line breaks you type in a note become spaces.</dd>
+<dd>The text a note ends with. Default: <code>[/usernote]</code>. It follows the same rules and must differ from the opening marker. If you leave it empty, a note runs from the opening marker to the end of its line; notes are then always one line long, and any line breaks you type in a note become spaces. If the markers break one of these rules, the line under them says why, starting with “Error:”, and a screen reader reads it out as soon as you pause typing.</dd>
 <dt>Enter or a click on a block</dt>
 <dd><strong>Adds a note</strong> (the default) opens the <strong>Add note</strong> dialog. <strong>Opens the context menu</strong> shows the block's menu instead, where you choose <strong>Add note</strong> or <strong>Copy block text</strong>; choose this if you find yourself adding notes by accident. A click or <kbd>Enter</kbd> on an existing note always opens it for editing, and a right-click, the <kbd>Applications</kbd> key and <kbd>Shift+F10</kbd> always open the menu.</dd>
-<dt>Enter in the note dialog</dt>
-<dd><strong>Saves the note (Ctrl+Enter starts a new line)</strong> is the default. <strong>Starts a new line (Ctrl+Enter saves the note)</strong> suits long notes with several paragraphs. Whichever you choose, <kbd>Ctrl+Enter</kbd> does the other thing.</dd>
+<dt>Enter in the note dialog (Ctrl+Enter does the other)</dt>
+<dd><strong>Saves the note</strong> is the default. <strong>Starts a new line</strong> suits long notes with several paragraphs. Whichever you choose, <kbd>Ctrl+Enter</kbd> does the other thing.</dd>
 </dl>
 <aside role="note" class="warning">
 <p><strong>Warning: changing the markers hides existing notes.</strong> PlanCake reads only the markers set right now. Notes already in a file that were written with other markers show as ordinary text: they are no longer in the notes list, <kbd>F9</kbd> skips them, and the command line does not count them. Nothing in the file changes, and nothing is lost. Switch the markers back, and those notes are notes again.</p>
@@ -591,8 +612,8 @@ footer {
 
 <h3 id="settings-advanced">Advanced</h3>
 <dl>
-<dt>Convert files that are not UTF-8 to UTF-8 (without BOM) when opening them. The file on disk is rewritten.</dt>
-<dd>Off by default, so files in legacy encodings open read-only and are never changed. Turn it on to have PlanCake convert such files to UTF-8 when you open them, so you can add notes. A file whose encoding PlanCake cannot recognize is never converted. See <a href="#encodings">Files that are not in UTF-8</a>.</dd>
+<dt>Convert to UTF-8 on opening</dt>
+<dd>Off by default, so files in legacy encodings open read-only and are never changed. Turn it on to have PlanCake convert a file that is not in UTF-8 to UTF-8 without a byte order mark (BOM) when you open it, so you can add notes. The conversion rewrites the file on disk. A file whose encoding PlanCake cannot recognize is never converted. See <a href="#encodings">Files that are not in UTF-8</a>.</dd>
 </dl>
 </article>
 
@@ -601,9 +622,10 @@ footer {
 <p>PlanCake can also work without a window. Four commands read the notes in a file, check whether any are left, remove them all, or export the file to HTML. They are made for scripts and for AI assistants: Claude uses them to read your notes on a plan and to confirm every one has been dealt with.</p>
 <p>Every command follows the same pattern:</p>
 <pre><code>plancake &lt;command&gt; &lt;file&gt; [options]</code></pre>
-<p>Type <code>plancake --help</code> for the list of commands, or <code>plancake list --help</code> for the options of one command. Output is UTF-8 without a byte order mark. Errors go to the error output, with exit code 1.</p>
+<p>Type <code>plancake --help</code> for the list of commands, or <code>plancake list --help</code> for the options of one command. Output is UTF-8 without a byte order mark. Errors go to the error output, with exit code 1. A mistyped command, such as <code>plancake chek</code>, is such an error too (“Unrecognized command: chek. Did you mean check?”), rather than a window opening on a file that does not exist.</p>
+<div class="table-scroll" role="region" aria-labelledby="command-line-caption" tabindex="0">
 <table>
-<caption>Exit codes</caption>
+<caption id="command-line-caption">Exit codes</caption>
 <thead>
 <tr><th scope="col">Code</th><th scope="col">Meaning</th></tr>
 </thead>
@@ -613,14 +635,17 @@ footer {
 <tr><td>3</td><td>Only from <code>check</code>: the file still has notes.</td></tr>
 </tbody>
 </table>
+</div>
 <p>The <code>list</code>, <code>check</code> and <code>export</code> commands never change your Markdown file. Only <code>clear</code> does.</p>
 
 <h3 id="cli-list">Listing the notes</h3>
 <pre><code>plancake list plan.md</code></pre>
-<p>This prints one line per note: the note's lines, the lines of the block it follows, the beginning of that block, and the note itself. Line breaks inside a note are shown as a slash.</p>
+<p>This prints one line per note: the note's lines, the lines of the block it follows, the beginning of that block, and the note itself. Lines are numbered from 1, as in a text editor. Line breaks inside a note are shown as a slash.</p>
 <pre><code>43-43 after 41-42 "Back up the database before you run the migration.": Also back up the uploads folder.</code></pre>
-<p>This format is meant for scripts, so its fixed words and punctuation — “after”, the dash, the quotation marks — stay in English whatever your interface language is.</p>
-<p>Add <code>--json</code> for JSON: a list of objects with the fields <code>noteStartLine</code>, <code>noteEndLine</code>, <code>blockStartLine</code>, <code>blockEndLine</code>, <code>blockKind</code>, <code>blockExcerpt</code> and <code>text</code>. Add <code>-o</code> (or <code>--output</code>) and a file name to write the result to a file instead of the screen:</p>
+<p>A note before the first block of the file follows no block, and its line says so:</p>
+<pre><code>1-1 at the start: Read the whole plan before you start.</code></pre>
+<p>This format is meant for scripts, so its fixed words and punctuation — “after”, “at the start”, the dash, the quotation marks — stay in English whatever your interface language is.</p>
+<p>Add <code>--json</code> for JSON: a list of objects with the fields <code>noteStartLine</code>, <code>noteEndLine</code>, <code>blockStartLine</code>, <code>blockEndLine</code>, <code>blockKind</code>, <code>blockExcerpt</code> and <code>text</code>. Line numbers start at 1. The <code>blockKind</code> is one of <code>paragraph</code>, <code>heading</code>, <code>listItem</code>, <code>code</code>, <code>tableRow</code>, or <code>start</code> for a note before the first block, whose <code>blockStartLine</code> and <code>blockEndLine</code> are <code>null</code> and whose <code>blockExcerpt</code> is empty. Add <code>-o</code> (or <code>--output</code>) and a file name to write the result to a file instead of the screen:</p>
 <pre><code>plancake list plan.md --json -o notes.json</code></pre>
 <p><strong>Export notes</strong> in the <strong>File</strong> menu saves the same JSON from the window.</p>
 
@@ -630,11 +655,12 @@ footer {
 
 <h3 id="cli-clear">Clearing every note</h3>
 <pre><code>plancake clear plan.md</code></pre>
-<p>This removes every note from the file and prints how many it removed, for example <code>Removed 2 notes.</code> For a file in a legacy encoding, <code>clear</code> follows the <a href="#settings-advanced">conversion setting</a>: when conversion is off, or the encoding cannot be recognized, it refuses to change a file that has notes and explains why.</p>
+<p>This removes every note from the file and prints how many it removed, for example <code>Removed 2 notes</code>. For a file in a legacy encoding, <code>clear</code> follows the <a href="#settings-advanced">conversion setting</a>: when conversion is off, or the encoding cannot be recognized, it refuses to change a file that has notes and explains why. Add <code>--convert</code> to convert such a file to UTF-8 for this run whatever the setting says; a file whose encoding cannot be recognized is still never changed.</p>
+<pre><code>plancake clear old-plan.md --convert</code></pre>
 
 <h3 id="cli-export">Exporting to HTML</h3>
 <pre><code>plancake export plan.md -o plan.html</code></pre>
-<p>This writes a standalone web page of the document with its notes clearly marked, to share with someone who does not use PlanCake. The page has its styles built in and contains no scripts. The <code>-o</code> option is required. The page's language is the <strong>Document language</strong> from Settings; to use another, add <code>--lang</code> and a language code, such as <code>--lang fr</code>. The page title is the document's first heading, or the file name if it has none.</p>
+<p>This writes a standalone web page of the document with its notes clearly marked, to share with someone who does not use PlanCake. The page has its styles built in and contains no scripts. The <code>-o</code> option is required. The page's language is the <strong>Document language</strong> from Settings; to use another, add <code>--lang</code> and a language code, such as <code>--lang fr</code>. The page title is the document's first heading, or the file name if it has none. Pictures that are files on your computer, such as <code>![Diagram](diagram.png)</code> next to the plan, are put inside the page, so it shows them wherever it is opened; one larger than 10 MB, or on another computer's network share, is not. Pictures from the web stay links to the web.</p>
 
 <h3 id="cli-markers">Using other markers for one run</h3>
 <p>By default the commands use the markers from Settings. To use other ones for a single run, add:</p>
@@ -668,8 +694,9 @@ cmd /c "plancake check plan.md"</code></pre>
 <p>These shortcuts are fixed; they cannot be changed. You can also see all of them in PlanCake itself: choose <strong>Keyboard shortcuts</strong> in the <strong>Help</strong> menu.</p>
 
 <h3 id="keys-window">Anywhere in the window</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-window-caption" tabindex="0">
 <table>
-<caption>Shortcuts that work in the document and in the notes list</caption>
+<caption id="keys-window-caption">Shortcuts that work in the document and in the notes list</caption>
 <thead>
 <tr><th scope="col">Action</th><th scope="col">Shortcut</th></tr>
 </thead>
@@ -681,7 +708,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Settings</td><td><kbd>Ctrl+Comma</kbd></td></tr>
 <tr><td>Undo</td><td><kbd>Ctrl+Z</kbd></td></tr>
 <tr><td>Redo</td><td><kbd>Ctrl+Y</kbd></td></tr>
-<tr><td>Switch between the document and the notes list</td><td><kbd>F6</kbd></td></tr>
+<tr><td>Switch between the document and the notes list</td><td><kbd>F6</kbd> or <kbd>Shift+F6</kbd></td></tr>
 <tr><td>Next note</td><td><kbd>F9</kbd></td></tr>
 <tr><td>Previous note</td><td><kbd>Shift+F9</kbd></td></tr>
 <tr><td>Next block in the document</td><td><kbd>Alt+Shift+Down Arrow</kbd></td></tr>
@@ -697,10 +724,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Close the window</td><td><kbd>Alt+F4</kbd></td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-document">In the document</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-document-caption" tabindex="0">
 <table>
-<caption>Keys and mouse actions in the document</caption>
+<caption id="keys-document-caption">Keys and mouse actions in the document</caption>
 <thead>
 <tr><th scope="col">Action</th><th scope="col">Keyboard</th><th scope="col">Mouse</th></tr>
 </thead>
@@ -712,10 +741,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Follow a link</td><td><kbd>Enter</kbd></td><td>Click</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-list">In the notes list</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-list-caption" tabindex="0">
 <table>
-<caption>Keys and mouse actions in the notes list</caption>
+<caption id="keys-list-caption">Keys and mouse actions in the notes list</caption>
 <thead>
 <tr><th scope="col">Action</th><th scope="col">Keyboard</th><th scope="col">Mouse</th></tr>
 </thead>
@@ -726,10 +757,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Open the menu of the note</td><td><kbd>Applications</kbd> or <kbd>Shift+F10</kbd></td><td>Right-click</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="keys-dialog">In the note dialog</h3>
+<div class="table-scroll" role="region" aria-labelledby="keys-dialog-caption" tabindex="0">
 <table>
-<caption>Keys in the Add note and Edit note dialog, with the default setting</caption>
+<caption id="keys-dialog-caption">Keys in the Add note and Edit note dialog, with the default setting</caption>
 <thead>
 <tr><th scope="col">Action</th><th scope="col">Shortcut</th></tr>
 </thead>
@@ -739,16 +772,18 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>Cancel</td><td><kbd>Escape</kbd>, or click <strong>Cancel</strong></td></tr>
 </tbody>
 </table>
+</div>
 <p>If you set <strong>Enter in the note dialog</strong> to <strong>Starts a new line</strong>, <kbd>Enter</kbd> and <kbd>Ctrl+Enter</kbd> swap.</p>
 </article>
 
 <article aria-labelledby="menus">
 <h2 id="menus">Menu reference</h2>
-<p>Click a menu name, press <kbd>Alt</kbd> to reach the menu bar, or open a menu directly: <kbd>Alt+F</kbd> for File, <kbd>Alt+E</kbd> for Edit, <kbd>Alt+V</kbd> for View, <kbd>Alt+N</kbd> for Notes, <kbd>Alt+H</kbd> for Help. Commands that do not apply at the moment — <strong>Undo</strong> with nothing to undo, <strong>Next note</strong> in a file without notes — are unavailable.</p>
+<p>Click a menu name, press <kbd>Alt</kbd> or <kbd>F10</kbd> to reach the menu bar, or open a menu directly: <kbd>Alt+F</kbd> for File, <kbd>Alt+E</kbd> for Edit, <kbd>Alt+V</kbd> for View, <kbd>Alt+N</kbd> for Notes, <kbd>Alt+H</kbd> for Help. Commands that do not apply at the moment — <strong>Undo</strong> with nothing to undo, <strong>Next note</strong> in a file without notes — are unavailable.</p>
 
 <h3 id="menu-file">File</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-file-caption" tabindex="0">
 <table>
-<caption>File menu</caption>
+<caption id="menu-file-caption">File menu</caption>
 <thead>
 <tr><th scope="col">Command</th><th scope="col">Shortcut</th><th scope="col">What it does</th></tr>
 </thead>
@@ -756,16 +791,18 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Open</strong></td><td><kbd>Ctrl+O</kbd></td><td>Opens a Markdown file from your disk.</td></tr>
 <tr><td><strong>Open from clipboard</strong></td><td><kbd>Ctrl+V</kbd></td><td>Opens the file, path or link you copied.</td></tr>
 <tr><td><strong>Open from link</strong></td><td><kbd>Ctrl+L</kbd></td><td>Downloads a Markdown file from the web and opens it.</td></tr>
-<tr><td><strong>Open in editor</strong></td><td><kbd>Ctrl+E</kbd></td><td>Opens the file in the program Windows uses for Markdown files, when you want to change the plan's text itself.</td></tr>
+<tr><td><strong>Open in editor</strong></td><td><kbd>Ctrl+E</kbd></td><td>Opens the file in the program Windows uses for Markdown files, when you want to change the plan's text itself. If that program is PlanCake itself, or there is none, the file opens in the program Windows uses to edit it, or else in Notepad.</td></tr>
 <tr><td><strong>Export notes</strong></td><td>None</td><td>Saves all notes of the file, with the blocks they follow, as a JSON file. PlanCake never reads it back; it is a copy for other tools.</td></tr>
 <tr><td><strong>Settings</strong></td><td><kbd>Ctrl+Comma</kbd></td><td>Opens the settings.</td></tr>
 <tr><td><strong>Exit</strong></td><td><kbd>Alt+F4</kbd></td><td>Closes the window.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-edit">Edit</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-edit-caption" tabindex="0">
 <table>
-<caption>Edit menu</caption>
+<caption id="menu-edit-caption">Edit menu</caption>
 <thead>
 <tr><th scope="col">Command</th><th scope="col">Shortcut</th><th scope="col">What it does</th></tr>
 </thead>
@@ -775,10 +812,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Delete all notes</strong></td><td>None</td><td>Removes every note from the file, after asking.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-view">View</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-view-caption" tabindex="0">
 <table>
-<caption>View menu</caption>
+<caption id="menu-view-caption">View menu</caption>
 <thead>
 <tr><th scope="col">Command</th><th scope="col">Shortcut</th><th scope="col">What it does</th></tr>
 </thead>
@@ -797,10 +836,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Reload</strong></td><td><kbd>F5</kbd></td><td>Reads the file from disk again.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-notes">Notes</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-notes-caption" tabindex="0">
 <table>
-<caption>Notes menu</caption>
+<caption id="menu-notes-caption">Notes menu</caption>
 <thead>
 <tr><th scope="col">Command</th><th scope="col">Shortcut</th><th scope="col">What it does</th></tr>
 </thead>
@@ -813,10 +854,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Previous block</strong></td><td><kbd>Alt+Shift+Up Arrow</kbd></td><td>Moves to the previous block or note in the document.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-help">Help</h3>
+<div class="table-scroll" role="region" aria-labelledby="menu-help-caption" tabindex="0">
 <table>
-<caption>Help menu</caption>
+<caption id="menu-help-caption">Help menu</caption>
 <thead>
 <tr><th scope="col">Command</th><th scope="col">Shortcut</th><th scope="col">What it does</th></tr>
 </thead>
@@ -824,14 +867,16 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>User manual</strong></td><td><kbd>F1</kbd></td><td>Opens this manual in your web browser, in your interface language when it is available.</td></tr>
 <tr><td><strong>Keyboard shortcuts</strong></td><td>None</td><td>Lists every shortcut.</td></tr>
 <tr><td><strong>Check for updates</strong></td><td>None</td><td>Checks for a new version right now.</td></tr>
-<tr><td><strong>About PlanCake</strong></td><td><kbd>Shift+F1</kbd></td><td>Shows the version, with a link to PlanCake on GitHub and a <strong>Copy info</strong> button.</td></tr>
+<tr><td><strong>About PlanCake</strong></td><td><kbd>Shift+F1</kbd></td><td>Shows the version, with a link to PlanCake on GitHub, a <strong>Copy info</strong> button and a <strong>Licenses</strong> button, which opens PlanCake's license and the notices of the third-party components it includes in Notepad.</td></tr>
 </tbody>
 </table>
+</div>
 
 <h3 id="menu-context">Context menus</h3>
 <p>Open a context menu by right-clicking, or with the <kbd>Applications</kbd> key or <kbd>Shift+F10</kbd>.</p>
+<div class="table-scroll" role="region" aria-labelledby="menu-context-caption" tabindex="0">
 <table>
-<caption>Context menu commands</caption>
+<caption id="menu-context-caption">Context menu commands</caption>
 <thead>
 <tr><th scope="col">Where</th><th scope="col">Commands</th></tr>
 </thead>
@@ -841,6 +886,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td>On a note in the notes list</td><td><strong>Edit note</strong>, <strong>Delete note</strong></td></tr>
 </tbody>
 </table>
+</div>
 </article>
 
 <article aria-labelledby="updates">
@@ -860,7 +906,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <li>With the installer: <code>%APPDATA%\Oire\PlanCake\PlanCake.cfg</code></li>
 <li>Portable: <code>userdata\PlanCake.cfg</code>, next to <code>plancake.exe</code></li>
 </ul>
-<p>To take your settings to another computer, copy that file to the same place there. The same folder holds a <code>logs</code> folder, which records what PlanCake did and helps when you report a problem, and some working files of the document view. Deleting that folder resets PlanCake to its defaults and never touches your Markdown files or the notes in them.</p>
+<p>To take your settings to another computer, copy that file to the same place there. The same folder holds a <code>logs</code> folder, which records what PlanCake did and helps when you report a problem. The working files of the document view are kept in <code>%LOCALAPPDATA%\Oire\PlanCake</code> with the installer, and in the same <code>userdata</code> folder in the portable version. Deleting these folders resets PlanCake to its defaults and never touches your Markdown files or the notes in them.</p>
 <h3 id="data-privacy">What goes over the network</h3>
 <p>PlanCake connects to the internet only for two things: downloading a file when you open one from a link, and checking for updates. It sends no usage data anywhere.</p>
 </article>
@@ -875,7 +921,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <details>
 <summary>I cannot add notes: the file is read-only</summary>
-<p>The file is not in UTF-8. Turn on <strong>Convert files that are not UTF-8 to UTF-8</strong> in the Advanced settings and open the file again. If PlanCake says the encoding could not be recognized, the file stays read-only whatever you do; open it in a text editor, save it as UTF-8, and open it in PlanCake again.</p>
+<p>The file is not in UTF-8. Turn on <strong>Convert to UTF-8 on opening</strong> in the Advanced settings and open the file again. If PlanCake says the encoding could not be recognized, the file stays read-only whatever you do; open it in a text editor, save it as UTF-8, and open it in PlanCake again.</p>
 <p>If PlanCake instead says the file is no longer there, it was deleted, renamed or moved while open. Put it back, or open it from its new place.</p>
 </details>
 
@@ -927,11 +973,12 @@ cmd /c "plancake check plan.md"</code></pre>
 <details>
 <summary>How do I report a problem?</summary>
 <p>Open <strong>About PlanCake</strong> with <kbd>Shift+F1</kbd> or from the <strong>Help</strong> menu and click <strong>Copy info</strong>; the dialog says “Copied”. This puts your PlanCake version and Windows details on the clipboard. Paste them into a new issue on <a href="https://github.com/Oire/plan-cake/issues">PlanCake's GitHub page</a>, together with what you did and what happened.</p>
+<p>Attach <code>errors.log</code> from the <code>logs</code> folder too (with any numbered ones beside it, such as <code>errors_001.log</code>), and <code>PlanCake.log</code> if you are asked for it. The <code>logs</code> folder is <code>%APPDATA%\Oire\PlanCake\logs</code> with the installer, and <code>userdata\logs</code> next to <code>plancake.exe</code> in the portable version. The logs name the files you opened and the web addresses you downloaded from, without the values in their queries, but never hold the text of your files or your notes.</p>
 </details>
 </article>
 </main>
 <footer>
-<p>© 2026 Oire Software SARL. PlanCake is open source under the Apache License 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake on GitHub</a>.</p>
+<p>© 2026 Oire Software SARL. PlanCake is open source under the Apache License 2.0. <a href="https://github.com/Oire/plan-cake">PlanCake on GitHub</a>. The licenses of the components it includes are in <code>THIRD-PARTY-NOTICES.txt</code>, next to <code>plancake.exe</code>; the <strong>Licenses</strong> button in <strong>About PlanCake</strong> opens it.</p>
 </footer>
 </body>
 </html>

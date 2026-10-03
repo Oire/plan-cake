@@ -12,15 +12,38 @@ namespace Oire.PlanCake.Ui;
 /// (General, Notes, Advanced). OK writes them to <see cref="Config"/> and saves the file; the
 /// window then applies them without a restart. Cancel and Escape leave <see cref="Config"/> as it was.
 /// </summary>
-internal partial class SettingsDialog: Form {
+internal sealed partial class SettingsDialog: Form {
     /// <summary>The interface languages offered, the system default first.</summary>
     private IReadOnlyList<LanguageOption> _interfaceLanguages = [];
+
+    /// <summary>
+    /// The red of the markers error: 4.5:1 or more against the dialog and its tabs. Not used in
+    /// high contrast.
+    /// </summary>
+    internal static readonly Color ErrorColor = Color.FromArgb(0xC4, 0x2B, 0x1C);
+
+    /// <summary>Says a new reason the markers cannot be used once the typing pauses.</summary>
+    private readonly System.Windows.Forms.Timer _markersErrorTimer;
+
+    /// <summary>The reason last spoken, so the same one is not said again on every key press.</summary>
+    private string? _spokenMarkersError;
 
     public SettingsDialog() {
         InitializeComponent();
         Localizer.Localize(this, Utils.Localization.Catalog);
         TextDirection.Apply(this);
+        TextDirection.KeepLeftToRight(openingMarkerTextBox, closingMarkerTextBox);
         Text = _("Settings");
+
+        components ??= new System.ComponentModel.Container();
+        _markersErrorTimer = new System.Windows.Forms.Timer(components) { Interval = 700 };
+        _markersErrorTimer.Tick += OnMarkersErrorTimerTick;
+
+        // An error stands out by its "Error:" prefix first; the red is extra, and high contrast
+        // keeps the theme's own text color.
+        if (!SystemInformation.HighContrast) {
+            markersErrorLabel.ForeColor = ErrorColor;
+        }
 
         FillChoices();
         LoadSettings();
@@ -71,10 +94,12 @@ internal partial class SettingsDialog: Form {
             new Choice<BlockEnterAction>(BlockEnterAction.ContextMenu, _("Opens the context menu")),
         ]);
 
+        // The items stay short enough to show whole in the closed box; the label says Ctrl+Enter.
         var ctrlEnter = HostCommands.KeyText(Keys.Control | Keys.Enter);
+        noteEnterLabel.Text = _("Enter in the note dialo&g ({0} does the other):", ctrlEnter);
         noteEnterComboBox.Items.AddRange([
-            new Choice<NoteEnterAction>(NoteEnterAction.Save, _("Saves the note ({0} starts a new line)", ctrlEnter)),
-            new Choice<NoteEnterAction>(NoteEnterAction.NewLine, _("Starts a new line ({0} saves the note)", ctrlEnter)),
+            new Choice<NoteEnterAction>(NoteEnterAction.Save, _("Saves the note")),
+            new Choice<NoteEnterAction>(NoteEnterAction.NewLine, _("Starts a new line")),
         ]);
 
         updateIntervalComboBox.Items.AddRange([
@@ -124,17 +149,34 @@ internal partial class SettingsDialog: Form {
 
     private static T Selected<T>(ComboBox comboBox) => ((Choice<T>)comboBox.SelectedItem!).Value;
 
-    private void OnMarkerTextChanged(object? sender, EventArgs e) => ShowMarkersError();
+    /// <summary>What the label under the markers says for <paramref name="error"/>: empty when there is none.</summary>
+    internal static string MarkersErrorText(string? error) => error is null ? String.Empty : _("Error: {0}", error);
+
+    private void OnMarkerTextChanged(object? sender, EventArgs e) {
+        ShowMarkersError();
+        _markersErrorTimer.Stop();
+        _markersErrorTimer.Start();
+    }
 
     /// <summary>
-    /// Shows why the markers cannot be used next to them, and gives it to both boxes as their
-    /// description, so a screen reader says it with the box's label.
+    /// Says the reason the markers cannot be used when it is new, once the typing pauses: the label
+    /// is silent, and JAWS reads a box's description in neither of its modes (docs/jaws-spike.md).
     /// </summary>
+    private void OnMarkersErrorTimerTick(object? sender, EventArgs e) {
+        _markersErrorTimer.Stop();
+        var error = DescribeMarkersError(openingMarkerTextBox.Text, closingMarkerTextBox.Text);
+
+        if (error is not null && error != _spokenMarkersError) {
+            StatusAnnouncer.Speak(ActiveControl ?? this, MarkersErrorText(error));
+        }
+
+        _spokenMarkersError = error;
+    }
+
+    /// <summary>Shows why the markers cannot be used in the label under them, and returns it.</summary>
     private string? ShowMarkersError() {
         var error = DescribeMarkersError(openingMarkerTextBox.Text, closingMarkerTextBox.Text);
-        markersErrorLabel.Text = error ?? String.Empty;
-        openingMarkerTextBox.AccessibleDescription = error;
-        closingMarkerTextBox.AccessibleDescription = error;
+        markersErrorLabel.Text = MarkersErrorText(error);
 
         return error;
     }
@@ -200,6 +242,8 @@ internal partial class SettingsDialog: Form {
         openingMarkerTextBox.TextChanged -= OnMarkerTextChanged;
         closingMarkerTextBox.TextChanged -= OnMarkerTextChanged;
         tabControl.Selected -= OnTabSelected;
+        _markersErrorTimer.Stop();
+        _markersErrorTimer.Tick -= OnMarkersErrorTimerTick;
         base.OnFormClosed(e);
     }
 

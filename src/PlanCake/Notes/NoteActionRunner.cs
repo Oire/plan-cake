@@ -1,4 +1,5 @@
 using Oire.PlanCake.Rendering;
+using Oire.PlanCake.Utils;
 using Serilog;
 using static Oire.PlanCake.Utils.Localization;
 
@@ -74,11 +75,11 @@ internal sealed class NoteActionRunner {
 
     public NoteStore Store { get; }
 
-    /// <summary>Why no note can be written to the file, or <see langword="null"/> when one can.</summary>
-    public string? CannotWriteReason => Store.File.IsReadOnly ? ReadOnlyMessage : null;
-
-    private static string ReadOnlyMessage =>
-        _("This file is not in UTF-8, so it is open read-only. Notes cannot be written to it.");
+    /// <summary>
+    /// Why no note can be written to the file, or <see langword="null"/> when one can: the same
+    /// reason the window gives when it opens the file (<see cref="LocalizedText.ReadOnlyReason"/>).
+    /// </summary>
+    public string? CannotWriteReason => LocalizedText.ReadOnlyReason(Store.File);
 
     /// <summary>
     /// Why <paramref name="note"/> cannot be edited or deleted, or <see langword="null"/> when it
@@ -95,7 +96,7 @@ internal sealed class NoteActionRunner {
     /// or <see langword="null"/> when one can: a note without a closing marker starts before
     /// where it would go (<see cref="NoteStore.UnterminatedBefore"/>), and would take it in.
     /// </summary>
-    public string? UnterminatedReason(string renderedText, BlockInfo block) {
+    public string? UnterminatedAddReason(string renderedText, BlockInfo block) {
         ArgumentNullException.ThrowIfNull(renderedText);
         ArgumentNullException.ThrowIfNull(block);
 
@@ -111,7 +112,10 @@ internal sealed class NoteActionRunner {
     public static string UnterminatedMessage(int line) =>
         _("The note on line {0} has no closing marker, so it runs to the end of the file, and changing it would change the rest of the file too. Add the closing marker in an editor first.", line);
 
-    /// <summary>Why <paramref name="text"/> cannot be written as a note, or <see langword="null"/> when it can.</summary>
+    /// <summary>
+    /// Why <paramref name="text"/> cannot be written as a note, or <see langword="null"/> when it
+    /// can.
+    /// </summary>
     public string? DescribeTextError(string text) {
         ArgumentNullException.ThrowIfNull(text);
 
@@ -123,19 +127,19 @@ internal sealed class NoteActionRunner {
             NoteTextError.ContainsOpeningMarker =>
                 _("The note cannot contain {0}, which marks the start of a note.", Store.Markers.Opening),
             NoteTextError.ContainsLineBreak => _("The note cannot contain a line break."),
-            var error => throw new InvalidOperationException($"Unknown note text error {error}."),
+            var error => throw new ArgumentOutOfRangeException(nameof(text), error, null),
         };
     }
 
     /// <summary>
     /// Adds a note after <paramref name="block"/>; refused when a note without a closing marker
-    /// starts before where it would go (<see cref="UnterminatedReason(String, BlockInfo)"/>).
+    /// starts before where it would go (<see cref="UnterminatedAddReason"/>).
     /// </summary>
     public NoteActionResult Add(string renderedText, BlockInfo block, string text) {
         ArgumentNullException.ThrowIfNull(renderedText);
         ArgumentNullException.ThrowIfNull(block);
 
-        if (UnterminatedReason(renderedText, block) is { } reason) {
+        if (UnterminatedAddReason(renderedText, block) is { } reason) {
             return new NoteActionResult(NoteActionStatus.Unterminated, reason);
         }
 
@@ -271,11 +275,17 @@ internal sealed class NoteActionRunner {
         } catch (ReadOnlyFileException ex) {
             Log.Warning(ex, "Action refused: {Path} is read-only", Store.File.Path);
 
-            return new NoteActionResult(NoteActionStatus.ReadOnly, ReadOnlyMessage);
+            return new NoteActionResult(NoteActionStatus.ReadOnly, CannotWriteReason ?? ex.Message);
         } catch (UnterminatedNoteException ex) {
             Log.Warning(ex, "Action refused: a note in {Path} has no closing marker", Store.File.Path);
 
             return new NoteActionResult(NoteActionStatus.Unterminated, UnterminatedMessage(ex.Line));
+        } catch (NoteInCodeException ex) {
+            Log.Warning(ex, "Action refused: the note would be inside code in {Path}", Store.File.Path);
+
+            return new NoteActionResult(NoteActionStatus.Failed, _(
+                "A note added here would be inside a code block that is never closed, so it would not count as a note. Close the code block in an editor first."
+            ));
         } catch (IOException ex) {
             Log.Error(ex, "Action failed on {Path}", Store.File.Path);
 
@@ -288,22 +298,22 @@ internal sealed class NoteActionRunner {
         change.Operation is NoteOperation.CheckTask or NoteOperation.UncheckTask ? change.Line : null;
 
     private static string UndoneMessage(NoteOperation operation) => operation switch {
-        NoteOperation.Add => _("Note added undone"),
-        NoteOperation.Edit => _("Note edited undone"),
-        NoteOperation.Delete => _("Note deleted undone"),
-        NoteOperation.Clear => _("All notes deleted undone"),
-        NoteOperation.CheckTask => _("Task checked undone"),
-        NoteOperation.UncheckTask => _("Task unchecked undone"),
+        NoteOperation.Add => _("Undone: note added"),
+        NoteOperation.Edit => _("Undone: note edited"),
+        NoteOperation.Delete => _("Undone: note deleted"),
+        NoteOperation.Clear => _("Undone: all notes deleted"),
+        NoteOperation.CheckTask => _("Undone: task checked"),
+        NoteOperation.UncheckTask => _("Undone: task unchecked"),
         _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null),
     };
 
     private static string RedoneMessage(NoteOperation operation) => operation switch {
-        NoteOperation.Add => _("Note added redone"),
-        NoteOperation.Edit => _("Note edited redone"),
-        NoteOperation.Delete => _("Note deleted redone"),
-        NoteOperation.Clear => _("All notes deleted redone"),
-        NoteOperation.CheckTask => _("Task checked redone"),
-        NoteOperation.UncheckTask => _("Task unchecked redone"),
+        NoteOperation.Add => _("Redone: note added"),
+        NoteOperation.Edit => _("Redone: note edited"),
+        NoteOperation.Delete => _("Redone: note deleted"),
+        NoteOperation.Clear => _("Redone: all notes deleted"),
+        NoteOperation.CheckTask => _("Redone: task checked"),
+        NoteOperation.UncheckTask => _("Redone: task unchecked"),
         _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null),
     };
 }

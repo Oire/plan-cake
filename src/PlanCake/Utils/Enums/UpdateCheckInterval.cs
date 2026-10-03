@@ -6,7 +6,7 @@ namespace Oire.PlanCake.Utils.Enums;
 /// Declared most frequent first, the order of the Settings combo box; the default
 /// (<see cref="Weekly"/>) is set in <c>Config</c>, not by the declaration order.
 /// </summary>
-public enum UpdateCheckInterval {
+internal enum UpdateCheckInterval {
     /// <summary>Every 24 hours.</summary>
     Daily,
 

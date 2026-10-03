@@ -19,6 +19,8 @@ concurrency:
 jobs:
   build:
     runs-on: windows-latest
+    # A hung test (a named pipe, an STA form) would otherwise hold the runner for six hours.
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v7
@@ -29,7 +31,8 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          # The SDK band global.json pins, so CI builds with the SDK a release is built with.
+          global-json-file: global.json
 
       - name: Install gettext
         shell: pwsh

@@ -81,7 +81,9 @@ internal sealed class MarkdownDownloader: IDisposable {
 
     /// <param name="handler">Sends the requests; tests pass one that never touches the network.</param>
     /// <param name="downloadsFolder">The folder the file is saved into, asked for at each download.</param>
-    /// <param name="timeout">How long the whole download may take; <see langword="null"/> for <see cref="Timeout"/>.</param>
+    /// <param name="timeout">
+    /// How long the whole download may take; <see langword="null"/> for <see cref="Timeout"/>.
+    /// </param>
     internal MarkdownDownloader(HttpMessageHandler handler, Func<string> downloadsFolder, TimeSpan? timeout = null) {
         ArgumentNullException.ThrowIfNull(handler);
         ArgumentNullException.ThrowIfNull(downloadsFolder);
@@ -100,7 +102,9 @@ internal sealed class MarkdownDownloader: IDisposable {
     /// segment of the link, always as Markdown (see <see cref="FileNameFor"/>; <c> (2)</c>,
     /// <c> (3)</c>… when the name is taken, as browsers do), marked as coming from the internet.
     /// </summary>
-    /// <param name="cancellationToken">Cancels the download; an <see cref="OperationCanceledException"/> follows.</param>
+    /// <param name="cancellationToken">
+    /// Cancels the download; an <see cref="OperationCanceledException"/> follows.
+    /// </param>
     /// <returns>Where the file was saved, or why it was not.</returns>
     public async Task<DownloadResult> DownloadAsync(string url, CancellationToken cancellationToken = default) {
         if (!UrlHelper.IsValidHttpUrl(url, out var trimmed)) {
@@ -111,7 +115,7 @@ internal sealed class MarkdownDownloader: IDisposable {
         }
 
         var uri = RewriteGitHubBlob(new Uri(trimmed));
-        Log.Information("Downloading {Url} from {Uri}", trimmed, uri);
+        Log.Information("Downloading {Url} from {Uri}", UrlHelper.ForLog(trimmed), UrlHelper.ForLog(uri));
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(_timeout);
@@ -123,7 +127,10 @@ internal sealed class MarkdownDownloader: IDisposable {
                 .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode) {
-                Log.Warning("Download of {Uri} refused: HTTP {Status}", uri, (int)response.StatusCode);
+                Log.Warning(
+                    "Download of {Uri} refused: HTTP {Status}",
+                    UrlHelper.ForLog(uri), (int)response.StatusCode
+                );
 
                 return DownloadResult.Failed(
                     DownloadFailure.HttpStatus,
@@ -132,13 +139,16 @@ internal sealed class MarkdownDownloader: IDisposable {
             }
 
             if (IsHtmlMediaType(response.Content.Headers.ContentType?.MediaType)) {
-                Log.Warning("Download of {Uri} refused: a web page", uri);
+                Log.Warning("Download of {Uri} refused: a web page", UrlHelper.ForLog(uri));
 
                 return WebPage();
             }
 
             if (response.Content.Headers.ContentLength > MaxSize) {
-                Log.Warning("Download of {Uri} refused: {Length} bytes", uri, response.Content.Headers.ContentLength);
+                Log.Warning(
+                    "Download of {Uri} refused: {Length} bytes",
+                    UrlHelper.ForLog(uri), response.Content.Headers.ContentLength
+                );
 
                 return TooLarge();
             }
@@ -146,14 +156,14 @@ internal sealed class MarkdownDownloader: IDisposable {
             var body = await ReadLimitedAsync(response.Content, timeout.Token).ConfigureAwait(false);
 
             if (body is null) {
-                Log.Warning("Download of {Uri} stopped: over {Max} bytes", uri, MaxSize);
+                Log.Warning("Download of {Uri} stopped: over {Max} bytes", UrlHelper.ForLog(uri), MaxSize);
 
                 return TooLarge();
             }
 
             content = body;
         } catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) {
-            Log.Warning("Download of {Uri} timed out", uri);
+            Log.Warning("Download of {Uri} timed out", UrlHelper.ForLog(uri));
 
             return DownloadResult.Failed(
                 DownloadFailure.Timeout,
@@ -162,14 +172,14 @@ internal sealed class MarkdownDownloader: IDisposable {
         } catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidDataException) {
             // A connection that drops while the body comes in is an IOException (HttpIOException),
             // a corrupt compressed body an InvalidDataException.
-            Log.Warning(ex, "Download of {Uri} failed", uri);
+            Log.Warning(ex, "Download of {Uri} failed", UrlHelper.ForLog(uri));
 
             return DownloadResult.Failed(DownloadFailure.Network, _("The download failed: {0}", ex.Message));
         }
 
         // A web page served as plain text is still a web page.
         if (LooksLikeHtml(content)) {
-            Log.Warning("Download of {Uri} refused: the content is a web page", uri);
+            Log.Warning("Download of {Uri} refused: the content is a web page", UrlHelper.ForLog(uri));
 
             return WebPage();
         }
@@ -179,12 +189,12 @@ internal sealed class MarkdownDownloader: IDisposable {
         try {
             var path = SaveUnique(folder, FileNameFor(uri), content);
             MarkFromInternet(path, uri, new Uri(trimmed));
-            Log.Information("Downloaded {Uri} to {Path} ({Length} bytes)", uri, path, content.Length);
+            Log.Information("Downloaded {Uri} to {Path} ({Length} bytes)", UrlHelper.ForLog(uri), path, content.Length);
 
             return DownloadResult.Saved(path);
         } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
             or NotSupportedException) {
-            Log.Error(ex, "Unable to save the download of {Uri} to {Folder}", uri, folder);
+            Log.Error(ex, "Unable to save the download of {Uri} to {Folder}", UrlHelper.ForLog(uri), folder);
 
             return DownloadResult.Failed(DownloadFailure.Save, _("Unable to save the file to {0}: {1}", folder, ex.Message));
         }

@@ -1,4 +1,5 @@
 using System.Text;
+using Oire.PlanCake.Utils;
 using Serilog;
 
 namespace Oire.PlanCake.Notes;
@@ -36,7 +37,7 @@ internal sealed record MarkdownFileOptions(
 
 /// <summary>
 /// A Markdown file on disk: its text, and how to write it back exactly as it was stored (same
-/// encoding, BOM and line endings), atomically, per Task 5 of the PlanCake plan.
+/// encoding, BOM and line endings), atomically, through a temporary file and <c>File.Replace</c>.
 /// </summary>
 /// <remarks>
 /// A file is decoded from its BOM (UTF-8, UTF-16 LE or BE) or else as strict UTF-8. A file that
@@ -53,6 +54,10 @@ internal sealed class MarkdownFile {
     private static readonly byte[] _utf16LeBom = [0xFF, 0xFE];
     private static readonly byte[] _utf16BeBom = [0xFE, 0xFF];
     private static readonly TimeSpan _defaultRetryDelay = TimeSpan.FromMilliseconds(200);
+
+    // The HRESULTs of ERROR_SHARING_VIOLATION and ERROR_LOCK_VIOLATION.
+    private const int SharingViolation = unchecked((int)0x80070020);
+    private const int LockViolation = unchecked((int)0x80070021);
 
     private static readonly Lazy<Encoding> _systemAnsi = new(() => {
         // Without the provider .NET only knows the Unicode encodings; code page 0 is the system's
@@ -131,11 +136,50 @@ internal sealed class MarkdownFile {
     }
 
     /// <summary>
+    /// Reads the file at <paramref name="path"/> without writing it, even when
+    /// <see cref="MarkdownFileOptions.ConvertToUtf8"/> says to convert it: a file read in the
+    /// background is converted only once the caller takes it, with <see cref="ConvertToUtf8"/>.
+    /// Every later <see cref="Reload"/> follows the options.
+    /// </summary>
+    /// <exception cref="IOException">The file cannot be read, even after the retries.</exception>
+    public static MarkdownFile OpenWithoutConverting(string path, MarkdownFileOptions? options = null) {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        var file = new MarkdownFile(System.IO.Path.GetFullPath(path), options ?? MarkdownFileOptions.Default);
+        file.Load(convert: false);
+
+        return file;
+    }
+
+    /// <summary>
+    /// True when the options say to convert the file and it was read without converting it
+    /// (<see cref="OpenWithoutConverting"/>), although a legacy encoding decodes it cleanly.
+    /// </summary>
+    public bool NeedsConversion => _options.ConvertToUtf8 && IsReadOnly && !IsUnrecognized && !ConversionFailed;
+
+    /// <summary>
+    /// Converts a file <see cref="OpenWithoutConverting"/> left as it was (see
+    /// <see cref="NeedsConversion"/>): reads it again and converts it as <see cref="Reload"/> does,
+    /// so what is written is what the file holds now, not what was read before. Does nothing when
+    /// it needs no conversion.
+    /// </summary>
+    /// <returns>
+    /// The file's text, which differs from <see cref="Text"/> before the call when the file changed
+    /// on disk meanwhile.
+    /// </returns>
+    /// <exception cref="IOException">The file cannot be read, even after the retries.</exception>
+    public string ConvertToUtf8() => NeedsConversion ? Reload() : Text;
+
+    /// <summary>
     /// Reads the file again, detecting its encoding and line ending afresh (converting it when it
     /// is not valid in its encoding and the options say so), and returns its text.
     /// </summary>
     /// <exception cref="IOException">The file cannot be read, even after the retries.</exception>
-    public string Reload() {
+    public string Reload() => Load(_options.ConvertToUtf8);
+
+    /// <inheritdoc cref="Reload"/>
+    /// <param name="convert">Convert a file that is not valid in its encoding to UTF-8.</param>
+    private string Load(bool convert) {
         var bytes = WithRetries(() => ReadAllBytes(Path));
         var ansi = _options.AnsiEncoding ?? _systemAnsi.Value;
         var decoded = Decode(bytes, ansi, _options.DocumentLanguage);
@@ -151,7 +195,7 @@ internal sealed class MarkdownFile {
         ConversionFailed = false;
 
         // Never a lossy decode: the replacement characters would be written over the original bytes.
-        if (decoded.IsFallback && !decoded.IsLossy && _options.ConvertToUtf8) {
+        if (decoded.IsFallback && !decoded.IsLossy && convert) {
             ConvertedFrom = decoded.Encoding;
             Encoding = new UTF8Encoding(false);
             HasBom = false;
@@ -191,7 +235,7 @@ internal sealed class MarkdownFile {
         body.CopyTo(bytes, preamble.Length);
 
         WithRetries(() => {
-            WriteAtomically(Path, bytes);
+            WriteFile(Path, bytes);
 
             return true;
         });
@@ -199,7 +243,10 @@ internal sealed class MarkdownFile {
         Text = text;
     }
 
-    /// <summary>Throws when the file is never written (<see cref="IsReadOnly"/> or <see cref="IsUnrecognized"/>).</summary>
+    /// <summary>
+    /// Throws when the file is never written (<see cref="IsReadOnly"/> or
+    /// <see cref="IsUnrecognized"/>).
+    /// </summary>
     /// <exception cref="ReadOnlyFileException">The file is read-only.</exception>
     public void EnsureWritable() {
         if (IsReadOnly || IsUnrecognized) {
@@ -210,7 +257,10 @@ internal sealed class MarkdownFile {
     }
 
     /// <summary>The result of decoding a file's bytes.</summary>
-    /// <param name="IsFallback">True when the bytes were not valid in their Unicode encoding and were decoded with a legacy one.</param>
+    /// <param name="IsFallback">
+    /// True when the bytes were not valid in their Unicode encoding and were decoded with a legacy
+    /// one.
+    /// </param>
     /// <param name="IsLossy">
     /// True when no encoding decoded them without loss: the text holds replacement characters.
     /// </param>
@@ -313,6 +363,40 @@ internal sealed class MarkdownFile {
         return memory.ToArray();
     }
 
+    /// <summary>
+    /// Writes the file a symbolic link points to rather than the link: replacing the link itself
+    /// fails, and would turn it into a plain file. A file with more than one name (a hard link) is
+    /// written in place, since replacing it would give this name a new file and leave the other
+    /// names with the old text; the write is then not atomic, but the caller has just checked the
+    /// file still holds the text it rendered. Every other file is written through a temporary file.
+    /// </summary>
+    private static void WriteFile(string path, byte[] bytes) {
+        var target = FinalTarget(path);
+
+        if (FileIdentity.LinkCount(target) > 1) {
+            WriteInPlace(target, bytes);
+        } else {
+            WriteAtomically(target, bytes);
+        }
+    }
+
+    /// <summary>The file a symbolic link at <paramref name="path"/> leads to, or the path itself.</summary>
+    private static string FinalTarget(string path) {
+        try {
+            return new FileInfo(path).ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? path;
+        } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
+            // Gone since it was read: written anew at its own path.
+            return path;
+        }
+    }
+
+    private static void WriteInPlace(string path, byte[] bytes) {
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.Read);
+        stream.Write(bytes);
+        stream.SetLength(bytes.Length);
+        stream.Flush(true);
+    }
+
     private static void WriteAtomically(string path, byte[] bytes) {
         var folder = System.IO.Path.GetDirectoryName(path) ?? ".";
         var temp = System.IO.Path.Combine(folder, $".{System.IO.Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
@@ -337,7 +421,8 @@ internal sealed class MarkdownFile {
 
     /// <summary>
     /// Runs <paramref name="action"/>, retrying it while the file is locked; after the last retry
-    /// the failure is thrown as an <see cref="IOException"/>. A missing file is not retried.
+    /// the failure is thrown as an <see cref="IOException"/>. Only what can pass is retried (see
+    /// <see cref="IsRetryable"/>); anything else fails at once.
     /// </summary>
     private T WithRetries<T>(Func<T> action) {
         var delay = _options.RetryDelay ?? _defaultRetryDelay;
@@ -345,7 +430,7 @@ internal sealed class MarkdownFile {
         for (var attempt = 0; ; attempt++) {
             try {
                 return action();
-            } catch (Exception ex) when (IsRetryable(ex) && attempt < _options.Retries) {
+            } catch (Exception ex) when (attempt < _options.Retries && IsRetryable(ex, Path)) {
                 _options.OnRetry?.Invoke(attempt);
                 Thread.Sleep(delay);
             } catch (UnauthorizedAccessException ex) {
@@ -354,7 +439,26 @@ internal sealed class MarkdownFile {
         }
     }
 
-    private static bool IsRetryable(Exception ex) =>
-        ex is UnauthorizedAccessException
-        || ex is IOException and not (FileNotFoundException or DirectoryNotFoundException);
+    /// <summary>
+    /// True for a failure that can pass: another program holding the file open or locked (a
+    /// sharing or lock violation), or access denied to a file that is neither read-only nor a
+    /// folder, which is how an antivirus scanner holding the file looks. Access denied to a
+    /// read-only file or to a folder, a missing file, and every other error stay as they are.
+    /// </summary>
+    internal static bool IsRetryable(Exception ex, string path) => ex switch {
+        IOException io => io.HResult is SharingViolation or LockViolation,
+        UnauthorizedAccessException => IsPlainWritableFile(path),
+        _ => false,
+    };
+
+    private static bool IsPlainWritableFile(string path) {
+        try {
+            var attributes = File.GetAttributes(path);
+
+            return (attributes & (FileAttributes.Directory | FileAttributes.ReadOnly)) == 0;
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
+                                         or NotSupportedException) {
+            return false;
+        }
+    }
 }

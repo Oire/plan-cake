@@ -26,4 +26,18 @@ public class AppConstantsTests {
         // user data does not take the settings with it.
         Path.GetDirectoryName(App.ConfigPath).Should().Be(App.DataFolder);
     }
+
+    [Fact]
+    public void WebView2DataFolder_IsLocalUnlessPortable() {
+        // A browser cache does not belong in the roaming profile.
+        var expectedRoot = App.IsPortable
+            ? App.DataFolder
+            : Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                App.ManufacturerNameShort,
+                App.Name
+            );
+
+        App.WebView2DataFolder.Should().Be(Path.Combine(expectedRoot, "WebView2"));
+    }
 }
