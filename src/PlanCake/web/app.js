@@ -324,6 +324,7 @@
         focusElement(next);
     }
 
+    // The empty window: what it is, and how to open a file (keys from the host's own table).
     function showNoDocument() {
         main.textContent = "";
         main.removeAttribute("lang");
@@ -332,6 +333,18 @@
             const paragraph = document.createElement("p");
             paragraph.textContent = strings.noDocument;
             main.append(paragraph);
+        }
+
+        if (Array.isArray(strings.noDocumentHints) && strings.noDocumentHints.length > 0) {
+            const list = document.createElement("ul");
+
+            strings.noDocumentHints.forEach(function (hint) {
+                const item = document.createElement("li");
+                item.textContent = hint;
+                list.append(item);
+            });
+
+            main.append(list);
         }
     }
 

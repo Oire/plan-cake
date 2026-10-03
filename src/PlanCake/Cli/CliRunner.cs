@@ -252,7 +252,9 @@ internal sealed class CliRunner {
             }
 
             if (markdown.ConvertedFrom is { } convertedFrom) {
-                WriteLine(_output, _("Converted from {0} to UTF-8.", LegacyEncoding.DisplayName(convertedFrom)));
+                WriteLine(
+                    _output, _("The file was converted from {0} to UTF-8.", LegacyEncoding.DisplayName(convertedFrom))
+                );
             }
 
             var parse = NoteParser.Parse(markdown.Text, noteMarkers);
@@ -297,7 +299,7 @@ internal sealed class CliRunner {
             }
 
             Log.Information("CLI: clear {Path}: {Count} notes removed", markdown.Path, parse.Notes.Count);
-            WriteLine(_output, _n("Removed {0} note.", "Removed {0} notes.", parse.Notes.Count, parse.Notes.Count));
+            WriteLine(_output, _n("Removed {0} note", "Removed {0} notes", parse.Notes.Count, parse.Notes.Count));
 
             return ExitCode.Success;
         });

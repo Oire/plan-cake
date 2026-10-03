@@ -67,6 +67,18 @@ public class TextDirectionTests: IDisposable {
     }
 
     [Fact]
+    public void PageChrome_EmptyWindowHints_NameTheKeysOfTheHostTable() {
+        var strings = MainWindow.PageStrings();
+
+        strings.NoDocumentHints.Should().Equal(
+            "To open a Markdown file, press Ctrl+O.",
+            "To open one from a link, press Ctrl+L.",
+            "You can also drag a Markdown file here.",
+            "For the user manual, press F1."
+        );
+    }
+
+    [Fact]
     public void Windows_CoverEveryFormOfTheApplication() {
         var built = new List<Type>();
 
@@ -89,6 +101,7 @@ public class TextDirectionTests: IDisposable {
         new MainWindow(),
         new NoteDialog(NoteDialogMode.Edit, "Excerpt", "Text", _ => null, NoteEnterAction.Save),
         new OpenLinkDialog(),
+        new OpeningDialog("plan.md", Task.CompletedTask),
         new SettingsDialog(),
         new AboutDialog(),
         new ShortcutsDialog(ShortcutsDialog.BuildRows()),

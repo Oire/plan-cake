@@ -51,6 +51,9 @@ internal static partial class MarkdownRenderer {
     /// <summary>The longest a <see cref="BlockInfo.Excerpt"/> gets, ellipsis included.</summary>
     public const int ExcerptLength = 80;
 
+    /// <summary>The longest <see cref="FirstSentence"/> gets, ellipsis included.</summary>
+    public const int SentenceLength = 120;
+
     /// <summary>
     /// The content security policy of an exported file: no script at all, no form that sends
     /// anywhere and no <c>&lt;base&gt;</c> that moves the plan's relative links.
@@ -119,7 +122,7 @@ internal static partial class MarkdownRenderer {
         walker.Walk(document);
 
         var notes = InsertNotes(document, parse.Notes, walker.Blocks, options);
-        var body = ToHtml(document, options.Mode, FindMixedTasks(document));
+        var body = ToHtml(document, options.Mode, FindMixedTasks(document), walker.TaskLabels);
         var title = walker.Title;
         var html = options.Mode == RenderMode.Export
             ? ExportDocument(body, title ?? options.FallbackTitle, options.DocumentLanguage)
@@ -185,14 +188,19 @@ internal static partial class MarkdownRenderer {
         return neutralized;
     }
 
-    private static string ToHtml(MarkdownDocument document, RenderMode mode, IReadOnlySet<TaskList> mixedTasks) {
+    private static string ToHtml(
+        MarkdownDocument document,
+        RenderMode mode,
+        IReadOnlySet<TaskList> mixedTasks,
+        IReadOnlyDictionary<TaskList, string> taskLabels
+    ) {
         using var writer = new StringWriter(CultureInfo.InvariantCulture);
         var renderer = new HtmlRenderer(writer);
         _pipeline.Setup(renderer);
 
         // The window's task-list check boxes can be toggled (Task 7a); an exported file's stay
         // disabled, as Markdig renders them. Both show a partially checked parent.
-        renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListRenderer(mode, mixedTasks));
+        renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListRenderer(mode, mixedTasks, taskLabels));
 
         // The block's attributes (data-lines, dir) belong on the <pre> the user lands on, not on
         // the <code> inside it.
@@ -421,9 +429,16 @@ internal static partial class MarkdownRenderer {
     /// done item carries <c>data-mixed</c>, which the page turns into the check box's
     /// <c>indeterminate</c> state. In an exported file it stays disabled as Markdig renders it,
     /// and a partially done item gets <c>aria-checked="mixed"</c>, since no script runs there.
+    /// Both carry the item's text as their <c>aria-label</c>: an input takes no name from the text
+    /// after it, and a screen reader that focuses the check box (after a toggle, in forms mode)
+    /// would say only "check box". Not a <c>&lt;label&gt;</c> around the text, which would make a
+    /// click on the text toggle the task instead of adding a note.
     /// </summary>
-    private sealed class TaskListRenderer(RenderMode mode, IReadOnlySet<TaskList> mixedTasks)
-        : HtmlObjectRenderer<TaskList> {
+    private sealed class TaskListRenderer(
+        RenderMode mode,
+        IReadOnlySet<TaskList> mixedTasks,
+        IReadOnlyDictionary<TaskList, string> labels
+    ): HtmlObjectRenderer<TaskList> {
         protected override void Write(HtmlRenderer renderer, TaskList obj) {
             if (!renderer.EnableHtmlForInline) {
                 renderer.Write(obj.Checked ? "[x]" : "[ ]");
@@ -444,6 +459,10 @@ internal static partial class MarkdownRenderer {
                 if (mixed) {
                     renderer.Write(" aria-checked=\"mixed\"");
                 }
+            }
+
+            if (labels.TryGetValue(obj, out var label) && label.Length > 0) {
+                renderer.Write($" aria-label=\"{HtmlEncode(label)}\"");
             }
 
             if (obj.Checked) {
@@ -512,24 +531,85 @@ internal static partial class MarkdownRenderer {
 
     /// <summary>
     /// Makes a one-line excerpt of <paramref name="text"/>: whitespace runs become one space, and
-    /// text longer than <see cref="ExcerptLength"/> is cut to fit with an ellipsis.
+    /// text longer than <see cref="ExcerptLength"/> is cut to fit at the end of a word, with an
+    /// ellipsis.
     /// </summary>
-    internal static string Excerpt(string text) {
-        var line = String.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+    internal static string Excerpt(string text) => Shorten(OneLine(text), ExcerptLength);
 
-        if (line.Length <= ExcerptLength) {
+    /// <summary>
+    /// The first sentence of <paramref name="text"/> on one line, for a cell that shows the start
+    /// of a note: up to the first full stop, question mark, exclamation mark or ellipsis followed by
+    /// a space and not by a lowercase letter (so <c>e.g. this</c> goes on), with any closing quote
+    /// or bracket after it. A text without such an end is a sentence of its own. A sentence longer
+    /// than <see cref="SentenceLength"/> is cut at the end of a word, with an ellipsis.
+    /// </summary>
+    internal static string FirstSentence(string text) {
+        var line = OneLine(text);
+        var end = SentenceEnd(line);
+
+        return Shorten(end < 0 ? line : line[..end], SentenceLength);
+    }
+
+    /// <summary>The text on one line: every run of whitespace becomes one space, none at either end.</summary>
+    internal static string OneLine(string text) =>
+        String.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+
+    /// <summary>
+    /// <paramref name="line"/> cut to at most <paramref name="maxLength"/> characters, ellipsis
+    /// included: at the last space that leaves at least half of it, so no word is cut in two; a
+    /// single word longer than that (a link, say) is cut where it must, never inside a surrogate pair.
+    /// </summary>
+    private static string Shorten(string line, int maxLength) {
+        if (line.Length <= maxLength) {
             return line;
         }
 
-        var cut = ExcerptLength - 1;
+        var limit = maxLength - 1;
 
-        // Never split a surrogate pair.
-        if (Char.IsHighSurrogate(line[cut - 1])) {
-            cut--;
+        if (Char.IsHighSurrogate(line[limit - 1])) {
+            limit--;
         }
+
+        // A space at the limit itself means the word before it ends there.
+        var space = line.LastIndexOf(' ', limit);
+        var cut = space >= limit / 2 ? space : limit;
 
         return String.Concat(line.AsSpan(0, cut).TrimEnd(), "…");
     }
+
+    /// <summary>
+    /// Where the first sentence of <paramref name="line"/> ends (see <see cref="FirstSentence"/>), or -1.
+    /// </summary>
+    private static int SentenceEnd(string line) {
+        for (var i = 0; i < line.Length; i++) {
+            if (!IsSentenceEnd(line[i])) {
+                continue;
+            }
+
+            var end = i + 1;
+
+            while (end < line.Length && (IsSentenceEnd(line[end]) || IsClosing(line[end]))) {
+                end++;
+            }
+
+            // The full stops of Chinese and Japanese take no space after them.
+            if (line[i] is '。' or '！' or '？') {
+                return end;
+            }
+
+            if (end + 1 < line.Length && line[end] == ' ' && !Char.IsLower(line[end + 1])) {
+                return end;
+            }
+
+            i = end - 1;
+        }
+
+        return -1;
+    }
+
+    private static bool IsSentenceEnd(char c) => c is '.' or '!' or '?' or '…' or '。' or '！' or '？';
+
+    private static bool IsClosing(char c) => c is '"' or '\'' or ')' or ']' or '»' or '”' or '’' or '“';
 
     /// <summary>
     /// Walks the syntax tree, stamps every block with <c>dir="auto"</c> and every annotatable block
@@ -550,9 +630,17 @@ internal static partial class MarkdownRenderer {
                 EnableHtmlEscape = false,
             };
             _pipeline.Setup(_plainRenderer);
+
+            // Markdig writes a footnote link as HTML whatever the renderer's settings: the back
+            // link at the end of a footnote and a reference in the text would show as markup in
+            // an excerpt, the copied text and the command line's output.
+            _plainRenderer.ObjectRenderers.Replace<HtmlFootnoteLinkRenderer>(new PlainFootnoteLinkRenderer());
         }
 
         public List<Annotatable> Blocks { get; } = [];
+
+        /// <summary>The text of each task-list item, without its marker, for its check box's name.</summary>
+        public Dictionary<TaskList, string> TaskLabels { get; } = new(ReferenceEqualityComparer.Instance);
 
         public string? Title { get; private set; }
 
@@ -575,7 +663,12 @@ internal static partial class MarkdownRenderer {
                     // carries the range; the <p> of a loose list gets the same one. Nested lists
                     // after the paragraph get their own.
                     SetDirection(lead);
-                    Add(BlockKind.ListItem, lead, PlainText(lead), item);
+                    var itemText = PlainText(lead);
+                    Add(BlockKind.ListItem, lead, itemText, item);
+
+                    if (TaskOf(item) is { } task) {
+                        TaskLabels[task] = TaskToggle.WithoutMarker(Excerpt(itemText));
+                    }
 
                     for (var i = 1; i < item.Count; i++) {
                         Visit(item[i]);
@@ -627,6 +720,18 @@ internal static partial class MarkdownRenderer {
         }
 
         private static void SetDirection(Block block) => block.GetAttributes().AddPropertyIfNotExist("dir", "auto");
+
+        /// <summary>
+        /// A footnote link in plain text: the reference as its number in brackets, the back link
+        /// at the end of a footnote as nothing.
+        /// </summary>
+        private sealed class PlainFootnoteLinkRenderer: HtmlObjectRenderer<FootnoteLink> {
+            protected override void Write(HtmlRenderer renderer, FootnoteLink obj) {
+                if (!obj.IsBackLink) {
+                    renderer.Write(String.Create(CultureInfo.InvariantCulture, $"[{obj.Footnote.Order}]"));
+                }
+            }
+        }
 
         private string PlainText(LeafBlock block) {
             _plainWriter.GetStringBuilder().Clear();

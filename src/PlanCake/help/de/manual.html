@@ -373,6 +373,7 @@ footer {
 <h2 id="main-window">Das Hauptfenster</h2>
 <p>Das Fenster hat oben eine Menüleiste, links das Dokument, rechts die Notizliste und ganz unten eine Statusleiste. Die Titelleiste zeigt den Namen der geöffneten Datei, zum Beispiel <strong>plan.md - PlanCake</strong>.</p>
 <p>Um dem Dokument oder der Notizliste mehr Platz zu geben, ziehen Sie die Trennlinie zwischen ihnen. Über die Tastatur wählen Sie <strong>Notizliste verbreitern</strong> oder <strong>Notizliste verschmälern</strong> im Menü <strong>Ansicht</strong>: Jeder Befehl verschiebt die Trennlinie um ein Zehntel der Breite, die sich beide teilen, auf eine runde Zahl – aus 32 Prozent wird die Liste zum Beispiel 40 Prozent breit, oder 30 Prozent. Die Statusleiste nennt den neuen Anteil, etwa „Notizliste 40 %“. Keine Seite kann wegschrumpfen: Die Liste bleibt mindestens etwa 150 Pixel breit und das Dokument etwa 200. An dieser Grenze bleibt die Trennlinie stehen, und die Statusleiste wiederholt den aktuellen Anteil. Beide Befehle sind nicht verfügbar, während die Notizliste ausgeblendet ist.</p>
+<p>PlanCake merkt sich Größe und Position des Fensters, ob es maximiert war, die Breite der Notizliste und den Zoom: Das nächste Fenster öffnet sich genauso, auf einem Bildschirm, der noch angeschlossen ist. Das allererste Fenster passt sich an den Bildschirm an, auf dem es sich öffnet.</p>
 
 <h3 id="document-view">Das Dokument</h3>
 <p>Das ist Ihre Markdown-Datei, formatiert. Wenn PlanCake eine Datei öffnet, beginnt es ganz oben. Auch Ihre Notizen erscheinen im Dokument, jeweils direkt nach dem Block, zu dem sie gehören, und optisch vom Text des Plans abgesetzt, damit Sie auf einen Blick sehen, was von Ihnen stammt.</p>
@@ -380,12 +381,12 @@ footer {
 <h3 id="notes-list">Die Notizliste</h3>
 <p>Die Notizliste versammelt jede Notiz der Datei an einem Ort, in der Reihenfolge, in der sie vorkommen. Sie hat drei Spalten:</p>
 <dl>
+<dt>Notiz</dt>
+<dd>Der erste Satz der Notiz in einer Zeile, ohne Markdown-Zeichensetzung. Die Spalte nimmt die ganze Breite ein, die die beiden anderen lassen. Lassen Sie den Mauszeiger auf einer Zeile ruhen, um die ganze Notiz zu sehen.</dd>
 <dt>Zeilen</dt>
 <dd>Wo die Notiz in der Datei steht: <code>12</code> für eine einzeilige Notiz, <code>12-14</code> für eine längere.</dd>
 <dt>Block</dt>
 <dd>Der Anfang des Blocks, auf den die Notiz folgt, damit Sie wissen, worum es geht, ohne dorthin zu gehen.</dd>
-<dt>Notiz</dt>
-<dd>Der Text der Notiz in einer Zeile, ohne Markdown-Zeichensetzung.</dd>
 </dl>
 <p>Um im Dokument zu einer Notiz zu springen, drücken Sie <kbd>Eingabe</kbd> auf ihrer Zeile oder doppelklicken Sie sie; der Fokus springt zur Notiz. Um eine Notiz zu löschen, wählen Sie sie aus und drücken <kbd>Entf</kbd>; die Auswahl springt dann zur nächstgelegenen verbleibenden Notiz, sodass Sie Ihre Stelle in der Liste nie verlieren. Klicken Sie eine Zeile mit der rechten Maustaste an, oder drücken Sie die <kbd>Anwendungstaste</kbd> oder <kbd>Umschalt+F10</kbd>, für ein Menü mit <strong>Notiz bearbeiten</strong> und <strong>Notiz löschen</strong>.</p>
 <p>Wenn Sie lieber das ganze Fenster für das Dokument hätten, wählen Sie <strong>Notizliste</strong> im Menü <strong>Ansicht</strong>. Das blendet die Liste aus, und erneutes Wählen zeigt sie wieder; die Statusleiste zeigt „Notizliste ausgeblendet“ oder „Notizliste eingeblendet“. PlanCake merkt sich die Wahl: Es ist dieselbe Einstellung wie <strong>Notizliste anzeigen</strong> in den <a href="#settings-general">Einstellungen</a>, sodass neue Fenster genauso öffnen und andere offene Fenster folgen, sobald Sie zu ihnen wechseln.</p>
@@ -417,6 +418,7 @@ footer {
 <article aria-labelledby="opening-files">
 <h2 id="opening-files">Eine Datei öffnen</h2>
 <p>Pläne erreichen Sie auf viele Arten: eine Datei auf der Festplatte, ein Pfad, den jemand in einen Chat eingefügt hat, ein Link zu GitHub. PlanCake kann alle davon direkt öffnen, ohne dass Sie zuvor etwas speichern müssen. Auf welche Weise auch immer Sie vorgehen, eine neu geöffnete Datei beginnt immer ganz oben.</p>
+<p>Wenn keine Datei geöffnet ist, zählt das Fenster die Wege auf, eine zu öffnen, mit ihren Tasten. Eine große Datei kann einen Moment zum Öffnen brauchen: Dauert es länger als eine halbe Sekunde oder ist die Datei größer als 1 MB, zeigt PlanCake den Dialog <strong>Datei wird geöffnet</strong> mit einer Fortschrittsanzeige. Drücken Sie <kbd>Esc</kbd> oder klicken Sie auf <strong>Abbrechen</strong>, um das Öffnen abzubrechen; die zuvor geöffnete Datei bleibt, wie sie war.</p>
 
 <h3 id="open-command-line">Über die Befehlszeile</h3>
 <p>Geben Sie <code>plancake</code> gefolgt von der Datei ein:</p>
@@ -470,7 +472,7 @@ footer {
 <p>Eine Datei auf jede andere Weise zu öffnen – mit <kbd>Strg+O</kbd>, per Ziehen, aus der Zwischenablage, über einen Link – fügt sie ebenfalls zum Verlauf hinzu, sodass <strong>Zurück</strong> Sie immer zu dem zurückbringt, was Sie zuvor gelesen haben.</p>
 
 <h3 id="zoom">Zoomen</h3>
-<p>Um den Text größer zu machen, drücken Sie <kbd>Strg+Plus</kbd>; um ihn kleiner zu machen, drücken Sie <kbd>Strg+Minus</kbd>. Die Tasten auf dem Ziffernblock funktionieren ebenfalls, ebenso wie <strong>Vergrößern</strong> und <strong>Verkleinern</strong> im Menü <strong>Ansicht</strong>. Jeder Schritt ändert die Größe um 10 Prozent, zwischen 50 und 300 Prozent, und die Statusleiste zeigt die neue Größe, zum Beispiel „Zoom 120 %“. Drücken Sie <kbd>Strg+0</kbd>, um zu 100 Prozent zurückzukehren.</p>
+<p>Um den Text größer zu machen, drücken Sie <kbd>Strg+Plus</kbd>; um ihn kleiner zu machen, drücken Sie <kbd>Strg+Minus</kbd>. Die Tasten auf dem Ziffernblock funktionieren ebenfalls, ebenso wie <strong>Vergrößern</strong> und <strong>Verkleinern</strong> im Menü <strong>Ansicht</strong>. Jeder Schritt ändert die Größe um 10 Prozent, zwischen 50 und 300 Prozent, und die Statusleiste zeigt die neue Größe, zum Beispiel „Zoom 120 %“. Drücken Sie <kbd>Strg+0</kbd>, um zu 100 Prozent zurückzukehren. Das nächste Fenster, das Sie öffnen, beginnt mit demselben Zoom.</p>
 
 <h3 id="document-language">Die Sprache des Dokuments</h3>
 <p>PlanCake hält zwei Sprachen auseinander: die Sprache seiner Menüs und Dialoge, und die Sprache, in der das Dokument geschrieben ist. Die Oberfläche auf Französisch umzustellen macht einen englischen Plan nicht französisch. Die Dokumentsprache ist wichtig, wenn der Plan vorgelesen wird (siehe <a href="#screen-readers">Einen Screenreader verwenden</a>) und hilft PlanCake, alte Dateicodierungen zu erkennen (siehe <a href="#encodings">Dateien, die nicht in UTF-8 vorliegen</a>).</p>
@@ -482,7 +484,7 @@ footer {
 
 <h3 id="adding-note">Eine Notiz hinzufügen</h3>
 <ol>
-<li>Klicken Sie den Absatz, die Überschrift, das Listenelement, die Tabellenzeile oder den Codeblock an, den Sie kommentieren möchten. Von der Tastatur aus bewegen Sie sich mit <kbd>Alt+Umschalt+Nach-unten</kbd> oder <kbd>Alt+Umschalt+Nach-oben</kbd> dorthin (siehe <a href="#reading-basics">Sich im Dokument bewegen</a>) und drücken <kbd>Eingabe</kbd>. Der Dialog <strong>Notiz hinzufügen</strong> öffnet sich. Er zeigt den Anfang des Blocks unter <strong>Notiz zu</strong>, damit Sie prüfen können, ob Sie den richtigen ausgewählt haben, und setzt den Cursor in das Feld <strong>Notiz</strong>.</li>
+<li>Klicken Sie den Absatz, die Überschrift, das Listenelement, die Tabellenzeile oder den Codeblock an, den Sie kommentieren möchten. Der Block unter dem Mauszeiger wird hervorgehoben, sodass Sie sehen, welchem Block ein Klick eine Notiz hinzufügt. Von der Tastatur aus bewegen Sie sich mit <kbd>Alt+Umschalt+Nach-unten</kbd> oder <kbd>Alt+Umschalt+Nach-oben</kbd> dorthin (siehe <a href="#reading-basics">Sich im Dokument bewegen</a>) und drücken <kbd>Eingabe</kbd>. Der Dialog <strong>Notiz hinzufügen</strong> öffnet sich. Er zeigt den Anfang des Blocks unter <strong>Notiz zu</strong>, damit Sie prüfen können, ob Sie den richtigen ausgewählt haben, und setzt den Cursor in das Feld <strong>Notiz</strong>.</li>
 <li>Tippen Sie Ihre Notiz. Um darin eine neue Zeile zu beginnen, drücken Sie <kbd>Strg+Eingabe</kbd>.</li>
 <li>Drücken Sie <kbd>Eingabe</kbd> oder klicken Sie auf <strong>OK</strong>, um zu speichern; drücken Sie <kbd>Esc</kbd> oder klicken Sie auf <strong>Abbrechen</strong>, um abzubrechen. <strong>OK</strong> bleibt nicht verfügbar, solange das Feld leer ist.</li>
 </ol>
@@ -545,7 +547,7 @@ footer {
 <article aria-labelledby="encodings">
 <h2 id="encodings">Dateien, die nicht in UTF-8 vorliegen</h2>
 <p>Fast jede Markdown-Datei liegt heute in UTF-8 vor. Ältere Dateien, besonders in Sprachen wie Russisch oder Hebräisch, sind manchmal stattdessen in einer veralteten Windows-Codierung gespeichert. PlanCake öffnet und zeigt sie korrekt an, schreibt aber standardmäßig nicht in sie: Die Datei öffnet sich schreibgeschützt, und PlanCake sagt Ihnen das und nennt die Codierung, zum Beispiel „Diese Datei ist nicht in UTF-8 und wurde daher schreibgeschützt als Windows-1251 geöffnet. Notizen können nicht hinzugefügt werden. Um sie in UTF-8 zu konvertieren, aktivieren Sie in den Einstellungen das Konvertieren von Dateien, die nicht in UTF-8 vorliegen.“</p>
-<p>Um solchen Dateien Notizen hinzuzufügen, schalten Sie <strong>Dateien, die nicht in UTF-8 vorliegen, beim Öffnen in UTF-8 (ohne BOM) konvertieren</strong> in den <a href="#settings-advanced">erweiterten Einstellungen</a> ein. PlanCake konvertiert dann jede solche Datei in dem Moment, in dem Sie sie öffnen, nach UTF-8 und sagt Ihnen zum Beispiel „Von Windows-1251 in UTF-8 konvertiert.“ Nur die Codierung ändert sich; der Text und die Zeilenenden bleiben gleich.</p>
+<p>Um solchen Dateien Notizen hinzuzufügen, schalten Sie <strong>Dateien, die nicht in UTF-8 vorliegen, beim Öffnen in UTF-8 (ohne BOM) konvertieren</strong> in den <a href="#settings-advanced">erweiterten Einstellungen</a> ein. PlanCake konvertiert dann jede solche Datei in dem Moment, in dem Sie sie öffnen, nach UTF-8 und sagt Ihnen zum Beispiel „Die Datei wurde von Windows-1251 in UTF-8 konvertiert.“ Nur die Codierung ändert sich; der Text und die Zeilenenden bleiben gleich.</p>
 <p>Manchmal kann PlanCake nicht sicher sagen, welche Codierung eine Datei verwendet. Eine solche Datei bleibt immer schreibgeschützt, egal was die Einstellung sagt: „Die Codierung dieser Datei konnte nicht erkannt werden, daher wurde sie schreibgeschützt geöffnet und wird nie geändert. Notizen können nicht hinzugefügt werden.“ Das ist eine feste Regel. Eine Datei zu schreiben, die nicht korrekt gelesen wurde, würde die Zeichen zerstören, die PlanCake nicht entziffern konnte, und das tut PlanCake nie.</p>
 <p>Die Einstellung <strong>Dokumentsprache</strong> ist einer der Hinweise, die PlanCake zur Erkennung einer veralteten Codierung nutzt; sie auf die Sprache Ihrer alten Dateien einzustellen, hilft also.</p>
 </article>
@@ -633,7 +635,7 @@ footer {
 
 <h3 id="cli-clear">Alle Notizen entfernen</h3>
 <pre><code>plancake clear plan.md</code></pre>
-<p>Das entfernt jede Notiz aus der Datei und gibt aus, wie viele entfernt wurden, zum Beispiel <code>2 Notizen entfernt.</code> Bei einer Datei in einer veralteten Codierung folgt <code>clear</code> der <a href="#settings-advanced">Konvertierungseinstellung</a>: Ist die Konvertierung ausgeschaltet, oder kann die Codierung nicht erkannt werden, weigert es sich, eine Datei zu ändern, die Notizen enthält, und erklärt, warum. Fügen Sie <code>--convert</code> hinzu, um eine solche Datei für diesen Aufruf unabhängig von der Einstellung in UTF-8 zu konvertieren; eine Datei, deren Codierung nicht erkannt werden kann, wird weiterhin nie geändert.</p>
+<p>Das entfernt jede Notiz aus der Datei und gibt aus, wie viele entfernt wurden, zum Beispiel <code>2 Notizen entfernt</code>. Bei einer Datei in einer veralteten Codierung folgt <code>clear</code> der <a href="#settings-advanced">Konvertierungseinstellung</a>: Ist die Konvertierung ausgeschaltet, oder kann die Codierung nicht erkannt werden, weigert es sich, eine Datei zu ändern, die Notizen enthält, und erklärt, warum. Fügen Sie <code>--convert</code> hinzu, um eine solche Datei für diesen Aufruf unabhängig von der Einstellung in UTF-8 zu konvertieren; eine Datei, deren Codierung nicht erkannt werden kann, wird weiterhin nie geändert.</p>
 <pre><code>plancake clear old-plan.md --convert</code></pre>
 
 <h3 id="cli-export">Nach HTML exportieren</h3>
@@ -748,7 +750,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <article aria-labelledby="menus">
 <h2 id="menus">Menüreferenz</h2>
-<p>Klicken Sie einen Menünamen an, drücken Sie <kbd>Alt</kbd>, um die Menüleiste zu erreichen, oder öffnen Sie ein Menü direkt: <kbd>Alt+D</kbd> für Datei, <kbd>Alt+B</kbd> für Bearbeiten, <kbd>Alt+A</kbd> für Ansicht, <kbd>Alt+N</kbd> für Notizen, <kbd>Alt+H</kbd> für Hilfe. Befehle, die gerade nicht zutreffen — <strong>Rückgängig</strong>, wenn es nichts rückgängig zu machen gibt, <strong>Nächste Notiz</strong> in einer Datei ohne Notizen —, sind nicht verfügbar.</p>
+<p>Klicken Sie einen Menünamen an, drücken Sie <kbd>Alt</kbd> oder <kbd>F10</kbd>, um die Menüleiste zu erreichen, oder öffnen Sie ein Menü direkt: <kbd>Alt+D</kbd> für Datei, <kbd>Alt+B</kbd> für Bearbeiten, <kbd>Alt+A</kbd> für Ansicht, <kbd>Alt+N</kbd> für Notizen, <kbd>Alt+H</kbd> für Hilfe. Befehle, die gerade nicht zutreffen — <strong>Rückgängig</strong>, wenn es nichts rückgängig zu machen gibt, <strong>Nächste Notiz</strong> in einer Datei ohne Notizen —, sind nicht verfügbar.</p>
 
 <h3 id="menu-file">Datei</h3>
 <table>

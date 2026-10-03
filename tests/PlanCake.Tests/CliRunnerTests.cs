@@ -495,7 +495,7 @@ public class CliRunnerTests: IDisposable {
 
         exitCode.Should().Be(ExitCode.Success);
         error.Should().BeEmpty();
-        output.Should().Contain("Windows-1251").And.Contain("Removed 1 note.");
+        output.Should().Contain("Windows-1251").And.Contain("Removed 1 note");
         File.ReadAllBytes(path).Should().Equal(_utf8.GetBytes("Привет, мир.\n"));
         Config.Advanced.ConvertToUtf8.Should().BeFalse();
     }

@@ -61,7 +61,7 @@ public class LocalizationTests: IDisposable {
 
         Localization.GetCurrentCulture().Name.Should().Be(language);
         Localization._("&File").Should().NotBe("&File");
-        Localization._n("Removed {0} note.", "Removed {0} notes.", 5, 5).Should().Contain("5").And.NotBe("Removed 5 notes.");
+        Localization._n("Removed {0} note", "Removed {0} notes", 5, 5).Should().Contain("5").And.NotBe("Removed 5 notes");
     }
 
     [Theory]

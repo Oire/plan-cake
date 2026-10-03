@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-03 02:41:09+0200\n"
+"POT-Creation-Date: 2026-10-03 13:43:06+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:58+02:00\n"
 "Last-Translator: \n"
 "Language-Team: he\n"
@@ -17,22 +17,22 @@ msgstr ""
 msgid "--single-token and --close-marker cannot be used together."
 msgstr "לא ניתן לשלב את האפשרות --single-token עם האפשרות --close-marker."
 
-#: ..\..\Ui\MainWindow.cs:1511
+#: ..\..\Ui\MainWindow.cs:1735
 #, csharp-format
 msgid "{0} - {1}"
 msgstr "{0} - {1}"
 
-#: ..\..\Cli\CliRunner.cs:405 ..\..\Ui\MainWindow.cs:488
+#: ..\..\Cli\CliRunner.cs:405 ..\..\Ui\MainWindow.cs:579
 #, csharp-format
 msgid "{0} is a folder, not a file."
 msgstr "{0} היא תיקייה, לא קובץ."
 
-#: ..\..\Ui\MainWindow.cs:1870
+#: ..\..\Ui\MainWindow.cs:2094
 #, csharp-format
-msgid "{0} is back. File reloaded"
-msgstr "הקובץ {0} חזר ונטען מחדש"
+msgid "{0} is back and was reloaded."
+msgstr "הקובץ {0} חזר ונטען מחדש."
 
-#: ..\..\Ui\MainWindow.cs:1263
+#: ..\..\Ui\MainWindow.cs:1487
 #, csharp-format
 msgid ""
 "{0} is no longer there: it was deleted, renamed or moved. Notes cannot be "
@@ -66,7 +66,7 @@ msgstr ""
 "אותו, הריצו את הפקודה שוב עם האפשרות --convert, או הפעילו בהגדרות של "
 "PlanCake את ההמרה של קבצים שאינם ב-UTF-8."
 
-#: ..\..\Ui\MainWindow.cs:869
+#: ..\..\Ui\MainWindow.cs:1093
 #, csharp-format
 msgid "{0} no longer exists and was removed from the history."
 msgstr "הקובץ {0} כבר לא קיים והוסר מההיסטוריה."
@@ -85,33 +85,34 @@ msgid_plural "All {0} notes deleted"
 msgstr[0] "ההערה נמחקה"
 msgstr[1] "כל {0} ההערות נמחקו"
 
-#: ..\..\Ui\MainWindow.cs:1900
+#: ..\..\Ui\MainWindow.cs:2124
 #, csharp-format
 msgid "{0} was changed outside PlanCake. Reload it?"
 msgstr "הקובץ {0} שונה מחוץ ל-PlanCake. לטעון אותו מחדש?"
 
-#: ..\..\Ui\MainWindow.cs:277
+#: ..\..\Ui\MainWindow.cs:293
 msgid "&About PlanCake"
 msgstr "&אודות PlanCake"
 
-#: ..\..\Ui\MainWindow.cs:1329
-msgid "&Add note"
-msgstr "&הוסף הערה"
+#: ..\..\Ui\MainWindow.cs:1553
+msgid "&Add note..."
+msgstr "&הוסף הערה..."
 
-#: ..\..\Ui\MainWindow.cs:256
+#: ..\..\Ui\MainWindow.cs:272
 msgid "&Back"
 msgstr "&אחורה"
 
 #: ..\..\Ui\NoteDialog.Designer.cs:101 ..\..\Ui\OpenLinkDialog.Designer.cs:73
+#: ..\..\Ui\OpeningDialog.Designer.cs:64
 #: ..\..\Ui\SettingsDialog.Designer.cs:386
 msgid "&Cancel"
 msgstr "&ביטול"
 
-#: ..\..\Ui\MainWindow.cs:276
+#: ..\..\Ui\MainWindow.cs:292
 msgid "&Check for updates"
 msgstr "בדוק &עדכונים"
 
-#: ..\..\Ui\MainWindow.cs:1341
+#: ..\..\Ui\MainWindow.cs:1565
 msgid "&Copy block text"
 msgstr "העתק &טקסט של הבלוק"
 
@@ -119,16 +120,16 @@ msgstr "העתק &טקסט של הבלוק"
 msgid "&Copy info"
 msgstr "&העתק מידע"
 
-#: ..\..\Ui\MainWindow.cs:218
-msgid "&Delete all notes..."
-msgstr "&מחק את כל ההערות..."
+#: ..\..\Ui\MainWindow.cs:234
+msgid "&Delete all notes"
+msgstr "&מחק את כל ההערות"
 
-#: ..\..\Ui\MainWindow.cs:263 ..\..\Ui\MainWindow.cs:1337
-#: ..\..\Ui\MainWindow.cs:2272
+#: ..\..\Ui\MainWindow.cs:279 ..\..\Ui\MainWindow.cs:1561
+#: ..\..\Ui\MainWindow.cs:2502
 msgid "&Delete note"
 msgstr "&מחק הערה"
 
-#: ..\..\Ui\MainWindow.cs:241
+#: ..\..\Ui\MainWindow.cs:257
 msgid "&Document language"
 msgstr "שפת &מסמך"
 
@@ -136,15 +137,12 @@ msgstr "שפת &מסמך"
 msgid "&Document language:"
 msgstr "שפת &מסמך:"
 
-#: ..\..\Ui\MainWindow.cs:214
+#: ..\..\Ui\MainWindow.cs:230
 msgid "&Edit"
 msgstr "&עריכה"
 
-#: ..\..\Ui\MainWindow.cs:1333 ..\..\Ui\MainWindow.cs:2271
-msgid "&Edit note"
-msgstr "&ערוך הערה"
-
-#: ..\..\Ui\MainWindow.cs:262
+#: ..\..\Ui\MainWindow.cs:278 ..\..\Ui\MainWindow.cs:1557
+#: ..\..\Ui\MainWindow.cs:2501
 msgid "&Edit note..."
 msgstr "&ערוך הערה..."
 
@@ -152,19 +150,19 @@ msgstr "&ערוך הערה..."
 msgid "&Enter or a click on a block:"
 msgstr "Enter או &לחיצה על בלוק:"
 
-#: ..\..\Ui\MainWindow.cs:201
+#: ..\..\Ui\MainWindow.cs:217
 msgid "&File"
 msgstr "&קובץ"
 
-#: ..\..\Ui\MainWindow.cs:257
+#: ..\..\Ui\MainWindow.cs:273
 msgid "&Forward"
 msgstr "&קדימה"
 
-#: ..\..\Ui\MainWindow.cs:272
+#: ..\..\Ui\MainWindow.cs:288
 msgid "&Help"
 msgstr "ע&זרה"
 
-#: ..\..\Ui\MainWindow.cs:229
+#: ..\..\Ui\MainWindow.cs:245
 msgid "&Interface language"
 msgstr "&שפת ממשק"
 
@@ -172,7 +170,7 @@ msgstr "&שפת ממשק"
 msgid "&Interface language:"
 msgstr "&שפת ממשק:"
 
-#: ..\..\Ui\MainWindow.cs:274
+#: ..\..\Ui\MainWindow.cs:290
 msgid "&Keyboard shortcuts"
 msgstr "&קיצורי מקלדת"
 
@@ -180,7 +178,7 @@ msgstr "&קיצורי מקלדת"
 msgid "&Link:"
 msgstr "&קישור:"
 
-#: ..\..\Ui\MainWindow.cs:265
+#: ..\..\Ui\MainWindow.cs:281
 msgid "&Next note"
 msgstr "הערה &הבאה"
 
@@ -188,11 +186,11 @@ msgstr "הערה &הבאה"
 msgid "&Note:"
 msgstr "&הערה:"
 
-#: ..\..\Ui\MainWindow.cs:261
+#: ..\..\Ui\MainWindow.cs:277
 msgid "&Notes"
 msgstr "&הערות"
 
-#: ..\..\Ui\MainWindow.cs:222
+#: ..\..\Ui\MainWindow.cs:238
 msgid "&Notes list"
 msgstr "&רשימת הערות"
 
@@ -201,39 +199,39 @@ msgstr "&רשימת הערות"
 msgid "&OK"
 msgstr "&אישור"
 
-#: ..\..\Ui\MainWindow.cs:202
+#: ..\..\Ui\MainWindow.cs:218
 msgid "&Open..."
 msgstr "&פתח..."
 
-#: ..\..\Ui\MainWindow.cs:266
+#: ..\..\Ui\MainWindow.cs:282
 msgid "&Previous note"
 msgstr "הערה &קודמת"
 
-#: ..\..\Ui\MainWindow.cs:216
+#: ..\..\Ui\MainWindow.cs:232
 msgid "&Redo"
 msgstr "ב&צע שוב"
 
-#: ..\..\Ui\MainWindow.cs:258
+#: ..\..\Ui\MainWindow.cs:274
 msgid "&Reload"
 msgstr "&טען מחדש"
 
-#: ..\..\Ui\MainWindow.cs:209
+#: ..\..\Ui\MainWindow.cs:225
 msgid "&Settings..."
 msgstr "ה&גדרות..."
 
-#: ..\..\Ui\MainWindow.cs:223
+#: ..\..\Ui\MainWindow.cs:239
 msgid "&Switch pane"
 msgstr "&החלף חלונית"
 
-#: ..\..\Ui\MainWindow.cs:215
+#: ..\..\Ui\MainWindow.cs:231
 msgid "&Undo"
 msgstr "&בטל"
 
-#: ..\..\Ui\MainWindow.cs:273
+#: ..\..\Ui\MainWindow.cs:289
 msgid "&User manual"
 msgstr "&מדריך המשתמש"
 
-#: ..\..\Ui\MainWindow.cs:221
+#: ..\..\Ui\MainWindow.cs:237
 msgid "&View"
 msgstr "&תצוגה"
 
@@ -241,11 +239,11 @@ msgstr "&תצוגה"
 msgid "&When the file changes on disk:"
 msgstr "&כאשר הקובץ משתנה בדיסק:"
 
-#: ..\..\Ui\MainWindow.cs:224
+#: ..\..\Ui\MainWindow.cs:240
 msgid "&Wider notes list"
 msgstr "הר&חב רשימת הערות"
 
-#: ..\..\Ui\MainWindow.cs:252
+#: ..\..\Ui\MainWindow.cs:268
 msgid "&Zoom in"
 msgstr "ה&גדל תצוגה"
 
@@ -254,7 +252,7 @@ msgstr "ה&גדל תצוגה"
 msgid "© {0} {1}"
 msgstr "© {0} {1}"
 
-#: ..\..\Ui\MainWindow.cs:1578 ..\..\Ui\MainWindow.cs:1608
+#: ..\..\Ui\MainWindow.cs:1802 ..\..\Ui\MainWindow.cs:1832
 msgid "A download is already in progress."
 msgstr "הורדה כבר מתבצעת."
 
@@ -282,7 +280,7 @@ msgstr ""
 msgid "A note has no closing marker and ends with its line"
 msgstr "להערה אין סמן סגירה, והיא מסתיימת בסוף השורה שלה"
 
-#: ..\..\Ui\MainWindow.cs:703
+#: ..\..\Ui\MainWindow.cs:880
 msgid "A note has no closing marker, so it runs to the end of the file."
 msgstr "להערה אין סמן סגירה, ולכן היא נמשכת עד סוף הקובץ."
 
@@ -302,17 +300,9 @@ msgstr "מוסיף הערה"
 msgid "Advanced"
 msgstr "מתקדם"
 
-#: ..\..\Ui\MainWindow.cs:1517 ..\..\Ui\MainWindow.cs:1725
+#: ..\..\Ui\MainWindow.cs:1741 ..\..\Ui\MainWindow.cs:1949
 msgid "All files"
 msgstr "כל הקבצים"
-
-#: ..\..\Notes\NoteActionRunner.cs:311
-msgid "All notes deleted redone"
-msgstr "מחיקת כל ההערות בוצעה שוב"
-
-#: ..\..\Notes\NoteActionRunner.cs:301
-msgid "All notes deleted undone"
-msgstr "מחיקת כל ההערות בוטלה"
 
 #: ..\..\Ui\HostCommands.cs:147
 msgid "Alt"
@@ -342,11 +332,11 @@ msgstr "חזרה לקובץ הקודם"
 msgid "Backspace"
 msgstr "Backspace"
 
-#: ..\..\Ui\MainWindow.cs:2237
+#: ..\..\Ui\MainWindow.cs:2468
 msgid "Block"
 msgstr "בלוק"
 
-#: ..\..\Ui\MainWindow.cs:1381
+#: ..\..\Ui\MainWindow.cs:1605
 msgid "Block text copied"
 msgstr "טקסט הבלוק הועתק"
 
@@ -354,7 +344,7 @@ msgstr "טקסט הבלוק הועתק"
 msgid "Check for &updates on startup"
 msgstr "בדוק &עדכונים בעת ההפעלה"
 
-#: ..\..\Ui\MainWindow.cs:410
+#: ..\..\Ui\MainWindow.cs:426
 msgid "Check for updates"
 msgstr "בדיקת עדכונים"
 
@@ -362,7 +352,7 @@ msgstr "בדיקת עדכונים"
 msgid "Check for updates in the &background:"
 msgstr "בדיקת עדכונים ב&רקע:"
 
-#: ..\..\Ui\MainWindow.cs:1251
+#: ..\..\Ui\MainWindow.cs:1475
 msgid "Check task"
 msgstr "סימון משימה"
 
@@ -397,11 +387,6 @@ msgid ""
 "settings say"
 msgstr "המרת קובץ שאינו ב-UTF-8 ל-UTF-8 (ללא BOM), ללא קשר להגדרות"
 
-#: ..\..\Cli\CliRunner.cs:255 ..\..\Ui\MainWindow.cs:697
-#, csharp-format
-msgid "Converted from {0} to UTF-8."
-msgstr "הומר מ-{0} ל-UTF-8."
-
 #: ..\..\Ui\AboutDialog.cs:59
 msgid "Copied"
 msgstr "הועתק"
@@ -414,22 +399,22 @@ msgstr "Ctrl"
 msgid "Delete"
 msgstr "Delete"
 
-#: ..\..\Ui\MainWindow.cs:1961
+#: ..\..\Ui\MainWindow.cs:2185
 msgid "Delete all notes"
 msgstr "מחיקת כל ההערות"
 
-#: ..\..\Ui\MainWindow.cs:1183
+#: ..\..\Ui\MainWindow.cs:1407
 msgid "Delete note"
 msgstr "מחיקת הערה"
 
-#: ..\..\Ui\MainWindow.cs:1960
+#: ..\..\Ui\MainWindow.cs:2184
 #, csharp-format
 msgid "Delete the note in this file?"
 msgid_plural "Delete all {0} notes in this file?"
 msgstr[0] "למחוק את ההערה בקובץ זה?"
 msgstr[1] "למחוק את כל {0} ההערות בקובץ זה?"
 
-#: ..\..\Ui\MainWindow.cs:1182
+#: ..\..\Ui\MainWindow.cs:1406
 #, csharp-format
 msgid ""
 "Delete this note?\n"
@@ -440,7 +425,7 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:2199
+#: ..\..\Ui\MainWindow.cs:2424
 #, csharp-format
 msgid "Document language: {0}"
 msgstr "שפת המסמך: {0}"
@@ -449,17 +434,17 @@ msgstr "שפת המסמך: {0}"
 msgid "Down Arrow"
 msgstr "חץ למטה"
 
-#: ..\..\Ui\MainWindow.cs:1651
+#: ..\..\Ui\MainWindow.cs:1875
 #, csharp-format
 msgid "Downloaded and saved to {0}"
 msgstr "הקובץ הורד ונשמר ב-{0}"
 
-#: ..\..\Ui\MainWindow.cs:1620
+#: ..\..\Ui\MainWindow.cs:1844
 #, csharp-format
 msgid "Downloading from {0}..."
 msgstr "מוריד מ-{0}..."
 
-#: ..\..\Ui\MainWindow.cs:211
+#: ..\..\Ui\MainWindow.cs:227
 msgid "E&xit"
 msgstr "י&ציאה"
 
@@ -475,12 +460,13 @@ msgstr "Enter"
 msgid "Enter in the note dialo&g:"
 msgstr "Enter ב&חלון ההערה:"
 
-#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Ui\AboutDialog.cs:52
-#: ..\..\Program.cs:150 ..\..\Ui\MainWindow.cs:430 ..\..\Ui\MainWindow.cs:712
+#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Program.cs:150
+#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:449
+#: ..\..\Ui\MainWindow.cs:889
 msgid "Error"
 msgstr "שגיאה"
 
-#: ..\..\Program.cs:183 ..\..\Cli\CliRunner.cs:163
+#: ..\..\Cli\CliRunner.cs:163 ..\..\Program.cs:183
 #, csharp-format
 msgid "Error: {0}"
 msgstr "שגיאה: {0}"
@@ -493,7 +479,7 @@ msgstr "כל 3 ימים"
 msgid "Exit"
 msgstr "יציאה"
 
-#: ..\..\Ui\MainWindow.cs:207
+#: ..\..\Ui\MainWindow.cs:223
 msgid "Export &notes..."
 msgstr "&ייצא הערות..."
 
@@ -501,25 +487,30 @@ msgstr "&ייצא הערות..."
 msgid "Export a file as standalone HTML with its notes"
 msgstr "ייצוא קובץ כ-HTML עצמאי עם ההערות שלו"
 
-#: ..\..\Ui\MainWindow.cs:1724
+#: ..\..\Ui\MainWindow.cs:1948
 msgid "Export notes"
 msgstr "ייצוא הערות"
 
-#: ..\..\Ui\MainWindow.cs:1755
+#: ..\..\Ui\MainWindow.cs:1979
 #, csharp-format
-msgid "Exported {0} note to {1}."
-msgid_plural "Exported {0} notes to {1}."
-msgstr[0] "הערה אחת יוצאה אל {1}."
-msgstr[1] "{0} הערות יוצאו אל {1}."
+msgid "Exported {0} note to {1}"
+msgid_plural "Exported {0} notes to {1}"
+msgstr[0] "הערה אחת יוצאה אל {1}"
+msgstr[1] "{0} הערות יוצאו אל {1}"
 
-#: ..\..\Ui\MainWindow.cs:1901
+#: ..\..\Ui\MainWindow.cs:2125
 msgid "File changed"
 msgstr "הקובץ השתנה"
 
-#: ..\..\Ui\MainWindow.cs:1776 ..\..\Ui\MainWindow.cs:1880
-#: ..\..\Ui\MainWindow.cs:1907
+#: ..\..\Ui\MainWindow.cs:2000 ..\..\Ui\MainWindow.cs:2104
+#: ..\..\Ui\MainWindow.cs:2131
 msgid "File reloaded"
 msgstr "הקובץ נטען מחדש"
+
+#: ..\..\Ui\MainWindow.cs:862
+#, csharp-format
+msgid "For the user manual, press {0}."
+msgstr "למדריך המשתמש, הקישו {0}."
 
 #: ..\..\Ui\HostCommands.cs:118
 msgid "Forward to the next file"
@@ -557,12 +548,12 @@ msgstr "ברשימת ההערות: תפריט ההערה"
 msgid "Invalid link"
 msgstr "קישור לא תקין"
 
-#: ..\..\Ui\MainWindow.cs:1725
+#: ..\..\Ui\MainWindow.cs:1949
 msgid "JSON files"
 msgstr "קובצי JSON"
 
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:45 ..\..\Ui\ShortcutsDialog.cs:27
-#: ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.cs:27 ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:45
 msgid "Keyboard shortcuts"
 msgstr "קיצורי מקלדת"
 
@@ -570,7 +561,7 @@ msgstr "קיצורי מקלדת"
 msgid "Left Arrow"
 msgstr "חץ שמאלה"
 
-#: ..\..\Ui\MainWindow.cs:2236
+#: ..\..\Ui\MainWindow.cs:2467
 msgid "Lines"
 msgstr "שורות"
 
@@ -578,7 +569,7 @@ msgstr "שורות"
 msgid "List the notes of a file with the blocks they follow"
 msgstr "הצגת ההערות של קובץ עם הבלוקים שהן באות אחריהם"
 
-#: ..\..\Ui\MainWindow.cs:1246
+#: ..\..\Ui\MainWindow.cs:1470
 #, csharp-format
 msgid ""
 "Mark this task as done? The file on disk will be changed.\n"
@@ -589,7 +580,7 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:1247
+#: ..\..\Ui\MainWindow.cs:1471
 #, csharp-format
 msgid ""
 "Mark this task as not done? The file on disk will be changed.\n"
@@ -600,7 +591,7 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:1517
+#: ..\..\Ui\MainWindow.cs:1741
 msgid "Markdown files"
 msgstr "קובצי Markdown"
 
@@ -608,7 +599,7 @@ msgstr "קובצי Markdown"
 msgid "Minus"
 msgstr "מינוס"
 
-#: ..\..\Ui\MainWindow.cs:225
+#: ..\..\Ui\MainWindow.cs:241
 msgid "N&arrower notes list"
 msgstr "ה&צר רשימת הערות"
 
@@ -616,7 +607,7 @@ msgstr "ה&צר רשימת הערות"
 msgid "Never"
 msgstr "אף פעם"
 
-#: ..\..\Ui\MainWindow.cs:268
+#: ..\..\Ui\MainWindow.cs:284
 msgid "Next &block"
 msgstr "&בלוק הבא"
 
@@ -628,37 +619,37 @@ msgstr "הבלוק הבא"
 msgid "Next note"
 msgstr "ההערה הבאה"
 
-#: ..\..\Ui\MainWindow.cs:689 ..\..\Ui\MainWindow.cs:1674
-#: ..\..\Ui\MainWindow.cs:1719 ..\..\Ui\MainWindow.cs:1765
+#: ..\..\Ui\MainWindow.cs:857 ..\..\Ui\MainWindow.cs:1898
+#: ..\..\Ui\MainWindow.cs:1943 ..\..\Ui\MainWindow.cs:1989
 msgid "No file is open."
 msgstr "אין קובץ פתוח."
 
-#: ..\..\Ui\MainWindow.cs:912 ..\..\Ui\MainWindow.cs:1006
+#: ..\..\Ui\MainWindow.cs:1136 ..\..\Ui\MainWindow.cs:1230
 msgid "No more blocks"
 msgstr "אין עוד בלוקים"
 
-#: ..\..\Ui\MainWindow.cs:896 ..\..\Ui\MainWindow.cs:1003
-#: ..\..\Ui\MainWindow.cs:2437
+#: ..\..\Ui\MainWindow.cs:1120 ..\..\Ui\MainWindow.cs:1227
+#: ..\..\Ui\MainWindow.cs:2670
 msgid "No more notes"
 msgstr "אין עוד הערות"
 
-#: ..\..\Ui\MainWindow.cs:873
+#: ..\..\Ui\MainWindow.cs:1097
 msgid "No next file"
 msgstr "אין קובץ הבא"
 
-#: ..\..\Ui\MainWindow.cs:2424
+#: ..\..\Ui\MainWindow.cs:2657
 msgid "No notes"
 msgstr "אין הערות"
 
-#: ..\..\Ui\MainWindow.cs:873
+#: ..\..\Ui\MainWindow.cs:1097
 msgid "No previous file"
 msgstr "אין קובץ קודם"
 
-#: ..\..\Ui\MainWindow.cs:1559
+#: ..\..\Ui\MainWindow.cs:1783
 msgid "None of the copied files is a Markdown file (.md, .markdown)."
 msgstr "אף אחד מהקבצים שהועתקו אינו קובץ Markdown (.md, .markdown)."
 
-#: ..\..\Ui\MainWindow.cs:2238
+#: ..\..\Ui\MainWindow.cs:2466
 msgid "Note"
 msgstr "הערה"
 
@@ -666,65 +657,41 @@ msgstr "הערה"
 msgid "Note added"
 msgstr "ההערה נוספה"
 
-#: ..\..\Notes\NoteActionRunner.cs:308
-msgid "Note added redone"
-msgstr "הוספת ההערה בוצעה שוב"
-
-#: ..\..\Notes\NoteActionRunner.cs:298
-msgid "Note added undone"
-msgstr "הוספת ההערה בוטלה"
-
 #: ..\..\Notes\NoteActionRunner.cs:159
 msgid "Note deleted"
 msgstr "ההערה נמחקה"
 
-#: ..\..\Notes\NoteActionRunner.cs:310
-msgid "Note deleted redone"
-msgstr "מחיקת ההערה בוצעה שוב"
-
-#: ..\..\Notes\NoteActionRunner.cs:300
-msgid "Note deleted undone"
-msgstr "מחיקת ההערה בוטלה"
-
 #: ..\..\Notes\NoteActionRunner.cs:150
 msgid "Note edited"
 msgstr "ההערה נערכה"
-
-#: ..\..\Notes\NoteActionRunner.cs:309
-msgid "Note edited redone"
-msgstr "עריכת ההערה בוצעה שוב"
-
-#: ..\..\Notes\NoteActionRunner.cs:299
-msgid "Note edited undone"
-msgstr "עריכת ההערה בוטלה"
 
 #: ..\..\Ui\NoteDialog.Designer.cs:57
 msgid "Note on:"
 msgstr "הערה על:"
 
 #: ..\..\Ui\MainWindow.Designer.cs:101 ..\..\Ui\SettingsDialog.Designer.cs:236
-#: ..\..\Ui\MainWindow.cs:2239
+#: ..\..\Ui\MainWindow.cs:2469
 msgid "Notes"
 msgstr "הערות"
 
-#: ..\..\Ui\MainWindow.cs:2406
+#: ..\..\Ui\MainWindow.cs:2639
 #, csharp-format
 msgid "Notes list {0}%"
 msgstr "רשימת הערות {0}%"
 
-#: ..\..\Ui\MainWindow.cs:2384
+#: ..\..\Ui\MainWindow.cs:2617
 msgid "Notes list hidden"
 msgstr "רשימת ההערות מוסתרת"
 
-#: ..\..\Ui\MainWindow.cs:2384
+#: ..\..\Ui\MainWindow.cs:2617
 msgid "Notes list shown"
 msgstr "רשימת ההערות מוצגת"
 
-#: ..\..\Notes\NoteActionRunner.cs:226 ..\..\Ui\MainWindow.cs:1285
+#: ..\..\Notes\NoteActionRunner.cs:226 ..\..\Ui\MainWindow.cs:1509
 msgid "Nothing to redo"
 msgstr "אין מה לבצע שוב"
 
-#: ..\..\Notes\NoteActionRunner.cs:208 ..\..\Ui\MainWindow.cs:1285
+#: ..\..\Notes\NoteActionRunner.cs:208 ..\..\Ui\MainWindow.cs:1509
 msgid "Nothing to undo"
 msgstr "אין מה לבטל"
 
@@ -764,11 +731,11 @@ msgstr "פעם בחודש"
 msgid "Once a week"
 msgstr "פעם בשבוע"
 
-#: ..\..\Ui\MainWindow.cs:1487
+#: ..\..\Ui\MainWindow.cs:1711
 msgid "Only Markdown files (.md, .markdown) can be opened."
 msgstr "ניתן לפתוח רק קובצי Markdown (.md, .markdown)."
 
-#: ..\..\Ui\MainWindow.cs:1516
+#: ..\..\Ui\MainWindow.cs:1740
 msgid "Open"
 msgstr "פתיחה"
 
@@ -776,11 +743,11 @@ msgstr "פתיחה"
 msgid "Open a file"
 msgstr "פתיחת קובץ"
 
-#: ..\..\Ui\MainWindow.cs:203
+#: ..\..\Ui\MainWindow.cs:219
 msgid "Open from &clipboard"
 msgstr "פתח מ&לוח הגזירים"
 
-#: ..\..\Ui\MainWindow.cs:204
+#: ..\..\Ui\MainWindow.cs:220
 msgid "Open from &link..."
 msgstr "פתח מ&קישור..."
 
@@ -796,7 +763,7 @@ msgstr "פתיחה מקישור"
 msgid "Open from the clipboard"
 msgstr "פתיחה מלוח הגזירים"
 
-#: ..\..\Ui\MainWindow.cs:206
+#: ..\..\Ui\MainWindow.cs:222
 msgid "Open in &editor"
 msgstr "פתח ב&עורך"
 
@@ -804,13 +771,22 @@ msgstr "פתח ב&עורך"
 msgid "Open in the editor"
 msgstr "פתיחה בעורך"
 
-#: ..\..\Ui\MainWindow.cs:1448
+#: ..\..\Ui\MainWindow.cs:1672
 msgid "Open link"
 msgstr "פתיחת קישור"
 
 #: ..\..\Program.cs:143
 msgid "Open the log folder now?"
 msgstr "לפתוח את תיקיית היומנים עכשיו?"
+
+#: ..\..\Ui\OpeningDialog.cs:28
+#, csharp-format
+msgid "Opening {0}…"
+msgstr "פותח את {0}…"
+
+#: ..\..\Ui\OpeningDialog.cs:25
+msgid "Opening a file"
+msgstr "פתיחת קובץ"
 
 #: ..\..\Ui\SettingsDialog.cs:71
 msgid "Opens the context menu"
@@ -825,7 +801,7 @@ msgstr "PlanCake"
 msgid "PlanCake could not start: {0}"
 msgstr "לא ניתן להפעיל את PlanCake: {0}"
 
-#: ..\..\Ui\MainWindow.cs:1447
+#: ..\..\Ui\MainWindow.cs:1671
 #, csharp-format
 msgid ""
 "PlanCake does not open this file from a link, since opening it could run a "
@@ -878,7 +854,7 @@ msgstr "הזינו קישור תקין שמתחיל ב-http:// או ב-https://.
 msgid "Plus"
 msgstr "פלוס"
 
-#: ..\..\Ui\MainWindow.cs:269
+#: ..\..\Ui\MainWindow.cs:285
 msgid "Previous b&lock"
 msgstr "ב&לוק קודם"
 
@@ -898,7 +874,7 @@ msgstr "הצגת מספר ההערות בקובץ; קוד יציאה 3 אם יש
 msgid "Print the notes as JSON"
 msgstr "הצגת ההערות כ-JSON"
 
-#: ..\..\Ui\MainWindow.cs:254
+#: ..\..\Ui\MainWindow.cs:270
 msgid "R&eset zoom"
 msgstr "א&פס גודל תצוגה"
 
@@ -914,6 +890,30 @@ msgstr "מוכן"
 msgid "Redo"
 msgstr "בצע שוב"
 
+#: ..\..\Notes\NoteActionRunner.cs:311
+msgid "Redone: all notes deleted"
+msgstr "מחיקת כל ההערות בוצעה שוב"
+
+#: ..\..\Notes\NoteActionRunner.cs:308
+msgid "Redone: note added"
+msgstr "הוספת ההערה בוצעה שוב"
+
+#: ..\..\Notes\NoteActionRunner.cs:310
+msgid "Redone: note deleted"
+msgstr "מחיקת ההערה בוצעה שוב"
+
+#: ..\..\Notes\NoteActionRunner.cs:309
+msgid "Redone: note edited"
+msgstr "עריכת ההערה בוצעה שוב"
+
+#: ..\..\Notes\NoteActionRunner.cs:312
+msgid "Redone: task checked"
+msgstr "סימון המשימה בוצע שוב"
+
+#: ..\..\Notes\NoteActionRunner.cs:313
+msgid "Redone: task unchecked"
+msgstr "הסרת הסימון של המשימה בוצעה שוב"
+
 #: ..\..\Ui\SettingsDialog.cs:65
 msgid "Reload it"
 msgstr "טען אותו מחדש"
@@ -928,10 +928,10 @@ msgstr "הסרת כל ההערות מקובץ"
 
 #: ..\..\Cli\CliRunner.cs:300
 #, csharp-format
-msgid "Removed {0} note."
-msgid_plural "Removed {0} notes."
-msgstr[0] "הוסרה הערה אחת."
-msgstr[1] "הוסרו {0} הערות."
+msgid "Removed {0} note"
+msgid_plural "Removed {0} notes"
+msgstr[0] "הוסרה הערה אחת"
+msgstr[1] "הוסרו {0} הערות"
 
 #: ..\..\Ui\HostCommands.cs:128
 msgid "Reset zoom"
@@ -980,7 +980,7 @@ msgstr "מתחיל שורה חדשה ({0} שומר את ההערה)"
 msgid "Switch between the document and the notes list"
 msgstr "מעבר בין המסמך לרשימת ההערות"
 
-#: ..\..\Ui\SettingsDialog.cs:58 ..\..\Ui\MainWindow.cs:230
+#: ..\..\Ui\SettingsDialog.cs:58 ..\..\Ui\MainWindow.cs:246
 msgid "System default"
 msgstr "שפת המערכת"
 
@@ -992,31 +992,15 @@ msgstr "Tab"
 msgid "Task checked"
 msgstr "המשימה סומנה"
 
-#: ..\..\Notes\NoteActionRunner.cs:312
-msgid "Task checked redone"
-msgstr "סימון המשימה בוצע שוב"
-
-#: ..\..\Notes\NoteActionRunner.cs:302
-msgid "Task checked undone"
-msgstr "סימון המשימה בוטל"
-
 #: ..\..\Notes\NoteActionRunner.cs:198
 msgid "Task unchecked"
 msgstr "הסימון של המשימה הוסר"
 
-#: ..\..\Notes\NoteActionRunner.cs:313
-msgid "Task unchecked redone"
-msgstr "הסרת הסימון של המשימה בוצעה שוב"
-
-#: ..\..\Notes\NoteActionRunner.cs:303
-msgid "Task unchecked undone"
-msgstr "הסרת הסימון של המשימה בוטלה"
-
-#: ..\..\Ui\MainWindow.cs:1375
+#: ..\..\Ui\MainWindow.cs:1599
 msgid "The block has no text to copy."
 msgstr "אין בבלוק טקסט להעתקה."
 
-#: ..\..\Ui\MainWindow.cs:1562
+#: ..\..\Ui\MainWindow.cs:1786
 msgid "The clipboard holds no Markdown file or link."
 msgstr "אין בלוח הגזירים קובץ Markdown או קישור."
 
@@ -1033,7 +1017,7 @@ msgstr "הפרטים נמצאים ביומן. להשאיר את PlanCake פתו�
 msgid "The details are in the logs in {0}. Please report the problem at {1}."
 msgstr "הפרטים נמצאים ביומנים בתיקייה {0}. דווחו על הבעיה בכתובת {1}."
 
-#: ..\..\Services\MarkdownDownloader.cs:173 ..\..\Ui\MainWindow.cs:1633
+#: ..\..\Services\MarkdownDownloader.cs:173 ..\..\Ui\MainWindow.cs:1857
 #, csharp-format
 msgid "The download failed: {0}"
 msgstr "ההורדה נכשלה: {0}"
@@ -1062,12 +1046,12 @@ msgstr ""
 "לא ניתן לזהות את הקידוד של קובץ זה, ולכן הוא נפתח לקריאה בלבד ולעולם לא "
 "ישתנה. לא ניתן להוסיף לו הערות."
 
-#: ..\..\Cli\CliRunner.cs:418 ..\..\Ui\MainWindow.cs:527
+#: ..\..\Cli\CliRunner.cs:418 ..\..\Ui\MainWindow.cs:648
 #, csharp-format
 msgid "The file {0} does not exist."
 msgstr "הקובץ {0} לא קיים."
 
-#: ..\..\Ui\MainWindow.cs:508
+#: ..\..\Ui\MainWindow.cs:599
 #, csharp-format
 msgid ""
 "The file {0} is open in another PlanCake window, which does not respond."
@@ -1079,7 +1063,7 @@ msgstr "הקובץ השתנה, ולכן אין עוד מה לבטל או לבצ�
 
 #: ..\..\Notes\NoteActionRunner.cs:160 ..\..\Notes\NoteActionRunner.cs:181
 #: ..\..\Notes\NoteActionRunner.cs:201 ..\..\Notes\NoteActionRunner.cs:255
-#: ..\..\Ui\MainWindow.cs:1273
+#: ..\..\Ui\MainWindow.cs:1497
 msgid "The file changed. Please try again."
 msgstr "הקובץ השתנה. נסו שוב."
 
@@ -1088,7 +1072,12 @@ msgstr "הקובץ השתנה. נסו שוב."
 msgid "The file is larger than {0} MB, the most PlanCake downloads."
 msgstr "הקובץ גדול מ-{0} MB, הגודל המרבי ש-PlanCake מוריד."
 
-#: ..\..\Ui\MainWindow.cs:1911
+#: ..\..\Cli\CliRunner.cs:255 ..\..\Ui\MainWindow.cs:874
+#, csharp-format
+msgid "The file was converted from {0} to UTF-8."
+msgstr "הקובץ הומר מ-{0} ל-UTF-8."
+
+#: ..\..\Ui\MainWindow.cs:2135
 msgid "The file was not reloaded. Press F5 to reload it."
 msgstr "הקובץ לא נטען מחדש. הקישו F5 כדי לטעון אותו מחדש."
 
@@ -1106,7 +1095,7 @@ msgstr "שפת המסמך, כגון en או fr (ברירת מחדל: שפת המ
 msgid "The latest version of PlanCake is one you chose to skip."
 msgstr "הגרסה האחרונה של PlanCake היא גרסה שבחרתם לדלג עליה."
 
-#: ..\..\Ui\MainWindow.cs:1432
+#: ..\..\Ui\MainWindow.cs:1656
 #, csharp-format
 msgid "The link target does not exist: {0}"
 msgstr "יעד הקישור לא קיים: {0}"
@@ -1190,20 +1179,20 @@ msgstr "סמן הפתיחה לא יכול להיות ריק."
 msgid "The output file cannot be the file itself: {0}"
 msgstr "קובץ הפלט לא יכול להיות הקובץ עצמו: {0}"
 
-#: ..\..\Ui\MainWindow.cs:2032 ..\..\Ui\MainWindow.cs:2149
-#: ..\..\Ui\MainWindow.cs:2365
+#: ..\..\Ui\MainWindow.cs:2256 ..\..\Ui\MainWindow.cs:2374
+#: ..\..\Ui\MainWindow.cs:2598
 msgid "The settings could not be saved. They apply until PlanCake is closed."
 msgstr "לא ניתן לשמור את ההגדרות. הן יחולו עד לסגירת PlanCake."
 
-#: ..\..\Ui\MainWindow.cs:1390 ..\..\Ui\MainWindow.cs:2293
+#: ..\..\Ui\MainWindow.cs:1614 ..\..\Ui\MainWindow.cs:2523
 msgid "The start of the document"
 msgstr "תחילת המסמך"
 
-#: ..\..\Ui\MainWindow.cs:1986
+#: ..\..\Ui\MainWindow.cs:2210
 msgid "The user manual could not be found."
 msgstr "מדריך המשתמש לא נמצא."
 
-#: ..\..\Notes\NoteActionRunner.cs:176 ..\..\Ui\MainWindow.cs:1943
+#: ..\..\Notes\NoteActionRunner.cs:176 ..\..\Ui\MainWindow.cs:2167
 msgid "There are no notes to delete."
 msgstr "אין הערות למחיקה."
 
@@ -1236,7 +1225,7 @@ msgstr ""
 "הערות. כדי להמיר אותו ל-UTF-8, הפעילו בהגדרות את ההמרה של קבצים שאינם "
 "ב-UTF-8."
 
-#: ..\..\Ui\MainWindow.cs:1435
+#: ..\..\Ui\MainWindow.cs:1659
 #, csharp-format
 msgid "This link cannot be opened: {0}"
 msgstr "לא ניתן לפתוח קישור זה: {0}"
@@ -1245,30 +1234,44 @@ msgstr "לא ניתן לפתוח קישור זה: {0}"
 msgid "This link leads to a web page, not a Markdown file."
 msgstr "קישור זה מוביל לדף אינטרנט, לא לקובץ Markdown."
 
+#: ..\..\Ui\MainWindow.cs:859
+#, csharp-format
+msgid "To open a Markdown file, press {0}."
+msgstr "כדי לפתוח קובץ Markdown, הקישו {0}."
+
+#: ..\..\Ui\MainWindow.cs:860
+#, csharp-format
+msgid "To open one from a link, press {0}."
+msgstr "כדי לפתוח קובץ מקישור, הקישו {0}."
+
 #: ..\..\Services\UpdateService.cs:349
 msgid "Unable to check for updates. Please try again later."
 msgstr "לא ניתן לבדוק עדכונים. נסו שוב מאוחר יותר."
 
-#: ..\..\Ui\AboutDialog.cs:62 ..\..\Ui\MainWindow.cs:1384
+#: ..\..\Ui\MainWindow.cs:1608
+msgid "Unable to copy to the clipboard"
+msgstr "לא ניתן להעתיק ללוח הגזירים"
+
+#: ..\..\Ui\AboutDialog.cs:62
 msgid "Unable to copy to the clipboard."
 msgstr "לא ניתן להעתיק ללוח הגזירים."
 
-#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:1478
+#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:1702
 #, csharp-format
 msgid "Unable to open {0}"
 msgstr "לא ניתן לפתוח את {0}"
 
-#: ..\..\Cli\CliRunner.cs:424 ..\..\Ui\MainWindow.cs:481
-#: ..\..\Ui\MainWindow.cs:533
+#: ..\..\Cli\CliRunner.cs:424 ..\..\Ui\MainWindow.cs:572
+#: ..\..\Ui\MainWindow.cs:654
 #, csharp-format
 msgid "Unable to open {0}: {1}"
 msgstr "לא ניתן לפתוח את {0}: {1}"
 
-#: ..\..\Ui\MainWindow.cs:1544
-msgid "Unable to read the clipboard."
-msgstr "לא ניתן לקרוא את לוח הגזירים."
+#: ..\..\Ui\MainWindow.cs:1768
+msgid "Unable to read the clipboard"
+msgstr "לא ניתן לקרוא את לוח הגזירים"
 
-#: ..\..\Ui\MainWindow.cs:1797 ..\..\Ui\MainWindow.cs:1799
+#: ..\..\Ui\MainWindow.cs:2021 ..\..\Ui\MainWindow.cs:2023
 #, csharp-format
 msgid "Unable to reload {0}: {1}"
 msgstr "לא ניתן לטעון מחדש את {0}: {1}"
@@ -1278,13 +1281,13 @@ msgstr "לא ניתן לטעון מחדש את {0}: {1}"
 msgid "Unable to save the file to {0}: {1}"
 msgstr "לא ניתן לשמור את הקובץ ב-{0}: {1}"
 
-#: ..\..\Ui\MainWindow.cs:429
+#: ..\..\Ui\MainWindow.cs:448
 #, csharp-format
 msgid "Unable to start the document view: {0}"
 msgstr "לא ניתן להפעיל את תצוגת המסמך: {0}"
 
 #: ..\..\Cli\CliRunner.cs:295 ..\..\Cli\CliRunner.cs:500
-#: ..\..\Ui\MainWindow.cs:1747
+#: ..\..\Ui\MainWindow.cs:1971
 #, csharp-format
 msgid "Unable to write {0}: {1}"
 msgstr "לא ניתן לכתוב את {0}: {1}"
@@ -1294,13 +1297,37 @@ msgstr "לא ניתן לכתוב את {0}: {1}"
 msgid "Unable to write the file: {0}"
 msgstr "לא ניתן לכתוב את הקובץ: {0}"
 
-#: ..\..\Ui\MainWindow.cs:1251
+#: ..\..\Ui\MainWindow.cs:1475
 msgid "Uncheck task"
 msgstr "ביטול סימון משימה"
 
 #: ..\..\Ui\HostCommands.cs:124
 msgid "Undo"
 msgstr "בטל"
+
+#: ..\..\Notes\NoteActionRunner.cs:301
+msgid "Undone: all notes deleted"
+msgstr "מחיקת כל ההערות בוטלה"
+
+#: ..\..\Notes\NoteActionRunner.cs:298
+msgid "Undone: note added"
+msgstr "הוספת ההערה בוטלה"
+
+#: ..\..\Notes\NoteActionRunner.cs:300
+msgid "Undone: note deleted"
+msgstr "מחיקת ההערה בוטלה"
+
+#: ..\..\Notes\NoteActionRunner.cs:299
+msgid "Undone: note edited"
+msgstr "עריכת ההערה בוטלה"
+
+#: ..\..\Notes\NoteActionRunner.cs:302
+msgid "Undone: task checked"
+msgstr "סימון המשימה בוטל"
+
+#: ..\..\Notes\NoteActionRunner.cs:303
+msgid "Undone: task unchecked"
+msgstr "הסרת הסימון של המשימה בוטלה"
 
 #: ..\..\Cli\CliRunner.cs:63
 #, csharp-format
@@ -1320,7 +1347,7 @@ msgstr "חץ למעלה"
 msgid "Update checks could not be started. The log has the details."
 msgstr "לא ניתן היה להפעיל את בדיקת העדכונים. הפרטים נמצאים ביומן."
 
-#: ..\..\Ui\HostCommands.cs:129 ..\..\Ui\MainWindow.cs:1987
+#: ..\..\Ui\HostCommands.cs:129 ..\..\Ui\MainWindow.cs:2211
 msgid "User manual"
 msgstr "מדריך המשתמש"
 
@@ -1364,17 +1391,21 @@ msgstr "לא נמצא WebView2 Runtime"
 msgid "Write to this file (UTF-8 without BOM) instead of the standard output"
 msgstr "כתיבה לקובץ זה (UTF-8 ללא BOM) במקום לפלט הסטנדרטי"
 
+#: ..\..\Ui\MainWindow.cs:861
+msgid "You can also drag a Markdown file here."
+msgstr "אפשר גם לגרור לכאן קובץ Markdown."
+
 #: ..\..\Program.cs:208
 #, csharp-format
 msgid "You can download it from {0}. Open the download page now?"
 msgstr "ניתן להוריד אותו מ-{0}. לפתוח את דף ההורדה עכשיו?"
 
-#: ..\..\Ui\MainWindow.cs:854
+#: ..\..\Ui\MainWindow.cs:1078
 #, csharp-format
 msgid "Zoom {0}%"
 msgstr "גודל תצוגה {0}%"
 
-#: ..\..\Ui\MainWindow.cs:253
+#: ..\..\Ui\MainWindow.cs:269
 msgid "Zoom &out"
 msgstr "הקטן &תצוגה"
 
@@ -1385,6 +1416,42 @@ msgstr "הגדלת התצוגה"
 #: ..\..\Ui\HostCommands.cs:127
 msgid "Zoom out"
 msgstr "הקטנת התצוגה"
+
+#~ msgid "&Delete all notes..."
+#~ msgstr "&מחק את כל ההערות..."
+
+#~ msgid "&Edit note"
+#~ msgstr "&ערוך הערה"
+
+#~ msgid "Note added redone"
+#~ msgstr "הוספת ההערה בוצעה שוב"
+
+#~ msgid "Note added undone"
+#~ msgstr "הוספת ההערה בוטלה"
+
+#~ msgid "Note deleted redone"
+#~ msgstr "מחיקת ההערה בוצעה שוב"
+
+#~ msgid "Note deleted undone"
+#~ msgstr "מחיקת ההערה בוטלה"
+
+#~ msgid "Note edited redone"
+#~ msgstr "עריכת ההערה בוצעה שוב"
+
+#~ msgid "Note edited undone"
+#~ msgstr "עריכת ההערה בוטלה"
+
+#~ msgid "Task checked redone"
+#~ msgstr "סימון המשימה בוצע שוב"
+
+#~ msgid "Task checked undone"
+#~ msgstr "סימון המשימה בוטל"
+
+#~ msgid "Task unchecked redone"
+#~ msgstr "הסרת הסימון של המשימה בוצעה שוב"
+
+#~ msgid "Task unchecked undone"
+#~ msgstr "הסרת הסימון של המשימה בוטלה"
 
 #~ msgid "Unable to start the program up. Please contact the developer."
 #~ msgstr "לא ניתן להפעיל את התוכנה. פנו למפתח."

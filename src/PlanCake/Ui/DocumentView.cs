@@ -66,12 +66,20 @@ internal sealed class DocumentView: UserControl {
     /// </summary>
     public event KeyEventHandler? AcceleratorKeyDown;
 
+    /// <summary>
+    /// Raised when an accelerator key (see <see cref="AcceleratorKeyDown"/>) is released while the
+    /// document has focus; Alt released alone is how the window tells a bare Alt, which enters
+    /// the menu bar. The same rules as for <see cref="AcceleratorKeyDown"/> apply.
+    /// </summary>
+    public event KeyEventHandler? AcceleratorKeyUp;
+
     public DocumentView() {
         _webView = new TabWebView {
             Name = "webView",
             Dock = DockStyle.Fill,
         };
         _webView.KeyDown += OnWebViewKeyDown;
+        _webView.KeyUp += OnWebViewKeyUp;
         Controls.Add(_webView);
     }
 
@@ -219,6 +227,8 @@ internal sealed class DocumentView: UserControl {
 
     private void OnWebViewKeyDown(object? sender, KeyEventArgs e) => AcceleratorKeyDown?.Invoke(this, e);
 
+    private void OnWebViewKeyUp(object? sender, KeyEventArgs e) => AcceleratorKeyUp?.Invoke(this, e);
+
     private void OnWebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e) {
         // Only the app's own pages may talk to the host.
         if (!e.Source.StartsWith(BaseUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase)) {
@@ -304,6 +314,7 @@ internal sealed class DocumentView: UserControl {
             }
 
             _webView.KeyDown -= OnWebViewKeyDown;
+            _webView.KeyUp -= OnWebViewKeyUp;
             _webView.Dispose();
         }
 

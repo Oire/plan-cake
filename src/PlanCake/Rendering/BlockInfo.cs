@@ -18,7 +18,7 @@ internal enum BlockKind {
 /// <param name="EndLine">The 1-based original line the block ends on, inclusive.</param>
 /// <param name="Text">The block's full plain text (table cells joined with <c> | </c>).</param>
 /// <param name="Excerpt">
-/// The plain text on one line, whitespace collapsed, cut to at most
+/// The plain text on one line, whitespace collapsed, cut at the end of a word to at most
 /// <see cref="MarkdownRenderer.ExcerptLength"/> characters with an ellipsis.
 /// </param>
 internal sealed record BlockInfo(BlockKind Kind, int StartLine, int EndLine, string Text, string Excerpt) {

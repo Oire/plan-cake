@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-03 02:41:09+0200\n"
+"POT-Creation-Date: 2026-10-03 13:43:06+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:58+02:00\n"
 "Last-Translator: \n"
 "Language-Team: de\n"
@@ -18,22 +18,22 @@ msgid "--single-token and --close-marker cannot be used together."
 msgstr ""
 "--single-token und --close-marker können nicht zusammen verwendet werden."
 
-#: ..\..\Ui\MainWindow.cs:1511
+#: ..\..\Ui\MainWindow.cs:1735
 #, csharp-format
 msgid "{0} - {1}"
 msgstr "{0} - {1}"
 
-#: ..\..\Cli\CliRunner.cs:405 ..\..\Ui\MainWindow.cs:488
+#: ..\..\Cli\CliRunner.cs:405 ..\..\Ui\MainWindow.cs:579
 #, csharp-format
 msgid "{0} is a folder, not a file."
 msgstr "{0} ist ein Ordner, keine Datei."
 
-#: ..\..\Ui\MainWindow.cs:1870
+#: ..\..\Ui\MainWindow.cs:2094
 #, csharp-format
-msgid "{0} is back. File reloaded"
-msgstr "{0} ist wieder da. Datei neu geladen"
+msgid "{0} is back and was reloaded."
+msgstr "{0} ist wieder da und wurde neu geladen."
 
-#: ..\..\Ui\MainWindow.cs:1263
+#: ..\..\Ui\MainWindow.cs:1487
 #, csharp-format
 msgid ""
 "{0} is no longer there: it was deleted, renamed or moved. Notes cannot be "
@@ -68,7 +68,7 @@ msgstr ""
 "convert aus, oder aktivieren Sie in den Einstellungen von PlanCake das "
 "Konvertieren von Dateien, die nicht in UTF-8 vorliegen."
 
-#: ..\..\Ui\MainWindow.cs:869
+#: ..\..\Ui\MainWindow.cs:1093
 #, csharp-format
 msgid "{0} no longer exists and was removed from the history."
 msgstr "{0} existiert nicht mehr und wurde aus dem Verlauf entfernt."
@@ -87,33 +87,34 @@ msgid_plural "All {0} notes deleted"
 msgstr[0] "{0} Notiz gelöscht"
 msgstr[1] "Alle {0} Notizen gelöscht"
 
-#: ..\..\Ui\MainWindow.cs:1900
+#: ..\..\Ui\MainWindow.cs:2124
 #, csharp-format
 msgid "{0} was changed outside PlanCake. Reload it?"
 msgstr "{0} wurde außerhalb von PlanCake geändert. Neu laden?"
 
-#: ..\..\Ui\MainWindow.cs:277
+#: ..\..\Ui\MainWindow.cs:293
 msgid "&About PlanCake"
 msgstr "Ü&ber PlanCake"
 
-#: ..\..\Ui\MainWindow.cs:1329
-msgid "&Add note"
-msgstr "Notiz &hinzufügen"
+#: ..\..\Ui\MainWindow.cs:1553
+msgid "&Add note..."
+msgstr "Notiz &hinzufügen..."
 
-#: ..\..\Ui\MainWindow.cs:256
+#: ..\..\Ui\MainWindow.cs:272
 msgid "&Back"
 msgstr "&Zurück"
 
 #: ..\..\Ui\NoteDialog.Designer.cs:101 ..\..\Ui\OpenLinkDialog.Designer.cs:73
+#: ..\..\Ui\OpeningDialog.Designer.cs:64
 #: ..\..\Ui\SettingsDialog.Designer.cs:386
 msgid "&Cancel"
 msgstr "&Abbrechen"
 
-#: ..\..\Ui\MainWindow.cs:276
+#: ..\..\Ui\MainWindow.cs:292
 msgid "&Check for updates"
 msgstr "Nach &Updates suchen"
 
-#: ..\..\Ui\MainWindow.cs:1341
+#: ..\..\Ui\MainWindow.cs:1565
 msgid "&Copy block text"
 msgstr "Blocktext &kopieren"
 
@@ -121,16 +122,16 @@ msgstr "Blocktext &kopieren"
 msgid "&Copy info"
 msgstr "Info &kopieren"
 
-#: ..\..\Ui\MainWindow.cs:218
-msgid "&Delete all notes..."
-msgstr "&Alle Notizen löschen..."
+#: ..\..\Ui\MainWindow.cs:234
+msgid "&Delete all notes"
+msgstr "&Alle Notizen löschen"
 
-#: ..\..\Ui\MainWindow.cs:263 ..\..\Ui\MainWindow.cs:1337
-#: ..\..\Ui\MainWindow.cs:2272
+#: ..\..\Ui\MainWindow.cs:279 ..\..\Ui\MainWindow.cs:1561
+#: ..\..\Ui\MainWindow.cs:2502
 msgid "&Delete note"
 msgstr "Notiz &löschen"
 
-#: ..\..\Ui\MainWindow.cs:241
+#: ..\..\Ui\MainWindow.cs:257
 msgid "&Document language"
 msgstr "&Dokumentsprache"
 
@@ -138,15 +139,12 @@ msgstr "&Dokumentsprache"
 msgid "&Document language:"
 msgstr "&Dokumentsprache:"
 
-#: ..\..\Ui\MainWindow.cs:214
+#: ..\..\Ui\MainWindow.cs:230
 msgid "&Edit"
 msgstr "&Bearbeiten"
 
-#: ..\..\Ui\MainWindow.cs:1333 ..\..\Ui\MainWindow.cs:2271
-msgid "&Edit note"
-msgstr "Notiz &bearbeiten"
-
-#: ..\..\Ui\MainWindow.cs:262
+#: ..\..\Ui\MainWindow.cs:278 ..\..\Ui\MainWindow.cs:1557
+#: ..\..\Ui\MainWindow.cs:2501
 msgid "&Edit note..."
 msgstr "Notiz &bearbeiten..."
 
@@ -154,19 +152,19 @@ msgstr "Notiz &bearbeiten..."
 msgid "&Enter or a click on a block:"
 msgstr "Eingabetaste oder &Mausklick auf einen Block:"
 
-#: ..\..\Ui\MainWindow.cs:201
+#: ..\..\Ui\MainWindow.cs:217
 msgid "&File"
 msgstr "&Datei"
 
-#: ..\..\Ui\MainWindow.cs:257
+#: ..\..\Ui\MainWindow.cs:273
 msgid "&Forward"
 msgstr "&Vorwärts"
 
-#: ..\..\Ui\MainWindow.cs:272
+#: ..\..\Ui\MainWindow.cs:288
 msgid "&Help"
 msgstr "&Hilfe"
 
-#: ..\..\Ui\MainWindow.cs:229
+#: ..\..\Ui\MainWindow.cs:245
 msgid "&Interface language"
 msgstr "&Oberflächensprache"
 
@@ -174,7 +172,7 @@ msgstr "&Oberflächensprache"
 msgid "&Interface language:"
 msgstr "Oberflächen&sprache:"
 
-#: ..\..\Ui\MainWindow.cs:274
+#: ..\..\Ui\MainWindow.cs:290
 msgid "&Keyboard shortcuts"
 msgstr "&Tastenkombinationen"
 
@@ -182,7 +180,7 @@ msgstr "&Tastenkombinationen"
 msgid "&Link:"
 msgstr "&Link:"
 
-#: ..\..\Ui\MainWindow.cs:265
+#: ..\..\Ui\MainWindow.cs:281
 msgid "&Next note"
 msgstr "&Nächste Notiz"
 
@@ -190,11 +188,11 @@ msgstr "&Nächste Notiz"
 msgid "&Note:"
 msgstr "&Notiz:"
 
-#: ..\..\Ui\MainWindow.cs:261
+#: ..\..\Ui\MainWindow.cs:277
 msgid "&Notes"
 msgstr "&Notizen"
 
-#: ..\..\Ui\MainWindow.cs:222
+#: ..\..\Ui\MainWindow.cs:238
 msgid "&Notes list"
 msgstr "&Notizliste"
 
@@ -203,39 +201,39 @@ msgstr "&Notizliste"
 msgid "&OK"
 msgstr "&OK"
 
-#: ..\..\Ui\MainWindow.cs:202
+#: ..\..\Ui\MainWindow.cs:218
 msgid "&Open..."
 msgstr "Ö&ffnen..."
 
-#: ..\..\Ui\MainWindow.cs:266
+#: ..\..\Ui\MainWindow.cs:282
 msgid "&Previous note"
 msgstr "&Vorherige Notiz"
 
-#: ..\..\Ui\MainWindow.cs:216
+#: ..\..\Ui\MainWindow.cs:232
 msgid "&Redo"
 msgstr "&Wiederholen"
 
-#: ..\..\Ui\MainWindow.cs:258
+#: ..\..\Ui\MainWindow.cs:274
 msgid "&Reload"
 msgstr "Neu &laden"
 
-#: ..\..\Ui\MainWindow.cs:209
+#: ..\..\Ui\MainWindow.cs:225
 msgid "&Settings..."
 msgstr "Ein&stellungen..."
 
-#: ..\..\Ui\MainWindow.cs:223
+#: ..\..\Ui\MainWindow.cs:239
 msgid "&Switch pane"
 msgstr "&Bereich wechseln"
 
-#: ..\..\Ui\MainWindow.cs:215
+#: ..\..\Ui\MainWindow.cs:231
 msgid "&Undo"
 msgstr "&Rückgängig"
 
-#: ..\..\Ui\MainWindow.cs:273
+#: ..\..\Ui\MainWindow.cs:289
 msgid "&User manual"
 msgstr "Benutzer&handbuch"
 
-#: ..\..\Ui\MainWindow.cs:221
+#: ..\..\Ui\MainWindow.cs:237
 msgid "&View"
 msgstr "&Ansicht"
 
@@ -243,11 +241,11 @@ msgstr "&Ansicht"
 msgid "&When the file changes on disk:"
 msgstr "&Wenn sich die Datei auf dem Datenträger ändert:"
 
-#: ..\..\Ui\MainWindow.cs:224
+#: ..\..\Ui\MainWindow.cs:240
 msgid "&Wider notes list"
 msgstr "Notizliste verbrei&tern"
 
-#: ..\..\Ui\MainWindow.cs:252
+#: ..\..\Ui\MainWindow.cs:268
 msgid "&Zoom in"
 msgstr "Ver&größern"
 
@@ -256,7 +254,7 @@ msgstr "Ver&größern"
 msgid "© {0} {1}"
 msgstr "© {0} {1}"
 
-#: ..\..\Ui\MainWindow.cs:1578 ..\..\Ui\MainWindow.cs:1608
+#: ..\..\Ui\MainWindow.cs:1802 ..\..\Ui\MainWindow.cs:1832
 msgid "A download is already in progress."
 msgstr "Es läuft bereits ein Download."
 
@@ -287,7 +285,7 @@ msgstr ""
 msgid "A note has no closing marker and ends with its line"
 msgstr "Eine Notiz hat keine Endmarkierung und endet mit ihrer Zeile"
 
-#: ..\..\Ui\MainWindow.cs:703
+#: ..\..\Ui\MainWindow.cs:880
 msgid "A note has no closing marker, so it runs to the end of the file."
 msgstr ""
 "Eine Notiz hat keine Endmarkierung und reicht daher bis zum Ende der Datei."
@@ -308,17 +306,9 @@ msgstr "Fügt eine Notiz hinzu"
 msgid "Advanced"
 msgstr "Erweitert"
 
-#: ..\..\Ui\MainWindow.cs:1517 ..\..\Ui\MainWindow.cs:1725
+#: ..\..\Ui\MainWindow.cs:1741 ..\..\Ui\MainWindow.cs:1949
 msgid "All files"
 msgstr "Alle Dateien"
-
-#: ..\..\Notes\NoteActionRunner.cs:311
-msgid "All notes deleted redone"
-msgstr "Löschen aller Notizen wiederholt"
-
-#: ..\..\Notes\NoteActionRunner.cs:301
-msgid "All notes deleted undone"
-msgstr "Löschen aller Notizen rückgängig gemacht"
 
 #: ..\..\Ui\HostCommands.cs:147
 msgid "Alt"
@@ -348,11 +338,11 @@ msgstr "Zurück zur vorherigen Datei"
 msgid "Backspace"
 msgstr "Rücktaste"
 
-#: ..\..\Ui\MainWindow.cs:2237
+#: ..\..\Ui\MainWindow.cs:2468
 msgid "Block"
 msgstr "Block"
 
-#: ..\..\Ui\MainWindow.cs:1381
+#: ..\..\Ui\MainWindow.cs:1605
 msgid "Block text copied"
 msgstr "Blocktext kopiert"
 
@@ -360,7 +350,7 @@ msgstr "Blocktext kopiert"
 msgid "Check for &updates on startup"
 msgstr "Beim Start nach &Updates suchen"
 
-#: ..\..\Ui\MainWindow.cs:410
+#: ..\..\Ui\MainWindow.cs:426
 msgid "Check for updates"
 msgstr "Nach Updates suchen"
 
@@ -368,7 +358,7 @@ msgstr "Nach Updates suchen"
 msgid "Check for updates in the &background:"
 msgstr "Im &Hintergrund nach Updates suchen:"
 
-#: ..\..\Ui\MainWindow.cs:1251
+#: ..\..\Ui\MainWindow.cs:1475
 msgid "Check task"
 msgstr "Aufgabe abhaken"
 
@@ -408,11 +398,6 @@ msgstr ""
 "Eine Datei, die nicht in UTF-8 vorliegt, unabhängig von den Einstellungen in "
 "UTF-8 (ohne BOM) konvertieren"
 
-#: ..\..\Cli\CliRunner.cs:255 ..\..\Ui\MainWindow.cs:697
-#, csharp-format
-msgid "Converted from {0} to UTF-8."
-msgstr "Von {0} in UTF-8 konvertiert."
-
 #: ..\..\Ui\AboutDialog.cs:59
 msgid "Copied"
 msgstr "Kopiert"
@@ -425,22 +410,22 @@ msgstr "Strg"
 msgid "Delete"
 msgstr "Entf"
 
-#: ..\..\Ui\MainWindow.cs:1961
+#: ..\..\Ui\MainWindow.cs:2185
 msgid "Delete all notes"
 msgstr "Alle Notizen löschen"
 
-#: ..\..\Ui\MainWindow.cs:1183
+#: ..\..\Ui\MainWindow.cs:1407
 msgid "Delete note"
 msgstr "Notiz löschen"
 
-#: ..\..\Ui\MainWindow.cs:1960
+#: ..\..\Ui\MainWindow.cs:2184
 #, csharp-format
 msgid "Delete the note in this file?"
 msgid_plural "Delete all {0} notes in this file?"
 msgstr[0] "Die Notiz in dieser Datei löschen?"
 msgstr[1] "Alle {0} Notizen in dieser Datei löschen?"
 
-#: ..\..\Ui\MainWindow.cs:1182
+#: ..\..\Ui\MainWindow.cs:1406
 #, csharp-format
 msgid ""
 "Delete this note?\n"
@@ -451,7 +436,7 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:2199
+#: ..\..\Ui\MainWindow.cs:2424
 #, csharp-format
 msgid "Document language: {0}"
 msgstr "Dokumentsprache: {0}"
@@ -460,17 +445,17 @@ msgstr "Dokumentsprache: {0}"
 msgid "Down Arrow"
 msgstr "Nach-unten"
 
-#: ..\..\Ui\MainWindow.cs:1651
+#: ..\..\Ui\MainWindow.cs:1875
 #, csharp-format
 msgid "Downloaded and saved to {0}"
 msgstr "Heruntergeladen und gespeichert unter {0}"
 
-#: ..\..\Ui\MainWindow.cs:1620
+#: ..\..\Ui\MainWindow.cs:1844
 #, csharp-format
 msgid "Downloading from {0}..."
 msgstr "Download von {0}..."
 
-#: ..\..\Ui\MainWindow.cs:211
+#: ..\..\Ui\MainWindow.cs:227
 msgid "E&xit"
 msgstr "B&eenden"
 
@@ -486,12 +471,13 @@ msgstr "Eingabe"
 msgid "Enter in the note dialo&g:"
 msgstr "Eingabetaste im Noti&zdialog:"
 
-#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Ui\AboutDialog.cs:52
-#: ..\..\Program.cs:150 ..\..\Ui\MainWindow.cs:430 ..\..\Ui\MainWindow.cs:712
+#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Program.cs:150
+#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:449
+#: ..\..\Ui\MainWindow.cs:889
 msgid "Error"
 msgstr "Fehler"
 
-#: ..\..\Program.cs:183 ..\..\Cli\CliRunner.cs:163
+#: ..\..\Cli\CliRunner.cs:163 ..\..\Program.cs:183
 #, csharp-format
 msgid "Error: {0}"
 msgstr "Fehler: {0}"
@@ -504,7 +490,7 @@ msgstr "Alle 3 Tage"
 msgid "Exit"
 msgstr "Beenden"
 
-#: ..\..\Ui\MainWindow.cs:207
+#: ..\..\Ui\MainWindow.cs:223
 msgid "Export &notes..."
 msgstr "&Notizen exportieren..."
 
@@ -512,25 +498,30 @@ msgstr "&Notizen exportieren..."
 msgid "Export a file as standalone HTML with its notes"
 msgstr "Eine Datei mit ihren Notizen als eigenständiges HTML exportieren"
 
-#: ..\..\Ui\MainWindow.cs:1724
+#: ..\..\Ui\MainWindow.cs:1948
 msgid "Export notes"
 msgstr "Notizen exportieren"
 
-#: ..\..\Ui\MainWindow.cs:1755
+#: ..\..\Ui\MainWindow.cs:1979
 #, csharp-format
-msgid "Exported {0} note to {1}."
-msgid_plural "Exported {0} notes to {1}."
-msgstr[0] "{0} Notiz nach {1} exportiert."
-msgstr[1] "{0} Notizen nach {1} exportiert."
+msgid "Exported {0} note to {1}"
+msgid_plural "Exported {0} notes to {1}"
+msgstr[0] "{0} Notiz nach {1} exportiert"
+msgstr[1] "{0} Notizen nach {1} exportiert"
 
-#: ..\..\Ui\MainWindow.cs:1901
+#: ..\..\Ui\MainWindow.cs:2125
 msgid "File changed"
 msgstr "Datei geändert"
 
-#: ..\..\Ui\MainWindow.cs:1776 ..\..\Ui\MainWindow.cs:1880
-#: ..\..\Ui\MainWindow.cs:1907
+#: ..\..\Ui\MainWindow.cs:2000 ..\..\Ui\MainWindow.cs:2104
+#: ..\..\Ui\MainWindow.cs:2131
 msgid "File reloaded"
 msgstr "Datei neu geladen"
+
+#: ..\..\Ui\MainWindow.cs:862
+#, csharp-format
+msgid "For the user manual, press {0}."
+msgstr "Für das Benutzerhandbuch drücken Sie {0}."
 
 #: ..\..\Ui\HostCommands.cs:118
 msgid "Forward to the next file"
@@ -570,12 +561,12 @@ msgstr "In der Notizliste: Menü der Notiz"
 msgid "Invalid link"
 msgstr "Ungültiger Link"
 
-#: ..\..\Ui\MainWindow.cs:1725
+#: ..\..\Ui\MainWindow.cs:1949
 msgid "JSON files"
 msgstr "JSON-Dateien"
 
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:45 ..\..\Ui\ShortcutsDialog.cs:27
-#: ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.cs:27 ..\..\Ui\ShortcutsDialog.cs:33
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:45
 msgid "Keyboard shortcuts"
 msgstr "Tastenkombinationen"
 
@@ -583,7 +574,7 @@ msgstr "Tastenkombinationen"
 msgid "Left Arrow"
 msgstr "Nach-links"
 
-#: ..\..\Ui\MainWindow.cs:2236
+#: ..\..\Ui\MainWindow.cs:2467
 msgid "Lines"
 msgstr "Zeilen"
 
@@ -591,7 +582,7 @@ msgstr "Zeilen"
 msgid "List the notes of a file with the blocks they follow"
 msgstr "Die Notizen einer Datei mit den Blöcken auflisten, auf die sie folgen"
 
-#: ..\..\Ui\MainWindow.cs:1246
+#: ..\..\Ui\MainWindow.cs:1470
 #, csharp-format
 msgid ""
 "Mark this task as done? The file on disk will be changed.\n"
@@ -603,7 +594,7 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:1247
+#: ..\..\Ui\MainWindow.cs:1471
 #, csharp-format
 msgid ""
 "Mark this task as not done? The file on disk will be changed.\n"
@@ -615,7 +606,7 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:1517
+#: ..\..\Ui\MainWindow.cs:1741
 msgid "Markdown files"
 msgstr "Markdown-Dateien"
 
@@ -623,7 +614,7 @@ msgstr "Markdown-Dateien"
 msgid "Minus"
 msgstr "Minus"
 
-#: ..\..\Ui\MainWindow.cs:225
+#: ..\..\Ui\MainWindow.cs:241
 msgid "N&arrower notes list"
 msgstr "Notizliste versch&mälern"
 
@@ -631,7 +622,7 @@ msgstr "Notizliste versch&mälern"
 msgid "Never"
 msgstr "Nie"
 
-#: ..\..\Ui\MainWindow.cs:268
+#: ..\..\Ui\MainWindow.cs:284
 msgid "Next &block"
 msgstr "Nächster Bl&ock"
 
@@ -643,37 +634,37 @@ msgstr "Nächster Block"
 msgid "Next note"
 msgstr "Nächste Notiz"
 
-#: ..\..\Ui\MainWindow.cs:689 ..\..\Ui\MainWindow.cs:1674
-#: ..\..\Ui\MainWindow.cs:1719 ..\..\Ui\MainWindow.cs:1765
+#: ..\..\Ui\MainWindow.cs:857 ..\..\Ui\MainWindow.cs:1898
+#: ..\..\Ui\MainWindow.cs:1943 ..\..\Ui\MainWindow.cs:1989
 msgid "No file is open."
 msgstr "Keine Datei geöffnet."
 
-#: ..\..\Ui\MainWindow.cs:912 ..\..\Ui\MainWindow.cs:1006
+#: ..\..\Ui\MainWindow.cs:1136 ..\..\Ui\MainWindow.cs:1230
 msgid "No more blocks"
 msgstr "Keine weiteren Blöcke"
 
-#: ..\..\Ui\MainWindow.cs:896 ..\..\Ui\MainWindow.cs:1003
-#: ..\..\Ui\MainWindow.cs:2437
+#: ..\..\Ui\MainWindow.cs:1120 ..\..\Ui\MainWindow.cs:1227
+#: ..\..\Ui\MainWindow.cs:2670
 msgid "No more notes"
 msgstr "Keine weiteren Notizen"
 
-#: ..\..\Ui\MainWindow.cs:873
+#: ..\..\Ui\MainWindow.cs:1097
 msgid "No next file"
 msgstr "Keine nächste Datei"
 
-#: ..\..\Ui\MainWindow.cs:2424
+#: ..\..\Ui\MainWindow.cs:2657
 msgid "No notes"
 msgstr "Keine Notizen"
 
-#: ..\..\Ui\MainWindow.cs:873
+#: ..\..\Ui\MainWindow.cs:1097
 msgid "No previous file"
 msgstr "Keine vorherige Datei"
 
-#: ..\..\Ui\MainWindow.cs:1559
+#: ..\..\Ui\MainWindow.cs:1783
 msgid "None of the copied files is a Markdown file (.md, .markdown)."
 msgstr "Keine der kopierten Dateien ist eine Markdown-Datei (.md, .markdown)."
 
-#: ..\..\Ui\MainWindow.cs:2238
+#: ..\..\Ui\MainWindow.cs:2466
 msgid "Note"
 msgstr "Notiz"
 
@@ -681,65 +672,41 @@ msgstr "Notiz"
 msgid "Note added"
 msgstr "Notiz hinzugefügt"
 
-#: ..\..\Notes\NoteActionRunner.cs:308
-msgid "Note added redone"
-msgstr "Hinzufügen der Notiz wiederholt"
-
-#: ..\..\Notes\NoteActionRunner.cs:298
-msgid "Note added undone"
-msgstr "Hinzufügen der Notiz rückgängig gemacht"
-
 #: ..\..\Notes\NoteActionRunner.cs:159
 msgid "Note deleted"
 msgstr "Notiz gelöscht"
 
-#: ..\..\Notes\NoteActionRunner.cs:310
-msgid "Note deleted redone"
-msgstr "Löschen der Notiz wiederholt"
-
-#: ..\..\Notes\NoteActionRunner.cs:300
-msgid "Note deleted undone"
-msgstr "Löschen der Notiz rückgängig gemacht"
-
 #: ..\..\Notes\NoteActionRunner.cs:150
 msgid "Note edited"
 msgstr "Notiz bearbeitet"
-
-#: ..\..\Notes\NoteActionRunner.cs:309
-msgid "Note edited redone"
-msgstr "Bearbeiten der Notiz wiederholt"
-
-#: ..\..\Notes\NoteActionRunner.cs:299
-msgid "Note edited undone"
-msgstr "Bearbeiten der Notiz rückgängig gemacht"
 
 #: ..\..\Ui\NoteDialog.Designer.cs:57
 msgid "Note on:"
 msgstr "Notiz zu:"
 
 #: ..\..\Ui\MainWindow.Designer.cs:101 ..\..\Ui\SettingsDialog.Designer.cs:236
-#: ..\..\Ui\MainWindow.cs:2239
+#: ..\..\Ui\MainWindow.cs:2469
 msgid "Notes"
 msgstr "Notizen"
 
-#: ..\..\Ui\MainWindow.cs:2406
+#: ..\..\Ui\MainWindow.cs:2639
 #, csharp-format
 msgid "Notes list {0}%"
 msgstr "Notizliste {0} %"
 
-#: ..\..\Ui\MainWindow.cs:2384
+#: ..\..\Ui\MainWindow.cs:2617
 msgid "Notes list hidden"
 msgstr "Notizliste ausgeblendet"
 
-#: ..\..\Ui\MainWindow.cs:2384
+#: ..\..\Ui\MainWindow.cs:2617
 msgid "Notes list shown"
 msgstr "Notizliste eingeblendet"
 
-#: ..\..\Notes\NoteActionRunner.cs:226 ..\..\Ui\MainWindow.cs:1285
+#: ..\..\Notes\NoteActionRunner.cs:226 ..\..\Ui\MainWindow.cs:1509
 msgid "Nothing to redo"
 msgstr "Nichts zum Wiederholen"
 
-#: ..\..\Notes\NoteActionRunner.cs:208 ..\..\Ui\MainWindow.cs:1285
+#: ..\..\Notes\NoteActionRunner.cs:208 ..\..\Ui\MainWindow.cs:1509
 msgid "Nothing to undo"
 msgstr "Nichts zum Rückgängigmachen"
 
@@ -779,11 +746,11 @@ msgstr "Einmal monatlich"
 msgid "Once a week"
 msgstr "Einmal wöchentlich"
 
-#: ..\..\Ui\MainWindow.cs:1487
+#: ..\..\Ui\MainWindow.cs:1711
 msgid "Only Markdown files (.md, .markdown) can be opened."
 msgstr "Nur Markdown-Dateien (.md, .markdown) können geöffnet werden."
 
-#: ..\..\Ui\MainWindow.cs:1516
+#: ..\..\Ui\MainWindow.cs:1740
 msgid "Open"
 msgstr "Öffnen"
 
@@ -791,11 +758,11 @@ msgstr "Öffnen"
 msgid "Open a file"
 msgstr "Eine Datei öffnen"
 
-#: ..\..\Ui\MainWindow.cs:203
+#: ..\..\Ui\MainWindow.cs:219
 msgid "Open from &clipboard"
 msgstr "Aus der &Zwischenablage öffnen"
 
-#: ..\..\Ui\MainWindow.cs:204
+#: ..\..\Ui\MainWindow.cs:220
 msgid "Open from &link..."
 msgstr "Über &Link öffnen..."
 
@@ -811,7 +778,7 @@ msgstr "Über Link öffnen"
 msgid "Open from the clipboard"
 msgstr "Aus der Zwischenablage öffnen"
 
-#: ..\..\Ui\MainWindow.cs:206
+#: ..\..\Ui\MainWindow.cs:222
 msgid "Open in &editor"
 msgstr "Im E&ditor öffnen"
 
@@ -819,13 +786,22 @@ msgstr "Im E&ditor öffnen"
 msgid "Open in the editor"
 msgstr "Im Editor öffnen"
 
-#: ..\..\Ui\MainWindow.cs:1448
+#: ..\..\Ui\MainWindow.cs:1672
 msgid "Open link"
 msgstr "Link öffnen"
 
 #: ..\..\Program.cs:143
 msgid "Open the log folder now?"
 msgstr "Den Protokollordner jetzt öffnen?"
+
+#: ..\..\Ui\OpeningDialog.cs:28
+#, csharp-format
+msgid "Opening {0}…"
+msgstr "{0} wird geöffnet…"
+
+#: ..\..\Ui\OpeningDialog.cs:25
+msgid "Opening a file"
+msgstr "Datei wird geöffnet"
 
 #: ..\..\Ui\SettingsDialog.cs:71
 msgid "Opens the context menu"
@@ -840,7 +816,7 @@ msgstr "PlanCake"
 msgid "PlanCake could not start: {0}"
 msgstr "PlanCake konnte nicht gestartet werden: {0}"
 
-#: ..\..\Ui\MainWindow.cs:1447
+#: ..\..\Ui\MainWindow.cs:1671
 #, csharp-format
 msgid ""
 "PlanCake does not open this file from a link, since opening it could run a "
@@ -897,7 +873,7 @@ msgstr ""
 msgid "Plus"
 msgstr "Plus"
 
-#: ..\..\Ui\MainWindow.cs:269
+#: ..\..\Ui\MainWindow.cs:285
 msgid "Previous b&lock"
 msgstr "Vorheriger Bloc&k"
 
@@ -918,7 +894,7 @@ msgstr ""
 msgid "Print the notes as JSON"
 msgstr "Die Notizen als JSON ausgeben"
 
-#: ..\..\Ui\MainWindow.cs:254
+#: ..\..\Ui\MainWindow.cs:270
 msgid "R&eset zoom"
 msgstr "Zoom zu&rücksetzen"
 
@@ -936,6 +912,30 @@ msgstr "Bereit"
 msgid "Redo"
 msgstr "Wiederholen"
 
+#: ..\..\Notes\NoteActionRunner.cs:311
+msgid "Redone: all notes deleted"
+msgstr "Löschen aller Notizen wiederholt"
+
+#: ..\..\Notes\NoteActionRunner.cs:308
+msgid "Redone: note added"
+msgstr "Hinzufügen der Notiz wiederholt"
+
+#: ..\..\Notes\NoteActionRunner.cs:310
+msgid "Redone: note deleted"
+msgstr "Löschen der Notiz wiederholt"
+
+#: ..\..\Notes\NoteActionRunner.cs:309
+msgid "Redone: note edited"
+msgstr "Bearbeiten der Notiz wiederholt"
+
+#: ..\..\Notes\NoteActionRunner.cs:312
+msgid "Redone: task checked"
+msgstr "Abhaken der Aufgabe wiederholt"
+
+#: ..\..\Notes\NoteActionRunner.cs:313
+msgid "Redone: task unchecked"
+msgstr "Entfernen des Häkchens wiederholt"
+
 #: ..\..\Ui\SettingsDialog.cs:65
 msgid "Reload it"
 msgstr "Neu laden"
@@ -950,10 +950,10 @@ msgstr "Alle Notizen aus einer Datei entfernen"
 
 #: ..\..\Cli\CliRunner.cs:300
 #, csharp-format
-msgid "Removed {0} note."
-msgid_plural "Removed {0} notes."
-msgstr[0] "{0} Notiz entfernt."
-msgstr[1] "{0} Notizen entfernt."
+msgid "Removed {0} note"
+msgid_plural "Removed {0} notes"
+msgstr[0] "{0} Notiz entfernt"
+msgstr[1] "{0} Notizen entfernt"
 
 #: ..\..\Ui\HostCommands.cs:128
 msgid "Reset zoom"
@@ -1002,7 +1002,7 @@ msgstr "Beginnt eine neue Zeile ({0} speichert die Notiz)"
 msgid "Switch between the document and the notes list"
 msgstr "Zwischen dem Dokument und der Notizliste wechseln"
 
-#: ..\..\Ui\SettingsDialog.cs:58 ..\..\Ui\MainWindow.cs:230
+#: ..\..\Ui\SettingsDialog.cs:58 ..\..\Ui\MainWindow.cs:246
 msgid "System default"
 msgstr "Systemsprache"
 
@@ -1014,31 +1014,15 @@ msgstr "Tab"
 msgid "Task checked"
 msgstr "Aufgabe abgehakt"
 
-#: ..\..\Notes\NoteActionRunner.cs:312
-msgid "Task checked redone"
-msgstr "Abhaken der Aufgabe wiederholt"
-
-#: ..\..\Notes\NoteActionRunner.cs:302
-msgid "Task checked undone"
-msgstr "Abhaken der Aufgabe rückgängig gemacht"
-
 #: ..\..\Notes\NoteActionRunner.cs:198
 msgid "Task unchecked"
 msgstr "Häkchen der Aufgabe entfernt"
 
-#: ..\..\Notes\NoteActionRunner.cs:313
-msgid "Task unchecked redone"
-msgstr "Entfernen des Häkchens wiederholt"
-
-#: ..\..\Notes\NoteActionRunner.cs:303
-msgid "Task unchecked undone"
-msgstr "Entfernen des Häkchens rückgängig gemacht"
-
-#: ..\..\Ui\MainWindow.cs:1375
+#: ..\..\Ui\MainWindow.cs:1599
 msgid "The block has no text to copy."
 msgstr "Der Block enthält keinen Text zum Kopieren."
 
-#: ..\..\Ui\MainWindow.cs:1562
+#: ..\..\Ui\MainWindow.cs:1786
 msgid "The clipboard holds no Markdown file or link."
 msgstr "Die Zwischenablage enthält weder eine Markdown-Datei noch einen Link."
 
@@ -1053,9 +1037,11 @@ msgstr "Die Einzelheiten stehen im Protokoll. PlanCake geöffnet lassen?"
 #: ..\..\Program.cs:128
 #, csharp-format
 msgid "The details are in the logs in {0}. Please report the problem at {1}."
-msgstr "Die Einzelheiten stehen in den Protokollen im Ordner {0}. Bitte melden Sie das Problem unter {1}."
+msgstr ""
+"Die Einzelheiten stehen in den Protokollen im Ordner {0}. Bitte melden Sie "
+"das Problem unter {1}."
 
-#: ..\..\Services\MarkdownDownloader.cs:173 ..\..\Ui\MainWindow.cs:1633
+#: ..\..\Services\MarkdownDownloader.cs:173 ..\..\Ui\MainWindow.cs:1857
 #, csharp-format
 msgid "The download failed: {0}"
 msgstr "Der Download ist fehlgeschlagen: {0}"
@@ -1087,12 +1073,12 @@ msgstr ""
 "schreibgeschützt geöffnet und wird nie geändert. Notizen können nicht "
 "hinzugefügt werden."
 
-#: ..\..\Cli\CliRunner.cs:418 ..\..\Ui\MainWindow.cs:527
+#: ..\..\Cli\CliRunner.cs:418 ..\..\Ui\MainWindow.cs:648
 #, csharp-format
 msgid "The file {0} does not exist."
 msgstr "Die Datei {0} existiert nicht."
 
-#: ..\..\Ui\MainWindow.cs:508
+#: ..\..\Ui\MainWindow.cs:599
 #, csharp-format
 msgid ""
 "The file {0} is open in another PlanCake window, which does not respond."
@@ -1108,7 +1094,7 @@ msgstr ""
 
 #: ..\..\Notes\NoteActionRunner.cs:160 ..\..\Notes\NoteActionRunner.cs:181
 #: ..\..\Notes\NoteActionRunner.cs:201 ..\..\Notes\NoteActionRunner.cs:255
-#: ..\..\Ui\MainWindow.cs:1273
+#: ..\..\Ui\MainWindow.cs:1497
 msgid "The file changed. Please try again."
 msgstr "Die Datei hat sich geändert. Bitte versuchen Sie es erneut."
 
@@ -1118,7 +1104,12 @@ msgid "The file is larger than {0} MB, the most PlanCake downloads."
 msgstr ""
 "Die Datei ist größer als {0} MB, das Maximum, das PlanCake herunterlädt."
 
-#: ..\..\Ui\MainWindow.cs:1911
+#: ..\..\Cli\CliRunner.cs:255 ..\..\Ui\MainWindow.cs:874
+#, csharp-format
+msgid "The file was converted from {0} to UTF-8."
+msgstr "Die Datei wurde von {0} in UTF-8 konvertiert."
+
+#: ..\..\Ui\MainWindow.cs:2135
 msgid "The file was not reloaded. Press F5 to reload it."
 msgstr ""
 "Die Datei wurde nicht neu geladen. Drücken Sie F5, um sie neu zu laden."
@@ -1140,7 +1131,7 @@ msgid "The latest version of PlanCake is one you chose to skip."
 msgstr ""
 "Die neueste Version von PlanCake ist eine, die Sie überspringen wollten."
 
-#: ..\..\Ui\MainWindow.cs:1432
+#: ..\..\Ui\MainWindow.cs:1656
 #, csharp-format
 msgid "The link target does not exist: {0}"
 msgstr "Das Linkziel existiert nicht: {0}"
@@ -1231,22 +1222,22 @@ msgstr "Die Anfangsmarkierung darf nicht leer sein."
 msgid "The output file cannot be the file itself: {0}"
 msgstr "Die Ausgabedatei darf nicht die Datei selbst sein: {0}"
 
-#: ..\..\Ui\MainWindow.cs:2032 ..\..\Ui\MainWindow.cs:2149
-#: ..\..\Ui\MainWindow.cs:2365
+#: ..\..\Ui\MainWindow.cs:2256 ..\..\Ui\MainWindow.cs:2374
+#: ..\..\Ui\MainWindow.cs:2598
 msgid "The settings could not be saved. They apply until PlanCake is closed."
 msgstr ""
 "Die Einstellungen konnten nicht gespeichert werden. Sie gelten, bis PlanCake "
 "geschlossen wird."
 
-#: ..\..\Ui\MainWindow.cs:1390 ..\..\Ui\MainWindow.cs:2293
+#: ..\..\Ui\MainWindow.cs:1614 ..\..\Ui\MainWindow.cs:2523
 msgid "The start of the document"
 msgstr "Der Anfang des Dokuments"
 
-#: ..\..\Ui\MainWindow.cs:1986
+#: ..\..\Ui\MainWindow.cs:2210
 msgid "The user manual could not be found."
 msgstr "Das Benutzerhandbuch wurde nicht gefunden."
 
-#: ..\..\Notes\NoteActionRunner.cs:176 ..\..\Ui\MainWindow.cs:1943
+#: ..\..\Notes\NoteActionRunner.cs:176 ..\..\Ui\MainWindow.cs:2167
 msgid "There are no notes to delete."
 msgstr "Es gibt keine Notizen zum Löschen."
 
@@ -1282,7 +1273,7 @@ msgstr ""
 "konvertieren, aktivieren Sie in den Einstellungen das Konvertieren von "
 "Dateien, die nicht in UTF-8 vorliegen."
 
-#: ..\..\Ui\MainWindow.cs:1435
+#: ..\..\Ui\MainWindow.cs:1659
 #, csharp-format
 msgid "This link cannot be opened: {0}"
 msgstr "Dieser Link kann nicht geöffnet werden: {0}"
@@ -1291,32 +1282,46 @@ msgstr "Dieser Link kann nicht geöffnet werden: {0}"
 msgid "This link leads to a web page, not a Markdown file."
 msgstr "Dieser Link führt zu einer Webseite, nicht zu einer Markdown-Datei."
 
+#: ..\..\Ui\MainWindow.cs:859
+#, csharp-format
+msgid "To open a Markdown file, press {0}."
+msgstr "Um eine Markdown-Datei zu öffnen, drücken Sie {0}."
+
+#: ..\..\Ui\MainWindow.cs:860
+#, csharp-format
+msgid "To open one from a link, press {0}."
+msgstr "Um eine Datei über einen Link zu öffnen, drücken Sie {0}."
+
 #: ..\..\Services\UpdateService.cs:349
 msgid "Unable to check for updates. Please try again later."
 msgstr ""
 "Aktualisierungen konnten nicht geprüft werden. Bitte versuchen Sie es später "
 "erneut."
 
-#: ..\..\Ui\AboutDialog.cs:62 ..\..\Ui\MainWindow.cs:1384
+#: ..\..\Ui\MainWindow.cs:1608
+msgid "Unable to copy to the clipboard"
+msgstr "Kopieren in die Zwischenablage nicht möglich"
+
+#: ..\..\Ui\AboutDialog.cs:62
 msgid "Unable to copy to the clipboard."
 msgstr "Kopieren in die Zwischenablage nicht möglich."
 
-#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:1478
+#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:1702
 #, csharp-format
 msgid "Unable to open {0}"
 msgstr "{0} kann nicht geöffnet werden"
 
-#: ..\..\Cli\CliRunner.cs:424 ..\..\Ui\MainWindow.cs:481
-#: ..\..\Ui\MainWindow.cs:533
+#: ..\..\Cli\CliRunner.cs:424 ..\..\Ui\MainWindow.cs:572
+#: ..\..\Ui\MainWindow.cs:654
 #, csharp-format
 msgid "Unable to open {0}: {1}"
 msgstr "{0} kann nicht geöffnet werden: {1}"
 
-#: ..\..\Ui\MainWindow.cs:1544
-msgid "Unable to read the clipboard."
-msgstr "Die Zwischenablage kann nicht gelesen werden."
+#: ..\..\Ui\MainWindow.cs:1768
+msgid "Unable to read the clipboard"
+msgstr "Lesen der Zwischenablage nicht möglich"
 
-#: ..\..\Ui\MainWindow.cs:1797 ..\..\Ui\MainWindow.cs:1799
+#: ..\..\Ui\MainWindow.cs:2021 ..\..\Ui\MainWindow.cs:2023
 #, csharp-format
 msgid "Unable to reload {0}: {1}"
 msgstr "{0} kann nicht neu geladen werden: {1}"
@@ -1326,13 +1331,13 @@ msgstr "{0} kann nicht neu geladen werden: {1}"
 msgid "Unable to save the file to {0}: {1}"
 msgstr "Die Datei kann nicht unter {0} gespeichert werden: {1}"
 
-#: ..\..\Ui\MainWindow.cs:429
+#: ..\..\Ui\MainWindow.cs:448
 #, csharp-format
 msgid "Unable to start the document view: {0}"
 msgstr "Die Dokumentansicht kann nicht gestartet werden: {0}"
 
 #: ..\..\Cli\CliRunner.cs:295 ..\..\Cli\CliRunner.cs:500
-#: ..\..\Ui\MainWindow.cs:1747
+#: ..\..\Ui\MainWindow.cs:1971
 #, csharp-format
 msgid "Unable to write {0}: {1}"
 msgstr "{0} kann nicht geschrieben werden: {1}"
@@ -1342,13 +1347,37 @@ msgstr "{0} kann nicht geschrieben werden: {1}"
 msgid "Unable to write the file: {0}"
 msgstr "Die Datei kann nicht geschrieben werden: {0}"
 
-#: ..\..\Ui\MainWindow.cs:1251
+#: ..\..\Ui\MainWindow.cs:1475
 msgid "Uncheck task"
 msgstr "Häkchen entfernen"
 
 #: ..\..\Ui\HostCommands.cs:124
 msgid "Undo"
 msgstr "Rückgängig"
+
+#: ..\..\Notes\NoteActionRunner.cs:301
+msgid "Undone: all notes deleted"
+msgstr "Löschen aller Notizen rückgängig gemacht"
+
+#: ..\..\Notes\NoteActionRunner.cs:298
+msgid "Undone: note added"
+msgstr "Hinzufügen der Notiz rückgängig gemacht"
+
+#: ..\..\Notes\NoteActionRunner.cs:300
+msgid "Undone: note deleted"
+msgstr "Löschen der Notiz rückgängig gemacht"
+
+#: ..\..\Notes\NoteActionRunner.cs:299
+msgid "Undone: note edited"
+msgstr "Bearbeiten der Notiz rückgängig gemacht"
+
+#: ..\..\Notes\NoteActionRunner.cs:302
+msgid "Undone: task checked"
+msgstr "Abhaken der Aufgabe rückgängig gemacht"
+
+#: ..\..\Notes\NoteActionRunner.cs:303
+msgid "Undone: task unchecked"
+msgstr "Entfernen des Häkchens rückgängig gemacht"
 
 #: ..\..\Cli\CliRunner.cs:63
 #, csharp-format
@@ -1370,7 +1399,7 @@ msgstr ""
 "Die Prüfung auf Aktualisierungen konnte nicht gestartet werden. Die "
 "Einzelheiten stehen im Protokoll."
 
-#: ..\..\Ui\HostCommands.cs:129 ..\..\Ui\MainWindow.cs:1987
+#: ..\..\Ui\HostCommands.cs:129 ..\..\Ui\MainWindow.cs:2211
 msgid "User manual"
 msgstr "Benutzerhandbuch"
 
@@ -1418,17 +1447,21 @@ msgstr "WebView2-Runtime nicht gefunden"
 msgid "Write to this file (UTF-8 without BOM) instead of the standard output"
 msgstr "In diese Datei (UTF-8 ohne BOM) statt in die Standardausgabe schreiben"
 
+#: ..\..\Ui\MainWindow.cs:861
+msgid "You can also drag a Markdown file here."
+msgstr "Sie können auch eine Markdown-Datei hierher ziehen."
+
 #: ..\..\Program.cs:208
 #, csharp-format
 msgid "You can download it from {0}. Open the download page now?"
 msgstr "Sie können sie von {0} herunterladen. Die Downloadseite jetzt öffnen?"
 
-#: ..\..\Ui\MainWindow.cs:854
+#: ..\..\Ui\MainWindow.cs:1078
 #, csharp-format
 msgid "Zoom {0}%"
 msgstr "Zoom {0} %"
 
-#: ..\..\Ui\MainWindow.cs:253
+#: ..\..\Ui\MainWindow.cs:269
 msgid "Zoom &out"
 msgstr "Ver&kleinern"
 
@@ -1439,6 +1472,42 @@ msgstr "Vergrößern"
 #: ..\..\Ui\HostCommands.cs:127
 msgid "Zoom out"
 msgstr "Verkleinern"
+
+#~ msgid "&Delete all notes..."
+#~ msgstr "&Alle Notizen löschen..."
+
+#~ msgid "&Edit note"
+#~ msgstr "Notiz &bearbeiten"
+
+#~ msgid "Note added redone"
+#~ msgstr "Hinzufügen der Notiz wiederholt"
+
+#~ msgid "Note added undone"
+#~ msgstr "Hinzufügen der Notiz rückgängig gemacht"
+
+#~ msgid "Note deleted redone"
+#~ msgstr "Löschen der Notiz wiederholt"
+
+#~ msgid "Note deleted undone"
+#~ msgstr "Löschen der Notiz rückgängig gemacht"
+
+#~ msgid "Note edited redone"
+#~ msgstr "Bearbeiten der Notiz wiederholt"
+
+#~ msgid "Note edited undone"
+#~ msgstr "Bearbeiten der Notiz rückgängig gemacht"
+
+#~ msgid "Task checked redone"
+#~ msgstr "Abhaken der Aufgabe wiederholt"
+
+#~ msgid "Task checked undone"
+#~ msgstr "Abhaken der Aufgabe rückgängig gemacht"
+
+#~ msgid "Task unchecked redone"
+#~ msgstr "Entfernen des Häkchens wiederholt"
+
+#~ msgid "Task unchecked undone"
+#~ msgstr "Entfernen des Häkchens rückgängig gemacht"
 
 #~ msgid "Unable to start the program up. Please contact the developer."
 #~ msgstr ""

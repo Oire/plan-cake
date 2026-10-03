@@ -218,10 +218,15 @@ acting on a block carries focus; the rest leave the reader where they are.
   are off; dev tools are on in Debug only.
 - **Accelerator keys.** Keys pressed while the page has focus never pass through the host's
   message loop, so the native menu bar's accelerators never see them. The WinForms control does
-  not call `ProcessCmdKey` either: it raises its own `KeyDown` from the browser's
-  `AcceleratorKeyPressed`, which `DocumentView.AcceleratorKeyDown` passes on. `MainWindow`
-  sends that path and `ProcessCmdKey` through `HostCommands`; a new shortcut goes into that
-  table, never into a key handler.
+  not call `ProcessCmdKey` either: it raises its own `KeyDown` (and `KeyUp`) from the browser's
+  `AcceleratorKeyPressed`, which `DocumentView.AcceleratorKeyDown` and `AcceleratorKeyUp` pass
+  on. `MainWindow` sends that path and `ProcessCmdKey` through `HostCommands`; a new shortcut
+  goes into that table, never into a key handler. For the same reason Windows never sees the
+  keys that enter the menu bar from the page: what is not a host command goes through
+  `MenuKeys` (pure, tested), and Alt+letter, Alt pressed and released alone, and F10 post
+  `WM_SYSCOMMAND` / `SC_KEYMENU` to the form (the mnemonic's character on the focused window's
+  keyboard layout, or 0). So a host command must never be Alt+letter, or it hides a menu
+  (`MenuKeysTests` checks).
 - **`BeginInvoke` before any dialog, message box or menu** started from a WebView2 event
   (`WebMessageReceived`, `NavigationStarting`, …) or from a key WebView2 forwarded. A nested
   message loop inside those handlers re-enters WebView2.
@@ -283,7 +288,9 @@ tests need no console.
 
 `App.DataFolder` resolves to `%APPDATA%\Oire\PlanCake`, or to `userdata\` next to the EXE when
 that folder exists (portable mode, detected once at static init). It holds `PlanCake.cfg`
-(written to a temporary file and moved over the old one, since other windows read it) and
+(written to a temporary file and moved over the old one, since other windows read it; its
+`[Window]` section is where the last window closed, its size, the notes list's width and the
+zoom, which the next window opens with, moved onto a screen that is still there) and
 `logs\` (Serilog: `PlanCake.log`, `PlanCake-short.log`, `errors.log`, `errors-short.log`,
 `analysis.json`; every window and every CLI run is its own process, so while one holds a log,
 the others write to numbered siblings such as `PlanCake_001.log`). Each log rolls over at 10 MB

@@ -295,22 +295,22 @@ internal sealed class NoteActionRunner {
         change.Operation is NoteOperation.CheckTask or NoteOperation.UncheckTask ? change.Line : null;
 
     private static string UndoneMessage(NoteOperation operation) => operation switch {
-        NoteOperation.Add => _("Note added undone"),
-        NoteOperation.Edit => _("Note edited undone"),
-        NoteOperation.Delete => _("Note deleted undone"),
-        NoteOperation.Clear => _("All notes deleted undone"),
-        NoteOperation.CheckTask => _("Task checked undone"),
-        NoteOperation.UncheckTask => _("Task unchecked undone"),
+        NoteOperation.Add => _("Undone: note added"),
+        NoteOperation.Edit => _("Undone: note edited"),
+        NoteOperation.Delete => _("Undone: note deleted"),
+        NoteOperation.Clear => _("Undone: all notes deleted"),
+        NoteOperation.CheckTask => _("Undone: task checked"),
+        NoteOperation.UncheckTask => _("Undone: task unchecked"),
         _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null),
     };
 
     private static string RedoneMessage(NoteOperation operation) => operation switch {
-        NoteOperation.Add => _("Note added redone"),
-        NoteOperation.Edit => _("Note edited redone"),
-        NoteOperation.Delete => _("Note deleted redone"),
-        NoteOperation.Clear => _("All notes deleted redone"),
-        NoteOperation.CheckTask => _("Task checked redone"),
-        NoteOperation.UncheckTask => _("Task unchecked redone"),
+        NoteOperation.Add => _("Redone: note added"),
+        NoteOperation.Edit => _("Redone: note edited"),
+        NoteOperation.Delete => _("Redone: note deleted"),
+        NoteOperation.Clear => _("Redone: all notes deleted"),
+        NoteOperation.CheckTask => _("Redone: task checked"),
+        NoteOperation.UncheckTask => _("Redone: task unchecked"),
         _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null),
     };
 }

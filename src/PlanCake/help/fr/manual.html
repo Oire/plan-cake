@@ -373,6 +373,7 @@ footer {
 <h2 id="main-window">La fenêtre principale</h2>
 <p>La fenêtre comporte une barre de menus en haut, le document à gauche, la liste des notes à droite, et une barre d’état tout en bas. La barre de titre affiche le nom du fichier ouvert, par exemple <strong>plan.md - PlanCake</strong>.</p>
 <p>Pour donner plus de place au document ou à la liste des notes, faites glisser la bordure qui les sépare. Depuis le clavier, choisissez <strong>Élargir la liste des notes</strong> ou <strong>Rétrécir la liste des notes</strong> dans le menu <strong>Affichage</strong>&nbsp;: chacune déplace la bordure d’un dixième de la largeur partagée par les deux, jusqu’à un chiffre rond — à partir de 32&nbsp;%, par exemple, la liste passe à 40&nbsp;% de large, ou à 30&nbsp;%. La barre d’état vous indique la nouvelle répartition, par exemple « Liste des notes 40&nbsp;% ». Aucun des deux côtés ne peut disparaître&nbsp;: la liste reste large d’au moins 150&nbsp;pixels environ, et le document d’environ 200. À cette limite, la bordure reste immobile, et la barre d’état répète la répartition actuelle. Les deux commandes sont indisponibles tant que la liste des notes est masquée.</p>
+<p>PlanCake retient la taille et la position de la fenêtre, si elle était agrandie, la largeur de la liste des notes et le zoom&nbsp;: la fenêtre suivante s’ouvre de la même façon, sur un écran toujours présent. La toute première fenêtre s’adapte à l’écran sur lequel elle s’ouvre.</p>
 
 <h3 id="document-view">Le document</h3>
 <p>C’est votre fichier Markdown, mis en forme. Quand PlanCake ouvre un fichier, il commence en haut. Vos notes apparaissent aussi à l’intérieur du document, chacune juste après le bloc auquel elle appartient et distincte du texte du plan, afin que vous puissiez voir d’un coup d’œil ce qui vous appartient.</p>
@@ -380,12 +381,12 @@ footer {
 <h3 id="notes-list">La liste des notes</h3>
 <p>La liste des notes rassemble toutes les notes du fichier en un seul endroit, dans l’ordre où elles apparaissent. Elle comporte trois colonnes&nbsp;:</p>
 <dl>
+<dt>Note</dt>
+<dd>La première phrase de la note sur une seule ligne, sans la ponctuation Markdown. La colonne prend toute la largeur que laissent les deux autres. Laissez le pointeur de la souris sur une ligne pour voir la note entière.</dd>
 <dt>Lignes</dt>
 <dd>L’emplacement de la note dans le fichier&nbsp;: <code>12</code> pour une note d’une seule ligne, <code>12-14</code> pour une note plus longue.</dd>
 <dt>Bloc</dt>
 <dd>Le début du bloc que suit la note, pour savoir de quoi il s’agit sans avoir à s’y rendre.</dd>
-<dt>Note</dt>
-<dd>Le texte de la note sur une seule ligne, sans la ponctuation Markdown.</dd>
 </dl>
 <p>Pour aller à une note dans le document, appuyez sur <kbd>Entrée</kbd> sur sa ligne ou double-cliquez dessus&nbsp;; le focus se déplace vers la note. Pour supprimer une note, sélectionnez-la et appuyez sur <kbd>Suppr</kbd>&nbsp;; la sélection se déplace alors vers la note restante la plus proche, afin que vous ne perdiez jamais votre place dans la liste. Faites un clic droit sur une ligne, ou appuyez sur la touche <kbd>Applications</kbd> ou <kbd>Maj+F10</kbd>, pour obtenir un menu avec <strong>Modifier la note</strong> et <strong>Supprimer la note</strong>.</p>
 <p>Si vous préférez disposer de toute la fenêtre pour le document, choisissez <strong>Liste des notes</strong> dans le menu <strong>Affichage</strong>. Cela masque la liste, et le choisir à nouveau la réaffiche&nbsp;; la barre d’état affiche « Liste des notes masquée » ou « Liste des notes affichée ». PlanCake retient ce choix&nbsp;: c’est le même réglage que <strong>Afficher la liste des notes</strong> dans <a href="#settings-general">les paramètres</a>, si bien que les nouvelles fenêtres s’ouvrent de la même façon, et que les autres fenêtres ouvertes suivent dès que vous passez à l’une d’elles.</p>
@@ -417,6 +418,7 @@ footer {
 <article aria-labelledby="opening-files">
 <h2 id="opening-files">Ouvrir un fichier</h2>
 <p>Les plans vous parviennent de multiples façons&nbsp;: un fichier sur le disque, un chemin collé par quelqu’un dans une discussion, un lien vers GitHub. PlanCake peut tous les ouvrir directement, sans que vous ayez à enregistrer quoi que ce soit au préalable. Quelle que soit la méthode utilisée, un fichier nouvellement ouvert commence toujours en haut.</p>
+<p>Quand aucun fichier n’est ouvert, la fenêtre indique les façons d’en ouvrir un, avec leurs touches. Un gros fichier peut mettre un moment à s’ouvrir&nbsp;: si cela prend plus d’une demi-seconde, ou si le fichier dépasse 1&nbsp;Mo, PlanCake affiche la boîte de dialogue <strong>Ouverture d’un fichier</strong> avec une barre de progression. Appuyez sur <kbd>Échap</kbd> ou cliquez sur <strong>Annuler</strong> pour l’interrompre&nbsp;; le fichier que vous aviez ouvert reste tel quel.</p>
 
 <h3 id="open-command-line">Depuis la ligne de commande</h3>
 <p>Tapez <code>plancake</code> suivi du fichier&nbsp;:</p>
@@ -470,7 +472,7 @@ footer {
 <p>Ouvrir un fichier de toute autre manière — avec <kbd>Ctrl+O</kbd>, par glisser-déposer, depuis le presse-papiers, depuis un lien — l’ajoute aussi à l’historique, de sorte que <strong>Précédent</strong> vous ramène toujours à ce que vous lisiez auparavant.</p>
 
 <h3 id="zoom">Zoomer</h3>
-<p>Pour agrandir le texte, appuyez sur <kbd>Ctrl+Plus</kbd>&nbsp;; pour le réduire, appuyez sur <kbd>Ctrl+Moins</kbd>. Les touches du pavé numérique fonctionnent aussi, tout comme <strong>Zoom avant</strong> et <strong>Zoom arrière</strong> dans le menu <strong>Affichage</strong>. Chaque étape change la taille de 10&nbsp;%, entre 50 et 300&nbsp;%, et la barre d’état affiche la nouvelle taille, par exemple « Zoom 120&nbsp;% ». Appuyez sur <kbd>Ctrl+0</kbd> pour revenir à 100&nbsp;%.</p>
+<p>Pour agrandir le texte, appuyez sur <kbd>Ctrl+Plus</kbd>&nbsp;; pour le réduire, appuyez sur <kbd>Ctrl+Moins</kbd>. Les touches du pavé numérique fonctionnent aussi, tout comme <strong>Zoom avant</strong> et <strong>Zoom arrière</strong> dans le menu <strong>Affichage</strong>. Chaque étape change la taille de 10&nbsp;%, entre 50 et 300&nbsp;%, et la barre d’état affiche la nouvelle taille, par exemple « Zoom 120&nbsp;% ». Appuyez sur <kbd>Ctrl+0</kbd> pour revenir à 100&nbsp;%. La prochaine fenêtre que vous ouvrez commence au même zoom.</p>
 
 <h3 id="document-language">La langue du document</h3>
 <p>PlanCake distingue deux langues&nbsp;: la langue de ses menus et boîtes de dialogue, et la langue dans laquelle le document est rédigé. Passer l’interface en français ne rend pas français un plan en anglais. La langue du document compte lorsque le plan est lu à voix haute (voir <a href="#screen-readers">Utiliser un lecteur d’écran</a>) et aide PlanCake à reconnaître les anciens encodages de fichiers (voir <a href="#encodings">Les fichiers qui ne sont pas en UTF-8</a>).</p>
@@ -482,7 +484,7 @@ footer {
 
 <h3 id="adding-note">Ajouter une note</h3>
 <ol>
-<li>Cliquez sur le paragraphe, le titre, l’élément de liste, la ligne de tableau ou le bloc de code que vous voulez commenter. Depuis le clavier, déplacez-vous dessus avec <kbd>Alt+Maj+Flèche bas</kbd> ou <kbd>Alt+Maj+Flèche haut</kbd> (voir <a href="#reading-basics">Se déplacer</a>) et appuyez sur <kbd>Entrée</kbd>. La boîte de dialogue <strong>Ajouter une note</strong> s’ouvre. Elle affiche le début du bloc sous <strong>Note sur</strong>, afin que vous puissiez vérifier que vous avez choisi le bon, et place le curseur dans la zone <strong>Note</strong>.</li>
+<li>Cliquez sur le paragraphe, le titre, l’élément de liste, la ligne de tableau ou le bloc de code que vous voulez commenter. Le bloc sous le pointeur de la souris est mis en évidence, pour que vous voyiez à quel bloc un clic ajoute une note. Depuis le clavier, déplacez-vous dessus avec <kbd>Alt+Maj+Flèche bas</kbd> ou <kbd>Alt+Maj+Flèche haut</kbd> (voir <a href="#reading-basics">Se déplacer</a>) et appuyez sur <kbd>Entrée</kbd>. La boîte de dialogue <strong>Ajouter une note</strong> s’ouvre. Elle affiche le début du bloc sous <strong>Note sur</strong>, afin que vous puissiez vérifier que vous avez choisi le bon, et place le curseur dans la zone <strong>Note</strong>.</li>
 <li>Tapez votre note. Pour y commencer une nouvelle ligne, appuyez sur <kbd>Ctrl+Entrée</kbd>.</li>
 <li>Appuyez sur <kbd>Entrée</kbd> ou cliquez sur <strong>OK</strong> pour enregistrer&nbsp;; appuyez sur <kbd>Échap</kbd> ou cliquez sur <strong>Annuler</strong> pour renoncer. <strong>OK</strong> reste indisponible tant que la zone est vide.</li>
 </ol>
@@ -545,7 +547,7 @@ footer {
 <article aria-labelledby="encodings">
 <h2 id="encodings">Les fichiers qui ne sont pas en UTF-8</h2>
 <p>Presque tous les fichiers Markdown sont aujourd’hui en UTF-8. Les fichiers plus anciens, notamment dans des langues telles que le russe ou l’hébreu, sont parfois enregistrés dans un ancien encodage Windows à la place. PlanCake les ouvre et les affiche correctement, mais par défaut il n’y écrit pas&nbsp;: le fichier s’ouvre en lecture seule, et PlanCake vous le signale, en nommant l’encodage, par exemple « Ce fichier n’est pas en UTF-8, il a donc été ouvert en lecture seule en tant que Windows-1251. Impossible d’y ajouter des notes. Pour le convertir en UTF-8, activez la conversion des fichiers qui ne sont pas en UTF-8 dans les paramètres. »</p>
-<p>Pour ajouter des notes à de tels fichiers, activez <strong>Convertir en UTF-8 les fichiers qui ne sont pas en UTF-8</strong> dans les <a href="#settings-advanced">paramètres avancés</a>. PlanCake convertit alors chaque fichier de ce type en UTF-8 dès que vous l’ouvrez et vous le signale, par exemple « Converti de Windows-1251 en UTF-8. » Seul l’encodage change&nbsp;; le texte et les fins de ligne restent les mêmes.</p>
+<p>Pour ajouter des notes à de tels fichiers, activez <strong>Convertir en UTF-8 les fichiers qui ne sont pas en UTF-8</strong> dans les <a href="#settings-advanced">paramètres avancés</a>. PlanCake convertit alors chaque fichier de ce type en UTF-8 dès que vous l’ouvrez et vous le signale, par exemple « Le fichier a été converti de Windows-1251 en UTF-8. » Seul l’encodage change&nbsp;; le texte et les fins de ligne restent les mêmes.</p>
 <p>Parfois, PlanCake ne peut pas déterminer avec certitude quel encodage un fichier utilise. Un tel fichier reste toujours en lecture seule, quel que soit le paramètre&nbsp;: « L’encodage de ce fichier n’a pas pu être reconnu, il a donc été ouvert en lecture seule et ne sera jamais modifié. Impossible d’y ajouter des notes. » C’est une règle stricte. Écrire dans un fichier qui n’a pas été lu correctement détruirait les caractères que PlanCake n’a pas pu déchiffrer, et PlanCake ne fait jamais cela.</p>
 <p>Le paramètre <strong>Langue du document</strong> est l’un des indices que PlanCake utilise pour reconnaître un ancien encodage&nbsp;; le régler sur la langue dans laquelle vos anciens fichiers sont écrits est donc utile.</p>
 </article>
@@ -633,7 +635,7 @@ footer {
 
 <h3 id="cli-clear">Supprimer toutes les notes</h3>
 <pre><code>plancake clear plan.md</code></pre>
-<p>Cela supprime toutes les notes du fichier et affiche combien il en a supprimé, par exemple <code>2 notes supprimées.</code> Pour un fichier dans un ancien encodage, <code>clear</code> suit <a href="#settings-advanced">le paramètre de conversion</a>&nbsp;: quand la conversion est désactivée, ou que l’encodage ne peut pas être reconnu, il refuse de modifier un fichier qui contient des notes et explique pourquoi. Ajoutez <code>--convert</code> pour convertir un tel fichier en UTF-8 pour cette exécution, quel que soit le paramètre&nbsp;; un fichier dont l’encodage ne peut pas être reconnu n’est toujours jamais modifié.</p>
+<p>Cela supprime toutes les notes du fichier et affiche combien il en a supprimé, par exemple <code>2 notes supprimées</code>. Pour un fichier dans un ancien encodage, <code>clear</code> suit <a href="#settings-advanced">le paramètre de conversion</a>&nbsp;: quand la conversion est désactivée, ou que l’encodage ne peut pas être reconnu, il refuse de modifier un fichier qui contient des notes et explique pourquoi. Ajoutez <code>--convert</code> pour convertir un tel fichier en UTF-8 pour cette exécution, quel que soit le paramètre&nbsp;; un fichier dont l’encodage ne peut pas être reconnu n’est toujours jamais modifié.</p>
 <pre><code>plancake clear old-plan.md --convert</code></pre>
 
 <h3 id="cli-export">Exporter en HTML</h3>
@@ -748,7 +750,7 @@ cmd /c "plancake check plan.md"</code></pre>
 
 <article aria-labelledby="menus">
 <h2 id="menus">Référence des menus</h2>
-<p>Cliquez sur un nom de menu, appuyez sur <kbd>Alt</kbd> pour atteindre la barre de menus, ou ouvrez un menu directement&nbsp;: <kbd>Alt+F</kbd> pour Fichier, <kbd>Alt+D</kbd> pour Édition, <kbd>Alt+A</kbd> pour Affichage, <kbd>Alt+N</kbd> pour Notes, <kbd>Alt+E</kbd> pour Aide. Les commandes qui ne s’appliquent pas pour le moment — <strong>Annuler</strong> sans rien à annuler, <strong>Note suivante</strong> dans un fichier sans notes — sont indisponibles.</p>
+<p>Cliquez sur un nom de menu, appuyez sur <kbd>Alt</kbd> ou <kbd>F10</kbd> pour atteindre la barre de menus, ou ouvrez un menu directement&nbsp;: <kbd>Alt+F</kbd> pour Fichier, <kbd>Alt+D</kbd> pour Édition, <kbd>Alt+A</kbd> pour Affichage, <kbd>Alt+N</kbd> pour Notes, <kbd>Alt+E</kbd> pour Aide. Les commandes qui ne s’appliquent pas pour le moment — <strong>Annuler</strong> sans rien à annuler, <strong>Note suivante</strong> dans un fichier sans notes — sont indisponibles.</p>
 
 <h3 id="menu-file">Fichier</h3>
 <table>

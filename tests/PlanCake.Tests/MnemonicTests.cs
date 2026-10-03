@@ -117,6 +117,7 @@ public class MnemonicTests: IDisposable {
         new MainWindow(),
         new NoteDialog(NoteDialogMode.Add, "Excerpt", String.Empty, _ => null, NoteEnterAction.Save),
         new OpenLinkDialog(),
+        new OpeningDialog("plan.md", Task.CompletedTask),
         new SettingsDialog(),
         new AboutDialog(),
         new ShortcutsDialog(ShortcutsDialog.BuildRows()),

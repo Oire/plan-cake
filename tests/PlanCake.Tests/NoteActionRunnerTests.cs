@@ -382,11 +382,11 @@ public class NoteActionRunnerTests: IDisposable {
 
         var undo = runner.Undo();
 
-        undo.Message.Should().Be("All notes deleted undone");
+        undo.Message.Should().Be("Undone: all notes deleted");
         undo.FocusNoteLine.Should().BeNull();
         OnDisk.Should().Be(text);
 
-        runner.Redo().Message.Should().Be("All notes deleted redone");
+        runner.Redo().Message.Should().Be("Redone: all notes deleted");
         OnDisk.Should().Be("Para.\n");
     }
 
@@ -415,13 +415,13 @@ public class NoteActionRunnerTests: IDisposable {
         var undo = runner.Undo();
 
         undo.Status.Should().Be(NoteActionStatus.Done);
-        undo.Message.Should().Be("Note added undone");
+        undo.Message.Should().Be("Undone: note added");
         undo.FocusNoteLine.Should().BeNull();
         OnDisk.Should().Be("Para.\n");
 
         var redo = runner.Redo();
 
-        redo.Message.Should().Be("Note added redone");
+        redo.Message.Should().Be("Redone: note added");
         redo.FocusNoteLine.Should().Be(2);
         OnDisk.Should().Be("Para.\n[usernote]Check this[/usernote]\n");
     }
@@ -435,9 +435,9 @@ public class NoteActionRunnerTests: IDisposable {
         var undo = runner.Undo();
         var redo = runner.Redo();
 
-        undo.Message.Should().Be("Note edited undone");
+        undo.Message.Should().Be("Undone: note edited");
         undo.FocusNoteLine.Should().Be(2);
-        redo.Message.Should().Be("Note edited redone");
+        redo.Message.Should().Be("Redone: note edited");
         redo.FocusNoteLine.Should().Be(2);
     }
 
@@ -449,13 +449,13 @@ public class NoteActionRunnerTests: IDisposable {
 
         var undo = runner.Undo();
 
-        undo.Message.Should().Be("Note deleted undone");
+        undo.Message.Should().Be("Undone: note deleted");
         undo.FocusNoteLine.Should().Be(2);
         OnDisk.Should().Be("Para.\n[usernote]old[/usernote]\n");
 
         var redo = runner.Redo();
 
-        redo.Message.Should().Be("Note deleted redone");
+        redo.Message.Should().Be("Redone: note deleted");
         redo.FocusNoteLine.Should().BeNull();
     }
 
@@ -525,8 +525,8 @@ public class NoteActionRunnerTests: IDisposable {
     }
 
     [Theory]
-    [InlineData(true, "Task checked undone", "Task checked redone")]
-    [InlineData(false, "Task unchecked undone", "Task unchecked redone")]
+    [InlineData(true, "Undone: task checked", "Redone: task checked")]
+    [InlineData(false, "Undone: task unchecked", "Redone: task unchecked")]
     public void UndoAndRedo_OfAToggle_AnnounceItAndFocusTheItem(bool isChecked, string undone, string redone) {
         var before = isChecked ? "- [ ] one\n" : "- [x] one\n";
         var runner = Runner(before);

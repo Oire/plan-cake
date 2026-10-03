@@ -96,6 +96,9 @@ public partial class MainWindow: Form {
     /// <summary>The window's menu bar, attached once the window has a handle.</summary>
     private NativeMenuBar? _menuBar;
 
+    /// <summary>Picks the menu bar's keys (Alt+letter, Alt alone, F10) out of those pressed in the document.</summary>
+    private readonly MenuKeys _menuKeys = new();
+
     /// <summary>The context menu of the notes list: Edit note, Delete note.</summary>
     private NativeContextMenu? _notesListMenu;
 
@@ -132,6 +135,18 @@ public partial class MainWindow: Form {
     /// </summary>
     private UpdateService? _updateService;
 
+    /// <summary>
+    /// True while a file is read and rendered in the background (<see cref="WaitForOpening"/>): the
+    /// window pumps messages then, and nothing may open another file or apply settings meanwhile.
+    /// </summary>
+    private bool _opening;
+
+    /// <summary>A file larger than this shows <see cref="OpeningDialog"/> at once while it opens.</summary>
+    private const long LargeFileSize = 1024 * 1024;
+
+    /// <summary>How long opening a smaller file may take before <see cref="OpeningDialog"/> shows.</summary>
+    private static readonly TimeSpan OpeningDialogDelay = TimeSpan.FromMilliseconds(500);
+
     /// <summary>True once <see cref="_updateService"/> has been set up (or found impossible).</summary>
     private bool _updatesInitialized;
 
@@ -162,6 +177,7 @@ public partial class MainWindow: Form {
         _announcer = new StatusAnnouncer(statusStrip, statusLabel);
         documentView.MessageReceived += OnPageMessage;
         documentView.AcceleratorKeyDown += OnDocumentAcceleratorKeyDown;
+        documentView.AcceleratorKeyUp += OnDocumentAcceleratorKeyUp;
         SetUpNotesList();
 
         // Drops on the document itself arrive as a page message (the browser handles them);
@@ -215,7 +231,7 @@ public partial class MainWindow: Form {
             EnabledWhen(MenuCommand(edit, _("&Undo"), HostCommand.Undo), () => FileIsThere() && _notes?.Store.CanUndo == true);
             EnabledWhen(MenuCommand(edit, _("&Redo"), HostCommand.Redo), () => FileIsThere() && _notes?.Store.CanRedo == true);
             edit.AddSeparator();
-            EnabledWhen(edit.AddItem(_("&Delete all notes..."), null, DeleteAllNotes), () => FileIsThere() && HasNotes());
+            EnabledWhen(edit.AddItem(_("&Delete all notes"), null, DeleteAllNotes), () => FileIsThere() && HasNotes());
         });
 
         spec.AddSubmenu(_("&View"), view => {
@@ -416,11 +432,14 @@ public partial class MainWindow: Form {
     }
 
     protected override async void OnLoad(EventArgs e) {
+        // The window is not shown yet: it opens where and as large as this says.
+        PlaceWindow();
         base.OnLoad(e);
         NameNotesList();
 
         try {
             await documentView.InitializeAsync();
+            documentView.ZoomFactor = Config.Window.Zoom / 100.0;
             documentView.Navigate(PageFile);
         } catch (Exception ex) {
             Log.Error(ex, "Unable to start the document view");
@@ -441,6 +460,74 @@ public partial class MainWindow: Form {
         if (!String.IsNullOrWhiteSpace(_initialFile)
             && LoadFileAs(_initialFile, position: null, recordHistory: true) == OpenOutcome.OpenElsewhere) {
             Close();
+        }
+    }
+
+    /// <summary>
+    /// Opens the window where the last one closed (<see cref="Config.SectionWindow"/>), moved onto a
+    /// screen that is still there, maximized if it was, with the notes list as wide as it was. A
+    /// first window fits the screen it opens on instead: the designer's size is taller than a
+    /// 1080p screen at 150%, which hid the status bar behind the taskbar.
+    /// </summary>
+    private void PlaceWindow() {
+        var saved = Config.Window;
+        var primary = Screen.PrimaryScreen;
+        var workAreas = Screen.AllScreens
+            .OrderBy(screen => screen.Equals(primary) ? 0 : 1)
+            .Select(screen => screen.WorkingArea)
+            .ToList();
+        var bounds = WindowPlacement.Restore(
+            new Rectangle(saved.Left, saved.Top, saved.Width, saved.Height), workAreas, MinimumSize
+        );
+
+        if (bounds is { } restored) {
+            StartPosition = FormStartPosition.Manual;
+            Bounds = restored;
+        } else {
+            // The designer's size was centered when the handle was made.
+            Size = WindowPlacement.FirstRunSize(Size, Screen.FromPoint(Cursor.Position).WorkingArea);
+            CenterToScreen();
+        }
+
+        var available = splitContainer.Width - splitContainer.SplitterWidth;
+
+        if (WindowPlacement.SplitterDistance(
+                available, saved.NotesListWidth, splitContainer.Panel2MinSize, splitContainer.Panel1MinSize
+            ) is { } distance) {
+            splitContainer.SplitterDistance = distance;
+        }
+
+        if (bounds is not null && saved.Maximized) {
+            WindowState = FormWindowState.Maximized;
+        }
+    }
+
+    /// <summary>
+    /// Saves where the window is for the next one (<see cref="PlaceWindow"/>): its normal bounds
+    /// even while maximized or minimized, the notes list's width (the last one known while it is
+    /// hidden) and the zoom.
+    /// </summary>
+    private void SaveWindowPlacement() {
+        var normal = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
+        var listWidth = IsNotesListVisible
+            ? splitContainer.Width - splitContainer.SplitterWidth - splitContainer.SplitterDistance
+            : Config.Window.NotesListWidth;
+        var zoom = documentView.IsInitialized
+            ? (int)Math.Round(documentView.ZoomFactor * 100)
+            : Config.Window.Zoom;
+
+        var window = new Config.SectionWindow {
+            Left = normal.Left,
+            Top = normal.Top,
+            Width = normal.Width,
+            Height = normal.Height,
+            Maximized = WindowState == FormWindowState.Maximized,
+            NotesListWidth = listWidth,
+            Zoom = zoom,
+        };
+
+        if (!Config.SaveWindow(window)) {
+            Log.Warning("The window's size and place could not be saved");
         }
     }
 
@@ -472,6 +559,12 @@ public partial class MainWindow: Form {
 
     /// <inheritdoc cref="LoadFile"/>
     private OpenOutcome LoadFileAs(string path, BlockInfo? position, bool recordHistory) {
+        if (_opening) {
+            Log.Information("{Path} not opened: another file is opening", path);
+
+            return OpenOutcome.Failed;
+        }
+
         string fullPath;
 
         try {
@@ -511,16 +604,45 @@ public partial class MainWindow: Form {
             }
         }
 
-        MarkdownFile file;
-
         // The document language helps recognize the encoding of a file that is not UTF-8.
         var documentLanguage = reopened ? _documentLanguage : Config.General.DefaultDocumentLanguage;
+        var fileOptions = new MarkdownFileOptions(
+            ConvertToUtf8: Config.Advanced.ConvertToUtf8,
+            DocumentLanguage: documentLanguage
+        );
+        var renderOptions = RenderOptionsFor(documentLanguage);
+
+        // Read, decoded, parsed and rendered off the UI thread, so a large file does not freeze
+        // the window; nothing of the window's state changes until it is done.
+        var work = Task.Run(() => {
+            var opened = MarkdownFile.Open(fullPath, fileOptions);
+            var render = MarkdownRenderer.Render(opened.Text, renderOptions);
+
+            return new PreparedRender(opened.Text, renderOptions, render, opened);
+        });
+
+        if (!WaitForOpening(work, fullPath)) {
+            claim?.Dispose();
+            Log.Information("Opening {Path} canceled", fullPath);
+
+            // Whatever the work still throws is of no interest any more.
+            work.ContinueWith(
+                task => Log.Debug(task.Exception, "Canceled opening of {Path} failed", fullPath),
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted,
+                TaskScheduler.Default
+            );
+            ReturnFocus();
+
+            return OpenOutcome.Failed;
+        }
+
+        MarkdownFile file;
+        PreparedRender prepared;
 
         try {
-            file = MarkdownFile.Open(fullPath, new MarkdownFileOptions(
-                ConvertToUtf8: Config.Advanced.ConvertToUtf8,
-                DocumentLanguage: documentLanguage
-            ));
+            prepared = work.GetAwaiter().GetResult();
+            file = prepared.File;
         } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
             claim?.Dispose();
             Log.Warning(ex, "Unable to open {Path}: not found", path);
@@ -533,6 +655,9 @@ public partial class MainWindow: Form {
             ShowError(_("Unable to open {0}: {1}", path, ex.Message));
 
             return OpenOutcome.Failed;
+        } catch {
+            claim?.Dispose();
+            throw;
         }
 
         if (!reopened) {
@@ -569,7 +694,7 @@ public partial class MainWindow: Form {
             documentView.Navigate(PageFile);
         }
 
-        RenderDocument(opened: !reopened, restorePosition: !reopened);
+        RenderDocument(opened: !reopened, restorePosition: !reopened, prepared: prepared);
         UpdateTitle();
 
         Log.Information(
@@ -588,6 +713,48 @@ public partial class MainWindow: Form {
     }
 
     /// <summary>
+    /// Waits for a file being opened in the background. A large file, or one that takes longer
+    /// than <see cref="OpeningDialogDelay"/>, shows <see cref="OpeningDialog"/> meanwhile.
+    /// </summary>
+    /// <returns>False when the user canceled: the window stays as it was.</returns>
+    private bool WaitForOpening(Task work, string path) {
+        var delay = IsLargeFile(path) ? TimeSpan.Zero : OpeningDialogDelay;
+        _opening = true;
+
+        try {
+            // WhenAny never throws: the caller reads how the work ended.
+            if (Task.WhenAny(work).Wait(delay)) {
+                return true;
+            }
+
+            Log.Information("Opening {Path} takes a while; showing the progress dialog", path);
+
+            using var dialog = new OpeningDialog(Path.GetFileName(path), work);
+
+            return dialog.ShowDialog(this) == DialogResult.OK;
+        } finally {
+            _opening = false;
+        }
+    }
+
+    private static bool IsLargeFile(string path) {
+        try {
+            return new FileInfo(path).Length > LargeFileSize;
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
+                                         or NotSupportedException) {
+            return false;
+        }
+    }
+
+    /// <summary>How the open file is rendered for the window, in <paramref name="documentLanguage"/>.</summary>
+    private RenderOptions RenderOptionsFor(string documentLanguage) => new(
+        _markers,
+        RenderMode.Interactive,
+        LocalizedText.RenderStrings(),
+        documentLanguage
+    );
+
+    /// <summary>
     /// Renders the open file and sends it to the page. Without an explicit
     /// <paramref name="focus"/>, the page goes to the note starting on
     /// <paramref name="focusNoteLine"/>, or to the check box of the task-list item starting on
@@ -601,29 +768,31 @@ public partial class MainWindow: Form {
     /// reported may be far from there, since the page never sees the virtual cursor move; sending
     /// the focus to it (at first the opening block) threw the reader back (Task 10 JAWS check).
     /// </param>
+    /// <param name="prepared">
+    /// The render made in the background while the file opened; used when it was made from the
+    /// file's text with the options this render would use, else the file is rendered again.
+    /// </param>
     private void RenderDocument(
         PageFocus? focus = null,
         int? focusNoteLine = null,
         int? focusTaskLine = null,
         bool opened = false,
-        bool restorePosition = true
+        bool restorePosition = true,
+        PreparedRender? prepared = null
     ) {
         if (_file is null) {
             return;
         }
 
-        var options = new RenderOptions(
-            _markers,
-            RenderMode.Interactive,
-            LocalizedText.RenderStrings(),
-            _documentLanguage
-        );
+        var options = RenderOptionsFor(_documentLanguage);
 
         // Another file starts with nothing selected in the notes list.
         var listSelection = opened ? null : SelectedListNote();
         _renderedText = _file.Text;
         _watcher?.Acknowledge(_renderedText);
-        _render = MarkdownRenderer.Render(_renderedText, options);
+        _render = prepared is not null && ReferenceEquals(prepared.Text, _renderedText) && prepared.Options == options
+            ? prepared.Result
+            : MarkdownRenderer.Render(_renderedText, options);
         _generation++;
 
         if (focus is null && focusNoteLine is { } line
@@ -686,15 +855,24 @@ public partial class MainWindow: Form {
     internal static StringsMessage PageStrings() => new(
         Utils.Localization.GetCurrentCulture().Name,
         TextDirection.IsRightToLeft ? "rtl" : "ltr",
-        _("No file is open.")
+        _("No file is open."),
+        [
+            _("To open a Markdown file, press {0}.", ShortcutOf(HostCommand.Open)),
+            _("To open one from a link, press {0}.", ShortcutOf(HostCommand.OpenFromLink)),
+            _("You can also drag a Markdown file here."),
+            _("For the user manual, press {0}.", ShortcutOf(HostCommand.UserManual)),
+        ]
     );
+
+    /// <summary>The key a command's menu item shows, for text that names it.</summary>
+    private static string ShortcutOf(HostCommand command) => HostCommands.MenuShortcut(command) ?? String.Empty;
 
     /// <summary>Tells the user what is special about the file just opened, if anything.</summary>
     private void AnnounceFileState(MarkdownFile file) {
         var messages = new List<string>();
 
         if (file.ConvertedFrom is { } convertedFrom) {
-            messages.Add(_("Converted from {0} to UTF-8.", LegacyEncoding.DisplayName(convertedFrom)));
+            messages.Add(_("The file was converted from {0} to UTF-8.", LegacyEncoding.DisplayName(convertedFrom)));
         } else if (LocalizedText.ReadOnlyReason(file) is { } readOnly) {
             messages.Add(readOnly);
         }
@@ -739,12 +917,59 @@ public partial class MainWindow: Form {
     /// <summary>
     /// Host shortcuts pressed in the document. The WebView2 control reports them as a
     /// <c>KeyDown</c> from inside a browser event, bypassing the message loop, the native menu's
-    /// accelerator table and <see cref="ProcessCmdKey"/>.
+    /// accelerator table and <see cref="ProcessCmdKey"/>. For the same reason Windows never sees
+    /// the keys that enter the menu bar there: Alt+letter and F10 are handed to it here
+    /// (<see cref="MenuKeys"/>), after the host commands, so Alt+Shift+Down and the rest keep theirs.
     /// </summary>
     private void OnDocumentAcceleratorKeyDown(object? sender, KeyEventArgs e) {
+        var menuAction = _menuKeys.KeyDown(e.KeyData);
+
         if (TryRunShortcut(e.KeyData, fromDocument: true)) {
             e.Handled = true;
+            return;
         }
+
+        e.Handled = EnterMenuBar(menuAction, e.KeyData);
+    }
+
+    /// <summary>Alt released alone in the document enters the menu bar, as it does elsewhere in Windows.</summary>
+    private void OnDocumentAcceleratorKeyUp(object? sender, KeyEventArgs e) =>
+        e.Handled = EnterMenuBar(_menuKeys.KeyUp(e.KeyData), e.KeyData);
+
+    /// <summary>
+    /// Enters the menu bar the way Windows does for a key it sees itself: <c>WM_SYSCOMMAND</c> with
+    /// <c>SC_KEYMENU</c>, the mnemonic's character for Alt+letter (a menu without that mnemonic
+    /// beeps, as it does elsewhere), none for Alt alone and F10. Posted: the key came from inside a
+    /// WebView2 event, and the menu's loop must not run inside it.
+    /// </summary>
+    /// <returns>True when the menu bar takes the key, which then does not reach the page.</returns>
+    private bool EnterMenuBar(MenuKeyAction action, Keys keyData) {
+        const int WM_SYSCOMMAND = 0x0112;
+        const int SC_KEYMENU = 0xF100;
+
+        if (action == MenuKeyAction.None || !IsHandleCreated) {
+            return false;
+        }
+
+        var character = '\0';
+
+        if (action == MenuKeyAction.OpenMenu) {
+            if (MenuKeys.CharacterOf(keyData & Keys.KeyCode) is not { } typed) {
+                return false;
+            }
+
+            character = typed;
+        }
+
+        Log.Debug("Menu bar entered from the document by {Keys}", keyData);
+
+        return NativeMethods.PostMessage(Handle, WM_SYSCOMMAND, (IntPtr)SC_KEYMENU, (IntPtr)character);
+    }
+
+    /// <summary>An Alt pressed here and released in another window does not enter this window's menu.</summary>
+    protected override void OnDeactivate(EventArgs e) {
+        base.OnDeactivate(e);
+        _menuKeys.Reset();
     }
 
     private bool TryRunShortcut(Keys keyData, bool fromDocument = false) {
@@ -1326,11 +1551,11 @@ public partial class MainWindow: Form {
         var spec = new NativeMenuSpec();
 
         if (addNote is not null) {
-            spec.Add(_("&Add note"), addNote);
+            spec.Add(_("&Add note..."), addNote);
         }
 
         if (editNote is not null) {
-            spec.Add(_("&Edit note"), editNote);
+            spec.Add(_("&Edit note..."), editNote);
         }
 
         if (deleteNote is not null) {
@@ -1381,7 +1606,7 @@ public partial class MainWindow: Form {
             _announcer.Announce(_("Block text copied"));
         } catch (ExternalException ex) {
             Log.Error(ex, "Unable to copy the block text to the clipboard");
-            _announcer.Announce(_("Unable to copy to the clipboard."));
+            _announcer.Announce(_("Unable to copy to the clipboard"));
         }
     }
 
@@ -1541,7 +1766,7 @@ public partial class MainWindow: Form {
             content = ClipboardClassifier.Classify(ClipboardDropList(), Clipboard.ContainsText() ? Clipboard.GetText() : null);
         } catch (ExternalException ex) {
             Log.Warning(ex, "Unable to read the clipboard");
-            _announcer.Announce(_("Unable to read the clipboard."));
+            _announcer.Announce(_("Unable to read the clipboard"));
 
             return;
         }
@@ -1752,7 +1977,7 @@ public partial class MainWindow: Form {
         Log.Information("Exported {Count} notes of {Path} to {Output}", count, _file.Path, dialog.FileName);
         ReturnFocus();
         _announcer.Announce(_n(
-            "Exported {0} note to {1}.", "Exported {0} notes to {1}.", count, count, Path.GetFileName(dialog.FileName)
+            "Exported {0} note to {1}", "Exported {0} notes to {1}", count, count, Path.GetFileName(dialog.FileName)
         ));
     }
 
@@ -1867,7 +2092,7 @@ public partial class MainWindow: Form {
                 _fileMissing = false;
 
                 if (Reload(fromOutside: true)) {
-                    _announcer.Announce(_("{0} is back. File reloaded", name));
+                    _announcer.Announce(_("{0} is back and was reloaded.", name));
                 }
 
                 break;
@@ -2061,7 +2286,8 @@ public partial class MainWindow: Form {
     }
 
     private void ReloadSettingsIfChanged() {
-        if (StartupFailed || IsDisposed) {
+        // While a file opens, the next activation applies them.
+        if (StartupFailed || IsDisposed || _opening) {
             return;
         }
 
@@ -2207,10 +2433,15 @@ public partial class MainWindow: Form {
     /// <summary>True while the notes list is shown and has the keyboard focus.</summary>
     private bool IsNotesListFocused => IsNotesListVisible && notesList.ContainsFocus;
 
+    /// <summary>
+    /// The columns Note, Lines and Block: the note first, filling the width the other two leave
+    /// (<see cref="NotesListView.FitFirstColumn"/>), with the whole note as the row's info tip.
+    /// </summary>
     private void SetUpNotesList() {
-        notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(60)));
         notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(200)));
-        notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(300)));
+        notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(60)));
+        notesList.Columns.Add(new NativeListViewColumn(String.Empty, LogicalToDeviceUnits(120)));
+        notesList.InfoTip = item => item.Tag is RenderedNote note ? NotesListRow.TipText(note) : null;
         LocalizeNotesList();
 
         notesList.ItemActivate += OnNotesListItemActivate;
@@ -2233,9 +2464,9 @@ public partial class MainWindow: Form {
     /// a <see cref="NativeListView"/>-typed reference.
     /// </summary>
     private void LocalizeNotesList() {
-        notesList.Columns[0].Text = _("Lines");
-        notesList.Columns[1].Text = _("Block");
-        notesList.Columns[2].Text = _("Note");
+        notesList.Columns[0].Text = _("Note");
+        notesList.Columns[1].Text = _("Lines");
+        notesList.Columns[2].Text = _("Block");
         notesList.AccessibleName = _("Notes");
         _notesListName = null;
         NameNotesList();
@@ -2268,7 +2499,7 @@ public partial class MainWindow: Form {
     /// which check its mnemonics in every catalog.
     /// </summary>
     internal static NativeMenuSpec NotesListMenuSpec(Action editNote, Action deleteNote) => new NativeMenuSpec()
-        .Add(_("&Edit note"), editNote)
+        .Add(_("&Edit note..."), editNote)
         .Add(_("&Delete note"), deleteNote);
 
     /// <summary>
@@ -2316,6 +2547,9 @@ public partial class MainWindow: Form {
             } finally {
                 notesList.EndUpdate();
             }
+
+            // Rows added or removed may show or hide the scroll bar.
+            notesList.FitFirstColumn();
         }
 
         if (selected is not null && selected.Index < notesList.Items.Count) {
@@ -2482,9 +2716,14 @@ public partial class MainWindow: Form {
     private NoteTarget CurrentTarget(RenderedNote note) => new(_generation, _renderedText, note.Block, note);
 
     protected override void OnFormClosed(FormClosedEventArgs e) {
+        if (!StartupFailed) {
+            SaveWindowPlacement();
+        }
+
         _download?.Cancel();
         documentView.MessageReceived -= OnPageMessage;
         documentView.AcceleratorKeyDown -= OnDocumentAcceleratorKeyDown;
+        documentView.AcceleratorKeyUp -= OnDocumentAcceleratorKeyUp;
         notesList.ItemActivate -= OnNotesListItemActivate;
         notesList.KeyDown -= OnNotesListKeyDown;
         notesList.GotFocus -= OnNotesListGotFocus;
@@ -2516,6 +2755,11 @@ public partial class MainWindow: Form {
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool IsWindowEnabled(IntPtr window);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool PostMessage(IntPtr window, int message, IntPtr wParam, IntPtr lParam);
     }
 }
 
@@ -2537,6 +2781,13 @@ internal sealed record AppliedSettings(
     NoteMarkers Markers,
     bool ConvertToUtf8
 );
+
+/// <summary>A file opened and rendered in the background, for the window to show.</summary>
+/// <param name="Text">The file text the render was made from.</param>
+/// <param name="Options">The options it was rendered with.</param>
+/// <param name="Result">The render.</param>
+/// <param name="File">The file.</param>
+internal sealed record PreparedRender(string Text, RenderOptions Options, RenderResult Result, MarkdownFile File);
 
 /// <summary>A note text kept after the file changed under it, for the next attempt on the same block or note.</summary>
 /// <param name="Mode">Whether it was a new note or an edit.</param>

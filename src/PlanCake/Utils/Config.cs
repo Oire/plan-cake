@@ -10,9 +10,10 @@ namespace Oire.PlanCake.Utils;
 /// <summary>
 /// Static configuration container backed by an INI file under <see cref="App.DataFolder"/>
 /// (<c>PlanCake.cfg</c>, sections <c>[General]</c>, <c>[Notes]</c> and <c>[Advanced]</c>; Technical
-/// details → "Settings" in the plan). Call <see cref="Load"/> once at startup, <see cref="Reload"/>
-/// to read it again while running, and <see cref="Save"/> whenever a section changes. The section properties are safe to read from any thread once
-/// <see cref="Load"/> has returned.
+/// details → "Settings" in the plan), and <c>[Window]</c>, where the window was when it last
+/// closed. Call <see cref="Load"/> once at startup, <see cref="Reload"/> to read it again while
+/// running, and <see cref="Save"/> whenever a section changes. The section properties are safe to
+/// read from any thread once <see cref="Load"/> has returned.
 /// </summary>
 /// <remarks>
 /// No method throws and none shows a dialog: configuration is a convenience, not a
@@ -53,6 +54,8 @@ internal static class Config {
     public static SectionNotes Notes { get; private set; } = new();
 
     public static SectionAdvanced Advanced { get; private set; } = new();
+
+    public static SectionWindow Window { get; private set; } = new();
 
     /// <summary>
     /// The last-write time of the file when this process last read or wrote it, so that
@@ -126,6 +129,34 @@ internal static class Config {
         public bool ConvertToUtf8 { get; set; }
     }
 
+    /// <summary>
+    /// Where the window was when it last closed, so the next one opens the same way; not a setting
+    /// the Settings dialog shows. Every window is a process, and the last one closed wins. A width
+    /// or height of 0 means nothing was saved yet: the window then fits the screen it opens on.
+    /// </summary>
+    public class SectionWindow {
+        /// <summary>The left edge of the window's normal (not maximized) bounds, in screen pixels.</summary>
+        public int Left { get; set; }
+
+        /// <summary>The top edge of the window's normal bounds, in screen pixels.</summary>
+        public int Top { get; set; }
+
+        /// <summary>The width of the window's normal bounds, in pixels; 0 when none was saved.</summary>
+        public int Width { get; set; }
+
+        /// <summary>The height of the window's normal bounds, in pixels; 0 when none was saved.</summary>
+        public int Height { get; set; }
+
+        /// <summary>Whether the window was maximized.</summary>
+        public bool Maximized { get; set; }
+
+        /// <summary>The width of the notes list, in pixels; 0 when none was saved.</summary>
+        public int NotesListWidth { get; set; }
+
+        /// <summary>The document's zoom, in percent.</summary>
+        public int Zoom { get; set; } = 100;
+    }
+
     #endregion
 
     /// <summary>
@@ -163,11 +194,14 @@ internal static class Config {
             var general = ReadSection<SectionGeneral>(cfg, nameof(General));
             var notes = ReadSection<SectionNotes>(cfg, nameof(Notes));
             var advanced = ReadSection<SectionAdvanced>(cfg, nameof(Advanced));
+            var window = ReadSection<SectionWindow>(cfg, nameof(Window));
             Normalize(general, notes);
+            Normalize(window);
 
             General = general;
             Notes = notes;
             Advanced = advanced;
+            Window = window;
             _knownStamp = stamp;
 
             return true;
@@ -202,6 +236,7 @@ internal static class Config {
                 Section.FromObject(nameof(General), General),
                 Section.FromObject(nameof(Notes), Notes),
                 Section.FromObject(nameof(Advanced), Advanced),
+                Section.FromObject(nameof(Window), Window),
             };
 
             // Every window is a process of its own and reads the file again (Settings, View →
@@ -281,6 +316,22 @@ internal static class Config {
         return read && Save();
     }
 
+    /// <summary>
+    /// The window closes: reads the file again (another window may have saved settings since this
+    /// one read it), stores where the window was, and saves. When the file cannot be read it is
+    /// left alone, as for <see cref="SaveLanguage"/>.
+    /// </summary>
+    /// <returns><c>true</c> when the file was written.</returns>
+    public static bool SaveWindow(SectionWindow window) {
+        ArgumentNullException.ThrowIfNull(window);
+
+        var read = Reload();
+        Normalize(window);
+        Window = window;
+
+        return read && Save();
+    }
+
     /// <summary>How many times a file another window is replacing is read again before giving up.</summary>
     private const int LoadRetries = 3;
 
@@ -303,6 +354,7 @@ internal static class Config {
         General = new SectionGeneral();
         Notes = new SectionNotes();
         Advanced = new SectionAdvanced();
+        Window = new SectionWindow();
     }
 
     /// <summary>
@@ -341,6 +393,29 @@ internal static class Config {
 
         return section;
     }
+
+    /// <summary>
+    /// A size that is not positive means none was saved, and a zoom out of the document's range
+    /// is reset; where the window lands on the screens is checked when it opens.
+    /// </summary>
+    private static void Normalize(SectionWindow window) {
+        if (window.Width <= 0 || window.Height <= 0) {
+            window.Width = 0;
+            window.Height = 0;
+        }
+
+        window.NotesListWidth = Math.Max(0, window.NotesListWidth);
+
+        if (window.Zoom is < MinimumZoom or > MaximumZoom) {
+            window.Zoom = 100;
+        }
+    }
+
+    /// <summary>The smallest zoom the document takes, in percent.</summary>
+    public const int MinimumZoom = 50;
+
+    /// <summary>The largest zoom the document takes, in percent.</summary>
+    public const int MaximumZoom = 300;
 
     /// <summary>Replaces values that were read but cannot be used with their defaults.</summary>
     private static void Normalize(SectionGeneral general, SectionNotes notes) {

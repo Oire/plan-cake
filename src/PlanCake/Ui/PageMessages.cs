@@ -29,7 +29,13 @@ internal sealed record RenderMessage(string Html, int Generation, string Documen
 /// <param name="UiLang">The interface language, for <c>&lt;html lang&gt;</c>.</param>
 /// <param name="UiDir"><c>ltr</c> or <c>rtl</c>, for <c>&lt;html dir&gt;</c>.</param>
 /// <param name="NoDocument">What the page shows while no file is open.</param>
-internal sealed record StringsMessage(string UiLang, string UiDir, string NoDocument) {
+/// <param name="NoDocumentHints">The ways to open a file the page lists under it, with their keys.</param>
+internal sealed record StringsMessage(
+    string UiLang,
+    string UiDir,
+    string NoDocument,
+    IReadOnlyList<string> NoDocumentHints
+) {
     public string Type { get; } = "strings";
 }
 

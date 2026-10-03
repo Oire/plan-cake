@@ -153,9 +153,9 @@ public class MarkdownRendererTests {
         var result = Render("- [x] done\n- [ ] todo\n");
 
         result.Html.Should().Contain(
-            """<li class="task-list-item" dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" checked="checked" /> done</li>"""
+            """<li class="task-list-item" dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" aria-label="done" checked="checked" /> done</li>"""
         ).And.Contain(
-            """<li class="task-list-item" dir="auto" data-lines="2-2"><input data-plancake-task="true" type="checkbox" /> todo</li>"""
+            """<li class="task-list-item" dir="auto" data-lines="2-2"><input data-plancake-task="true" type="checkbox" aria-label="todo" /> todo</li>"""
         );
         result.Html.Should().NotContain("disabled");
         Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "2-2");
@@ -166,23 +166,29 @@ public class MarkdownRendererTests {
         var result = Render("- [ ] one\n\n- [x] two\n");
 
         result.Html.Should().Contain(
-            """<p dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" /> one</p>"""
+            """<p dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" aria-label="one" /> one</p>"""
         );
         Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "3-3");
     }
 
     // Partially checked parents
 
-    private const string Unchecked = """<input data-plancake-task="true" type="checkbox" />""";
-    private const string Mixed = """<input data-plancake-task="true" type="checkbox" data-mixed="true" />""";
-    private const string Checked = """<input data-plancake-task="true" type="checkbox" checked="checked" />""";
+    // A check box named after its item, then the item's text.
+    private static string Unchecked(string text) =>
+        $"""<input data-plancake-task="true" type="checkbox" aria-label="{text}" /> {text}""";
+
+    private static string Mixed(string text) =>
+        $"""<input data-plancake-task="true" type="checkbox" data-mixed="true" aria-label="{text}" /> {text}""";
+
+    private static string Checked(string text) =>
+        $"""<input data-plancake-task="true" type="checkbox" aria-label="{text}" checked="checked" /> {text}""";
 
     [Fact]
     public void Render_TaskParentWithOneOfTwoChildrenChecked_IsMixed() {
         var result = Render("- [ ] parent\n  - [x] one\n  - [ ] two\n");
 
-        result.Html.Should().Contain(Mixed + " parent");
-        result.Html.Should().Contain(Checked + " one").And.Contain(Unchecked + " two");
+        result.Html.Should().Contain(Mixed("parent"));
+        result.Html.Should().Contain(Checked("one")).And.Contain(Unchecked("two"));
         result.Html.Split("data-mixed").Should().HaveCount(2);
     }
 
@@ -198,15 +204,15 @@ public class MarkdownRendererTests {
     public void Render_CheckedTaskParent_StaysCheckedWhateverItsChildren() {
         var result = Render("- [x] parent\n  - [x] one\n  - [ ] two\n");
 
-        result.Html.Should().Contain(Checked + " parent").And.NotContain("data-mixed");
+        result.Html.Should().Contain(Checked("parent")).And.NotContain("data-mixed");
     }
 
     [Fact]
     public void Render_Grandchild_CountsAsADescendant() {
         var result = Render("- [ ] parent\n  - [ ] child\n    - [x] grandchild\n");
 
-        result.Html.Should().Contain(Mixed + " parent");
-        result.Html.Should().Contain(Unchecked + " child");
+        result.Html.Should().Contain(Mixed("parent"));
+        result.Html.Should().Contain(Unchecked("child"));
         result.Html.Split("data-mixed").Should().HaveCount(2);
     }
 
@@ -214,7 +220,9 @@ public class MarkdownRendererTests {
     public void Render_MixedParentInExport_IsAriaCheckedMixed() {
         var result = Render("- [ ] parent\n  - [x] one\n  - [ ] two\n", RenderMode.Export);
 
-        result.Html.Should().Contain("""<input disabled="disabled" type="checkbox" aria-checked="mixed" /> parent""");
+        result.Html.Should().Contain(
+            """<input disabled="disabled" type="checkbox" aria-checked="mixed" aria-label="parent" /> parent"""
+        );
         result.Html.Should().NotContain("data-mixed");
     }
 
@@ -222,9 +230,29 @@ public class MarkdownRendererTests {
     public void Render_TaskListExport_CheckboxesStayDisabled() {
         var result = Render("- [x] done\n- [ ] todo\n", RenderMode.Export);
 
-        result.Html.Should().Contain("""<input disabled="disabled" type="checkbox" checked="checked" />""")
-            .And.Contain("""<input disabled="disabled" type="checkbox" />""");
+        result.Html.Should().Contain("""<input disabled="disabled" type="checkbox" aria-label="done" checked="checked" />""")
+            .And.Contain("""<input disabled="disabled" type="checkbox" aria-label="todo" />""");
         result.Html.Should().NotContain("data-plancake-task");
+    }
+
+    [Fact]
+    public void Render_TaskCheckbox_IsNamedAfterItsItemWithoutTheMarker() {
+        var result = Render("- [ ] Fix \"quotes\" & **bold** text\n");
+
+        result.Html.Should().Contain(
+            """<input data-plancake-task="true" type="checkbox" aria-label="Fix &quot;quotes&quot; &amp; bold text" />"""
+        );
+    }
+
+    [Fact]
+    public void Render_LongTaskItem_NamesItsCheckboxWithTheExcerpt() {
+        var words = String.Join(' ', Enumerable.Repeat("word", 30));
+
+        var result = Render($"- [x] {words}\n");
+
+        var label = TaskToggle.WithoutMarker(result.Blocks[0].Excerpt);
+        label.Should().EndWith("…");
+        result.Html.Should().Contain($"""aria-label="{label}" checked="checked" />""");
     }
 
     [Fact]
@@ -518,6 +546,73 @@ public class MarkdownRendererTests {
 
         excerpt.Should().HaveLength(MarkdownRenderer.ExcerptLength).And.EndWith("…");
         words.Should().StartWith(excerpt[..^1].TrimEnd());
+    }
+
+    [Fact]
+    public void Excerpt_LongText_IsCutAtTheEndOfAWord() {
+        // Words of eight letters: the 79 characters before the ellipsis end inside the ninth word.
+        var text = String.Join(' ', Enumerable.Repeat("abcdefgh", 12));
+
+        var excerpt = MarkdownRenderer.Excerpt(text);
+
+        excerpt.Should().Be(String.Join(' ', Enumerable.Repeat("abcdefgh", 8)) + "…");
+    }
+
+    [Fact]
+    public void Excerpt_WordLongerThanHalfTheExcerpt_IsCutWhereItMust() {
+        var text = "See https://example.com/" + new string('a', 100);
+
+        var excerpt = MarkdownRenderer.Excerpt(text);
+
+        excerpt.Should().HaveLength(MarkdownRenderer.ExcerptLength).And.EndWith("a…");
+    }
+
+    [Theory]
+    [InlineData("Check this. And that.", "Check this.")]
+    [InlineData("Really? Yes.", "Really?")]
+    [InlineData("Stop! Now.", "Stop!")]
+    [InlineData("He said \"go.\" Then left.", "He said \"go.\"")]
+    [InlineData("Use it (see the plan.) Then more.", "Use it (see the plan.)")]
+    [InlineData("Wait… What?", "Wait…")]
+    [InlineData("One sentence without an end", "One sentence without an end")]
+    [InlineData("Ends with a stop.", "Ends with a stop.")]
+    [InlineData("Use e.g. this one. Then more.", "Use e.g. this one.")]
+    [InlineData("Version 1.2 is out. Upgrade.", "Version 1.2 is out.")]
+    [InlineData("First line\nsecond line. Third.", "First line second line.")]
+    [InlineData("これは文です。次の文。", "これは文です。")]
+    [InlineData("זה משפט. ועוד אחד.", "זה משפט.")]
+    public void FirstSentence_EndsAtTheFirstSentenceEnd(string text, string expected) =>
+        MarkdownRenderer.FirstSentence(text).Should().Be(expected);
+
+    [Fact]
+    public void FirstSentence_TooLong_IsCutAtTheEndOfAWord() {
+        var text = String.Join(' ', Enumerable.Repeat("abcdefghi", 20)) + ". Next.";
+
+        var sentence = MarkdownRenderer.FirstSentence(text);
+
+        sentence.Should().EndWith("abcdefghi…");
+        sentence.Length.Should().BeLessThanOrEqualTo(MarkdownRenderer.SentenceLength);
+    }
+
+    // Footnotes in plain text
+
+    [Fact]
+    public void Render_Footnote_ExcerptAndTextLeaveTheBackLinkOut() {
+        var result = Render("Text[^1].\n\n[^1]: The footnote.\n");
+
+        var footnote = result.Blocks.Single(block => block.StartLine == 3);
+        footnote.Text.Should().Be("The footnote.");
+        footnote.Excerpt.Should().Be("The footnote.");
+    }
+
+    [Fact]
+    public void Render_FootnoteReference_IsItsNumberInBracketsInPlainText() {
+        var result = Render("Text[^note] here.\n\n[^note]: The footnote.\n");
+
+        var paragraph = result.Blocks.Single(block => block.StartLine == 1);
+        paragraph.Text.Should().Be("Text[1] here.");
+        paragraph.Excerpt.Should().NotContain("<");
+        result.Html.Should().Contain("footnote-back-ref", "the page itself still links back");
     }
 
     [Fact]

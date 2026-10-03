@@ -13,6 +13,7 @@
     --note-border: #8a6d00;
     --note-background: #fff8dc;
     --note-text: #1f1f1f;
+    --hover-background: #eef3fb;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,6 +27,7 @@
         --note-border: #e0b400;
         --note-background: #3a3217;
         --note-text: #f2f2f2;
+        --hover-background: #2a3038;
     }
 }
 
@@ -117,8 +119,24 @@ li.task-list-item {
     list-style: none;
 }
 
-li.task-list-item > input[type="checkbox"] {
-    margin-inline-end: 0.4em;
+/* Larger than the browser's 13 pixels, so a click that just misses it does not land on the
+   item, which would add a note instead. */
+li.task-list-item input[type="checkbox"] {
+    width: 1.1em;
+    height: 1.1em;
+    margin-block: 0;
+    margin-inline: 0 0.5em;
+    vertical-align: -0.15em;
+}
+
+/* A click anywhere on a block adds a note to it (app.js): the block under the pointer shows it,
+   the innermost one only, and not while the pointer is on a note inside it. */
+[data-lines] {
+    cursor: pointer;
+}
+
+[data-lines]:hover:not(:has([data-lines]:hover, .note:hover)) {
+    background: var(--hover-background);
 }
 
 img {
@@ -177,6 +195,19 @@ td .note {
         background: Canvas;
         color: CanvasText;
         forced-color-adjust: none;
+    }
+
+    /* forced-color-adjust is inherited: without this, a link in a note kept the authored blue
+       instead of the theme's link color. */
+    .note a {
+        color: LinkText;
+    }
+
+    /* Backgrounds are the theme's in forced colors: the block under the pointer gets a thin
+       dashed outline instead, unless it shows the focus outline. */
+    [data-lines]:hover:not(:has([data-lines]:hover, .note:hover)):not(:focus, [data-plancake-current]) {
+        outline: 1px dashed CanvasText;
+        outline-offset: 2px;
     }
 
     :focus-visible,
