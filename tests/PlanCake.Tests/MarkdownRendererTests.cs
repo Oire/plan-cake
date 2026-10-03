@@ -558,6 +558,51 @@ public class MarkdownRendererTests {
     }
 
     [Fact]
+    public void Excerpt_SeveralSentences_KeepsTheFirst() =>
+        MarkdownRenderer.Excerpt("Back up the database. Then the uploads.").Should().Be("Back up the database.");
+
+    [Theory]
+    [InlineData(",")]
+    [InlineData(";")]
+    [InlineData(":")]
+    [InlineData(" —")]
+    [InlineData(" –")]
+    [InlineData(" -")]
+    public void Excerpt_LongSentence_IsCutAtItsLastPause(string pause) {
+        const string Clause = "Back up the database and the uploads folder on the production server";
+        var text = $"{Clause}{pause} then restore both of them on the staging server and compare them";
+
+        MarkdownRenderer.Excerpt(text).Should().Be(Clause + "…");
+    }
+
+    [Fact]
+    public void Excerpt_NumbersAndTimes_AreNotPauses() {
+        var text = "Copy 1,000 files at 10:30 from the old production server to the new one and "
+            + "check every one of them twice";
+
+        var excerpt = MarkdownRenderer.Excerpt(text);
+
+        excerpt.Should().StartWith("Copy 1,000 files at 10:30 from the old production server").And.EndWith("…");
+    }
+
+    [Fact]
+    public void Excerpt_PauseTooEarly_IsCutAtTheEndOfAWordInstead() {
+        var text = "First, " + String.Join(' ', Enumerable.Repeat("abcdefgh", 12));
+
+        var excerpt = MarkdownRenderer.Excerpt(text);
+
+        excerpt.Should().NotBe("First…").And.EndWith("abcdefgh…");
+    }
+
+    [Fact]
+    public void FirstSentence_TooLong_IsCutAtItsLastPause() {
+        var clause = String.Join(' ', Enumerable.Repeat("abcdefghi", 10));
+        var text = $"{clause}; {String.Join(' ', Enumerable.Repeat("abcdefghi", 10))}. Next.";
+
+        MarkdownRenderer.FirstSentence(text).Should().Be(clause + "…");
+    }
+
+    [Fact]
     public void Excerpt_WordLongerThanHalfTheExcerpt_IsCutWhereItMust() {
         var text = "See https://example.com/" + new string('a', 100);
 

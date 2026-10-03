@@ -542,24 +542,27 @@ internal static partial class MarkdownRenderer {
     }
 
     /// <summary>
-    /// Makes a one-line excerpt of <paramref name="text"/>: whitespace runs become one space, and
-    /// text longer than <see cref="ExcerptLength"/> is cut to fit at the end of a word, with an
-    /// ellipsis.
+    /// Makes a one-line excerpt of <paramref name="text"/>: its first sentence (see
+    /// <see cref="FirstSentence"/>), whitespace runs made one space, and a sentence longer than
+    /// <see cref="ExcerptLength"/> cut at a pause in it or at the end of a word (see
+    /// <see cref="Shorten"/>).
     /// </summary>
-    internal static string Excerpt(string text) => Shorten(OneLine(text), ExcerptLength);
+    internal static string Excerpt(string text) => Shorten(SentenceOf(OneLine(text)), ExcerptLength);
 
     /// <summary>
     /// The first sentence of <paramref name="text"/> on one line, for a cell that shows the start
     /// of a note: up to the first full stop, question mark, exclamation mark or ellipsis followed by
     /// a space and not by a lowercase letter (so <c>e.g. this</c> goes on), with any closing quote
     /// or bracket after it. A text without such an end is a sentence of its own. A sentence longer
-    /// than <see cref="SentenceLength"/> is cut at the end of a word, with an ellipsis.
+    /// than <see cref="SentenceLength"/> is cut at a pause in it or at the end of a word (see
+    /// <see cref="Shorten"/>).
     /// </summary>
-    internal static string FirstSentence(string text) {
-        var line = OneLine(text);
+    internal static string FirstSentence(string text) => Shorten(SentenceOf(OneLine(text)), SentenceLength);
+
+    private static string SentenceOf(string line) {
         var end = SentenceEnd(line);
 
-        return Shorten(end < 0 ? line : line[..end], SentenceLength);
+        return end < 0 ? line : line[..end];
     }
 
     /// <summary>The text on one line: every run of whitespace becomes one space, none at either end.</summary>
@@ -568,8 +571,11 @@ internal static partial class MarkdownRenderer {
 
     /// <summary>
     /// <paramref name="line"/> cut to at most <paramref name="maxLength"/> characters, ellipsis
-    /// included: at the last space that leaves at least half of it, so no word is cut in two; a
-    /// single word longer than that (a link, say) is cut where it must, never inside a surrogate pair.
+    /// included. The cut goes, in order of preference, at the last pause in the sentence (a comma,
+    /// semicolon or colon followed by a space, or a dash between spaces, the pause itself left out),
+    /// then at the last space, as long as either leaves at least half of the length, so no word is
+    /// cut in two; a single word longer than that (a link, say) is cut where it must, never inside a
+    /// surrogate pair.
     /// </summary>
     private static string Shorten(string line, int maxLength) {
         if (line.Length <= maxLength) {
@@ -582,11 +588,37 @@ internal static partial class MarkdownRenderer {
             limit--;
         }
 
+        var pause = LastPause(line, limit);
+
         // A space at the limit itself means the word before it ends there.
         var space = line.LastIndexOf(' ', limit);
-        var cut = space >= limit / 2 ? space : limit;
+        var cut = pause >= limit / 2 ? pause : space >= limit / 2 ? space : limit;
 
         return String.Concat(line.AsSpan(0, cut).TrimEnd(), "…");
+    }
+
+    /// <summary>
+    /// Where the last pause before <paramref name="limit"/> starts in <paramref name="line"/>, or -1:
+    /// a comma, semicolon or colon (Latin or full-width) with a space after it, or the space before a
+    /// dash that has spaces around it. A comma inside a number (<c>1,000</c>) or a colon inside a
+    /// time (<c>10:30</c>) has no space after it, so it is not a pause.
+    /// </summary>
+    private static int LastPause(string line, int limit) {
+        for (var i = Math.Min(limit, line.Length - 2); i > 0; i--) {
+            if (line[i] is '，' or '；' or '：') {
+                return i;
+            }
+
+            if (line[i] is ',' or ';' or ':' && line[i + 1] == ' ') {
+                return i;
+            }
+
+            if (line[i] == ' ' && i + 2 < line.Length && line[i + 1] is '—' or '–' or '-' && line[i + 2] == ' ') {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     /// <summary>
