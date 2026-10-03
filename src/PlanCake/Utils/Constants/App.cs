@@ -17,7 +17,6 @@ internal static class App {
     /// </summary>
     public const string Name = "PlanCake";
     public const string ManufacturerNameShort = "Oire";
-    public const string ManufacturerNameFull = "Oire Software";
     public const string ConfigFileExtension = "cfg";
 
     /// <summary>The source repository, linked from the About dialog.</summary>
