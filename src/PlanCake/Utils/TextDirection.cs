@@ -36,13 +36,13 @@ internal static class TextDirection {
 
     /// <summary>
     /// Text from the document, written by the user or kept in English (a block's excerpt, a note,
-    /// the copyright line), to be shown in the interface. In a right-to-left interface, text that starts left to right (an English
-    /// excerpt) is wrapped in LEFT-TO-RIGHT EMBEDDING (U+202A) and POP DIRECTIONAL FORMATTING
-    /// (U+202C), so it keeps its own direction and its punctuation stays where it was written: its
-    /// final period or ellipsis no longer jumps to its start. Text that starts right to left already
-    /// runs with the interface, and a left-to-right interface reorders nothing, so they are left
-    /// alone. Not the isolates of Unicode 6.3 (U+2068, U+2069): GDI, which draws labels, list
-    /// views and message boxes, shows them as boxes.
+    /// the copyright line), to be shown in the interface. In a right-to-left interface, text that
+    /// starts left to right (an English excerpt) is wrapped in LEFT-TO-RIGHT EMBEDDING (U+202A) and
+    /// POP DIRECTIONAL FORMATTING (U+202C), so it keeps its own direction and its punctuation stays
+    /// where it was written: its final period or ellipsis no longer jumps to its start. Text that
+    /// starts right to left already runs with the interface, and a left-to-right interface reorders
+    /// nothing, so they are left alone. Not the isolates of Unicode 6.3 (U+2068, U+2069): GDI,
+    /// which draws labels, list views and message boxes, shows them as boxes.
     /// </summary>
     public static string Embed(string text) {
         ArgumentNullException.ThrowIfNull(text);

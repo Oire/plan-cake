@@ -30,22 +30,6 @@ public class LocalizationTests: IDisposable {
     }
 
     [Fact]
-    public void SetLanguage_RaisesLanguageChanged() {
-        var raised = false;
-        EventHandler handler = (_, _) => raised = true;
-
-        Localization.LanguageChanged += handler;
-
-        try {
-            Localization.SetLanguage(App.SystemLanguageName);
-        } finally {
-            Localization.LanguageChanged -= handler;
-        }
-
-        raised.Should().BeTrue();
-    }
-
-    [Fact]
     public void Underscore_WithNoCatalog_ReturnsTheSourceString() {
         Localization.SetLanguage("en-US");
 

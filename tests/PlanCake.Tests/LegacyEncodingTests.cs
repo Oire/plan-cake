@@ -37,7 +37,10 @@ public class LegacyEncodingTests: IDisposable {
     private const string Hebrew = "# בדיקת קידוד\n\nהקובץ הזה בקידוד Windows-1255. שלום עולם.\n";
     private const string French = "# Vérification\n\nCe fichier est encodé en Windows-1252 : élève, où, déjà, ça, « œuvre ».\n";
 
-    /// <summary>Bytes no legacy code page PlanCake tries decodes cleanly: each is undefined in Windows-1252 or 1251.</summary>
+    /// <summary>
+    /// Bytes no legacy code page PlanCake tries decodes cleanly: each is undefined in Windows-1252
+    /// or 1251.
+    /// </summary>
     private static readonly byte[] _undecodable = [
         (byte)'#', (byte)' ', 0x81, 0x8D, 0x8F, 0x90, 0x9D, 0x98, (byte)'\n',
     ];

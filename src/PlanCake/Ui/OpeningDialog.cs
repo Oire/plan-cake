@@ -11,7 +11,7 @@ namespace Oire.PlanCake.Ui;
 /// however it ended; the caller reads the outcome from the task. Cancel leaves the window as it
 /// was, and the work's result is dropped when it comes.
 /// </summary>
-internal partial class OpeningDialog: Form {
+internal sealed partial class OpeningDialog: Form {
     private readonly Task _work;
 
     /// <param name="fileName">The name of the file being opened.</param>

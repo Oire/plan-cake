@@ -9,10 +9,10 @@ internal enum NoteOperation {
     Delete,
     Clear,
 
-    /// <summary>A task-list item was checked (Task 7a).</summary>
+    /// <summary>A task-list item was checked.</summary>
     CheckTask,
 
-    /// <summary>A task-list item was unchecked (Task 7a).</summary>
+    /// <summary>A task-list item was unchecked.</summary>
     UncheckTask,
 }
 
@@ -47,8 +47,8 @@ internal sealed record NoteChange(NoteOperation Operation, string Before, string
 
 /// <summary>
 /// Adds, edits and deletes notes in a Markdown file (and checks and unchecks its task-list
-/// items), never over a change the caller has not seen, and undoes and redoes those changes,
-/// per Task 5 and Technical details → "Note placement in the file" in the PlanCake plan.
+/// items), never over a change the caller has not seen, and undoes and redoes those changes.
+/// Where a note goes is set out in plan 001, Technical details → "Note placement in the file".
 /// </summary>
 /// <remarks>
 /// Every operation takes the text the caller last rendered and throws

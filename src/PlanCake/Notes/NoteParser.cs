@@ -228,7 +228,10 @@ internal static class NoteParser {
         return notes;
     }
 
-    /// <summary>The note whose opening marker starts at <paramref name="start"/>, on line <paramref name="lineIndex"/>.</summary>
+    /// <summary>
+    /// The note whose opening marker starts at <paramref name="start"/>, on line
+    /// <paramref name="lineIndex"/>.
+    /// </summary>
     private static Note ReadNote(string source, NoteMarkers markers, List<Line> lines, int lineIndex, int start) {
         var textStart = start + markers.Opening.Length;
         int textEnd;
@@ -343,7 +346,10 @@ internal static class NoteParser {
         return -1;
     }
 
-    /// <summary>An open fenced code block: its fence character, how long its fence is, and the column it starts in.</summary>
+    /// <summary>
+    /// An open fenced code block: its fence character, how long its fence is, and the column it
+    /// starts in.
+    /// </summary>
     private readonly record struct Fence(char Character, int Length, int Column);
 
     /// <summary>
@@ -517,7 +523,10 @@ internal static class NoteParser {
         return true;
     }
 
-    /// <summary>The index of the line, by its start offsets, holding the character at <paramref name="offset"/>.</summary>
+    /// <summary>
+    /// The index of the line, by its start offsets, holding the character at
+    /// <paramref name="offset"/>.
+    /// </summary>
     private static int LineIndexAt(int[] lineStarts, int offset) {
         var index = Array.BinarySearch(lineStarts, offset);
 

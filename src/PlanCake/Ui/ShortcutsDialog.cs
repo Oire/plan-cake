@@ -16,7 +16,7 @@ internal sealed record ShortcutRow(string Command, string Shortcut);
 /// what the keys do; the keys that belong to the document and the notes list, which no menu
 /// shows, are listed after them.
 /// </summary>
-internal partial class ShortcutsDialog: Form {
+internal sealed partial class ShortcutsDialog: Form {
     /// <param name="rows">The rows to show, from <see cref="BuildRows"/>.</param>
     public ShortcutsDialog(IReadOnlyList<ShortcutRow> rows) {
         ArgumentNullException.ThrowIfNull(rows);
@@ -83,7 +83,10 @@ internal partial class ShortcutsDialog: Form {
 
     private void OnListGotFocus(object? sender, EventArgs e) => NameList();
 
-    /// <summary>Names the list window for MSAA, which is what JAWS reads (see <see cref="WindowAccessibleName"/>).</summary>
+    /// <summary>
+    /// Names the list window for MSAA, which is what JAWS reads (see
+    /// <see cref="WindowAccessibleName"/>).
+    /// </summary>
     private void NameList() => WindowAccessibleName.Set(shortcutsList.ListHandle, shortcutsList.AccessibleName ?? String.Empty);
 
     protected override void OnFormClosed(FormClosedEventArgs e) {

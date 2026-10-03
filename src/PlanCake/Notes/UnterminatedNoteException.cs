@@ -5,7 +5,7 @@ namespace Oire.PlanCake.Notes;
 /// to the end of the file: nothing was written, since rewriting or removing it would take the
 /// rest of the document with it.
 /// </summary>
-public sealed class UnterminatedNoteException: InvalidOperationException {
+internal sealed class UnterminatedNoteException: NoteWriteException {
     public UnterminatedNoteException() : base("The note has no closing marker, so it runs to the end of the file.") { }
 
     public UnterminatedNoteException(string message) : base(message) { }

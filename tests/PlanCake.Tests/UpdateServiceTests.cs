@@ -28,13 +28,14 @@ public class UpdateServiceTests {
         written.Should().Be(32);
     }
 
+    // The enums are internal and a test method is public, so they come in as object.
     [Theory]
     [InlineData(UpdateCheckInterval.Daily, 1)]
     [InlineData(UpdateCheckInterval.EveryThreeDays, 3)]
     [InlineData(UpdateCheckInterval.Weekly, 7)]
     [InlineData(UpdateCheckInterval.Monthly, 30)]
-    public void ToFrequency_GivesThePeriodOfEachInterval(UpdateCheckInterval interval, int days) =>
-        UpdateService.ToFrequency(interval).Should().Be(TimeSpan.FromDays(days));
+    public void ToFrequency_GivesThePeriodOfEachInterval(object interval, int days) =>
+        UpdateService.ToFrequency((UpdateCheckInterval)interval).Should().Be(TimeSpan.FromDays(days));
 
     [Fact]
     public void ToFrequency_OfNever_IsNone() =>
@@ -45,8 +46,8 @@ public class UpdateServiceTests {
     [InlineData(UpdateStatus.UpdateNotAvailable, UpdateCheckOutcome.UpToDate)]
     [InlineData(UpdateStatus.UserSkipped, UpdateCheckOutcome.Skipped)]
     [InlineData(UpdateStatus.CouldNotDetermine, UpdateCheckOutcome.Failed)]
-    public void ToOutcome_MapsEveryStatus(UpdateStatus status, UpdateCheckOutcome expected) =>
-        UpdateService.ToOutcome(status).Should().Be(expected);
+    public void ToOutcome_MapsEveryStatus(UpdateStatus status, object expected) =>
+        UpdateService.ToOutcome(status).Should().Be((UpdateCheckOutcome)expected);
 
     [Fact]
     public void Describe_AnAvailableUpdate_SaysNothing() =>
@@ -57,8 +58,8 @@ public class UpdateServiceTests {
     [InlineData(UpdateCheckOutcome.Skipped, "The latest version of PlanCake is one you chose to skip.")]
     [InlineData(UpdateCheckOutcome.Failed, "Unable to check for updates. Please try again later.")]
     [InlineData(UpdateCheckOutcome.Unavailable, "Update checks could not be started. The log has the details.")]
-    public void Describe_TellsTheUserTheOutcome(UpdateCheckOutcome outcome, string expected) =>
-        UpdateService.Describe(outcome).Should().Be(expected);
+    public void Describe_TellsTheUserTheOutcome(object outcome, string expected) =>
+        UpdateService.Describe((UpdateCheckOutcome)outcome).Should().Be(expected);
 
     [Fact]
     public void TryClaimBackgroundChecks_GoesToOneClaimantAtATime() {

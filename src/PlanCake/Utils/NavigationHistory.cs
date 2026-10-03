@@ -22,7 +22,10 @@ internal enum HistoryOutcome {
     OpenFailed,
 }
 
-/// <summary>The result of <see cref="NavigationHistory.GoBack"/> or <see cref="NavigationHistory.GoForward"/>.</summary>
+/// <summary>
+/// The result of <see cref="NavigationHistory.GoBack"/> or
+/// <see cref="NavigationHistory.GoForward"/>.
+/// </summary>
 /// <param name="Outcome">How the move ended.</param>
 /// <param name="Missing">
 /// The files skipped on the way because they no longer exist; they were dropped from the history.

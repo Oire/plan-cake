@@ -34,7 +34,9 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <!-- Portable, not full: coverlet reads only portable PDBs, and with a Windows PDB the
+         coverage run instruments nothing. -->
+    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
   </PropertyGroup>
 
@@ -56,7 +58,6 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Markdig" Version="1.4.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.401" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
     <PackageReference Include="NetSparkleUpdater.SparkleUpdater" Version="3.1.0" />

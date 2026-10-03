@@ -37,7 +37,7 @@ internal sealed record MarkdownFileOptions(
 
 /// <summary>
 /// A Markdown file on disk: its text, and how to write it back exactly as it was stored (same
-/// encoding, BOM and line endings), atomically, per Task 5 of the PlanCake plan.
+/// encoding, BOM and line endings), atomically, through a temporary file and <c>File.Replace</c>.
 /// </summary>
 /// <remarks>
 /// A file is decoded from its BOM (UTF-8, UTF-16 LE or BE) or else as strict UTF-8. A file that
@@ -204,7 +204,10 @@ internal sealed class MarkdownFile {
         Text = text;
     }
 
-    /// <summary>Throws when the file is never written (<see cref="IsReadOnly"/> or <see cref="IsUnrecognized"/>).</summary>
+    /// <summary>
+    /// Throws when the file is never written (<see cref="IsReadOnly"/> or
+    /// <see cref="IsUnrecognized"/>).
+    /// </summary>
     /// <exception cref="ReadOnlyFileException">The file is read-only.</exception>
     public void EnsureWritable() {
         if (IsReadOnly || IsUnrecognized) {
@@ -215,7 +218,10 @@ internal sealed class MarkdownFile {
     }
 
     /// <summary>The result of decoding a file's bytes.</summary>
-    /// <param name="IsFallback">True when the bytes were not valid in their Unicode encoding and were decoded with a legacy one.</param>
+    /// <param name="IsFallback">
+    /// True when the bytes were not valid in their Unicode encoding and were decoded with a legacy
+    /// one.
+    /// </param>
     /// <param name="IsLossy">
     /// True when no encoding decoded them without loss: the text holds replacement characters.
     /// </param>

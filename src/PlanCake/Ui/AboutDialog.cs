@@ -17,7 +17,7 @@ namespace Oire.PlanCake.Ui;
 /// Help → About PlanCake: the product, its version, the copyright, a link to the repository, and
 /// "Copy info", which puts what a bug report needs on the clipboard.
 /// </summary>
-internal partial class AboutDialog: Form {
+internal sealed partial class AboutDialog: Form {
     public AboutDialog() {
         InitializeComponent();
         Localizer.Localize(this, Utils.Localization.Catalog);

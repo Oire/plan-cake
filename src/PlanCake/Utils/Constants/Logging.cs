@@ -3,7 +3,7 @@ namespace Oire.PlanCake.Utils.Constants;
 /// <summary>
 /// Paths and formats for the Serilog sinks configured in <c>Program.ConfigureLogging</c>.
 /// </summary>
-public static class Logging {
+internal static class Logging {
     public static readonly string LogFolder = Path.Combine(App.DataFolder, "logs");
     public const string LogFileExtension = "log";
     public static readonly string GenericFile = Path.Combine(LogFolder, $"{App.Name}.{LogFileExtension}");

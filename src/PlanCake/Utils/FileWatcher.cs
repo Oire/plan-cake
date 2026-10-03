@@ -29,7 +29,10 @@ internal sealed class FileChangeEventArgs(FileChangeKind kind, string? text): Ev
 /// <see cref="FileWatcher"/> so that its tests can fire it without waiting.
 /// </summary>
 internal interface IDebounceTimer: IDisposable {
-    /// <summary>Runs <paramref name="callback"/> once after <paramref name="delay"/>, canceling any pending run.</summary>
+    /// <summary>
+    /// Runs <paramref name="callback"/> once after <paramref name="delay"/>, canceling any pending
+    /// run.
+    /// </summary>
     void Restart(TimeSpan delay, Action callback);
 
     /// <summary>Cancels the pending run, if any.</summary>
@@ -71,9 +74,9 @@ internal sealed class UiDebounceTimer: IDebounceTimer {
 }
 
 /// <summary>
-/// Watches one file for changes made outside PlanCake (Task 10 of the plan). It watches the
-/// file's folder, not the file, because editors often save by writing a temporary file and
-/// renaming it over the original. Events are debounced: the file is looked at once, 300 ms after
+/// Watches one file for changes made outside PlanCake. It watches the file's folder, not the
+/// file, because editors often save by writing a temporary file and renaming it over the
+/// original. Events are debounced: the file is looked at once, 300 ms after
 /// the last event about it, so a burst of events (and a save by rename) is one change.
 /// </summary>
 /// <remarks>
@@ -105,7 +108,10 @@ internal sealed class FileWatcher: IDisposable {
     private int _failedReads;
 
     /// <param name="path">The file to watch.</param>
-    /// <param name="timer">The debounce timer; its callback must run on the thread that handles <see cref="FileChanged"/>.</param>
+    /// <param name="timer">
+    /// The debounce timer; its callback must run on the thread that handles
+    /// <see cref="FileChanged"/>.
+    /// </param>
     /// <param name="readText">
     /// Reads the file's text, or returns <see langword="null"/> when the file does not exist; an
     /// <see cref="IOException"/> (a locked file) means "look again later". Defaults to
@@ -271,7 +277,10 @@ internal sealed class FileWatcher: IDisposable {
         FileChanged?.Invoke(this, new FileChangeEventArgs(FileChangeKind.Changed, text));
     }
 
-    /// <summary>The wait before the next look at a file that could not be read <paramref name="failures"/> times.</summary>
+    /// <summary>
+    /// The wait before the next look at a file that could not be read <paramref name="failures"/>
+    /// times.
+    /// </summary>
     internal static TimeSpan RetryDelay(int failures) {
         var delay = Debounce * Math.Pow(2, Math.Clamp(failures - 1, 0, 16));
 

@@ -198,8 +198,8 @@ internal static partial class MarkdownRenderer {
         var renderer = new HtmlRenderer(writer);
         _pipeline.Setup(renderer);
 
-        // The window's task-list check boxes can be toggled (Task 7a); an exported file's stay
-        // disabled, as Markdig renders them. Both show a partially checked parent.
+        // The window's task-list check boxes can be toggled; an exported file's stay disabled, as
+        // Markdig renders them. Both show a partially checked parent.
         renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListRenderer(mode, mixedTasks, taskLabels));
 
         // The block's attributes (data-lines, dir) belong on the <pre> the user lands on, not on

@@ -81,7 +81,9 @@ internal sealed class MarkdownDownloader: IDisposable {
 
     /// <param name="handler">Sends the requests; tests pass one that never touches the network.</param>
     /// <param name="downloadsFolder">The folder the file is saved into, asked for at each download.</param>
-    /// <param name="timeout">How long the whole download may take; <see langword="null"/> for <see cref="Timeout"/>.</param>
+    /// <param name="timeout">
+    /// How long the whole download may take; <see langword="null"/> for <see cref="Timeout"/>.
+    /// </param>
     internal MarkdownDownloader(HttpMessageHandler handler, Func<string> downloadsFolder, TimeSpan? timeout = null) {
         ArgumentNullException.ThrowIfNull(handler);
         ArgumentNullException.ThrowIfNull(downloadsFolder);
@@ -100,7 +102,9 @@ internal sealed class MarkdownDownloader: IDisposable {
     /// segment of the link, always as Markdown (see <see cref="FileNameFor"/>; <c> (2)</c>,
     /// <c> (3)</c>… when the name is taken, as browsers do), marked as coming from the internet.
     /// </summary>
-    /// <param name="cancellationToken">Cancels the download; an <see cref="OperationCanceledException"/> follows.</param>
+    /// <param name="cancellationToken">
+    /// Cancels the download; an <see cref="OperationCanceledException"/> follows.
+    /// </param>
     /// <returns>Where the file was saved, or why it was not.</returns>
     public async Task<DownloadResult> DownloadAsync(string url, CancellationToken cancellationToken = default) {
         if (!UrlHelper.IsValidHttpUrl(url, out var trimmed)) {

@@ -140,7 +140,10 @@ internal static class PageMessages {
         return JsonSerializer.Serialize(message, message.GetType(), _options);
     }
 
-    /// <summary>A string property of a page message, or <see langword="null"/> when it is missing or not a string.</summary>
+    /// <summary>
+    /// A string property of a page message, or <see langword="null"/> when it is missing or not a
+    /// string.
+    /// </summary>
     public static string? GetString(JsonElement message, string property) =>
         message.ValueKind == JsonValueKind.Object
         && message.TryGetProperty(property, out var value)
@@ -148,7 +151,10 @@ internal static class PageMessages {
             ? value.GetString()
             : null;
 
-    /// <summary>A Boolean property of a page message, or <see langword="null"/> when it is missing or not a Boolean.</summary>
+    /// <summary>
+    /// A Boolean property of a page message, or <see langword="null"/> when it is missing or not a
+    /// Boolean.
+    /// </summary>
     public static bool? GetBool(JsonElement message, string property) =>
         message.ValueKind == JsonValueKind.Object
         && message.TryGetProperty(property, out var value)
@@ -156,7 +162,10 @@ internal static class PageMessages {
             ? value.GetBoolean()
             : null;
 
-    /// <summary>A number property of a page message, or <see langword="null"/> when it is missing or not a number.</summary>
+    /// <summary>
+    /// A number property of a page message, or <see langword="null"/> when it is missing or not a
+    /// number.
+    /// </summary>
     public static double? GetDouble(JsonElement message, string property) =>
         message.ValueKind == JsonValueKind.Object
         && message.TryGetProperty(property, out var value)
@@ -192,7 +201,10 @@ internal static class PageMessages {
         return GetInt(message, "note") is { } index && index >= 0 && index < notes.Count ? notes[index] : null;
     }
 
-    /// <summary>An integer property of a page message, or <see langword="null"/> when it is missing or not an integer.</summary>
+    /// <summary>
+    /// An integer property of a page message, or <see langword="null"/> when it is missing or not
+    /// an integer.
+    /// </summary>
     public static int? GetInt(JsonElement message, string property) =>
         message.ValueKind == JsonValueKind.Object
         && message.TryGetProperty(property, out var value)

@@ -10,9 +10,10 @@ namespace Oire.PlanCake.Utils;
 /// <remarks>
 /// The <c>SysListView32</c> that <c>NativeListView</c> creates reports an empty MSAA name: the
 /// system proxy for a list view does not use the window text that
-/// <c>NativeListView.AccessibleName</c> sets, and the window has no sibling label for the proxy
-/// to fall back on. JAWS reads the MSAA name, so the list went unnamed (Task 8 JAWS check).
-/// An annotation is what the proxy consults first, for MSAA and UI Automation clients alike.
+/// <c>NativeListView.AccessibleName</c> sets, and the window has no sibling label for the proxy to
+/// fall back on. JAWS reads the MSAA name, so the list went unnamed (<c>docs/jaws-spike.md</c>,
+/// "The notes list had no name"). An annotation is what the proxy consults first, for MSAA and UI
+/// Automation clients alike.
 /// </remarks>
 internal static class WindowAccessibleName {
     private const uint ObjIdClient = 0xFFFFFFFC;

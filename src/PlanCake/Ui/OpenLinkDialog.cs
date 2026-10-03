@@ -9,7 +9,7 @@ namespace Oire.PlanCake.Ui;
 /// File → Open from link: asks for the link of a Markdown file to download and open. The link is
 /// checked before the dialog closes, so a link that is not http(s) keeps the dialog open.
 /// </summary>
-internal partial class OpenLinkDialog: Form {
+internal sealed partial class OpenLinkDialog: Form {
     /// <param name="initialUrl">The link the box starts with (one found on the clipboard), if any.</param>
     public OpenLinkDialog(string? initialUrl = null) {
         InitializeComponent();

@@ -20,10 +20,10 @@ internal enum ClaimOutcome {
 }
 
 /// <summary>
-/// One window per file (Task 10 of the plan). The window showing a file owns a named pipe named
-/// after the file's normalized full path; a second attempt to open the same file, from another
-/// PlanCake process or from another window's link or history, connects to that pipe, asks the
-/// owner to come to the front, and opens nothing itself.
+/// One window per file, so two windows never write conflicting notes into one file. The window
+/// showing a file owns a named pipe named after the file's normalized full path; a second
+/// attempt to open the same file, from another PlanCake process or from another window's link or
+/// history, connects to that pipe, asks the owner to come to the front, and opens nothing itself.
 /// </summary>
 internal sealed class SingleInstance: IDisposable {
     /// <summary>The one request the pipe understands.</summary>
@@ -92,7 +92,10 @@ internal sealed class SingleInstance: IDisposable {
     /// text the window last rendered (<c>StaleFileException</c>) still keeps a second window on
     /// such a path from writing over the first one's notes.
     /// </summary>
-    /// <returns>The final path, or <see langword="null"/> when the file cannot be opened (it does not exist, say).</returns>
+    /// <returns>
+    /// The final path, or <see langword="null"/> when the file cannot be opened (it does not exist,
+    /// say).
+    /// </returns>
     internal static string? FinalPath(string fullPath) {
         // No access asked for, only a handle: it opens whoever else has the file open.
         using var handle = NativeMethods.CreateFile(
@@ -137,7 +140,10 @@ internal sealed class SingleInstance: IDisposable {
         }
     }
 
-    /// <summary>The pipe name for <paramref name="path"/>: <c>PlanCake-&lt;SHA-256 of the normalized path&gt;</c>.</summary>
+    /// <summary>
+    /// The pipe name for <paramref name="path"/>: <c>PlanCake-&lt;SHA-256 of the normalized
+    /// path&gt;</c>.
+    /// </summary>
     public static string PipeName(string path) => PipeNameOfNormalized(NormalizePath(path));
 
     private static string PipeNameOfNormalized(string normalizedPath) =>
@@ -153,7 +159,9 @@ internal sealed class SingleInstance: IDisposable {
 
     /// <inheritdoc cref="TryRegister(String, Action)"/>
     /// <param name="path">The file to register.</param>
-    /// <param name="onActivate">Runs when another attempt to open the file asks this window to come to the front.</param>
+    /// <param name="onActivate">
+    /// Runs when another attempt to open the file asks this window to come to the front.
+    /// </param>
     /// <param name="hooks">Where tests step into the listener; <see langword="null"/> outside tests.</param>
     internal static SingleInstance? TryRegister(string path, Action onActivate, ListenerHooks? hooks) {
         ArgumentNullException.ThrowIfNull(onActivate);
@@ -193,7 +201,10 @@ internal sealed class SingleInstance: IDisposable {
     /// </summary>
     /// <param name="path">The file to claim.</param>
     /// <param name="onActivate">As for <see cref="TryRegister"/>.</param>
-    /// <param name="registration">The registration when the outcome is <see cref="ClaimOutcome.Registered"/>, else <see langword="null"/>.</param>
+    /// <param name="registration">
+    /// The registration when the outcome is <see cref="ClaimOutcome.Registered"/>, else
+    /// <see langword="null"/>.
+    /// </param>
     /// <param name="timeout">As for <see cref="TryActivate"/>.</param>
     public static ClaimOutcome TryClaim(
         string path,
@@ -272,7 +283,10 @@ internal sealed class SingleInstance: IDisposable {
         return Task.Run(() => ActivateAsync(client, cancellation.Token)).GetAwaiter().GetResult();
     }
 
-    /// <summary>Asks the window at the other end of <paramref name="client"/> to come to the front; disposes the client.</summary>
+    /// <summary>
+    /// Asks the window at the other end of <paramref name="client"/> to come to the front; disposes
+    /// the client.
+    /// </summary>
     private static async Task<bool> ActivateAsync(NamedPipeClientStream client, CancellationToken token) {
         await using var connection = client;
 

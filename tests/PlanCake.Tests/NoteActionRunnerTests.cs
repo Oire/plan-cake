@@ -300,14 +300,14 @@ public class NoteActionRunnerTests: IDisposable {
         var render = Render(Text);
         var paragraph = render.Blocks[^1];
 
-        var reason = runner.UnterminatedReason(Text, paragraph);
+        var reason = runner.UnterminatedAddReason(Text, paragraph);
         var result = runner.Add(Text, paragraph, "Looks good");
 
         reason.Should().Contain("line 4").And.Contain("a note added here would become part of it");
         result.Status.Should().Be(NoteActionStatus.Unterminated);
         result.Message.Should().Be(reason);
         result.NeedsRender.Should().BeFalse();
-        runner.UnterminatedReason(Text, render.Blocks[0]).Should().BeNull();
+        runner.UnterminatedAddReason(Text, render.Blocks[0]).Should().BeNull();
         OnDisk.Should().Be(Text);
     }
 

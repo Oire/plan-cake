@@ -5,7 +5,7 @@ namespace Oire.PlanCake.Notes;
 /// the text PlanCake last wrote), so nothing was written: writing now would overwrite a change
 /// the user has not seen.
 /// </summary>
-public sealed class StaleFileException: Exception {
+internal sealed class StaleFileException: NoteWriteException {
     public StaleFileException() : base("The file changed on disk since it was last read.") { }
 
     public StaleFileException(string message) : base(message) { }

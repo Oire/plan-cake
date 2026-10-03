@@ -12,7 +12,7 @@ namespace Oire.PlanCake.Ui;
 /// (General, Notes, Advanced). OK writes them to <see cref="Config"/> and saves the file; the
 /// window then applies them without a restart. Cancel and Escape leave <see cref="Config"/> as it was.
 /// </summary>
-internal partial class SettingsDialog: Form {
+internal sealed partial class SettingsDialog: Form {
     /// <summary>The interface languages offered, the system default first.</summary>
     private IReadOnlyList<LanguageOption> _interfaceLanguages = [];
 

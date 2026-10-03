@@ -2,8 +2,8 @@ namespace Oire.PlanCake.Notes;
 
 /// <summary>
 /// Reads and rewrites the task marker (<c>[ ]</c>, <c>[x]</c> or <c>[X]</c>) of a task-list item
-/// in a Markdown source, per Task 7a in the PlanCake plan. Pure text operations: nothing else on
-/// the line, no line ending and no other line is touched.
+/// in a Markdown source. Pure text operations: nothing else on the line, no line ending and no
+/// other line is touched.
 /// </summary>
 internal static class TaskToggle {
     /// <summary>

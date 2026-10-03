@@ -32,17 +32,6 @@ internal static class Localization {
     }
 
     /// <summary>
-    /// Raised at the end of <see cref="SetLanguage"/>, once the catalog has been reset and the
-    /// thread cultures updated. Subscribers re-evaluate anything whose text was captured once
-    /// rather than looked up on demand — menus, above all.
-    /// </summary>
-    /// <remarks>
-    /// This is a static event, so a subscriber that forgets to unsubscribe stays alive for the
-    /// life of the process. Unsubscribe in <c>Dispose</c>.
-    /// </remarks>
-    public static event EventHandler? LanguageChanged;
-
-    /// <summary>
     /// Switches the UI language and resets the catalog. Call once at startup with
     /// <c>Config.General.Language</c>, and again whenever the user changes it in Settings.
     /// </summary>
@@ -60,8 +49,6 @@ internal static class Localization {
         Thread.CurrentThread.CurrentCulture = culture;
         CultureInfo.DefaultThreadCurrentUICulture = culture;
         CultureInfo.DefaultThreadCurrentCulture = culture;
-
-        LanguageChanged?.Invoke(null, EventArgs.Empty);
     }
 
     /// <summary>

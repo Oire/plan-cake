@@ -291,7 +291,7 @@ internal sealed class CliRunner {
 
                 try {
                     new NoteStore(markdown, noteMarkers).Clear(markdown.Text);
-                } catch (Exception ex) when (ex is IOException or StaleFileException or ReadOnlyFileException) {
+                } catch (Exception ex) when (ex is IOException or NoteWriteException) {
                     Log.Error(ex, "CLI: unable to clear the notes of {Path}", markdown.Path);
 
                     return Fail(_("Unable to write {0}: {1}", markdown.Path, ex.Message));

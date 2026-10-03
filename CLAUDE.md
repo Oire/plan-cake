@@ -69,6 +69,17 @@ decisions.
   `TextDirection.Apply(this)`; send every message box through `DialogHelper`; and add the form
   to the lists in `MnemonicTests` and `TextDirectionTests` (both fail until you do: each checks
   that its list covers every `Form` type).
+- **A label that wraps is a `Ui/WrappingLabel`.** With the system code page set to UTF-8 (the
+  "Beta: Use Unicode UTF-8 for worldwide language support" option), Windows text drawing takes
+  every letter outside ASCII for a double-byte character and breaks a line between any two of
+  them, so a stock `Label` splits Russian, Ukrainian and Hebrew words in the middle.
+  `WrappingLabel` measures and draws with `TextFormatFlags.NoFullWidthCharacterBreak`.
+- **Text from the document in a right-to-left interface** (an excerpt, a note) goes through
+  `TextDirection.Embed`: text that starts left to right is wrapped in LEFT-TO-RIGHT EMBEDDING and
+  POP DIRECTIONAL FORMATTING (U+202A … U+202C), so its punctuation stays where it was written.
+  Not the isolates U+2068 and U+2069: GDI, which draws labels, list views and message boxes,
+  shows them as visible boxes. A box that holds code or a link (the note markers, a URL) stays
+  left to right through `TextDirection.KeepLeftToRight`.
 - **The user manual follows the UI.** `help/<code>/manual.html` (six languages) is written by
   hand with the `write-manual` skill, using the glossaries in `help/glossaries/`. It repeats
   menu names, shortcuts and setting labels word for word, and no test checks it. A change to a
@@ -152,10 +163,13 @@ map.
   `data-lines` sees them; Markdig's 0-based lines are converted at the boundary. The strings the
   renderer writes come in through `RenderStrings`, so it never touches the catalog.
   `PositionRestorer` picks the block to return to after a re-render.
-- **Ui/** holds `MainWindow` (the menu, the notes list, every note action), `DocumentView` (the
-  WebView2 control and its lockdown), `HostCommands` (the one table of commands and keys that
-  the menu, both key paths and the Keyboard shortcuts dialog all read) and `PageMessages` (the
-  page protocol's message shapes).
+- **Ui/** holds `MainWindow` (the menu, the notes list, every note action; a partial class split
+  by subject into `MainWindow.Menu.cs`, `.Keys.cs`, `.Page.cs`, `.Notes.cs`, `.NotesList.cs` and
+  so on), `DocumentView` (the WebView2 control and its lockdown; the navigation rule is
+  `NavigationGate`), `HostCommands` (the one table of commands and keys that the menu, both key
+  paths and the Keyboard shortcuts dialog all read), `PageMessages` (the page protocol's
+  message shapes) and `PageMessageRouter` (what the window does about a page message: UI-free
+  and tested, while `MainWindow` does the dialogs and menus).
 - **Cli/** is `CliRunner` (System.CommandLine 2.x: `list`, `check`, `clear`, `export`) and
   `ConsoleAttacher`. `list`, `check` and `export` never write the Markdown file; `clear` follows
   the conversion setting like the window. `list`'s text lines are data and stay in English;
@@ -197,7 +211,7 @@ focus), `strings`, `focusNote`, `nextNote` / `previousNote`, `nextBlock` /
 `previousBlock`, `taskState`. Page → host: `activate`, `activateNote`, `contextMenu`,
 `toggleTask`, `position`, `openLink`, `noMoreNotes`, `noMoreBlocks`, `dropFiles`, `goBack`,
 `ready`. Every render carries a `generation`; the host ignores a message from an older render
-(`WhileCurrent` in `MainWindow`). There is no `announce` message: every announcement goes
+(`PageMessageRouter`, and `WhileCurrent` for an action deferred past a re-render). There is no `announce` message: every announcement goes
 through `StatusAnnouncer`.
 
 A different file gets a freshly loaded page (the host navigates to `index.html` again and
@@ -297,8 +311,8 @@ the others write to numbered siblings such as `PlanCake_001.log`). Each log roll
 and keeps ten files, numbered siblings included; a Release build logs from Information up, a
 Debug build from Debug. The browser's user data folder, `App.WebView2DataFolder`, is
 `%LOCALAPPDATA%\Oire\PlanCake\WebView2`, or `userdata\WebView2` when portable; the uninstaller
-offers to remove both folders. PlanCake keeps no other user content, so `App.DataSubfolder`
-(`data\`) is unused. The logs are the first thing to read when a user reports a problem.
+offers to remove both folders. PlanCake keeps no other user content. The logs are the first
+thing to read when a user reports a problem.
 
 ## File safety
 
@@ -393,6 +407,13 @@ touch `Config` or `Localization` must not run in parallel across classes.
   disposed, never shown.
 - `web/morph.js` and `web/blocks.js` expose pure functions that `MorphPlanTests` and
   `BlockPickTests` run in Jint, so the page needs no JS toolchain.
+- `DocumentViewLockdownTests` (trait `Category=WebView2`) runs a real WebView2 in a form that is
+  never shown and checks that a plan's raw HTML posts nothing and navigates nowhere. It is
+  skipped without the WebView2 Runtime; `--filter "Category!=WebView2"` leaves it out.
+- Coverage: `dotnet test --collect:"XPlat Code Coverage"` writes a Cobertura report, and CI prints
+  its summary. Coverlet needs the app's Debug PDB to stay `portable` and the test project's
+  `PreserveCompilationContext`, without which it cannot resolve the WinForms and WebView2
+  references and instruments nothing.
 - While a PlanCake window is open, `bin\Debug\plancake.exe` is locked: build and test with
   `dotnet build --artifacts-path <temp dir>` (and the same for `dotnet test`) rather than
   closing the user's window.

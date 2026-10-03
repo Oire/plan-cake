@@ -130,7 +130,10 @@ public class MnemonicTests: IDisposable {
             .Select(item => item.Text)
             .Concat(items.Where(item => item.Children is not null).SelectMany(item => ItemsWithoutMnemonic(item.Children!)));
 
-    /// <summary>Every form PlanCake shows; <see cref="Forms_CoverEveryFormOfTheApplication"/> keeps the list whole.</summary>
+    /// <summary>
+    /// Every form PlanCake shows; <see cref="Forms_CoverEveryFormOfTheApplication"/> keeps the list
+    /// whole.
+    /// </summary>
     private static List<Form> Forms() => [
         new MainWindow(),
         new NoteDialog(NoteDialogMode.Add, "Excerpt", String.Empty, _ => null, NoteEnterAction.Save),

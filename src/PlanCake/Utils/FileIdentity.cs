@@ -39,7 +39,10 @@ internal static class FileIdentity {
         return Information(path) is { } info ? info.NumberOfLinks : 0;
     }
 
-    /// <summary>The volume serial number and file ID of an existing file; <see langword="null"/> when it cannot be opened.</summary>
+    /// <summary>
+    /// The volume serial number and file ID of an existing file; <see langword="null"/> when it
+    /// cannot be opened.
+    /// </summary>
     private static (uint Volume, ulong File)? Identity(string path) =>
         Information(path) is { } info
             ? (info.VolumeSerialNumber, ((ulong)info.FileIndexHigh << 32) | info.FileIndexLow)

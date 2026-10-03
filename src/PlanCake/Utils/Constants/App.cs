@@ -10,7 +10,7 @@ namespace Oire.PlanCake.Utils.Constants;
 /// file that imports it, and the resulting errors are confusing. Import it as
 /// <c>using App = Oire.PlanCake.Utils.Constants.App;</c> where needed.
 /// </remarks>
-public static class App {
+internal static class App {
     /// <summary>
     /// Product name. Drives the data folder, the config file name and the gettext catalog
     /// name (<c>locale/&lt;code&gt;/PlanCake.mo</c>); the translation scripts read it from here.
@@ -35,13 +35,6 @@ public static class App {
     /// <c>UpdateServiceTests</c> checks that it is base64 of 32 bytes.
     /// </remarks>
     public const string UpdatePublicKey = "3grlY7WRufCg+1vbmTzxPu8uSBDDo/BV887KX0pwDfM=";
-
-    /// <summary>
-    /// Subfolder of <see cref="DataFolder"/> that holds user-generated content.
-    /// Config files stay at the root of <see cref="DataFolder"/>
-    /// so that wiping user data never takes the settings with it.
-    /// </summary>
-    public const string DataSubfolder = "data";
 
     /// <summary>
     /// When <c>true</c>, user data lives next to the executable under <c>userdata/</c>

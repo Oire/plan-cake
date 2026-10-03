@@ -10,7 +10,10 @@ namespace Oire.PlanCake.Utils;
 /// gettext catalog; their callers translate through here.
 /// </summary>
 internal static class LocalizedText {
-    /// <summary>Why the markers cannot delimit a note; <see langword="null"/> for <see cref="NoteMarkersError.None"/>.</summary>
+    /// <summary>
+    /// Why the markers cannot delimit a note; <see langword="null"/> for
+    /// <see cref="NoteMarkersError.None"/>.
+    /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">An error this method does not know.</exception>
     public static string? MarkersError(NoteMarkersError error) => error switch {
         NoteMarkersError.None => null,

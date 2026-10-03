@@ -96,7 +96,7 @@ internal sealed class NoteActionRunner {
     /// or <see langword="null"/> when one can: a note without a closing marker starts before
     /// where it would go (<see cref="NoteStore.UnterminatedBefore"/>), and would take it in.
     /// </summary>
-    public string? UnterminatedReason(string renderedText, BlockInfo block) {
+    public string? UnterminatedAddReason(string renderedText, BlockInfo block) {
         ArgumentNullException.ThrowIfNull(renderedText);
         ArgumentNullException.ThrowIfNull(block);
 
@@ -112,7 +112,10 @@ internal sealed class NoteActionRunner {
     public static string UnterminatedMessage(int line) =>
         _("The note on line {0} has no closing marker, so it runs to the end of the file, and changing it would change the rest of the file too. Add the closing marker in an editor first.", line);
 
-    /// <summary>Why <paramref name="text"/> cannot be written as a note, or <see langword="null"/> when it can.</summary>
+    /// <summary>
+    /// Why <paramref name="text"/> cannot be written as a note, or <see langword="null"/> when it
+    /// can.
+    /// </summary>
     public string? DescribeTextError(string text) {
         ArgumentNullException.ThrowIfNull(text);
 
@@ -124,19 +127,19 @@ internal sealed class NoteActionRunner {
             NoteTextError.ContainsOpeningMarker =>
                 _("The note cannot contain {0}, which marks the start of a note.", Store.Markers.Opening),
             NoteTextError.ContainsLineBreak => _("The note cannot contain a line break."),
-            var error => throw new InvalidOperationException($"Unknown note text error {error}."),
+            var error => throw new ArgumentOutOfRangeException(nameof(text), error, null),
         };
     }
 
     /// <summary>
     /// Adds a note after <paramref name="block"/>; refused when a note without a closing marker
-    /// starts before where it would go (<see cref="UnterminatedReason(String, BlockInfo)"/>).
+    /// starts before where it would go (<see cref="UnterminatedAddReason"/>).
     /// </summary>
     public NoteActionResult Add(string renderedText, BlockInfo block, string text) {
         ArgumentNullException.ThrowIfNull(renderedText);
         ArgumentNullException.ThrowIfNull(block);
 
-        if (UnterminatedReason(renderedText, block) is { } reason) {
+        if (UnterminatedAddReason(renderedText, block) is { } reason) {
             return new NoteActionResult(NoteActionStatus.Unterminated, reason);
         }
 

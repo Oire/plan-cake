@@ -68,7 +68,10 @@ internal static class PositionRestorer {
 
     private static int BlockStart(BlockInfo block) => block.StartLine;
 
-    /// <summary>The candidate whose start line is nearest to <paramref name="line"/>, the earlier one on a tie.</summary>
+    /// <summary>
+    /// The candidate whose start line is nearest to <paramref name="line"/>, the earlier one on a
+    /// tie.
+    /// </summary>
     private static T? Nearest<T>(int line, IEnumerable<T> candidates, Func<T, int> startLine) where T : class =>
         candidates.MinBy(candidate => Math.Abs(startLine(candidate) - line));
 }
