@@ -1,4 +1,5 @@
 using Oire.PlanCake.Rendering;
+using Oire.PlanCake.Utils;
 using Serilog;
 using static Oire.PlanCake.Utils.Localization;
 
@@ -74,11 +75,11 @@ internal sealed class NoteActionRunner {
 
     public NoteStore Store { get; }
 
-    /// <summary>Why no note can be written to the file, or <see langword="null"/> when one can.</summary>
-    public string? CannotWriteReason => Store.File.IsReadOnly ? ReadOnlyMessage : null;
-
-    private static string ReadOnlyMessage =>
-        _("This file is not in UTF-8, so it is open read-only. Notes cannot be written to it.");
+    /// <summary>
+    /// Why no note can be written to the file, or <see langword="null"/> when one can: the same
+    /// reason the window gives when it opens the file (<see cref="LocalizedText.ReadOnlyReason"/>).
+    /// </summary>
+    public string? CannotWriteReason => LocalizedText.ReadOnlyReason(Store.File);
 
     /// <summary>
     /// Why <paramref name="note"/> cannot be edited or deleted, or <see langword="null"/> when it
@@ -271,11 +272,17 @@ internal sealed class NoteActionRunner {
         } catch (ReadOnlyFileException ex) {
             Log.Warning(ex, "Action refused: {Path} is read-only", Store.File.Path);
 
-            return new NoteActionResult(NoteActionStatus.ReadOnly, ReadOnlyMessage);
+            return new NoteActionResult(NoteActionStatus.ReadOnly, CannotWriteReason ?? ex.Message);
         } catch (UnterminatedNoteException ex) {
             Log.Warning(ex, "Action refused: a note in {Path} has no closing marker", Store.File.Path);
 
             return new NoteActionResult(NoteActionStatus.Unterminated, UnterminatedMessage(ex.Line));
+        } catch (NoteInCodeException ex) {
+            Log.Warning(ex, "Action refused: the note would be inside code in {Path}", Store.File.Path);
+
+            return new NoteActionResult(NoteActionStatus.Failed, _(
+                "A note added here would be inside a code block that is never closed, so it would not count as a note. Close the code block in an editor first."
+            ));
         } catch (IOException ex) {
             Log.Error(ex, "Action failed on {Path}", Store.File.Path);
 

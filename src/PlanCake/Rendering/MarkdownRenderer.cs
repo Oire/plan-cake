@@ -80,6 +80,9 @@ internal static partial class MarkdownRenderer {
         .UsePreciseSourceLocation()
         .Build();
 
+    /// <summary>The pipeline a document is parsed with, for <see cref="NoteParser"/> to find its code blocks.</summary>
+    internal static MarkdownPipeline Pipeline => _pipeline;
+
     /// <summary>
     /// The pipeline a note's own text is rendered with: the document's extensions, except that
     /// raw HTML is shown as text (a note cannot fake the page's own attributes), a line break the
@@ -206,52 +209,102 @@ internal static partial class MarkdownRenderer {
         RenderOptions options
     ) {
         var rendered = new List<RenderedNote>(notes.Count);
-        var insertedAfter = new Dictionary<Block, int>(ReferenceEqualityComparer.Instance);
-        var insertedAtTop = 0;
+        var anchors = FindAnchors(blocks, notes);
+        var atTop = new List<Block>();
+        var after = new Dictionary<Block, List<Block>>(ReferenceEqualityComparer.Instance);
 
         for (var index = 0; index < notes.Count; index++) {
             var note = notes[index];
-            var anchor = FindAnchor(blocks, note.StartLine);
+            var anchor = anchors[index];
             var noteBlock = CreateHtmlBlock(NoteHtml(note, index, options));
 
             if (anchor is null) {
-                document.Insert(insertedAtTop++, noteBlock);
+                atTop.Add(noteBlock);
             } else if (anchor.Target is TableRow row) {
                 // A <div> cannot sit between table rows, so the note goes into the row's last cell.
                 var container = row.Count > 0 && row[^1] is ContainerBlock lastCell ? lastCell : row;
                 container.Add(noteBlock);
+            } else if (after.TryGetValue(anchor.Target, out var list)) {
+                list.Add(noteBlock);
             } else {
-                var parent = anchor.Target.Parent
-                    ?? throw new InvalidOperationException("An annotatable block has no parent.");
-                var alreadyInserted = insertedAfter.GetValueOrDefault(anchor.Target);
-                parent.Insert(parent.IndexOf(anchor.Target) + 1 + alreadyInserted, noteBlock);
-                insertedAfter[anchor.Target] = alreadyInserted + 1;
+                after[anchor.Target] = [noteBlock];
             }
 
             rendered.Add(new RenderedNote(index, note, anchor?.Info));
+        }
+
+        // Each container is rebuilt once with its notes in place, rather than one insert per note.
+        var parents = new HashSet<ContainerBlock>(ReferenceEqualityComparer.Instance);
+
+        foreach (var target in after.Keys) {
+            parents.Add(target.Parent ?? throw new InvalidOperationException("An annotatable block has no parent."));
+        }
+
+        if (atTop.Count > 0) {
+            parents.Add(document);
+        }
+
+        foreach (var parent in parents) {
+            var children = parent.ToArray();
+            parent.Clear();
+
+            if (ReferenceEquals(parent, document)) {
+                atTop.ForEach(parent.Add);
+            }
+
+            foreach (var child in children) {
+                parent.Add(child);
+
+                if (after.TryGetValue(child, out var list)) {
+                    list.ForEach(parent.Add);
+                }
+            }
         }
 
         return rendered;
     }
 
     /// <summary>
-    /// The block containing <paramref name="noteLine"/> (a note written by hand inside a block),
-    /// else the last block ending before it, else <see langword="null"/>.
+    /// For every note, the block containing its first line (a note written by hand inside a
+    /// block), else the last block ending before it, else <see langword="null"/>; ties go to the
+    /// block first in document order. One pass over both: the notes come in source order, and the
+    /// blocks are taken by their first line.
     /// </summary>
-    private static Annotatable? FindAnchor(List<Annotatable> blocks, int noteLine) {
-        Annotatable? anchor = null;
+    private static Annotatable?[] FindAnchors(List<Annotatable> blocks, IReadOnlyList<Note> notes) {
+        var anchors = new Annotatable?[notes.Count];
 
-        foreach (var block in blocks) {
-            if (block.Info.StartLine <= noteLine && noteLine <= block.Info.EndLine) {
-                return block;
+        // Footnotes are rendered at the end, so document order is not line order.
+        var byStart = Enumerable.Range(0, blocks.Count).OrderBy(index => blocks[index].Info.StartLine).ToArray();
+        var next = 0;
+
+        // The blocks started by the note's line, by the line they end on, and by document order.
+        var started = new PriorityQueue<int, (int EndLine, int Index)>();
+        var open = new SortedSet<int>();
+        var lastEnded = -1;
+
+        for (var n = 0; n < notes.Count; n++) {
+            var noteLine = notes[n].StartLine;
+
+            while (next < byStart.Length && blocks[byStart[next]].Info.StartLine <= noteLine) {
+                var index = byStart[next++];
+                started.Enqueue(index, (blocks[index].Info.EndLine, index));
+                open.Add(index);
             }
 
-            if (block.Info.EndLine < noteLine && (anchor is null || block.Info.EndLine > anchor.Info.EndLine)) {
-                anchor = block;
+            while (started.TryPeek(out var index, out var key) && key.EndLine < noteLine) {
+                started.Dequeue();
+                open.Remove(index);
+
+                if (lastEnded < 0 || key.EndLine > blocks[lastEnded].Info.EndLine
+                    || (key.EndLine == blocks[lastEnded].Info.EndLine && index < lastEnded)) {
+                    lastEnded = index;
+                }
             }
+
+            anchors[n] = open.Count > 0 ? blocks[open.Min] : lastEnded >= 0 ? blocks[lastEnded] : null;
         }
 
-        return anchor;
+        return anchors;
     }
 
     private static HtmlBlock CreateHtmlBlock(string html) {

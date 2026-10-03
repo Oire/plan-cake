@@ -483,6 +483,13 @@ public partial class MainWindow: Form {
             return OpenOutcome.Failed;
         }
 
+        if (Directory.Exists(fullPath)) {
+            Log.Warning("Unable to open {Path}: it is a folder", fullPath);
+            ShowError(_("{0} is a folder, not a file.", path));
+
+            return OpenOutcome.Failed;
+        }
+
         // Opening the same file again keeps the reading position; another file starts at the top.
         var reopened = _file is not null && String.Equals(_file.Path, fullPath, StringComparison.OrdinalIgnoreCase);
 
@@ -688,25 +695,8 @@ public partial class MainWindow: Form {
 
         if (file.ConvertedFrom is { } convertedFrom) {
             messages.Add(_("Converted from {0} to UTF-8.", LegacyEncoding.DisplayName(convertedFrom)));
-        } else if (file.IsUnrecognized && file.InvalidByteLine is { } invalidLine) {
-            messages.Add(_(
-                "This file is in {0} but has an invalid byte on line {1}, so it was opened read-only and is never changed. Notes cannot be added to it.",
-                LegacyEncoding.DisplayName(file.Encoding), invalidLine
-            ));
-        } else if (file.ConversionFailed) {
-            messages.Add(_(
-                "This file is not in UTF-8 and could not be converted, so it was opened read-only as {0}. Notes cannot be added to it.",
-                LegacyEncoding.DisplayName(file.Encoding)
-            ));
-        } else if (file.IsUnrecognized) {
-            messages.Add(_(
-                "The encoding of this file could not be recognized, so it was opened read-only and is never changed. Notes cannot be added to it."
-            ));
-        } else if (file.IsReadOnly) {
-            messages.Add(_(
-                "This file is not in UTF-8, so it was opened read-only as {0}. Notes cannot be added to it.",
-                LegacyEncoding.DisplayName(file.Encoding)
-            ));
+        } else if (LocalizedText.ReadOnlyReason(file) is { } readOnly) {
+            messages.Add(readOnly);
         }
 
         if (_render?.Parse.HasUnterminated == true) {

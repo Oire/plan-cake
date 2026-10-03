@@ -55,7 +55,13 @@ internal sealed record NoteChange(NoteOperation Operation, string Before, string
 /// <see cref="StaleFileException"/> without writing when the file on disk differs from it.
 /// </remarks>
 internal sealed class NoteStore {
-    private readonly Stack<NoteChange> _undo = new();
+    /// <summary>
+    /// How many changes can be undone. Each one holds the file's text twice, so an unbounded
+    /// history of a large file would grow without limit; the oldest change is forgotten first.
+    /// </summary>
+    public const int HistoryLimit = 100;
+
+    private readonly LinkedList<NoteChange> _undo = new();
     private readonly Stack<NoteChange> _redo = new();
 
     public NoteStore(MarkdownFile file, NoteMarkers markers) {
@@ -122,6 +128,10 @@ internal sealed class NoteStore {
     /// A note without a closing marker starts before where the note would go, so the new note's
     /// closing marker would end it (<see cref="UnterminatedBefore"/>); nothing is written.
     /// </exception>
+    /// <exception cref="NoteInCodeException">
+    /// The note would land inside code (a fenced code block that is never closed), where it would
+    /// not read back as a note; nothing is written.
+    /// </exception>
     public NoteChange Add(string renderedText, BlockInfo afterBlock, string text) {
         ArgumentNullException.ThrowIfNull(afterBlock);
 
@@ -134,6 +144,11 @@ internal sealed class NoteStore {
         }
 
         var (after, line) = InsertNote(current, parse, afterBlock, noteText, Markers, File.LineEnding);
+
+        // Markers inside code are not notes, so a note written into code would vanish into it.
+        if (!NoteParser.Parse(after, Markers).Notes.Any(note => note.StartLine == line && note.Text == noteText)) {
+            throw new NoteInCodeException();
+        }
 
         return Apply(new NoteChange(NoteOperation.Add, current, after, line, 1));
     }
@@ -216,9 +231,9 @@ internal sealed class NoteStore {
             throw new InvalidOperationException("There is nothing to undo.");
         }
 
-        var change = _undo.Peek();
+        var change = _undo.Last!.Value;
         WriteReplacing(change.After, change.Before);
-        _undo.Pop();
+        _undo.RemoveLast();
         _redo.Push(change);
 
         return change;
@@ -237,7 +252,7 @@ internal sealed class NoteStore {
         var change = _redo.Peek();
         WriteReplacing(change.Before, change.After);
         _redo.Pop();
-        _undo.Push(change);
+        PushUndo(change);
 
         return change;
     }
@@ -297,10 +312,18 @@ internal sealed class NoteStore {
         }
 
         File.Write(change.After);
-        _undo.Push(change);
+        PushUndo(change);
         _redo.Clear();
 
         return change;
+    }
+
+    private void PushUndo(NoteChange change) {
+        _undo.AddLast(change);
+
+        if (_undo.Count > HistoryLimit) {
+            _undo.RemoveFirst();
+        }
     }
 
     private void WriteReplacing(string expected, string replacement) {

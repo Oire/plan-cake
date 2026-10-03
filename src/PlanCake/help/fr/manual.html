@@ -516,6 +516,7 @@ footer {
 <pre><code>Sauvegardez la base de données avant d’exécuter la migration.
 [usernote]Sauvegardez aussi le dossier des téléversements.[/usernote]</code></pre>
 <p>Quiconque ouvre le fichier dans un éditeur de texte, et tout outil qui le lit, voit vos notes. Vous pouvez même écrire des notes à la main sous la même forme, et PlanCake les affiche comme les siennes. Pour utiliser des marqueurs différents, voir <a href="#settings-notes">les paramètres de Notes</a>.</p>
+<p>Les marqueurs à l’intérieur du code ne sont pas des notes&nbsp;: entre accents graves, comme dans <code>`[usernote]`</code>, ou dans un bloc de code. Un plan ou un manuel qui montre les marqueurs en exemple les garde tels quels, et ni la fenêtre ni les commandes n’y touchent. PlanCake lui-même n’écrit jamais de note à l’intérieur du code&nbsp;: une note sur un bloc de code va sur la ligne qui le suit.</p>
 
 <h3 id="copy-block">Copier le texte d’un bloc</h3>
 <p>Pour copier un paragraphe, un élément de liste ou un autre bloc sans sa ponctuation Markdown, faites un clic droit dessus, ou appuyez sur la touche <kbd>Applications</kbd> ou <kbd>Maj+F10</kbd> dessus, et choisissez <strong>Copier le texte du bloc</strong>. La barre d’état affiche « Texte du bloc copié ».</p>
@@ -543,7 +544,7 @@ footer {
 
 <article aria-labelledby="encodings">
 <h2 id="encodings">Les fichiers qui ne sont pas en UTF-8</h2>
-<p>Presque tous les fichiers Markdown sont aujourd’hui en UTF-8. Les fichiers plus anciens, notamment dans des langues telles que le russe ou l’hébreu, sont parfois enregistrés dans un ancien encodage Windows à la place. PlanCake les ouvre et les affiche correctement, mais par défaut il n’y écrit pas&nbsp;: le fichier s’ouvre en lecture seule, et PlanCake vous le signale, en nommant l’encodage, par exemple « Ce fichier n’est pas en UTF-8, il a donc été ouvert en lecture seule en tant que Windows-1251. Impossible d’y ajouter des notes. »</p>
+<p>Presque tous les fichiers Markdown sont aujourd’hui en UTF-8. Les fichiers plus anciens, notamment dans des langues telles que le russe ou l’hébreu, sont parfois enregistrés dans un ancien encodage Windows à la place. PlanCake les ouvre et les affiche correctement, mais par défaut il n’y écrit pas&nbsp;: le fichier s’ouvre en lecture seule, et PlanCake vous le signale, en nommant l’encodage, par exemple « Ce fichier n’est pas en UTF-8, il a donc été ouvert en lecture seule en tant que Windows-1251. Impossible d’y ajouter des notes. Pour le convertir en UTF-8, activez la conversion des fichiers qui ne sont pas en UTF-8 dans les paramètres. »</p>
 <p>Pour ajouter des notes à de tels fichiers, activez <strong>Convertir en UTF-8 les fichiers qui ne sont pas en UTF-8</strong> dans les <a href="#settings-advanced">paramètres avancés</a>. PlanCake convertit alors chaque fichier de ce type en UTF-8 dès que vous l’ouvrez et vous le signale, par exemple « Converti de Windows-1251 en UTF-8. » Seul l’encodage change&nbsp;; le texte et les fins de ligne restent les mêmes.</p>
 <p>Parfois, PlanCake ne peut pas déterminer avec certitude quel encodage un fichier utilise. Un tel fichier reste toujours en lecture seule, quel que soit le paramètre&nbsp;: « L’encodage de ce fichier n’a pas pu être reconnu, il a donc été ouvert en lecture seule et ne sera jamais modifié. Impossible d’y ajouter des notes. » C’est une règle stricte. Écrire dans un fichier qui n’a pas été lu correctement détruirait les caractères que PlanCake n’a pas pu déchiffrer, et PlanCake ne fait jamais cela.</p>
 <p>Le paramètre <strong>Langue du document</strong> est l’un des indices que PlanCake utilise pour reconnaître un ancien encodage&nbsp;; le régler sur la langue dans laquelle vos anciens fichiers sont écrits est donc utile.</p>
@@ -601,7 +602,7 @@ footer {
 <p>PlanCake peut aussi fonctionner sans fenêtre. Quatre commandes permettent de lire les notes d’un fichier, de vérifier s’il en reste, de toutes les supprimer, ou d’exporter le fichier en HTML. Elles sont conçues pour les scripts et pour les assistants IA&nbsp;: Claude les utilise pour lire vos notes sur un plan et confirmer qu’elles ont toutes été traitées.</p>
 <p>Chaque commande suit le même modèle&nbsp;:</p>
 <pre><code>plancake &lt;command&gt; &lt;file&gt; [options]</code></pre>
-<p>Tapez <code>plancake --help</code> pour la liste des commandes, ou <code>plancake list --help</code> pour les options d’une commande. La sortie est en UTF-8 sans marque d’ordre des octets. Les erreurs vont vers la sortie d’erreur, avec le code de sortie 1.</p>
+<p>Tapez <code>plancake --help</code> pour la liste des commandes, ou <code>plancake list --help</code> pour les options d’une commande. La sortie est en UTF-8 sans marque d’ordre des octets. Les erreurs vont vers la sortie d’erreur, avec le code de sortie 1. Une commande mal tapée, comme <code>plancake chek</code>, est aussi une erreur (« Commande non reconnue&nbsp;: chek. Vouliez-vous dire check&nbsp;? »)&nbsp;: aucune fenêtre ne s’ouvre alors sur un fichier qui n’existe pas.</p>
 <table>
 <caption>Codes de sortie</caption>
 <thead>
@@ -617,10 +618,12 @@ footer {
 
 <h3 id="cli-list">Lister les notes</h3>
 <pre><code>plancake list plan.md</code></pre>
-<p>Cela affiche une ligne par note&nbsp;: les lignes de la note, les lignes du bloc qu’elle suit, le début de ce bloc, et la note elle-même. Les sauts de ligne à l’intérieur d’une note sont représentés par une barre oblique.</p>
+<p>Cela affiche une ligne par note&nbsp;: les lignes de la note, les lignes du bloc qu’elle suit, le début de ce bloc, et la note elle-même. Les lignes sont numérotées à partir de 1, comme dans un éditeur de texte. Les sauts de ligne à l’intérieur d’une note sont représentés par une barre oblique.</p>
 <pre><code>43-43 after 41-42 "Back up the database before you run the migration.": Also back up the uploads folder.</code></pre>
-<p>Ce format est destiné aux scripts, ses mots fixes et sa ponctuation — « after », le tiret, les guillemets — restent donc en anglais quelle que soit votre langue d’interface.</p>
-<p>Ajoutez <code>--json</code> pour du JSON&nbsp;: une liste d’objets avec les champs <code>noteStartLine</code>, <code>noteEndLine</code>, <code>blockStartLine</code>, <code>blockEndLine</code>, <code>blockKind</code>, <code>blockExcerpt</code> et <code>text</code>. Ajoutez <code>-o</code> (ou <code>--output</code>) suivi d’un nom de fichier pour écrire le résultat dans un fichier plutôt qu’à l’écran&nbsp;:</p>
+<p>Une note placée avant le premier bloc du fichier ne suit aucun bloc, et sa ligne l’indique&nbsp;:</p>
+<pre><code>1-1 at the start: Read the whole plan before you start.</code></pre>
+<p>Ce format est destiné aux scripts, ses mots fixes et sa ponctuation — « after », « at the start », le tiret, les guillemets — restent donc en anglais quelle que soit votre langue d’interface.</p>
+<p>Ajoutez <code>--json</code> pour du JSON&nbsp;: une liste d’objets avec les champs <code>noteStartLine</code>, <code>noteEndLine</code>, <code>blockStartLine</code>, <code>blockEndLine</code>, <code>blockKind</code>, <code>blockExcerpt</code> et <code>text</code>. Les lignes sont numérotées à partir de 1. Le champ <code>blockKind</code> vaut <code>paragraph</code>, <code>heading</code>, <code>listItem</code>, <code>code</code>, <code>tableRow</code>, ou <code>start</code> pour une note placée avant le premier bloc, dont <code>blockStartLine</code> et <code>blockEndLine</code> valent <code>null</code> et dont <code>blockExcerpt</code> est vide. Ajoutez <code>-o</code> (ou <code>--output</code>) suivi d’un nom de fichier pour écrire le résultat dans un fichier plutôt qu’à l’écran&nbsp;:</p>
 <pre><code>plancake list plan.md --json -o notes.json</code></pre>
 <p><strong>Exporter les notes</strong> dans le menu <strong>Fichier</strong> enregistre le même JSON depuis la fenêtre.</p>
 
@@ -630,7 +633,8 @@ footer {
 
 <h3 id="cli-clear">Supprimer toutes les notes</h3>
 <pre><code>plancake clear plan.md</code></pre>
-<p>Cela supprime toutes les notes du fichier et affiche combien il en a supprimé, par exemple <code>2 notes supprimées.</code> Pour un fichier dans un ancien encodage, <code>clear</code> suit <a href="#settings-advanced">le paramètre de conversion</a>&nbsp;: quand la conversion est désactivée, ou que l’encodage ne peut pas être reconnu, il refuse de modifier un fichier qui contient des notes et explique pourquoi.</p>
+<p>Cela supprime toutes les notes du fichier et affiche combien il en a supprimé, par exemple <code>2 notes supprimées.</code> Pour un fichier dans un ancien encodage, <code>clear</code> suit <a href="#settings-advanced">le paramètre de conversion</a>&nbsp;: quand la conversion est désactivée, ou que l’encodage ne peut pas être reconnu, il refuse de modifier un fichier qui contient des notes et explique pourquoi. Ajoutez <code>--convert</code> pour convertir un tel fichier en UTF-8 pour cette exécution, quel que soit le paramètre&nbsp;; un fichier dont l’encodage ne peut pas être reconnu n’est toujours jamais modifié.</p>
+<pre><code>plancake clear old-plan.md --convert</code></pre>
 
 <h3 id="cli-export">Exporter en HTML</h3>
 <pre><code>plancake export plan.md -o plan.html</code></pre>

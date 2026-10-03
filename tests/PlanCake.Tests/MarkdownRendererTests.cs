@@ -397,6 +397,30 @@ public class MarkdownRendererTests {
     }
 
     [Fact]
+    public void Render_ManyNotes_EachFollowsItsOwnBlock() {
+        var source = String.Concat(Enumerable.Range(0, 500).Select(i => $"Para {i}.\n[usernote]note {i}[/usernote]\n\n"));
+
+        var result = Render(source);
+
+        result.Notes.Should().HaveCount(500);
+        result.Notes.Should().AllSatisfy(note => note.Block!.Excerpt.Should().Be($"Para {note.Index}."));
+        result.Html.Should().Contain($"Para 499.</p>\n{NoteDiv(499, "note 499")}\n");
+        result.Html.IndexOf(NoteDiv(0, "note 0"), StringComparison.Ordinal)
+            .Should().BeLessThan(result.Html.IndexOf("Para 1.", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Render_NoteAfterAFootnote_IsAnchoredToTheFootnoteNotTheLastBlock() {
+        // Footnotes are rendered at the end, out of line order.
+        const string source = "Text[^1].\n\n[^1]: The footnote.\n[usernote]on the footnote[/usernote]\n\nLast para.\n[usernote]on the last[/usernote]\n";
+
+        var result = Render(source);
+
+        result.Notes[0].Block!.Excerpt.Should().StartWith("The footnote.");
+        result.Notes[1].Block!.Excerpt.Should().Be("Last para.");
+    }
+
+    [Fact]
     public void Render_NoteText_IsEncodedAndLineBreaksBecomeBr() {
         var result = Render("Para\n[usernote]a <b> & \"q\" 'r'\nnext[/usernote]\n");
 

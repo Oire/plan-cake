@@ -1,4 +1,5 @@
 using System.Text;
+using Oire.PlanCake.Utils;
 using Serilog;
 
 namespace Oire.PlanCake.Notes;
@@ -53,6 +54,10 @@ internal sealed class MarkdownFile {
     private static readonly byte[] _utf16LeBom = [0xFF, 0xFE];
     private static readonly byte[] _utf16BeBom = [0xFE, 0xFF];
     private static readonly TimeSpan _defaultRetryDelay = TimeSpan.FromMilliseconds(200);
+
+    // The HRESULTs of ERROR_SHARING_VIOLATION and ERROR_LOCK_VIOLATION.
+    private const int SharingViolation = unchecked((int)0x80070020);
+    private const int LockViolation = unchecked((int)0x80070021);
 
     private static readonly Lazy<Encoding> _systemAnsi = new(() => {
         // Without the provider .NET only knows the Unicode encodings; code page 0 is the system's
@@ -191,7 +196,7 @@ internal sealed class MarkdownFile {
         body.CopyTo(bytes, preamble.Length);
 
         WithRetries(() => {
-            WriteAtomically(Path, bytes);
+            WriteFile(Path, bytes);
 
             return true;
         });
@@ -313,6 +318,40 @@ internal sealed class MarkdownFile {
         return memory.ToArray();
     }
 
+    /// <summary>
+    /// Writes the file a symbolic link points to rather than the link: replacing the link itself
+    /// fails, and would turn it into a plain file. A file with more than one name (a hard link) is
+    /// written in place, since replacing it would give this name a new file and leave the other
+    /// names with the old text; the write is then not atomic, but the caller has just checked the
+    /// file still holds the text it rendered. Every other file is written through a temporary file.
+    /// </summary>
+    private static void WriteFile(string path, byte[] bytes) {
+        var target = FinalTarget(path);
+
+        if (FileIdentity.LinkCount(target) > 1) {
+            WriteInPlace(target, bytes);
+        } else {
+            WriteAtomically(target, bytes);
+        }
+    }
+
+    /// <summary>The file a symbolic link at <paramref name="path"/> leads to, or the path itself.</summary>
+    private static string FinalTarget(string path) {
+        try {
+            return new FileInfo(path).ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? path;
+        } catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException) {
+            // Gone since it was read: written anew at its own path.
+            return path;
+        }
+    }
+
+    private static void WriteInPlace(string path, byte[] bytes) {
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.Read);
+        stream.Write(bytes);
+        stream.SetLength(bytes.Length);
+        stream.Flush(true);
+    }
+
     private static void WriteAtomically(string path, byte[] bytes) {
         var folder = System.IO.Path.GetDirectoryName(path) ?? ".";
         var temp = System.IO.Path.Combine(folder, $".{System.IO.Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
@@ -337,7 +376,8 @@ internal sealed class MarkdownFile {
 
     /// <summary>
     /// Runs <paramref name="action"/>, retrying it while the file is locked; after the last retry
-    /// the failure is thrown as an <see cref="IOException"/>. A missing file is not retried.
+    /// the failure is thrown as an <see cref="IOException"/>. Only what can pass is retried (see
+    /// <see cref="IsRetryable"/>); anything else fails at once.
     /// </summary>
     private T WithRetries<T>(Func<T> action) {
         var delay = _options.RetryDelay ?? _defaultRetryDelay;
@@ -345,7 +385,7 @@ internal sealed class MarkdownFile {
         for (var attempt = 0; ; attempt++) {
             try {
                 return action();
-            } catch (Exception ex) when (IsRetryable(ex) && attempt < _options.Retries) {
+            } catch (Exception ex) when (attempt < _options.Retries && IsRetryable(ex, Path)) {
                 _options.OnRetry?.Invoke(attempt);
                 Thread.Sleep(delay);
             } catch (UnauthorizedAccessException ex) {
@@ -354,7 +394,26 @@ internal sealed class MarkdownFile {
         }
     }
 
-    private static bool IsRetryable(Exception ex) =>
-        ex is UnauthorizedAccessException
-        || ex is IOException and not (FileNotFoundException or DirectoryNotFoundException);
+    /// <summary>
+    /// True for a failure that can pass: another program holding the file open or locked (a
+    /// sharing or lock violation), or access denied to a file that is neither read-only nor a
+    /// folder, which is how an antivirus scanner holding the file looks. Access denied to a
+    /// read-only file or to a folder, a missing file, and every other error stay as they are.
+    /// </summary>
+    internal static bool IsRetryable(Exception ex, string path) => ex switch {
+        IOException io => io.HResult is SharingViolation or LockViolation,
+        UnauthorizedAccessException => IsPlainWritableFile(path),
+        _ => false,
+    };
+
+    private static bool IsPlainWritableFile(string path) {
+        try {
+            var attributes = File.GetAttributes(path);
+
+            return (attributes & (FileAttributes.Directory | FileAttributes.ReadOnly)) == 0;
+        } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
+                                         or NotSupportedException) {
+            return false;
+        }
+    }
 }

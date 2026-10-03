@@ -516,6 +516,7 @@ footer {
 <pre><code>Back up the database before you run the migration.
 [usernote]Also back up the uploads folder.[/usernote]</code></pre>
 <p>Wer die Datei in einem Texteditor öffnet, und jedes Tool, das sie liest, sieht Ihre Notizen. Sie können Notizen sogar von Hand in derselben Form schreiben, und PlanCake zeigt sie wie seine eigenen an. Um andere Markierungen zu verwenden, siehe <a href="#settings-notes">Notizen-Einstellungen</a>.</p>
+<p>Markierungen in Code sind keine Notizen: zwischen Backticks, wie in <code>`[usernote]`</code>, oder in einem Codeblock. Ein Plan oder Handbuch, das die Markierungen als Beispiel zeigt, behält sie unverändert, und weder das Fenster noch die Befehle rühren sie an. PlanCake selbst schreibt nie eine Notiz in Code: Eine Notiz zu einem Codeblock kommt in die Zeile danach.</p>
 
 <h3 id="copy-block">Den Text eines Blocks kopieren</h3>
 <p>Um einen Absatz, ein Listenelement oder einen anderen Block ohne seine Markdown-Zeichensetzung zu kopieren, klicken Sie ihn mit der rechten Maustaste an, oder drücken Sie die <kbd>Anwendungstaste</kbd> oder <kbd>Umschalt+F10</kbd> darauf, und wählen Sie <strong>Blocktext kopieren</strong>. Die Statusleiste zeigt „Blocktext kopiert“.</p>
@@ -543,7 +544,7 @@ footer {
 
 <article aria-labelledby="encodings">
 <h2 id="encodings">Dateien, die nicht in UTF-8 vorliegen</h2>
-<p>Fast jede Markdown-Datei liegt heute in UTF-8 vor. Ältere Dateien, besonders in Sprachen wie Russisch oder Hebräisch, sind manchmal stattdessen in einer veralteten Windows-Codierung gespeichert. PlanCake öffnet und zeigt sie korrekt an, schreibt aber standardmäßig nicht in sie: Die Datei öffnet sich schreibgeschützt, und PlanCake sagt Ihnen das und nennt die Codierung, zum Beispiel „Diese Datei ist nicht in UTF-8 und wurde daher schreibgeschützt als Windows-1251 geöffnet. Notizen können nicht hinzugefügt werden.“</p>
+<p>Fast jede Markdown-Datei liegt heute in UTF-8 vor. Ältere Dateien, besonders in Sprachen wie Russisch oder Hebräisch, sind manchmal stattdessen in einer veralteten Windows-Codierung gespeichert. PlanCake öffnet und zeigt sie korrekt an, schreibt aber standardmäßig nicht in sie: Die Datei öffnet sich schreibgeschützt, und PlanCake sagt Ihnen das und nennt die Codierung, zum Beispiel „Diese Datei ist nicht in UTF-8 und wurde daher schreibgeschützt als Windows-1251 geöffnet. Notizen können nicht hinzugefügt werden. Um sie in UTF-8 zu konvertieren, aktivieren Sie in den Einstellungen das Konvertieren von Dateien, die nicht in UTF-8 vorliegen.“</p>
 <p>Um solchen Dateien Notizen hinzuzufügen, schalten Sie <strong>Dateien, die nicht in UTF-8 vorliegen, beim Öffnen in UTF-8 (ohne BOM) konvertieren</strong> in den <a href="#settings-advanced">erweiterten Einstellungen</a> ein. PlanCake konvertiert dann jede solche Datei in dem Moment, in dem Sie sie öffnen, nach UTF-8 und sagt Ihnen zum Beispiel „Von Windows-1251 in UTF-8 konvertiert.“ Nur die Codierung ändert sich; der Text und die Zeilenenden bleiben gleich.</p>
 <p>Manchmal kann PlanCake nicht sicher sagen, welche Codierung eine Datei verwendet. Eine solche Datei bleibt immer schreibgeschützt, egal was die Einstellung sagt: „Die Codierung dieser Datei konnte nicht erkannt werden, daher wurde sie schreibgeschützt geöffnet und wird nie geändert. Notizen können nicht hinzugefügt werden.“ Das ist eine feste Regel. Eine Datei zu schreiben, die nicht korrekt gelesen wurde, würde die Zeichen zerstören, die PlanCake nicht entziffern konnte, und das tut PlanCake nie.</p>
 <p>Die Einstellung <strong>Dokumentsprache</strong> ist einer der Hinweise, die PlanCake zur Erkennung einer veralteten Codierung nutzt; sie auf die Sprache Ihrer alten Dateien einzustellen, hilft also.</p>
@@ -601,7 +602,7 @@ footer {
 <p>PlanCake kann auch ohne Fenster arbeiten. Vier Befehle lesen die Notizen einer Datei, prüfen, ob noch welche übrig sind, entfernen sie alle oder exportieren die Datei nach HTML. Sie sind für Skripte und für KI-Assistenten gemacht: Claude verwendet sie, um Ihre Notizen zu einem Plan zu lesen und zu bestätigen, dass jede davon bearbeitet wurde.</p>
 <p>Jeder Befehl folgt demselben Muster:</p>
 <pre><code>plancake &lt;command&gt; &lt;file&gt; [options]</code></pre>
-<p>Geben Sie <code>plancake --help</code> ein für die Liste der Befehle, oder <code>plancake list --help</code> für die Optionen eines einzelnen Befehls. Die Ausgabe ist UTF-8 ohne Byte Order Mark. Fehler gehen an die Fehlerausgabe, mit Exitcode 1.</p>
+<p>Geben Sie <code>plancake --help</code> ein für die Liste der Befehle, oder <code>plancake list --help</code> für die Optionen eines einzelnen Befehls. Die Ausgabe ist UTF-8 ohne Byte Order Mark. Fehler gehen an die Fehlerausgabe, mit Exitcode 1. Auch ein falsch geschriebener Befehl wie <code>plancake chek</code> ist ein solcher Fehler („Unbekannter Befehl: chek. Meinten Sie check?“), statt dass sich ein Fenster mit einer Datei öffnet, die es nicht gibt.</p>
 <table>
 <caption>Exitcodes</caption>
 <thead>
@@ -617,10 +618,12 @@ footer {
 
 <h3 id="cli-list">Die Notizen auflisten</h3>
 <pre><code>plancake list plan.md</code></pre>
-<p>Das gibt eine Zeile pro Notiz aus: die Zeilen der Notiz, die Zeilen des Blocks, auf den sie folgt, den Anfang dieses Blocks und die Notiz selbst. Zeilenumbrüche innerhalb einer Notiz werden als Schrägstrich dargestellt.</p>
+<p>Das gibt eine Zeile pro Notiz aus: die Zeilen der Notiz, die Zeilen des Blocks, auf den sie folgt, den Anfang dieses Blocks und die Notiz selbst. Die Zeilen werden ab 1 gezählt, wie in einem Texteditor. Zeilenumbrüche innerhalb einer Notiz werden als Schrägstrich dargestellt.</p>
 <pre><code>43-43 after 41-42 "Back up the database before you run the migration.": Also back up the uploads folder.</code></pre>
-<p>Dieses Format ist für Skripte gedacht, daher bleiben seine festen Wörter und Zeichensetzung — „after“, der Bindestrich, die Anführungszeichen — auf Englisch, unabhängig von Ihrer Oberflächensprache.</p>
-<p>Fügen Sie <code>--json</code> hinzu für JSON: eine Liste von Objekten mit den Feldern <code>noteStartLine</code>, <code>noteEndLine</code>, <code>blockStartLine</code>, <code>blockEndLine</code>, <code>blockKind</code>, <code>blockExcerpt</code> und <code>text</code>. Fügen Sie <code>-o</code> (oder <code>--output</code>) und einen Dateinamen hinzu, um das Ergebnis in eine Datei statt auf den Bildschirm zu schreiben:</p>
+<p>Eine Notiz vor dem ersten Block der Datei folgt auf keinen Block, und ihre Zeile sagt das:</p>
+<pre><code>1-1 at the start: Read the whole plan before you start.</code></pre>
+<p>Dieses Format ist für Skripte gedacht, daher bleiben seine festen Wörter und Zeichensetzung — „after“, „at the start“, der Bindestrich, die Anführungszeichen — auf Englisch, unabhängig von Ihrer Oberflächensprache.</p>
+<p>Fügen Sie <code>--json</code> hinzu für JSON: eine Liste von Objekten mit den Feldern <code>noteStartLine</code>, <code>noteEndLine</code>, <code>blockStartLine</code>, <code>blockEndLine</code>, <code>blockKind</code>, <code>blockExcerpt</code> und <code>text</code>. Die Zeilen werden ab 1 gezählt. <code>blockKind</code> ist <code>paragraph</code>, <code>heading</code>, <code>listItem</code>, <code>code</code>, <code>tableRow</code> oder <code>start</code> für eine Notiz vor dem ersten Block; bei ihr sind <code>blockStartLine</code> und <code>blockEndLine</code> <code>null</code>, und <code>blockExcerpt</code> ist leer. Fügen Sie <code>-o</code> (oder <code>--output</code>) und einen Dateinamen hinzu, um das Ergebnis in eine Datei statt auf den Bildschirm zu schreiben:</p>
 <pre><code>plancake list plan.md --json -o notes.json</code></pre>
 <p><strong>Notizen exportieren</strong> im Menü <strong>Datei</strong> speichert dasselbe JSON aus dem Fenster.</p>
 
@@ -630,7 +633,8 @@ footer {
 
 <h3 id="cli-clear">Alle Notizen entfernen</h3>
 <pre><code>plancake clear plan.md</code></pre>
-<p>Das entfernt jede Notiz aus der Datei und gibt aus, wie viele entfernt wurden, zum Beispiel <code>2 Notizen entfernt.</code> Bei einer Datei in einer veralteten Codierung folgt <code>clear</code> der <a href="#settings-advanced">Konvertierungseinstellung</a>: Ist die Konvertierung ausgeschaltet, oder kann die Codierung nicht erkannt werden, weigert es sich, eine Datei zu ändern, die Notizen enthält, und erklärt, warum.</p>
+<p>Das entfernt jede Notiz aus der Datei und gibt aus, wie viele entfernt wurden, zum Beispiel <code>2 Notizen entfernt.</code> Bei einer Datei in einer veralteten Codierung folgt <code>clear</code> der <a href="#settings-advanced">Konvertierungseinstellung</a>: Ist die Konvertierung ausgeschaltet, oder kann die Codierung nicht erkannt werden, weigert es sich, eine Datei zu ändern, die Notizen enthält, und erklärt, warum. Fügen Sie <code>--convert</code> hinzu, um eine solche Datei für diesen Aufruf unabhängig von der Einstellung in UTF-8 zu konvertieren; eine Datei, deren Codierung nicht erkannt werden kann, wird weiterhin nie geändert.</p>
+<pre><code>plancake clear old-plan.md --convert</code></pre>
 
 <h3 id="cli-export">Nach HTML exportieren</h3>
 <pre><code>plancake export plan.md -o plan.html</code></pre>

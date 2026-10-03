@@ -34,6 +34,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Corpus\**\*.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\PlanCake\PlanCake.csproj" />
   </ItemGroup>
 

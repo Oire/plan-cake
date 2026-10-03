@@ -124,6 +124,44 @@ public class NoteActionRunnerTests: IDisposable {
     }
 
     [Fact]
+    public void CannotWriteReason_LegacyFile_NamesItsEncodingAndTheConvertSetting() {
+        File.WriteAllBytes(_path, _windows1251.GetBytes("Абзац.\n"));
+        var runner = RunnerForFile(new MarkdownFileOptions(AnsiEncoding: _windows1251));
+
+        runner.CannotWriteReason.Should().Be(
+            "This file is not in UTF-8, so it was opened read-only as Windows-1251. Notes cannot be added to it. To convert it to UTF-8, turn on converting files that are not UTF-8 in the settings."
+        );
+    }
+
+    [Fact]
+    public void CannotWriteReason_DamagedUtf8_SaysItIsUtf8WithAnInvalidByte() {
+        File.WriteAllBytes(_path, [.. new UTF8Encoding(false).GetBytes("Абзац.\nВторой абзац.\n"), 0xFF, (byte)'\n']);
+        var runner = RunnerForFile(new MarkdownFileOptions(AnsiEncoding: _windows1251));
+
+        runner.CannotWriteReason.Should().Be(
+            "This file is in UTF-8 but has an invalid byte on line 3, so it was opened read-only and is never changed. Notes cannot be added to it."
+        );
+    }
+
+    [Fact]
+    public void CannotWriteReason_Utf8File_IsNull() =>
+        Runner("Para.\n").CannotWriteReason.Should().BeNull();
+
+    [Fact]
+    public void Add_AfterAFenceThatIsNeverClosed_FailsWithTheReasonAndKeepsTheText() {
+        var runner = Runner("Para.\n\n```\ncode\n");
+        var rendered = runner.Store.File.Text;
+        var block = Render(rendered).Blocks[^1];
+
+        var result = runner.Add(rendered, block, "Lost");
+
+        result.Status.Should().Be(NoteActionStatus.Failed);
+        result.Message.Should().Contain("code block");
+        result.KeepsText.Should().BeTrue();
+        OnDisk.Should().Be("Para.\n\n```\ncode\n");
+    }
+
+    [Fact]
     public void Delete_ReadOnlyFile_IsRefusedWithTheReason() {
         const string text = "Абзац.\n[usernote]заметка[/usernote]\n";
         File.WriteAllBytes(_path, _windows1251.GetBytes(text));

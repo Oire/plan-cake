@@ -57,6 +57,10 @@ internal sealed class CliRunner {
         _fileArgument.Validators.Add(result => {
             if (result.Tokens is [{ Value: ['-', ..] option }]) {
                 result.AddError(_("Unrecognized option: {0}", option));
+            } else if (result.Tokens is [{ Value: var word }] && MistypedCommand(word) is { } command) {
+                // A mistyped command would otherwise open the window on a file that does not exist,
+                // and a script waiting for it would wait until someone closes the window.
+                result.AddError(_("Unrecognized command: {0}. Did you mean {1}?", word, command));
             }
         });
 
@@ -91,6 +95,56 @@ internal sealed class CliRunner {
         file = opensWindow ? result.GetValue(runner._fileArgument) : null;
 
         return opensWindow;
+    }
+
+    /// <summary>The subcommands, which <see cref="MistypedCommand"/> compares a lone word with.</summary>
+    internal static readonly string[] CommandNames = ["list", "check", "clear", "export"];
+
+    /// <summary>
+    /// The subcommand <paramref name="word"/> is likely a typo of, or <see langword="null"/>: a word
+    /// with no folder and no extension, naming no file or folder, within two edits of a
+    /// subcommand. Any other word is a file to open, so an existing file without an extension
+    /// still opens.
+    /// </summary>
+    internal static string? MistypedCommand(string word) {
+        ArgumentNullException.ThrowIfNull(word);
+
+        if (word.Length == 0 || word.AsSpan().IndexOfAny('\\', '/', ':') >= 0 || Path.HasExtension(word)
+            || File.Exists(word) || Directory.Exists(word)) {
+            return null;
+        }
+
+        var lowered = word.ToLowerInvariant();
+
+        return CommandNames
+            .Select(command => (Command: command, Distance: EditDistance(lowered, command)))
+            .Where(candidate => candidate.Distance <= 2)
+            .OrderBy(candidate => candidate.Distance)
+            .Select(candidate => candidate.Command)
+            .FirstOrDefault();
+    }
+
+    /// <summary>The Levenshtein distance between two words.</summary>
+    private static int EditDistance(string first, string second) {
+        var previous = new int[second.Length + 1];
+        var current = new int[second.Length + 1];
+
+        for (var j = 0; j <= second.Length; j++) {
+            previous[j] = j;
+        }
+
+        for (var i = 1; i <= first.Length; i++) {
+            current[0] = i;
+
+            for (var j = 1; j <= second.Length; j++) {
+                var substitution = previous[j - 1] + (first[i - 1] == second[j - 1] ? 0 : 1);
+                current[j] = Math.Min(substitution, Math.Min(previous[j], current[j - 1]) + 1);
+            }
+
+            (previous, current) = (current, previous);
+        }
+
+        return previous[second.Length];
     }
 
     /// <summary>Runs a subcommand (or prints the help, the version or a parse error).</summary>
@@ -182,13 +236,18 @@ internal sealed class CliRunner {
 
     private Command ClearCommand() {
         var file = FileArgument(_("The Markdown file to remove every note from"));
+        var convert = new Option<bool>("--convert") {
+            Description = _("Convert a file that is not UTF-8 to UTF-8 (without BOM), whatever the settings say"),
+        };
         var markers = new MarkerOptions();
-        var command = new Command("clear", _("Remove every note from a file")) { file };
+        var command = new Command("clear", _("Remove every note from a file")) { file, convert };
         markers.AddTo(command);
 
         command.SetAction(result => {
+            var convertToUtf8 = result.GetValue(convert) || Config.Advanced.ConvertToUtf8;
+
             if (!TryResolveMarkers(result, markers, out var noteMarkers)
-                || !TryOpen(result.GetValue(file)!, Config.Advanced.ConvertToUtf8, null, out var markdown)) {
+                || !TryOpen(result.GetValue(file)!, convertToUtf8, null, out var markdown)) {
                 return ExitCode.Error;
             }
 
@@ -223,7 +282,7 @@ internal sealed class CliRunner {
 
                 if (markdown.IsReadOnly) {
                     return Fail(_(
-                        "{0} is not in UTF-8 but in {1}, so PlanCake does not change it. To convert it, turn on converting files that are not UTF-8 in PlanCake's settings.",
+                        "{0} is not in UTF-8 but in {1}, so PlanCake does not change it. To convert it, run the command again with --convert, or turn on converting files that are not UTF-8 in PlanCake's settings.",
                         markdown.Path, LegacyEncoding.DisplayName(markdown.Encoding)
                     ));
                 }
@@ -342,6 +401,12 @@ internal sealed class CliRunner {
     private bool TryOpen(string path, bool convertToUtf8, string? documentLanguage, out MarkdownFile file) {
         file = null!;
 
+        if (Directory.Exists(path)) {
+            Fail(_("{0} is a folder, not a file.", path));
+
+            return false;
+        }
+
         try {
             file = MarkdownFile.Open(path, new MarkdownFileOptions(
                 ConvertToUtf8: convertToUtf8,
@@ -396,20 +461,24 @@ internal sealed class CliRunner {
 
     /// <summary>
     /// One line per note: <c>&lt;noteStart&gt;-&lt;noteEnd&gt; after &lt;blockStart&gt;-&lt;blockEnd&gt;
-    /// "&lt;excerpt&gt;": &lt;text&gt;</c>, line breaks in the text shown as <c> / </c>. Empty
-    /// without notes.
+    /// "&lt;excerpt&gt;": &lt;text&gt;</c>, or <c>&lt;noteStart&gt;-&lt;noteEnd&gt; at the start:
+    /// &lt;text&gt;</c> for a note before the first block; line numbers are 1-based, and line
+    /// breaks in the text are shown as <c> / </c>. Empty without notes.
     /// </summary>
     internal static string ListText(IReadOnlyList<RenderedNote> notes) {
         var text = new StringBuilder();
 
         foreach (var rendered in notes) {
             var note = rendered.Note;
-            var block = rendered.Block;
-            text.Append(CultureInfo.InvariantCulture, $"{note.StartLine}-{note.EndLine} after ")
-                .Append(CultureInfo.InvariantCulture, $"{block?.StartLine ?? 0}-{block?.EndLine ?? 0} ")
-                .Append(CultureInfo.InvariantCulture, $"\"{block?.Excerpt}\": ")
-                .Append(note.Text.Replace("\n", " / ", StringComparison.Ordinal))
-                .Append('\n');
+            text.Append(CultureInfo.InvariantCulture, $"{note.StartLine}-{note.EndLine} ");
+
+            if (rendered.Block is { } block) {
+                text.Append(CultureInfo.InvariantCulture, $"after {block.StartLine}-{block.EndLine} \"{block.Excerpt}\": ");
+            } else {
+                text.Append("at the start: ");
+            }
+
+            text.Append(note.Text.Replace("\n", " / ", StringComparison.Ordinal)).Append('\n');
         }
 
         return text.ToString();

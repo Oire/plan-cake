@@ -142,6 +142,44 @@ public class CliRunnerTests: IDisposable {
         error.Should().NotBeEmpty();
     }
 
+    [Theory]
+    [InlineData("chek", "check")]
+    [InlineData("lst", "list")]
+    [InlineData("CLEAR", "clear")]
+    [InlineData("exprot", "export")]
+    public void MistypedCommand_IsAnErrorThatNamesTheCommand(string word, string command) {
+        CliRunner.OpensWindow([word], out _).Should().BeFalse();
+
+        var (exitCode, _, error) = Run(word);
+
+        exitCode.Should().Be(ExitCode.Error);
+        error.Should().Contain($"Unrecognized command: {word}. Did you mean {command}?");
+    }
+
+    [Theory]
+    [InlineData("plan")]
+    [InlineData("chek.md")]
+    [InlineData(@"drafts\chek")]
+    [InlineData("checklist")]
+    public void WordThatIsNotATypoOfACommand_OpensTheWindow(string word) {
+        CliRunner.OpensWindow([word], out var file).Should().BeTrue();
+        file.Should().Be(word);
+    }
+
+    [Fact]
+    public void ExistingFileNamedLikeAMistypedCommand_OpensTheWindow() {
+        Write("# Plan\n", "chek");
+        var current = Directory.GetCurrentDirectory();
+        Directory.SetCurrentDirectory(_folder);
+
+        try {
+            CliRunner.OpensWindow(["chek"], out var file).Should().BeTrue();
+            file.Should().Be("chek");
+        } finally {
+            Directory.SetCurrentDirectory(current);
+        }
+    }
+
     [Fact]
     public void Run_Help_PrintsTheSubcommands() {
         var (exitCode, output, _) = Run("--help");
@@ -162,7 +200,7 @@ public class CliRunnerTests: IDisposable {
         error.Should().BeEmpty();
         output.Should().Be(
             """
-            1-1 after 0-0 "": At the top
+            1-1 at the start: At the top
             3-3 after 2-2 "Title": On the heading
             6-7 after 5-5 "Para one.": On the paragraph / second line
             10-10 after 9-9 "item": On the item
@@ -190,7 +228,8 @@ public class CliRunnerTests: IDisposable {
         notes[0].EnumerateObject().Select(property => property.Name).Should().Equal(
             "noteStartLine", "noteEndLine", "blockStartLine", "blockEndLine", "blockKind", "blockExcerpt", "text"
         );
-        notes[0].GetProperty("blockStartLine").GetInt32().Should().Be(0);
+        notes[0].GetProperty("blockStartLine").ValueKind.Should().Be(JsonValueKind.Null);
+        notes[0].GetProperty("blockEndLine").ValueKind.Should().Be(JsonValueKind.Null);
         notes[0].GetProperty("blockExcerpt").GetString().Should().BeEmpty();
 
         var paragraph = notes[2];
@@ -236,6 +275,18 @@ public class CliRunnerTests: IDisposable {
         output.Should().BeEmpty();
         error.Should().BeEmpty();
         File.ReadAllBytes(outPath).Should().Equal(printed);
+    }
+
+    [Fact]
+    public void List_FileThatShowsTheMarkersAsCode_HasNoNotes() {
+        var path = Write(
+            "# Notes\n\nNotes go between `[usernote]` and `[/usernote]`.\n\n```markdown\nPara.\n[usernote]Example.[/usernote]\n```\n"
+        );
+
+        Run("list", path).Should().Be((ExitCode.Success, "", ""));
+        Run("check", path).Should().Be((ExitCode.Success, "0 notes\n", ""));
+        Run("clear", path).ExitCode.Should().Be(ExitCode.Success);
+        File.ReadAllText(path).Should().Contain("[usernote]Example.[/usernote]");
     }
 
     [Fact]
@@ -424,6 +475,32 @@ public class CliRunnerTests: IDisposable {
     }
 
     [Fact]
+    public void Clear_FileNotInUtf8_SaysHowToConvertIt() {
+        Config.General.DefaultDocumentLanguage = "ru";
+        var windows1251 = CodePagesEncodingProvider.Instance.GetEncoding(1251)!;
+        var path = WriteBytes(windows1251.GetBytes("Привет, мир.\n[usernote]Заметка[/usernote]\n"));
+
+        var (_, _, error) = Run("clear", path);
+
+        error.Should().Contain("--convert");
+    }
+
+    [Fact]
+    public void Clear_Convert_ConvertsTheFileAndRemovesTheNotes() {
+        Config.General.DefaultDocumentLanguage = "ru";
+        var windows1251 = CodePagesEncodingProvider.Instance.GetEncoding(1251)!;
+        var path = WriteBytes(windows1251.GetBytes("Привет, мир.\n[usernote]Заметка[/usernote]\n"));
+
+        var (exitCode, output, error) = Run("clear", path, "--convert");
+
+        exitCode.Should().Be(ExitCode.Success);
+        error.Should().BeEmpty();
+        output.Should().Contain("Windows-1251").And.Contain("Removed 1 note.");
+        File.ReadAllBytes(path).Should().Equal(_utf8.GetBytes("Привет, мир.\n"));
+        Config.Advanced.ConvertToUtf8.Should().BeFalse();
+    }
+
+    [Fact]
     public void Clear_UnrecognizedEncoding_IsRefusedAndNeverWritten() {
         Config.Advanced.ConvertToUtf8 = true;
         byte[] bytes = [.. _utf8.GetBytes("Text\n[usernote]note[/usernote]\n"), 0x81, 0x8D, 0x8F, 0x90, 0x9D, 0x98, (byte)'\n'];
@@ -531,6 +608,21 @@ public class CliRunnerTests: IDisposable {
         exitCode.Should().Be(ExitCode.Error);
         output.Should().BeEmpty();
         error.Should().Contain("missing.md");
+    }
+
+    [Theory]
+    [InlineData("list")]
+    [InlineData("check")]
+    [InlineData("clear")]
+    public void Folder_IsAnErrorThatSaysSo(string command) {
+        var folder = Path.Combine(_folder, "plans");
+        Directory.CreateDirectory(folder);
+
+        var (exitCode, output, error) = Run(command, folder);
+
+        exitCode.Should().Be(ExitCode.Error);
+        output.Should().BeEmpty();
+        error.Should().Be($"{folder} is a folder, not a file.\n");
     }
 
     [Fact]

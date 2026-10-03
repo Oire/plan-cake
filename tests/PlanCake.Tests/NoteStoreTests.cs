@@ -119,6 +119,46 @@ public class NoteStoreTests: IDisposable {
     }
 
     [Fact]
+    public void Add_AfterFencedCodeShowingAMarker_IsFoundAndTheMarkerInTheCodeIsNot() {
+        const string Text = "```\n[usernote]example[/usernote]\n```\nAfter.\n";
+        var store = Store(Text);
+
+        AddAfter(store, BlockKind.Code, "Real note");
+
+        OnDisk.Should().Be("```\n[usernote]example[/usernote]\n```\n[usernote]Real note[/usernote]\nAfter.\n");
+        var note = Render(OnDisk).Notes.Should().ContainSingle().Subject;
+        note.Note.Text.Should().Be("Real note");
+        note.Block!.Kind.Should().Be(BlockKind.Code);
+    }
+
+    [Theory]
+    [InlineData("Example:\n\n    code\n    more\n\nAfter.\n", "Example:\n\n    code\n    more\n    [usernote]Why?[/usernote]\n\nAfter.\n")]
+    [InlineData("Example:\n\n    code\n\n    more\n", "Example:\n\n    code\n\n    more\n    [usernote]Why?[/usernote]\n")]
+    [InlineData("- item\n\n        code\n", "- item\n\n        code\n        [usernote]Why?[/usernote]\n")]
+    public void Add_AfterIndentedCode_IsFoundAsANoteOnTheCode(string text, string expected) {
+        var store = Store(text);
+
+        AddAfter(store, BlockKind.Code, "Why?");
+
+        OnDisk.Should().Be(expected);
+        var note = Render(OnDisk).Notes.Should().ContainSingle().Subject;
+        note.Note.Text.Should().Be("Why?");
+        note.Block!.Kind.Should().Be(BlockKind.Code);
+    }
+
+    [Fact]
+    public void Add_AfterAFenceThatIsNeverClosed_ThrowsAndWritesNothing() {
+        const string Text = "Para.\n\n```\ncode runs to the end\n";
+        var store = Store(Text);
+
+        var add = () => AddAfter(store, BlockKind.Code, "Lost in the code");
+
+        add.Should().Throw<NoteInCodeException>();
+        OnDisk.Should().Be(Text);
+        store.CanUndo.Should().BeFalse();
+    }
+
+    [Fact]
     public void Add_AfterParagraphInBlockquote_WritesNoQuoteMarkerAndStillAnchorsThere() {
         var store = Store("> Quoted text\n> more\n\nAfter.\n");
 
@@ -269,10 +309,10 @@ public class NoteStoreTests: IDisposable {
         OnDisk.Should().Be(Unterminated);
     }
 
-    // A stray opening marker (here in inline code) runs to the end of the file; a note added
-    // after it would close it, and the two would read back as one note.
+    // A stray opening marker runs to the end of the file; a note added after it would close it,
+    // and the two would read back as one note.
     [Theory]
-    [InlineData("# Title\n\nPara `[usernote]` stray\n\nMore of the plan\n", 3)]
+    [InlineData("# Title\n\nPara [usernote] stray\n\nMore of the plan\n", 3)]
     [InlineData("# Title\n\nPara.\n\n[usernote]Never closed\n\nMore of the plan\n", 5)]
     public void Add_AfterTheStartOfAnUnterminatedNote_ThrowsAndWritesNothing(string text, int markerLine) {
         var store = Store(text);
@@ -521,6 +561,28 @@ public class NoteStoreTests: IDisposable {
         store.Redo().Operation.Should().Be(NoteOperation.Edit);
         OnDisk.Should().Be("Para.\n[usernote]two[/usernote]\n");
         store.CanRedo.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Undo_KeepsOnlyTheLastChangesUpToTheLimit() {
+        var store = Store("Para.\n");
+
+        for (var i = 0; i < NoteStore.HistoryLimit + 5; i++) {
+            AddAfter(store, BlockKind.Paragraph, $"note {i}");
+        }
+
+        var undone = 0;
+
+        while (store.CanUndo) {
+            store.Undo();
+            undone++;
+        }
+
+        undone.Should().Be(NoteStore.HistoryLimit);
+        Render(OnDisk).Notes.Select(note => note.Note.Text).Should().Equal("note 0", "note 1", "note 2", "note 3", "note 4");
+
+        store.Redo().Operation.Should().Be(NoteOperation.Add);
+        Render(OnDisk).Notes.Should().HaveCount(6);
     }
 
     [Fact]

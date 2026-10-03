@@ -29,18 +29,29 @@ internal static class FileIdentity {
         }
     }
 
+    /// <summary>
+    /// How many names (hard links) the file at <paramref name="path"/> has; 0 when it cannot be
+    /// opened.
+    /// </summary>
+    public static uint LinkCount(string path) {
+        ArgumentNullException.ThrowIfNull(path);
+
+        return Information(path) is { } info ? info.NumberOfLinks : 0;
+    }
+
     /// <summary>The volume serial number and file ID of an existing file; <see langword="null"/> when it cannot be opened.</summary>
-    private static (uint Volume, ulong File)? Identity(string path) {
+    private static (uint Volume, ulong File)? Identity(string path) =>
+        Information(path) is { } info
+            ? (info.VolumeSerialNumber, ((ulong)info.FileIndexHigh << 32) | info.FileIndexLow)
+            : null;
+
+    private static ByHandleFileInformation? Information(string path) {
         try {
             using var handle = File.OpenHandle(
                 path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete
             );
 
-            if (!NativeMethods.GetFileInformationByHandle(handle, out var info)) {
-                return null;
-            }
-
-            return (info.VolumeSerialNumber, ((ulong)info.FileIndexHigh << 32) | info.FileIndexLow);
+            return NativeMethods.GetFileInformationByHandle(handle, out var info) ? info : null;
         } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException
                                          or NotSupportedException) {
             return null;

@@ -516,6 +516,7 @@ footer {
 <pre dir="ltr"><code>Back up the database before you run the migration.
 [usernote]Also back up the uploads folder.[/usernote]</code></pre>
 <p>מי שפותח את הקובץ בעורך טקסט, וכל כלי שקורא אותו, רואה את ההערות שלכם. תוכלו אפילו לכתוב הערות ביד באותה צורה, ו-PlanCake יציג אותן כמו שלו. כדי להשתמש בסמנים שונים, ראו <a href="#settings-notes">הגדרות ההערות</a>.</p>
+<p>סמנים בתוך קוד אינם הערות: בין גרשים הפוכים, כמו ב-<code dir="ltr">`[usernote]`</code>, או בתוך בלוק קוד. תוכנית או מדריך שמציגים את הסמנים כדוגמה שומרים עליהם כפי שהם, והחלון והפקודות לא נוגעים בהם. PlanCake עצמו לעולם לא כותב הערה בתוך קוד: הערה על בלוק קוד נכתבת בשורה שאחריו.</p>
 
 <h3 id="copy-block">העתקת הטקסט של בלוק</h3>
 <p>כדי להעתיק פסקה, פריט רשימה או בלוק אחר בלי סימני הפיסוק של Markdown שלו, לחצו לחיצה ימנית עליו, או הקישו את <kbd dir="ltr">מקש יישומים</kbd> או <kbd dir="ltr">Shift+F10</kbd> עליו, ובחרו <strong>העתק טקסט של הבלוק</strong>. שורת המצב אומרת „טקסט הבלוק הועתק”.</p>
@@ -543,7 +544,7 @@ footer {
 
 <article aria-labelledby="encodings">
 <h2 id="encodings">קבצים שאינם ב-UTF-8</h2>
-<p>כמעט כל קובץ Markdown היום הוא ב-UTF-8. קבצים ישנים יותר, בעיקר בשפות כמו רוסית או עברית, נשמרים לעיתים בקידוד Windows ישן במקום. PlanCake פותח ומציג אותם כהלכה, אבל כברירת מחדל הוא לא כותב אליהם: הקובץ נפתח לקריאה בלבד, ו-PlanCake אומר לכם זאת, בציון הקידוד, לדוגמה „קובץ זה אינו ב-UTF-8, ולכן הוא נפתח לקריאה בלבד כ-Windows-1251. לא ניתן להוסיף לו הערות.”</p>
+<p>כמעט כל קובץ Markdown היום הוא ב-UTF-8. קבצים ישנים יותר, בעיקר בשפות כמו רוסית או עברית, נשמרים לעיתים בקידוד Windows ישן במקום. PlanCake פותח ומציג אותם כהלכה, אבל כברירת מחדל הוא לא כותב אליהם: הקובץ נפתח לקריאה בלבד, ו-PlanCake אומר לכם זאת, בציון הקידוד, לדוגמה „קובץ זה אינו ב-UTF-8, ולכן הוא נפתח לקריאה בלבד כ-Windows-1251. לא ניתן להוסיף לו הערות. כדי להמיר אותו ל-UTF-8, הפעילו בהגדרות את ההמרה של קבצים שאינם ב-UTF-8.”</p>
 <p>כדי להוסיף הערות לקבצים כאלה, הפעילו את <strong>המר ל-UTF-8 (ללא BOM) קבצים שאינם ב-UTF-8 בעת פתיחתם</strong> ב<a href="#settings-advanced">הגדרות מתקדמות</a>. PlanCake ממיר אז כל קובץ כזה ל-UTF-8 ברגע שתפתחו אותו ומודיע לכם, לדוגמה „הומר מ-Windows-1251 ל-UTF-8.” רק הקידוד משתנה; הטקסט וסופי השורות נשארים אותו הדבר.</p>
 <p>לפעמים PlanCake לא יכול לדעת בוודאות איזה קידוד קובץ משתמש בו. קובץ כזה נשאר תמיד לקריאה בלבד, לא משנה מה ההגדרה אומרת: „לא ניתן לזהות את הקידוד של קובץ זה, ולכן הוא נפתח לקריאה בלבד ולעולם לא ישתנה. לא ניתן להוסיף לו הערות.” זהו כלל נחרץ. כתיבה לקובץ שלא נקרא נכון הייתה הורסת את התווים ש-PlanCake לא הצליח לפענח, ו-PlanCake לעולם לא עושה זאת.</p>
 <p>ההגדרה <strong>שפת מסמך</strong> היא אחד הרמזים ש-PlanCake משתמש בהם כדי לזהות קידוד ישן, כך שקביעתה לשפה שבה כתובים הקבצים הישנים שלכם עוזרת.</p>
@@ -601,7 +602,7 @@ footer {
 <p>PlanCake יכול גם לעבוד בלי חלון. ארבע פקודות קוראות את ההערות בקובץ, בודקות אם נותרו כאלה, מסירות את כולן, או מייצאות את הקובץ ל-HTML. הן נועדו לסקריפטים ולעוזרי בינה מלאכותית: Claude משתמש בהן כדי לקרוא את ההערות שלכם על תוכנית ולוודא שכל אחת מהן טופלה.</p>
 <p>כל פקודה פועלת לפי אותו תבנית:</p>
 <pre dir="ltr"><code>plancake &lt;command&gt; &lt;file&gt; [options]</code></pre>
-<p>הקלידו <code dir="ltr">plancake --help</code> לרשימת הפקודות, או <code dir="ltr">plancake list --help</code> לאפשרויות של פקודה מסוימת. הפלט הוא UTF-8 בלי סימון סדר בתים (BOM). שגיאות נשלחות לפלט השגיאות, עם קוד יציאה 1.</p>
+<p>הקלידו <code dir="ltr">plancake --help</code> לרשימת הפקודות, או <code dir="ltr">plancake list --help</code> לאפשרויות של פקודה מסוימת. הפלט הוא UTF-8 בלי סימון סדר בתים (BOM). שגיאות נשלחות לפלט השגיאות, עם קוד יציאה 1. גם פקודה עם שגיאת הקלדה, כמו <code dir="ltr">plancake chek</code>, היא שגיאה כזו („פקודה לא מוכרת: chek. האם התכוונתם ל-check?”), במקום שייפתח חלון עם קובץ שאינו קיים.</p>
 <table>
 <caption>קודי יציאה</caption>
 <thead>
@@ -617,10 +618,12 @@ footer {
 
 <h3 id="cli-list">הצגת ההערות</h3>
 <pre dir="ltr"><code>plancake list plan.md</code></pre>
-<p>זה מדפיס שורה אחת לכל הערה: השורות של ההערה, השורות של הבלוק שאחריו היא באה, תחילת אותו בלוק, וההערה עצמה. מעברי שורה בתוך הערה מוצגים כלוכסן.</p>
+<p>זה מדפיס שורה אחת לכל הערה: השורות של ההערה, השורות של הבלוק שאחריו היא באה, תחילת אותו בלוק, וההערה עצמה. השורות ממוספרות החל מ-1, כמו בעורך טקסט. מעברי שורה בתוך הערה מוצגים כלוכסן.</p>
 <pre dir="ltr"><code>43-43 after 41-42 "Back up the database before you run the migration.": Also back up the uploads folder.</code></pre>
-<p>תבנית זו נועדה לסקריפטים, כך שהמילים והפיסוק הקבועים שלה — „after”, המקף, המירכאות — נשארים באנגלית לא משנה מה שפת הממשק שלכם.</p>
-<p>הוסיפו <code dir="ltr">--json</code> עבור JSON: רשימה של אובייקטים עם השדות <code dir="ltr">noteStartLine</code>, <code dir="ltr">noteEndLine</code>, <code dir="ltr">blockStartLine</code>, <code dir="ltr">blockEndLine</code>, <code dir="ltr">blockKind</code>, <code dir="ltr">blockExcerpt</code> ו-<code dir="ltr">text</code>. הוסיפו <code dir="ltr">-o</code> (או <code dir="ltr">--output</code>) ושם קובץ כדי לכתוב את התוצאה לקובץ במקום למסך:</p>
+<p>הערה שלפני הבלוק הראשון בקובץ אינה באה אחרי אף בלוק, והשורה שלה אומרת זאת:</p>
+<pre dir="ltr"><code>1-1 at the start: Read the whole plan before you start.</code></pre>
+<p>תבנית זו נועדה לסקריפטים, כך שהמילים והפיסוק הקבועים שלה — „after”, „at the start”, המקף, המירכאות — נשארים באנגלית לא משנה מה שפת הממשק שלכם.</p>
+<p>הוסיפו <code dir="ltr">--json</code> עבור JSON: רשימה של אובייקטים עם השדות <code dir="ltr">noteStartLine</code>, <code dir="ltr">noteEndLine</code>, <code dir="ltr">blockStartLine</code>, <code dir="ltr">blockEndLine</code>, <code dir="ltr">blockKind</code>, <code dir="ltr">blockExcerpt</code> ו-<code dir="ltr">text</code>. השורות ממוספרות החל מ-1. הערך של <code dir="ltr">blockKind</code> הוא <code dir="ltr">paragraph</code>, <code dir="ltr">heading</code>, <code dir="ltr">listItem</code>, <code dir="ltr">code</code>, <code dir="ltr">tableRow</code>, או <code dir="ltr">start</code> עבור הערה שלפני הבלוק הראשון; אצלה <code dir="ltr">blockStartLine</code> ו-<code dir="ltr">blockEndLine</code> הם <code dir="ltr">null</code>, ו-<code dir="ltr">blockExcerpt</code> ריק. הוסיפו <code dir="ltr">-o</code> (או <code dir="ltr">--output</code>) ושם קובץ כדי לכתוב את התוצאה לקובץ במקום למסך:</p>
 <pre dir="ltr"><code>plancake list plan.md --json -o notes.json</code></pre>
 <p><strong>ייצא הערות</strong> בתפריט <strong>קובץ</strong> שומר את אותו JSON מהחלון.</p>
 
@@ -630,7 +633,8 @@ footer {
 
 <h3 id="cli-clear">מחיקת כל ההערות</h3>
 <pre dir="ltr"><code>plancake clear plan.md</code></pre>
-<p>זה מסיר כל הערה מהקובץ ומדפיס כמה הוסרו, לדוגמה <code>הוסרו 2 הערות.</code> עבור קובץ בקידוד ישן, <code dir="ltr">clear</code> פועל לפי <a href="#settings-advanced">הגדרת ההמרה</a>: כאשר ההמרה כבויה, או שהקידוד לא ניתן לזיהוי, הפקודה מסרבת לשנות קובץ שיש בו הערות ומסבירה מדוע.</p>
+<p>זה מסיר כל הערה מהקובץ ומדפיס כמה הוסרו, לדוגמה <code>הוסרו 2 הערות.</code> עבור קובץ בקידוד ישן, <code dir="ltr">clear</code> פועל לפי <a href="#settings-advanced">הגדרת ההמרה</a>: כאשר ההמרה כבויה, או שהקידוד לא ניתן לזיהוי, הפקודה מסרבת לשנות קובץ שיש בו הערות ומסבירה מדוע. הוסיפו <code dir="ltr">--convert</code> כדי להמיר קובץ כזה ל-UTF-8 בהרצה הזו, ללא קשר להגדרה; קובץ שהקידוד שלו לא ניתן לזיהוי עדיין לעולם לא משתנה.</p>
+<pre dir="ltr"><code>plancake clear old-plan.md --convert</code></pre>
 
 <h3 id="cli-export">ייצוא ל-HTML</h3>
 <pre dir="ltr"><code>plancake export plan.md -o plan.html</code></pre>

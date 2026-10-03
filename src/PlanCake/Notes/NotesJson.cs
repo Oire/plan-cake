@@ -27,7 +27,9 @@ internal static class NotesJson {
 
     /// <summary>
     /// The notes as a JSON array of <c>{ noteStartLine, noteEndLine, blockStartLine,
-    /// blockEndLine, blockKind, blockExcerpt, text }</c>; <c>[]</c> without any.
+    /// blockEndLine, blockKind, blockExcerpt, text }</c>; <c>[]</c> without any. Line numbers are
+    /// 1-based; a note before the first block has <c>null</c> block lines, an empty excerpt and
+    /// the kind <see cref="StartKind"/>.
     /// </summary>
     public static string Serialize(IReadOnlyList<RenderedNote> notes) =>
         Encoding.UTF8.GetString(SerializeToUtf8(notes));
@@ -46,8 +48,8 @@ internal static class NotesJson {
                 writer.WriteStartObject();
                 writer.WriteNumber("noteStartLine", rendered.Note.StartLine);
                 writer.WriteNumber("noteEndLine", rendered.Note.EndLine);
-                writer.WriteNumber("blockStartLine", block?.StartLine ?? 0);
-                writer.WriteNumber("blockEndLine", block?.EndLine ?? 0);
+                WriteLine(writer, "blockStartLine", block?.StartLine);
+                WriteLine(writer, "blockEndLine", block?.EndLine);
                 writer.WriteString("blockKind", KindName(block));
                 writer.WriteString("blockExcerpt", block?.Excerpt ?? String.Empty);
                 writer.WriteString("text", rendered.Note.Text);
@@ -60,6 +62,14 @@ internal static class NotesJson {
         stream.WriteByte((byte)'\n');
 
         return stream.ToArray();
+    }
+
+    private static void WriteLine(Utf8JsonWriter writer, string name, int? line) {
+        if (line is { } value) {
+            writer.WriteNumber(name, value);
+        } else {
+            writer.WriteNull(name);
+        }
     }
 
     /// <summary>
