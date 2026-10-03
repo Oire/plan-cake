@@ -11,8 +11,7 @@
 # A release is built from a clean working tree: the script refuses uncommitted or untracked
 # files, which would ship under a committed version number, unless -AllowDirty is given (for a
 # trial build). With -Appcast or -Deploy it warns when HEAD does not carry the four-part tag
-# vX.Y.Z.N of the version it built (see "Releasing" in CLAUDE.md). plancake.pdb, which does not
-# ship, is kept in installer\Output\symbols\<version>\ for reading stack traces from a release.
+# vX.Y.Z.N of the version it built (see "Releasing" in CLAUDE.md).
 #
 
 [CmdletBinding(PositionalBinding=$false)]
@@ -46,10 +45,11 @@ $PublishOutputPath = Join-Path $BuildOutputPath "publish"
 # What ships, in the installer and in the portable zip alike (plancake.iss lists the same set).
 # The single-file publish leaves everything but the exe beside it: WebView2Loader.dll (a native
 # DLL the bundle cannot hold), web\ (the page WebView2 shows), help\ (the user manual), locale\
-# (the compiled .mo catalogs), and LICENSE and THIRD-PARTY-NOTICES.txt (Help > About >
-# Licenses opens them). The publish folder also holds files that do not ship: plancake.pdb (kept in
-# Output\symbols instead), the WebView2 XML docs and a second WebView2Loader.dll under runtimes\.
-$ShippedItems = @("plancake.exe", "WebView2Loader.dll", "web", "help", "locale", "LICENSE", "THIRD-PARTY-NOTICES.txt")
+# (the compiled .mo catalogs), and LICENSE.txt (the repository's LICENSE, renamed by the .csproj
+# so Notepad and Explorer know it as text) and THIRD-PARTY-NOTICES.txt (Help > About > Licenses
+# opens them). The publish folder also holds files that do not ship: plancake.pdb, the WebView2
+# XML docs and a second WebView2Loader.dll under runtimes\.
+$ShippedItems = @("plancake.exe", "WebView2Loader.dll", "web", "help", "locale", "LICENSE.txt", "THIRD-PARTY-NOTICES.txt")
 
 Write-Host "PlanCake Installer Build Script" -ForegroundColor Green
 Write-Host "===============================" -ForegroundColor Green
@@ -166,7 +166,7 @@ $RequiredFiles = @(
     "WebView2Loader.dll",
     "web\index.html",
     "help\en\manual.html",
-    "LICENSE",
+    "LICENSE.txt",
     "THIRD-PARTY-NOTICES.txt"
 )
 
@@ -245,18 +245,6 @@ Write-Host "  File: $($Installer.Name)" -ForegroundColor White
 Write-Host "  Size: $FileSize MB" -ForegroundColor White
 Write-Host "  Version: $Version" -ForegroundColor White
 Write-Host "  Path: $($Installer.FullName)" -ForegroundColor White
-
-# The symbols of this build, for reading the stack traces in a user's errors.log. Local only:
-# installer\Output is gitignored and the .pdb never ships.
-$PdbPath = Join-Path $PublishOutputPath "plancake.pdb"
-if (Test-Path $PdbPath) {
-    $SymbolsDir = Join-Path $OutputDir "symbols\$Version"
-    New-Item -ItemType Directory -Path $SymbolsDir -Force | Out-Null
-    Copy-Item -Path $PdbPath -Destination $SymbolsDir -Force
-    Write-Host "  Symbols: $SymbolsDir" -ForegroundColor White
-} else {
-    Write-Warning "plancake.pdb not found in the publish output; no symbols kept for $Version."
-}
 
 # A release is the commit tagged vX.Y.Z.N with the version it builds as (see "Releasing" in
 # CLAUDE.md). Only a warning: the tag can be added after a trial of the appcast.

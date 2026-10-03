@@ -93,7 +93,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; PlanCake's license and the third-party notices (Help > About > Licenses opens them).
 Source: "{#SourcePath}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}\THIRD-PARTY-NOTICES.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}\web\*"; DestDir: "{app}\web"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#SourcePath}\help\*"; DestDir: "{app}\help"; Flags: ignoreversion recursesubdirs createallsubdirs

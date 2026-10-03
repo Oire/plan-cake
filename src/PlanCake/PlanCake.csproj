@@ -103,9 +103,16 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <!-- PlanCake's license and the third-party notices, next to the exe: Help > About >
-         Licenses opens them, and the installer and the portable zip ship them. -->
-    <None Include="..\..\LICENSE;..\..\THIRD-PARTY-NOTICES.txt">
-      <Link>%(Filename)%(Extension)</Link>
+         Licenses opens them, and the installer and the portable zip ship them. The repository's
+         LICENSE keeps its bare name, which GitHub expects; it ships as LICENSE.txt, a name
+         Notepad and Explorer know as text. -->
+    <None Include="..\..\LICENSE">
+      <Link>LICENSE.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </None>
+    <None Include="..\..\THIRD-PARTY-NOTICES.txt">
+      <Link>THIRD-PARTY-NOTICES.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>

@@ -70,13 +70,13 @@ internal sealed partial class AboutDialog: Form {
     /// portable zip ship both.
     /// </summary>
     internal static IReadOnlyList<string> LicenseFiles(string folder) => [
-        Path.Combine(folder, "LICENSE"),
+        Path.Combine(folder, "LICENSE.txt"),
         Path.Combine(folder, "THIRD-PARTY-NOTICES.txt"),
     ];
 
     /// <summary>
-    /// Opens the license files in Notepad. They are the application's own plain-text files, and
-    /// LICENSE has no extension, so no file association is involved.
+    /// Opens the license files in Notepad. They are the application's own plain-text files, so
+    /// no file association is involved.
     /// </summary>
     private void OnLicensesClick(object? sender, EventArgs e) {
         var notepad = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe");

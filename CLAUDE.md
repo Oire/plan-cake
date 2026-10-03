@@ -370,14 +370,12 @@ then paste the contents of `keys/NetSparkle_Ed25519.pub` into `App.UpdatePublicK
 compiles the translations with `-Strict`, publishes to `src/PlanCake/bin/x64/Release/publish`,
 compiles `installer/plancake.iss` with Inno Setup 6, and writes to `installer/Output/`
 (gitignored) the installer `plancake-v<VERSION>-setup.exe` and the portable
-`plancake-v<VERSION>-portable.zip`, where `<VERSION>` is the four-part file version, and keeps
-`plancake.pdb` in `installer/Output/symbols/<VERSION>/` (never shipped; it is what turns a stack
-trace in a user's `errors.log` into source lines). `-Appcast` adds `appcast.xml` and its
-signature, signed with the key in `keys/` (it needs `netsparkle-generate-appcast`); `-Deploy`
-uploads the lot to plancake.oire.dev over SCP with the host and path in
-`installer/deploy.json` (gitignored; copy `deploy.example.json`). Release notes come from
-`changelogs/<X.Y.Z>.md`, named after the three-part version of the cycle, since `N` is only
-known once the release commit exists; the script hands the file to the generator under the
+`plancake-v<VERSION>-portable.zip`, where `<VERSION>` is the four-part file version.
+`-Appcast` adds `appcast.xml` and its signature, signed with the key in `keys/` (it needs
+`netsparkle-generate-appcast`); `-Deploy` uploads the lot to plancake.oire.dev over SCP with the
+host and path in `installer/deploy.json` (gitignored; copy `deploy.example.json`). Release notes
+come from `changelogs/<X.Y.Z>.md`, named after the three-part version of the cycle, since `N` is
+only known once the release commit exists; the script hands the file to the generator under the
 four-part name it looks for (a `changelogs/<X.Y.Z.N>.md` wins when there is one).
 
 The script refuses a working tree with uncommitted or untracked files (`git status
@@ -386,12 +384,12 @@ The script refuses a working tree with uncommitted or untracked files (`git stat
 `-Deploy` it warns when HEAD does not carry the tag `v<VERSION>` of the build.
 
 What ships is the same in both: `plancake.exe`, `WebView2Loader.dll`, `web\`, `help\`,
-`locale\**\*.mo`, `LICENSE` and `THIRD-PARTY-NOTICES.txt` (the last two copied next to the exe
-by the `.csproj`; Help → About → Licenses opens them in Notepad). The publish folder holds more
-(the `.pdb`, WebView2's XML docs, a second `WebView2Loader.dll` under `runtimes\`), so a new
-file beside the exe must be added to both the `[Files]` section of `plancake.iss` and
-`$ShippedItems` in the script. The installer puts `{app}` on the machine `PATH` and takes it
-off on uninstall, adds a Start menu shortcut to the manual in the language Setup ran in
+`locale\**\*.mo`, `LICENSE.txt` and `THIRD-PARTY-NOTICES.txt` (the last two copied next to the exe
+by the `.csproj`, which ships the repository's `LICENSE` as `LICENSE.txt`; Help → About →
+Licenses opens them in Notepad). The publish folder holds more (the `.pdb`, WebView2's XML docs,
+a second `WebView2Loader.dll` under `runtimes\`), so a new file beside the exe must be added to
+both the `[Files]` section of `plancake.iss` and `$ShippedItems` in the script. The installer
+puts `{app}` on the machine `PATH` and takes it off on uninstall, adds a Start menu shortcut to the manual in the language Setup ran in
 (`help\{language}\manual.html`), shows the Ready to Install page (it lists the runtimes Setup
 is about to download, and its button is the one that says Install), and installs the .NET 10
 Desktop Runtime and the WebView2 Runtime when missing (`CodeDependencies.iss`, from
@@ -450,7 +448,6 @@ From start to finish, by hand on the maintainer's machine (CI never builds a rel
 4. Create the GitHub release from the tag with the installer and the zip from
    `installer/Output/`:
    `gh release create v1.0.0.7 installer/Output/plancake-v1.0.0.7-setup.exe installer/Output/plancake-v1.0.0.7-portable.zip --title "PlanCake 1.0.0.7" --notes-file changelogs/1.0.0.md`.
-   Keep `installer/Output/symbols/1.0.0.7/plancake.pdb` somewhere safe.
 5. Update winget with the four-part version (the `wingetcreate update` command above;
    `wingetcreate new` for the first release).
 6. Open the next cycle on the next commit, not on the release commit:
