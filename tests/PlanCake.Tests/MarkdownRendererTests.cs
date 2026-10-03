@@ -245,13 +245,22 @@ public class MarkdownRendererTests {
     }
 
     [Fact]
-    public void Render_LongTaskItem_NamesItsCheckboxWithTheWholeText() {
-        var words = String.Join(' ', Enumerable.Repeat("word", 30));
+    public void Render_TaskItem_NamesItsCheckboxWithTheFirstSentence() {
+        var words = String.Join(' ', Enumerable.Repeat("word", 20));
 
-        var result = Render($"- [x] {words}\n  continued\n");
+        var result = Render($"- [x] {words}\n  continued. Then more.\n");
 
-        result.Blocks[0].Excerpt.Should().EndWith("…");
-        result.Html.Should().Contain($"""aria-label="{words} continued" checked="checked" />""");
+        result.Html.Should().Contain($"""aria-label="{words} continued." checked="checked" />""");
+    }
+
+    [Fact]
+    public void Render_LongTaskSentence_NamesItsCheckboxUpToAPause() {
+        var clause = String.Join(' ', Enumerable.Repeat("word", 20));
+        var rest = String.Join(' ', Enumerable.Repeat("more", 20));
+
+        var result = Render($"- [ ] {clause}, {rest}.\n");
+
+        result.Html.Should().Contain($"""aria-label="{clause}…" />""");
     }
 
     [Fact]

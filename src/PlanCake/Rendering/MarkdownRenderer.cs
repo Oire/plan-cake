@@ -441,7 +441,7 @@ internal static partial class MarkdownRenderer {
     /// done item carries <c>data-mixed</c>, which the page turns into the check box's
     /// <c>indeterminate</c> state. In an exported file it stays disabled as Markdig renders it,
     /// and a partially done item gets <c>aria-checked="mixed"</c>, since no script runs there.
-    /// Both carry the item's text as their <c>aria-label</c>: an input takes no name from the text
+    /// Both carry the item's first sentence as their <c>aria-label</c>: an input takes no name from the text
     /// after it, and a screen reader that focuses the check box (after a toggle, in forms mode)
     /// would say only "check box". Not a <c>&lt;label&gt;</c> around the text, which would make a
     /// click on the text toggle the task instead of adding a note.
@@ -710,10 +710,11 @@ internal static partial class MarkdownRenderer {
                     var itemText = PlainText(lead);
                     Add(BlockKind.ListItem, lead, itemText, item);
 
-                    // The whole item, not the excerpt: a name cut with an ellipsis tells a screen
-                    // reader user less than the text it stands for.
+                    // The first sentence, as long as a note's in the notes list: enough to tell the
+                    // task by when the check box has the focus, and short enough not to make the
+                    // item heard twice over in browse mode, where its text follows the name.
                     if (TaskOf(item) is { } task) {
-                        TaskLabels[task] = TaskToggle.WithoutMarker(OneLine(itemText));
+                        TaskLabels[task] = FirstSentence(TaskToggle.WithoutMarker(OneLine(itemText)));
                     }
 
                     for (var i = 1; i < item.Count; i++) {
