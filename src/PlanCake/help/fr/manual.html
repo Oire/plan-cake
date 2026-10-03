@@ -760,7 +760,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Ouvrir</strong></td><td><kbd>Ctrl+O</kbd></td><td>Ouvre un fichier Markdown depuis votre disque.</td></tr>
 <tr><td><strong>Ouvrir depuis le presse-papiers</strong></td><td><kbd>Ctrl+V</kbd></td><td>Ouvre le fichier, le chemin ou le lien que vous avez copié.</td></tr>
 <tr><td><strong>Ouvrir depuis un lien</strong></td><td><kbd>Ctrl+L</kbd></td><td>Télécharge un fichier Markdown depuis le web et l’ouvre.</td></tr>
-<tr><td><strong>Ouvrir dans l’éditeur</strong></td><td><kbd>Ctrl+E</kbd></td><td>Ouvre le fichier dans le programme que Windows associe aux fichiers Markdown, quand vous voulez modifier le texte même du plan.</td></tr>
+<tr><td><strong>Ouvrir dans l’éditeur</strong></td><td><kbd>Ctrl+E</kbd></td><td>Ouvre le fichier dans le programme que Windows associe aux fichiers Markdown, quand vous voulez modifier le texte même du plan. Si ce programme est PlanCake lui-même, ou s’il n’y en a aucun, le fichier s’ouvre dans le programme que Windows utilise pour le modifier, ou à défaut dans le Bloc-notes.</td></tr>
 <tr><td><strong>Exporter les notes</strong></td><td>Aucun</td><td>Enregistre toutes les notes du fichier, avec les blocs qu’elles suivent, sous forme de fichier JSON. PlanCake ne le relit jamais&nbsp;; c’est une copie destinée à d’autres outils.</td></tr>
 <tr><td><strong>Paramètres</strong></td><td><kbd>Ctrl+Virgule</kbd></td><td>Ouvre les paramètres.</td></tr>
 <tr><td><strong>Quitter</strong></td><td><kbd>Alt+F4</kbd></td><td>Ferme la fenêtre.</td></tr>
@@ -864,7 +864,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <li>Avec le programme d’installation&nbsp;: <code>%APPDATA%\Oire\PlanCake\PlanCake.cfg</code></li>
 <li>Portable&nbsp;: <code>userdata\PlanCake.cfg</code>, à côté de <code>plancake.exe</code></li>
 </ul>
-<p>Pour emporter vos paramètres sur un autre ordinateur, copiez ce fichier au même endroit là-bas. Ce même dossier contient un dossier <code>logs</code>, qui enregistre ce qu’a fait PlanCake et aide quand vous signalez un problème, ainsi que quelques fichiers de travail de l’affichage du document. Supprimer ce dossier réinitialise PlanCake à ses valeurs par défaut et ne touche jamais à vos fichiers Markdown ni aux notes qu’ils contiennent.</p>
+<p>Pour emporter vos paramètres sur un autre ordinateur, copiez ce fichier au même endroit là-bas. Ce même dossier contient un dossier <code>logs</code>, qui enregistre ce qu’a fait PlanCake et aide quand vous signalez un problème. Les fichiers de travail de l’affichage du document sont conservés dans <code>%LOCALAPPDATA%\Oire\PlanCake</code> avec l’installateur, et dans ce même dossier <code>userdata</code> dans la version portable. Supprimer ces dossiers réinitialise PlanCake à ses valeurs par défaut et ne touche jamais à vos fichiers Markdown ni aux notes qu’ils contiennent.</p>
 <h3 id="data-privacy">Ce qui transite sur le réseau</h3>
 <p>PlanCake ne se connecte à internet que pour deux choses&nbsp;: télécharger un fichier quand vous en ouvrez un depuis un lien, et vérifier les mises à jour. Il n’envoie aucune donnée d’utilisation où que ce soit.</p>
 </article>

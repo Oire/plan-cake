@@ -44,7 +44,7 @@ internal partial class OpenLinkDialog: Form {
         }
 
         if (Validate(urlTextBox.Text) is { } error) {
-            Log.Debug("Link rejected: {Url}", urlTextBox.Text.Trim());
+            Log.Debug("Link rejected: {Url}", UrlHelper.ForLog(urlTextBox.Text.Trim()));
             DialogHelper.Show(error, _("Invalid link"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             e.Cancel = true;
             urlTextBox.Focus();

@@ -232,4 +232,16 @@ public class LinkResolverTests {
     public void IsMarkdownPath_ChecksTheExtension(string? path, bool expected) {
         LinkResolver.IsMarkdownPath(path).Should().Be(expected);
     }
+
+    // IsNoEditor: Open in editor when Windows opens Markdown files with PlanCake
+
+    [Theory]
+    [InlineData(null, @"C:\Program Files\PlanCake\plancake.exe", true)]
+    [InlineData("", @"C:\Program Files\PlanCake\plancake.exe", true)]
+    [InlineData(@"C:\Program Files\PlanCake\plancake.exe", @"C:\Program Files\PlanCake\plancake.exe", true)]
+    [InlineData(@"D:\Tools\PlanCake\PLANCAKE.EXE", @"C:\Program Files\PlanCake\plancake.exe", true)]
+    [InlineData(@"C:\Windows\System32\notepad.exe", @"C:\Program Files\PlanCake\plancake.exe", false)]
+    [InlineData(@"C:\Program Files\Microsoft VS Code\Code.exe", null, false)]
+    public void IsNoEditor_IsTrueForNoProgramOrPlanCakeItself(string? program, string? own, bool expected) =>
+        LinkResolver.IsNoEditor(program, own).Should().Be(expected);
 }

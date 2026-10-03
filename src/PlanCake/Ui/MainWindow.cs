@@ -1409,7 +1409,10 @@ public partial class MainWindow: Form {
     private void OpenLink(string href) {
         var folder = _file is null ? null : Path.GetDirectoryName(_file.Path);
         var target = LinkResolver.Resolve(href, folder);
-        Log.Information("Link {Href} resolved to {Kind} {Target}", href, target.Kind, target.Target);
+        Log.Information(
+            "Link {Href} resolved to {Kind} {Target}",
+            UrlHelper.ForLog(href), target.Kind, UrlHelper.ForLog(target.Target)
+        );
 
         switch (target.Kind) {
             case LinkKind.External:
@@ -1471,7 +1474,7 @@ public partial class MainWindow: Form {
         try {
             Process.Start(startInfo)?.Dispose();
         } catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or FileNotFoundException) {
-            Log.Error(ex, "Unable to open {Target}", target);
+            Log.Error(ex, "Unable to open {Target}", UrlHelper.ForLog(target));
             _announcer.Announce(_("Unable to open {0}", target));
         }
     }
@@ -1624,7 +1627,7 @@ public partial class MainWindow: Form {
             return;
         } catch (Exception ex) {
             // Nothing may leave an async void: it would end up in the unhandled-exception handler.
-            Log.Error(ex, "Download of {Url} failed", url);
+            Log.Error(ex, "Download of {Url} failed", UrlHelper.ForLog(url));
 
             if (!IsDisposed && !Disposing) {
                 _announcer.Announce(_("The download failed: {0}", ex.Message));
@@ -1660,9 +1663,11 @@ public partial class MainWindow: Form {
     }
 
     /// <summary>
-    /// File → Open in editor: a Markdown file in the program Windows opens Markdown files with;
-    /// any other file (opened through All files) with its "edit" verb, else in Notepad, never
-    /// with its default verb, which for a script or a program runs it.
+    /// File → Open in editor: a Markdown file in the program Windows opens Markdown files with,
+    /// unless that is PlanCake itself (which would only bring this window to the front) or there
+    /// is none; any other file (opened through All files), and a Markdown file then, with its
+    /// "edit" verb, else in Notepad. Never a non-Markdown file with its default verb, which for a
+    /// script or a program runs it.
     /// </summary>
     private void OpenInEditor() {
         if (_file is null) {
@@ -1678,8 +1683,17 @@ public partial class MainWindow: Form {
         var path = _file.Path;
 
         if (LinkResolver.IsMarkdownPath(path)) {
-            ShellOpen(path);
-            return;
+            var program = LinkResolver.DefaultProgramFor(path);
+
+            if (!LinkResolver.IsNoEditor(program, Environment.ProcessPath)) {
+                ShellOpen(path);
+                return;
+            }
+
+            Log.Information(
+                "Markdown files open in {Program}; opening {Path} for editing otherwise",
+                program ?? "nothing", path
+            );
         }
 
         if (!LinkResolver.IsRunnable(path)) {

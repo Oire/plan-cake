@@ -760,7 +760,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Open</strong></td><td><kbd>Ctrl+O</kbd></td><td>Opens a Markdown file from your disk.</td></tr>
 <tr><td><strong>Open from clipboard</strong></td><td><kbd>Ctrl+V</kbd></td><td>Opens the file, path or link you copied.</td></tr>
 <tr><td><strong>Open from link</strong></td><td><kbd>Ctrl+L</kbd></td><td>Downloads a Markdown file from the web and opens it.</td></tr>
-<tr><td><strong>Open in editor</strong></td><td><kbd>Ctrl+E</kbd></td><td>Opens the file in the program Windows uses for Markdown files, when you want to change the plan's text itself.</td></tr>
+<tr><td><strong>Open in editor</strong></td><td><kbd>Ctrl+E</kbd></td><td>Opens the file in the program Windows uses for Markdown files, when you want to change the plan's text itself. If that program is PlanCake itself, or there is none, the file opens in the program Windows uses to edit it, or else in Notepad.</td></tr>
 <tr><td><strong>Export notes</strong></td><td>None</td><td>Saves all notes of the file, with the blocks they follow, as a JSON file. PlanCake never reads it back; it is a copy for other tools.</td></tr>
 <tr><td><strong>Settings</strong></td><td><kbd>Ctrl+Comma</kbd></td><td>Opens the settings.</td></tr>
 <tr><td><strong>Exit</strong></td><td><kbd>Alt+F4</kbd></td><td>Closes the window.</td></tr>
@@ -864,7 +864,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <li>With the installer: <code>%APPDATA%\Oire\PlanCake\PlanCake.cfg</code></li>
 <li>Portable: <code>userdata\PlanCake.cfg</code>, next to <code>plancake.exe</code></li>
 </ul>
-<p>To take your settings to another computer, copy that file to the same place there. The same folder holds a <code>logs</code> folder, which records what PlanCake did and helps when you report a problem, and some working files of the document view. Deleting that folder resets PlanCake to its defaults and never touches your Markdown files or the notes in them.</p>
+<p>To take your settings to another computer, copy that file to the same place there. The same folder holds a <code>logs</code> folder, which records what PlanCake did and helps when you report a problem. The working files of the document view are kept in <code>%LOCALAPPDATA%\Oire\PlanCake</code> with the installer, and in the same <code>userdata</code> folder in the portable version. Deleting these folders resets PlanCake to its defaults and never touches your Markdown files or the notes in them.</p>
 <h3 id="data-privacy">What goes over the network</h3>
 <p>PlanCake connects to the internet only for two things: downloading a file when you open one from a link, and checking for updates. It sends no usage data anywhere.</p>
 </article>

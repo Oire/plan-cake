@@ -83,8 +83,18 @@ public static class App {
     public static readonly string WebFolder = Path.Combine(AppContext.BaseDirectory, "web");
 
     /// <summary>
-    /// The WebView2 user data folder (the browser's cache and state), under <see cref="DataFolder"/>
-    /// because the install folder is not writable.
+    /// The WebView2 user data folder (the browser's cache and state). Not in the install folder,
+    /// which is not writable, and not under <see cref="DataFolder"/> in the user profile: a
+    /// browser cache does not belong in the roaming profile, which a domain copies to its server
+    /// at every logoff. It goes under the local application data folder instead, as Microsoft
+    /// recommends; a portable copy keeps it in <c>userdata\</c> with everything else.
     /// </summary>
-    public static readonly string WebView2DataFolder = Path.Combine(DataFolder, "WebView2");
+    public static readonly string WebView2DataFolder = IsPortable
+        ? Path.Combine(DataFolder, "WebView2")
+        : Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            ManufacturerNameShort,
+            Name,
+            "WebView2"
+        );
 }

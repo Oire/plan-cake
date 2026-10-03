@@ -171,7 +171,9 @@ map.
   away from the shell (the window offers to show it in File Explorer), and does not follow, or
   even check, a UNC path on another host than the document's, since touching it sends the
   user's credentials there. File → Open in editor uses the "edit" verb or Notepad for anything
-  that is not Markdown, never the default verb.
+  that is not Markdown, never the default verb; a Markdown file gets the default verb unless
+  Windows opens Markdown with PlanCake itself or with nothing (`LinkResolver.DefaultProgramFor`),
+  and then goes the same way.
 - **web/** is the page. `app.js` shows what the host renders, reports which block or note the
   user acts on, and moves focus when the host asks. `morph.js` updates the page in place when
   the same file is rendered again; `blocks.js` picks the block Alt+Shift+Down and Up move to.
@@ -205,7 +207,9 @@ acting on a block carries focus; the rest leave the reader where they are.
 
 ### WebView2
 
-- **User data folder** under `App.DataFolder\WebView2`: the install folder is not writable.
+- **User data folder** `App.WebView2DataFolder`: `%LOCALAPPDATA%\Oire\PlanCake\WebView2`
+  (`userdata\WebView2` when portable). Not the install folder, which is not writable, and not
+  the roaming `App.DataFolder`: a browser cache does not belong in a roaming profile.
 - **The page's own host.** `web\` is mapped to `https://app.plancake/`. The only navigation
   allowed is the host's own `Navigate` to a page there; every other navigation, frame navigation
   and new window is refused, and the CSP in `index.html` allows no script but the app's own.
@@ -279,13 +283,15 @@ tests need no console.
 
 `App.DataFolder` resolves to `%APPDATA%\Oire\PlanCake`, or to `userdata\` next to the EXE when
 that folder exists (portable mode, detected once at static init). It holds `PlanCake.cfg`
-(written to a temporary file and moved over the old one, since other windows read it),
+(written to a temporary file and moved over the old one, since other windows read it) and
 `logs\` (Serilog: `PlanCake.log`, `PlanCake-short.log`, `errors.log`, `errors-short.log`,
 `analysis.json`; every window and every CLI run is its own process, so while one holds a log,
-the others write to numbered siblings such as `PlanCake_001.log`) and `WebView2\` (the
-browser's user data folder, `App.WebView2DataFolder`). PlanCake keeps no other user content, so
-`App.DataSubfolder` (`data\`) is unused. The logs are the first thing to read when a user
-reports a problem.
+the others write to numbered siblings such as `PlanCake_001.log`). Each log rolls over at 10 MB
+and keeps ten files, numbered siblings included; a Release build logs from Information up, a
+Debug build from Debug. The browser's user data folder, `App.WebView2DataFolder`, is
+`%LOCALAPPDATA%\Oire\PlanCake\WebView2`, or `userdata\WebView2` when portable; the uninstaller
+offers to remove both folders. PlanCake keeps no other user content, so `App.DataSubfolder`
+(`data\`) is unused. The logs are the first thing to read when a user reports a problem.
 
 ## File safety
 

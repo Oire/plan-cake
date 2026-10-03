@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-03 02:27:02+0200\n"
+"POT-Creation-Date: 2026-10-03 02:41:09+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: fr\n"
@@ -18,7 +18,7 @@ msgid "--single-token and --close-marker cannot be used together."
 msgstr ""
 "--single-token et --close-marker ne peuvent pas être utilisés ensemble."
 
-#: ..\..\Ui\MainWindow.cs:1508
+#: ..\..\Ui\MainWindow.cs:1511
 #, csharp-format
 msgid "{0} - {1}"
 msgstr "{0} - {1}"
@@ -28,7 +28,7 @@ msgstr "{0} - {1}"
 msgid "{0} is a folder, not a file."
 msgstr "{0} est un dossier, pas un fichier."
 
-#: ..\..\Ui\MainWindow.cs:1856
+#: ..\..\Ui\MainWindow.cs:1870
 #, csharp-format
 msgid "{0} is back. File reloaded"
 msgstr "{0} est de retour. Fichier rechargé"
@@ -86,7 +86,7 @@ msgid_plural "All {0} notes deleted"
 msgstr[0] "{0} note supprimée"
 msgstr[1] "Les {0} notes ont été supprimées"
 
-#: ..\..\Ui\MainWindow.cs:1886
+#: ..\..\Ui\MainWindow.cs:1900
 #, csharp-format
 msgid "{0} was changed outside PlanCake. Reload it?"
 msgstr "{0} a été modifié en dehors de PlanCake. Le recharger ?"
@@ -125,7 +125,7 @@ msgid "&Delete all notes..."
 msgstr "&Supprimer toutes les notes..."
 
 #: ..\..\Ui\MainWindow.cs:263 ..\..\Ui\MainWindow.cs:1337
-#: ..\..\Ui\MainWindow.cs:2258
+#: ..\..\Ui\MainWindow.cs:2272
 msgid "&Delete note"
 msgstr "&Supprimer la note"
 
@@ -141,7 +141,7 @@ msgstr "Langue du &document :"
 msgid "&Edit"
 msgstr "É&dition"
 
-#: ..\..\Ui\MainWindow.cs:1333 ..\..\Ui\MainWindow.cs:2257
+#: ..\..\Ui\MainWindow.cs:1333 ..\..\Ui\MainWindow.cs:2271
 msgid "&Edit note"
 msgstr "&Modifier la note"
 
@@ -255,7 +255,7 @@ msgstr "&Zoom avant"
 msgid "© {0} {1}"
 msgstr "© {0} {1}"
 
-#: ..\..\Ui\MainWindow.cs:1575 ..\..\Ui\MainWindow.cs:1605
+#: ..\..\Ui\MainWindow.cs:1578 ..\..\Ui\MainWindow.cs:1608
 msgid "A download is already in progress."
 msgstr "Un téléchargement est déjà en cours."
 
@@ -307,7 +307,7 @@ msgstr "Ajoute une note"
 msgid "Advanced"
 msgstr "Avancé"
 
-#: ..\..\Ui\MainWindow.cs:1514 ..\..\Ui\MainWindow.cs:1711
+#: ..\..\Ui\MainWindow.cs:1517 ..\..\Ui\MainWindow.cs:1725
 msgid "All files"
 msgstr "Tous les fichiers"
 
@@ -347,7 +347,7 @@ msgstr "Revenir au fichier précédent"
 msgid "Backspace"
 msgstr "Retour arrière"
 
-#: ..\..\Ui\MainWindow.cs:2223
+#: ..\..\Ui\MainWindow.cs:2237
 msgid "Block"
 msgstr "Bloc"
 
@@ -424,7 +424,7 @@ msgstr "Ctrl"
 msgid "Delete"
 msgstr "Suppr"
 
-#: ..\..\Ui\MainWindow.cs:1947
+#: ..\..\Ui\MainWindow.cs:1961
 msgid "Delete all notes"
 msgstr "Supprimer toutes les notes"
 
@@ -432,7 +432,7 @@ msgstr "Supprimer toutes les notes"
 msgid "Delete note"
 msgstr "Supprimer la note"
 
-#: ..\..\Ui\MainWindow.cs:1946
+#: ..\..\Ui\MainWindow.cs:1960
 #, csharp-format
 msgid "Delete the note in this file?"
 msgid_plural "Delete all {0} notes in this file?"
@@ -450,7 +450,7 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:2185
+#: ..\..\Ui\MainWindow.cs:2199
 #, csharp-format
 msgid "Document language: {0}"
 msgstr "Langue du document : {0}"
@@ -459,12 +459,12 @@ msgstr "Langue du document : {0}"
 msgid "Down Arrow"
 msgstr "Flèche bas"
 
-#: ..\..\Ui\MainWindow.cs:1648
+#: ..\..\Ui\MainWindow.cs:1651
 #, csharp-format
 msgid "Downloaded and saved to {0}"
 msgstr "Téléchargé et enregistré dans {0}"
 
-#: ..\..\Ui\MainWindow.cs:1617
+#: ..\..\Ui\MainWindow.cs:1620
 #, csharp-format
 msgid "Downloading from {0}..."
 msgstr "Téléchargement depuis {0}..."
@@ -485,12 +485,12 @@ msgstr "Entrée"
 msgid "Enter in the note dialo&g:"
 msgstr "Entrée dans la boîte de dialo&gue de note :"
 
-#: ..\..\Program.cs:90 ..\..\Program.cs:113 ..\..\Ui\AboutDialog.cs:52
-#: ..\..\Ui\MainWindow.cs:430 ..\..\Ui\MainWindow.cs:712
+#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Ui\AboutDialog.cs:52
+#: ..\..\Program.cs:150 ..\..\Ui\MainWindow.cs:430 ..\..\Ui\MainWindow.cs:712
 msgid "Error"
 msgstr "Erreur"
 
-#: ..\..\Program.cs:139 ..\..\Cli\CliRunner.cs:163
+#: ..\..\Program.cs:183 ..\..\Cli\CliRunner.cs:163
 #, csharp-format
 msgid "Error: {0}"
 msgstr "Erreur : {0}"
@@ -511,23 +511,23 @@ msgstr "&Exporter les notes..."
 msgid "Export a file as standalone HTML with its notes"
 msgstr "Exporter un fichier en HTML autonome avec ses notes"
 
-#: ..\..\Ui\MainWindow.cs:1710
+#: ..\..\Ui\MainWindow.cs:1724
 msgid "Export notes"
 msgstr "Exporter les notes"
 
-#: ..\..\Ui\MainWindow.cs:1741
+#: ..\..\Ui\MainWindow.cs:1755
 #, csharp-format
 msgid "Exported {0} note to {1}."
 msgid_plural "Exported {0} notes to {1}."
 msgstr[0] "{0} note exportée vers {1}."
 msgstr[1] "{0} notes exportées vers {1}."
 
-#: ..\..\Ui\MainWindow.cs:1887
+#: ..\..\Ui\MainWindow.cs:1901
 msgid "File changed"
 msgstr "Fichier modifié"
 
-#: ..\..\Ui\MainWindow.cs:1762 ..\..\Ui\MainWindow.cs:1866
-#: ..\..\Ui\MainWindow.cs:1893
+#: ..\..\Ui\MainWindow.cs:1776 ..\..\Ui\MainWindow.cs:1880
+#: ..\..\Ui\MainWindow.cs:1907
 msgid "File reloaded"
 msgstr "Fichier rechargé"
 
@@ -568,12 +568,12 @@ msgstr "Dans la liste des notes : menu de la note"
 msgid "Invalid link"
 msgstr "Lien non valide"
 
-#: ..\..\Ui\MainWindow.cs:1711
+#: ..\..\Ui\MainWindow.cs:1725
 msgid "JSON files"
 msgstr "Fichiers JSON"
 
-#: ..\..\Ui\ShortcutsDialog.cs:27 ..\..\Ui\ShortcutsDialog.cs:33
-#: ..\..\Ui\ShortcutsDialog.Designer.cs:45
+#: ..\..\Ui\ShortcutsDialog.Designer.cs:45 ..\..\Ui\ShortcutsDialog.cs:27
+#: ..\..\Ui\ShortcutsDialog.cs:33
 msgid "Keyboard shortcuts"
 msgstr "Raccourcis clavier"
 
@@ -581,7 +581,7 @@ msgstr "Raccourcis clavier"
 msgid "Left Arrow"
 msgstr "Flèche gauche"
 
-#: ..\..\Ui\MainWindow.cs:2222
+#: ..\..\Ui\MainWindow.cs:2236
 msgid "Lines"
 msgstr "Lignes"
 
@@ -612,7 +612,7 @@ msgstr ""
 "\n"
 "{0}"
 
-#: ..\..\Ui\MainWindow.cs:1514
+#: ..\..\Ui\MainWindow.cs:1517
 msgid "Markdown files"
 msgstr "Fichiers Markdown"
 
@@ -640,8 +640,8 @@ msgstr "Bloc suivant"
 msgid "Next note"
 msgstr "Note suivante"
 
-#: ..\..\Ui\MainWindow.cs:689 ..\..\Ui\MainWindow.cs:1669
-#: ..\..\Ui\MainWindow.cs:1705 ..\..\Ui\MainWindow.cs:1751
+#: ..\..\Ui\MainWindow.cs:689 ..\..\Ui\MainWindow.cs:1674
+#: ..\..\Ui\MainWindow.cs:1719 ..\..\Ui\MainWindow.cs:1765
 msgid "No file is open."
 msgstr "Aucun fichier n'est ouvert."
 
@@ -650,7 +650,7 @@ msgid "No more blocks"
 msgstr "Plus de blocs"
 
 #: ..\..\Ui\MainWindow.cs:896 ..\..\Ui\MainWindow.cs:1003
-#: ..\..\Ui\MainWindow.cs:2423
+#: ..\..\Ui\MainWindow.cs:2437
 msgid "No more notes"
 msgstr "Plus de notes"
 
@@ -658,7 +658,7 @@ msgstr "Plus de notes"
 msgid "No next file"
 msgstr "Aucun fichier suivant"
 
-#: ..\..\Ui\MainWindow.cs:2410
+#: ..\..\Ui\MainWindow.cs:2424
 msgid "No notes"
 msgstr "Aucune note"
 
@@ -666,11 +666,11 @@ msgstr "Aucune note"
 msgid "No previous file"
 msgstr "Aucun fichier précédent"
 
-#: ..\..\Ui\MainWindow.cs:1556
+#: ..\..\Ui\MainWindow.cs:1559
 msgid "None of the copied files is a Markdown file (.md, .markdown)."
 msgstr "Aucun des fichiers copiés n'est un fichier Markdown (.md, .markdown)."
 
-#: ..\..\Ui\MainWindow.cs:2224
+#: ..\..\Ui\MainWindow.cs:2238
 msgid "Note"
 msgstr "Note"
 
@@ -715,20 +715,20 @@ msgid "Note on:"
 msgstr "Note sur :"
 
 #: ..\..\Ui\MainWindow.Designer.cs:101 ..\..\Ui\SettingsDialog.Designer.cs:236
-#: ..\..\Ui\MainWindow.cs:2225
+#: ..\..\Ui\MainWindow.cs:2239
 msgid "Notes"
 msgstr "Notes"
 
-#: ..\..\Ui\MainWindow.cs:2392
+#: ..\..\Ui\MainWindow.cs:2406
 #, csharp-format
 msgid "Notes list {0}%"
 msgstr "Liste des notes {0} %"
 
-#: ..\..\Ui\MainWindow.cs:2370
+#: ..\..\Ui\MainWindow.cs:2384
 msgid "Notes list hidden"
 msgstr "Liste des notes masquée"
 
-#: ..\..\Ui\MainWindow.cs:2370
+#: ..\..\Ui\MainWindow.cs:2384
 msgid "Notes list shown"
 msgstr "Liste des notes affichée"
 
@@ -776,11 +776,11 @@ msgstr "Une fois par mois"
 msgid "Once a week"
 msgstr "Une fois par semaine"
 
-#: ..\..\Ui\MainWindow.cs:1484
+#: ..\..\Ui\MainWindow.cs:1487
 msgid "Only Markdown files (.md, .markdown) can be opened."
 msgstr "Seuls les fichiers Markdown (.md, .markdown) peuvent être ouverts."
 
-#: ..\..\Ui\MainWindow.cs:1513
+#: ..\..\Ui\MainWindow.cs:1516
 msgid "Open"
 msgstr "Ouvrir"
 
@@ -816,9 +816,13 @@ msgstr "Ouvrir dans l'é&diteur"
 msgid "Open in the editor"
 msgstr "Ouvrir dans l'éditeur"
 
-#: ..\..\Ui\MainWindow.cs:1445
+#: ..\..\Ui\MainWindow.cs:1448
 msgid "Open link"
 msgstr "Ouvrir le lien"
+
+#: ..\..\Program.cs:143
+msgid "Open the log folder now?"
+msgstr "Ouvrir le dossier des journaux maintenant ?"
 
 #: ..\..\Ui\SettingsDialog.cs:71
 msgid "Opens the context menu"
@@ -828,7 +832,12 @@ msgstr "Ouvre le menu contextuel"
 msgid "PlanCake"
 msgstr "PlanCake"
 
-#: ..\..\Ui\MainWindow.cs:1444
+#: ..\..\Program.cs:125
+#, csharp-format
+msgid "PlanCake could not start: {0}"
+msgstr "Impossible de démarrer PlanCake : {0}"
+
+#: ..\..\Ui\MainWindow.cs:1447
 #, csharp-format
 msgid ""
 "PlanCake does not open this file from a link, since opening it could run a "
@@ -845,11 +854,11 @@ msgstr ""
 "\n"
 "L'afficher dans l'Explorateur de fichiers ?"
 
-#: ..\..\Services\UpdateService.cs:289
+#: ..\..\Services\UpdateService.cs:346
 msgid "PlanCake is up to date."
 msgstr "PlanCake est à jour."
 
-#: ..\..\Program.cs:162
+#: ..\..\Program.cs:206
 msgid ""
 "PlanCake needs the Microsoft Edge WebView2 Runtime, which is not installed "
 "on this computer."
@@ -970,7 +979,7 @@ msgstr "Raccourci"
 msgid "Show the notes &list"
 msgstr "Afficher la &liste des notes"
 
-#: ..\..\Program.cs:110
+#: ..\..\Program.cs:104
 #, csharp-format
 msgid "Something went wrong: {0}"
 msgstr "Une erreur s'est produite : {0}"
@@ -1024,7 +1033,7 @@ msgstr "Décochage de la tâche annulé"
 msgid "The block has no text to copy."
 msgstr "Le bloc ne contient aucun texte à copier."
 
-#: ..\..\Ui\MainWindow.cs:1559
+#: ..\..\Ui\MainWindow.cs:1562
 msgid "The clipboard holds no Markdown file or link."
 msgstr "Le presse-papiers ne contient ni fichier Markdown ni lien."
 
@@ -1032,21 +1041,26 @@ msgstr "Le presse-papiers ne contient ni fichier Markdown ni lien."
 msgid "The closing marker must differ from the opening marker."
 msgstr "Le marqueur de fermeture doit être différent du marqueur d'ouverture."
 
-#: ..\..\Program.cs:112
+#: ..\..\Program.cs:106
 msgid "The details are in the log. Keep PlanCake open?"
 msgstr "Les détails figurent dans le journal. Garder PlanCake ouvert ?"
 
-#: ..\..\Services\MarkdownDownloader.cs:167 ..\..\Ui\MainWindow.cs:1630
+#: ..\..\Program.cs:128
+#, csharp-format
+msgid "The details are in the logs in {0}. Please report the problem at {1}."
+msgstr "Les détails figurent dans les journaux du dossier {0}. Veuillez signaler le problème à l'adresse {1}."
+
+#: ..\..\Services\MarkdownDownloader.cs:173 ..\..\Ui\MainWindow.cs:1633
 #, csharp-format
 msgid "The download failed: {0}"
 msgstr "Échec du téléchargement : {0}"
 
-#: ..\..\Services\MarkdownDownloader.cs:130
+#: ..\..\Services\MarkdownDownloader.cs:133
 #, csharp-format
 msgid "The download failed: the server answered {0} {1}."
 msgstr "Échec du téléchargement : le serveur a répondu {0} {1}."
 
-#: ..\..\Services\MarkdownDownloader.cs:160
+#: ..\..\Services\MarkdownDownloader.cs:166
 #, csharp-format
 msgid "The download took longer than {0} seconds and was stopped."
 msgstr "Le téléchargement a duré plus de {0} secondes et a été arrêté."
@@ -1090,12 +1104,12 @@ msgstr "Le fichier a changé, il n'y a donc plus rien à annuler ni à rétablir
 msgid "The file changed. Please try again."
 msgstr "Le fichier a changé. Veuillez réessayer."
 
-#: ..\..\Services\MarkdownDownloader.cs:327
+#: ..\..\Services\MarkdownDownloader.cs:333
 #, csharp-format
 msgid "The file is larger than {0} MB, the most PlanCake downloads."
 msgstr "Le fichier dépasse {0} Mo, la taille maximale que PlanCake télécharge."
 
-#: ..\..\Ui\MainWindow.cs:1897
+#: ..\..\Ui\MainWindow.cs:1911
 msgid "The file was not reloaded. Press F5 to reload it."
 msgstr "Le fichier n'a pas été rechargé. Appuyez sur F5 pour le recharger."
 
@@ -1111,13 +1125,13 @@ msgstr ""
 "La langue du document, par exemple en ou fr (par défaut : la langue du "
 "document dans les paramètres)"
 
-#: ..\..\Services\UpdateService.cs:290
+#: ..\..\Services\UpdateService.cs:347
 msgid "The latest version of PlanCake is one you chose to skip."
 msgstr ""
 "La dernière version de PlanCake est une version que vous avez choisi "
 "d'ignorer."
 
-#: ..\..\Ui\MainWindow.cs:1429
+#: ..\..\Ui\MainWindow.cs:1432
 #, csharp-format
 msgid "The link target does not exist: {0}"
 msgstr "La cible du lien n'existe pas : {0}"
@@ -1203,22 +1217,22 @@ msgstr "Le marqueur d'ouverture ne peut pas être vide."
 msgid "The output file cannot be the file itself: {0}"
 msgstr "Le fichier de sortie ne peut pas être le fichier lui-même : {0}"
 
-#: ..\..\Ui\MainWindow.cs:2018 ..\..\Ui\MainWindow.cs:2135
-#: ..\..\Ui\MainWindow.cs:2351
+#: ..\..\Ui\MainWindow.cs:2032 ..\..\Ui\MainWindow.cs:2149
+#: ..\..\Ui\MainWindow.cs:2365
 msgid "The settings could not be saved. They apply until PlanCake is closed."
 msgstr ""
 "Impossible d'enregistrer les paramètres. Ils s'appliquent jusqu'à la "
 "fermeture de PlanCake."
 
-#: ..\..\Ui\MainWindow.cs:1390 ..\..\Ui\MainWindow.cs:2279
+#: ..\..\Ui\MainWindow.cs:1390 ..\..\Ui\MainWindow.cs:2293
 msgid "The start of the document"
 msgstr "Le début du document"
 
-#: ..\..\Ui\MainWindow.cs:1972
+#: ..\..\Ui\MainWindow.cs:1986
 msgid "The user manual could not be found."
 msgstr "Le manuel utilisateur est introuvable."
 
-#: ..\..\Notes\NoteActionRunner.cs:176 ..\..\Ui\MainWindow.cs:1929
+#: ..\..\Notes\NoteActionRunner.cs:176 ..\..\Ui\MainWindow.cs:1943
 msgid "There are no notes to delete."
 msgstr "Il n'y a aucune note à supprimer."
 
@@ -1253,16 +1267,16 @@ msgstr ""
 "activez la conversion des fichiers qui ne sont pas en UTF-8 dans les "
 "paramètres."
 
-#: ..\..\Ui\MainWindow.cs:1432
+#: ..\..\Ui\MainWindow.cs:1435
 #, csharp-format
 msgid "This link cannot be opened: {0}"
 msgstr "Impossible d'ouvrir ce lien : {0}"
 
-#: ..\..\Services\MarkdownDownloader.cs:322
+#: ..\..\Services\MarkdownDownloader.cs:328
 msgid "This link leads to a web page, not a Markdown file."
 msgstr "Ce lien mène à une page web, pas à un fichier Markdown."
 
-#: ..\..\Services\UpdateService.cs:292
+#: ..\..\Services\UpdateService.cs:349
 msgid "Unable to check for updates. Please try again later."
 msgstr "Impossible de vérifier les mises à jour. Veuillez réessayer plus tard."
 
@@ -1270,7 +1284,7 @@ msgstr "Impossible de vérifier les mises à jour. Veuillez réessayer plus tard
 msgid "Unable to copy to the clipboard."
 msgstr "Impossible de copier dans le presse-papiers."
 
-#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:1475
+#: ..\..\Ui\AboutDialog.cs:52 ..\..\Ui\MainWindow.cs:1478
 #, csharp-format
 msgid "Unable to open {0}"
 msgstr "Impossible d'ouvrir {0}"
@@ -1281,16 +1295,16 @@ msgstr "Impossible d'ouvrir {0}"
 msgid "Unable to open {0}: {1}"
 msgstr "Impossible d'ouvrir {0} : {1}"
 
-#: ..\..\Ui\MainWindow.cs:1541
+#: ..\..\Ui\MainWindow.cs:1544
 msgid "Unable to read the clipboard."
 msgstr "Impossible de lire le presse-papiers."
 
-#: ..\..\Ui\MainWindow.cs:1783 ..\..\Ui\MainWindow.cs:1785
+#: ..\..\Ui\MainWindow.cs:1797 ..\..\Ui\MainWindow.cs:1799
 #, csharp-format
 msgid "Unable to reload {0}: {1}"
 msgstr "Impossible de recharger {0} : {1}"
 
-#: ..\..\Services\MarkdownDownloader.cs:189
+#: ..\..\Services\MarkdownDownloader.cs:195
 #, csharp-format
 msgid "Unable to save the file to {0}: {1}"
 msgstr "Impossible d'enregistrer le fichier dans {0} : {1}"
@@ -1300,13 +1314,8 @@ msgstr "Impossible d'enregistrer le fichier dans {0} : {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "Impossible de démarrer l'affichage du document : {0}"
 
-#: ..\..\Program.cs:89
-msgid "Unable to start the program up. Please contact the developer."
-msgstr ""
-"Impossible de démarrer le programme. Veuillez contacter le développeur."
-
 #: ..\..\Cli\CliRunner.cs:295 ..\..\Cli\CliRunner.cs:500
-#: ..\..\Ui\MainWindow.cs:1733
+#: ..\..\Ui\MainWindow.cs:1747
 #, csharp-format
 msgid "Unable to write {0}: {1}"
 msgstr "Impossible d'écrire {0} : {1}"
@@ -1338,13 +1347,13 @@ msgstr "Option non reconnue : {0}"
 msgid "Up Arrow"
 msgstr "Flèche haut"
 
-#: ..\..\Services\UpdateService.cs:291
+#: ..\..\Services\UpdateService.cs:348
 msgid "Update checks could not be started. The log has the details."
 msgstr ""
 "La vérification des mises à jour n'a pas pu démarrer. Les détails figurent "
 "dans le journal."
 
-#: ..\..\Ui\HostCommands.cs:129 ..\..\Ui\MainWindow.cs:1973
+#: ..\..\Ui\HostCommands.cs:129 ..\..\Ui\MainWindow.cs:1987
 msgid "User manual"
 msgstr "Manuel utilisateur"
 
@@ -1384,7 +1393,7 @@ msgstr ""
 "Avertissement : la note de la ligne {0} n'a pas de marqueur de fermeture, "
 "elle s'étend donc jusqu'à la fin du fichier."
 
-#: ..\..\Program.cs:167
+#: ..\..\Program.cs:211
 msgid "WebView2 Runtime not found"
 msgstr "Runtime WebView2 introuvable"
 
@@ -1392,7 +1401,7 @@ msgstr "Runtime WebView2 introuvable"
 msgid "Write to this file (UTF-8 without BOM) instead of the standard output"
 msgstr "Écrire dans ce fichier (UTF-8 sans BOM) au lieu de la sortie standard"
 
-#: ..\..\Program.cs:164
+#: ..\..\Program.cs:208
 #, csharp-format
 msgid "You can download it from {0}. Open the download page now?"
 msgstr ""
@@ -1415,3 +1424,7 @@ msgstr "Zoom avant"
 #: ..\..\Ui\HostCommands.cs:127
 msgid "Zoom out"
 msgstr "Zoom arrière"
+
+#~ msgid "Unable to start the program up. Please contact the developer."
+#~ msgstr ""
+#~ "Impossible de démarrer le programme. Veuillez contacter le développeur."

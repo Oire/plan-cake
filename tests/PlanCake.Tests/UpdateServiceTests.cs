@@ -114,4 +114,31 @@ public class UpdateServiceTests {
         using var next = UpdateService.TryClaimBackgroundChecks(name);
         next.Should().NotBeNull();
     }
+
+    [Fact]
+    public void IsValidPublicKey_AcceptsTheAppsKey() =>
+        UpdateService.IsValidPublicKey(App.UpdatePublicKey).Should().BeTrue();
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("not a key")]
+    [InlineData("PASTE-THE-PUBLIC-KEY-HERE")]
+    [InlineData("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==")] // 31 bytes
+    [InlineData("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==")] // 33 bytes
+    public void IsValidPublicKey_RejectsAnythingButBase64Of32Bytes(string? key) =>
+        UpdateService.IsValidPublicKey(key).Should().BeFalse();
+
+    [Fact]
+    public void FormatSparkleMessage_FillsInTheArguments() =>
+        UpdateService.FormatSparkleMessage("Status {0}, {1} updates", ["ok", 2]).Should().Be("Status ok, 2 updates");
+
+    [Fact]
+    public void FormatSparkleMessage_WithoutArguments_KeepsBracesAsText() =>
+        UpdateService.FormatSparkleMessage("Item {Title} failed", null).Should().Be("Item {Title} failed");
+
+    [Fact]
+    public void FormatSparkleMessage_ThatDoesNotFormat_KeepsMessageAndArguments() =>
+        UpdateService.FormatSparkleMessage("Item {Title} failed: {0}", ["404"]).Should().Be("Item {Title} failed: {0} 404");
 }

@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
+using Oire.PlanCake.Utils;
 using Serilog;
 using App = Oire.PlanCake.Utils.Constants.App;
 
@@ -78,8 +79,8 @@ internal sealed class DocumentView: UserControl {
     public bool IsInitialized => _webView.CoreWebView2 is not null;
 
     /// <summary>
-    /// Starts the browser: a user data folder under <see cref="App.DataFolder"/> (the install
-    /// folder is not writable), the <c>web</c> folder mapped to <see cref="BaseUri"/>, and the
+    /// Starts the browser: its user data folder in <see cref="App.WebView2DataFolder"/> (the
+    /// install folder is not writable), the <c>web</c> folder mapped to <see cref="BaseUri"/>, and the
     /// browser's own context menus, accelerator keys, status bar and (in Release) dev tools off.
     /// </summary>
     public async Task InitializeAsync() {
@@ -268,17 +269,17 @@ internal sealed class DocumentView: UserControl {
             return;
         }
 
-        Log.Information("Navigation blocked: {Uri}", e.Uri);
+        Log.Information("Navigation blocked: {Uri}", UrlHelper.ForLog(e.Uri));
         e.Cancel = true;
     }
 
     private void OnFrameNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e) {
-        Log.Information("Frame navigation blocked: {Uri}", e.Uri);
+        Log.Information("Frame navigation blocked: {Uri}", UrlHelper.ForLog(e.Uri));
         e.Cancel = true;
     }
 
     private void OnNewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e) {
-        Log.Information("New window blocked: {Uri}", e.Uri);
+        Log.Information("New window blocked: {Uri}", UrlHelper.ForLog(e.Uri));
         e.Handled = true;
     }
 

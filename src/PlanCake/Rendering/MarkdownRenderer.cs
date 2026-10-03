@@ -51,9 +51,13 @@ internal static partial class MarkdownRenderer {
     /// <summary>The longest a <see cref="BlockInfo.Excerpt"/> gets, ellipsis included.</summary>
     public const int ExcerptLength = 80;
 
-    /// <summary>The content security policy of an exported file: no script at all.</summary>
+    /// <summary>
+    /// The content security policy of an exported file: no script at all, no form that sends
+    /// anywhere and no <c>&lt;base&gt;</c> that moves the plan's relative links.
+    /// </summary>
     public const string ExportContentSecurityPolicy =
-        "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src * data:";
+        "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src * data:; "
+        + "base-uri 'none'; form-action 'none'";
 
     private const string ExportStyle = """
         body { font-family: "Segoe UI", sans-serif; line-height: 1.5; max-width: 50em; margin: 1em auto; }

@@ -760,7 +760,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>פתח</strong></td><td><kbd dir="ltr">Ctrl+O</kbd></td><td>פותח קובץ Markdown מהדיסק שלכם.</td></tr>
 <tr><td><strong>פתח מלוח הגזירים</strong></td><td><kbd dir="ltr">Ctrl+V</kbd></td><td>פותח את הקובץ, הנתיב או הקישור שהעתקתם.</td></tr>
 <tr><td><strong>פתח מקישור</strong></td><td><kbd dir="ltr">Ctrl+L</kbd></td><td>מוריד קובץ Markdown מהאינטרנט ופותח אותו.</td></tr>
-<tr><td><strong>פתח בעורך</strong></td><td><kbd dir="ltr">Ctrl+E</kbd></td><td>פותח את הקובץ בתוכנה ש-Windows משתמש בה עבור קובצי Markdown, כשאתם רוצים לשנות את הטקסט של התוכנית עצמה.</td></tr>
+<tr><td><strong>פתח בעורך</strong></td><td><kbd dir="ltr">Ctrl+E</kbd></td><td>פותח את הקובץ בתוכנה ש-Windows משתמש בה עבור קובצי Markdown, כשאתם רוצים לשנות את הטקסט של התוכנית עצמה. אם התוכנה הזו היא PlanCake עצמו, או שאין כזו, הקובץ נפתח בתוכנה ש-Windows משתמש בה לעריכתו, ואם גם היא אינה קיימת — בפנקס רשימות.</td></tr>
 <tr><td><strong>ייצא הערות</strong></td><td>ללא</td><td>שומר את כל ההערות של הקובץ, עם הבלוקים שהן באות אחריהם, כקובץ JSON. PlanCake לעולם לא קורא אותו בחזרה; זהו עותק עבור כלים אחרים.</td></tr>
 <tr><td><strong>הגדרות</strong></td><td><kbd dir="ltr">Ctrl+פסיק</kbd></td><td>פותח את ההגדרות.</td></tr>
 <tr><td><strong>יציאה</strong></td><td><kbd dir="ltr">Alt+F4</kbd></td><td>סוגר את החלון.</td></tr>
@@ -864,7 +864,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <li>עם תוכנת ההתקנה: <code dir="ltr">%APPDATA%\Oire\PlanCake\PlanCake.cfg</code></li>
 <li>ניידת: <code dir="ltr">userdata\PlanCake.cfg</code>, לצד <code dir="ltr">plancake.exe</code></li>
 </ul>
-<p>כדי להעביר את ההגדרות שלכם למחשב אחר, העתיקו את הקובץ הזה לאותו מקום שם. אותה תיקייה מכילה גם תיקיית <code dir="ltr">logs</code>, שרושמת מה PlanCake עשה ועוזרת כשאתם מדווחים על בעיה, וכמה קבצי עבודה של תצוגת המסמך. מחיקת התיקייה הזו מאפסת את PlanCake לברירות המחדל שלו ולעולם לא נוגעת בקובצי ה-Markdown שלכם או בהערות שבהם.</p>
+<p>כדי להעביר את ההגדרות שלכם למחשב אחר, העתיקו את הקובץ הזה לאותו מקום שם. אותה תיקייה מכילה גם תיקיית <code dir="ltr">logs</code>, שרושמת מה PlanCake עשה ועוזרת כשאתם מדווחים על בעיה. קבצי העבודה של תצוגת המסמך נשמרים ב-<code dir="ltr">%LOCALAPPDATA%\Oire\PlanCake</code> בגרסה המותקנת, ובאותה תיקיית <code dir="ltr">userdata</code> בגרסה הניידת. מחיקת התיקיות האלה מאפסת את PlanCake לברירות המחדל שלו ולעולם לא נוגעת בקובצי ה-Markdown שלכם או בהערות שבהם.</p>
 <h3 id="data-privacy">מה עובר ברשת</h3>
 <p>PlanCake מתחבר לאינטרנט רק עבור שני דברים: הורדת קובץ כשאתם פותחים אחד מקישור, ובדיקת עדכונים. הוא לא שולח שום נתוני שימוש לשום מקום.</p>
 </article>

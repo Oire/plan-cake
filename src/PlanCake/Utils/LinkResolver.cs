@@ -121,6 +121,67 @@ internal static class LinkResolver {
         }
     }
 
+    /// <summary>
+    /// The program Windows opens <paramref name="path"/>'s type with by default (the full path of
+    /// its executable), or <see langword="null"/> when there is none or it cannot be told.
+    /// </summary>
+    public static string? DefaultProgramFor(string path) {
+        var extension = Path.GetExtension(path);
+
+        if (String.IsNullOrEmpty(extension)) {
+            return null;
+        }
+
+        try {
+            uint length = 0;
+
+            // S_FALSE with the length the answer needs, terminating null included.
+            var result = NativeMethods.AssocQueryString(AssocFNone, AssocStrExecutable, extension, null, null, ref length);
+
+            if (result != SFalse || length == 0) {
+                return null;
+            }
+
+            var buffer = new char[length];
+            result = NativeMethods.AssocQueryString(AssocFNone, AssocStrExecutable, extension, null, buffer, ref length);
+
+            if (result != 0) {
+                return null;
+            }
+
+            var program = new string(buffer).TrimEnd(Char.MinValue);
+
+            return program.Length == 0 ? null : program;
+        } catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException) {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// True when <paramref name="program"/>, the default program for a file type, is no editor
+    /// PlanCake can hand a file to: none at all, or PlanCake itself (this executable, or another
+    /// copy of it, which would only bring the window already showing the file to the front).
+    /// </summary>
+    /// <param name="program">The program's path, from <see cref="DefaultProgramFor"/>.</param>
+    /// <param name="ownExecutable">
+    /// The path of the running executable (<see cref="Environment.ProcessPath"/>).
+    /// </param>
+    public static bool IsNoEditor(string? program, string? ownExecutable) {
+        if (String.IsNullOrWhiteSpace(program)) {
+            return true;
+        }
+
+        if (String.IsNullOrEmpty(ownExecutable)) {
+            return false;
+        }
+
+        return String.Equals(
+            Path.GetFileName(program.Trim('"')),
+            Path.GetFileName(ownExecutable),
+            StringComparison.OrdinalIgnoreCase
+        );
+    }
+
     /// <summary>True when <paramref name="path"/> names a Markdown file (<c>.md</c> or <c>.markdown</c>).</summary>
     public static bool IsMarkdownPath(string? path) {
         var extension = Path.GetExtension(path);
@@ -243,10 +304,25 @@ internal static class LinkResolver {
         return host.Length == 0 ? null : host;
     }
 
+    private const uint AssocFNone = 0;
+    private const int AssocStrExecutable = 2;
+    private const int SFalse = 1;
+
     private static class NativeMethods {
         [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool AssocIsDangerous(string pszAssoc);
+
+        [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true, EntryPoint = "AssocQueryStringW")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        public static extern int AssocQueryString(
+            uint flags,
+            int str,
+            string pszAssoc,
+            string? pszExtra,
+            [Out] char[]? pszOut,
+            ref uint pcchOut
+        );
     }
 }

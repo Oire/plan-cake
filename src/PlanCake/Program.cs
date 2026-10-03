@@ -84,13 +84,7 @@ internal static class Program {
             return mainWindow.StartupFailed ? ExitCode.Error : ExitCode.Success;
         } catch (Exception ex) {
             Log.Fatal(ex, "App startup: unable to initialize the application");
-
-            DialogHelper.Show(
-                _("Unable to start the program up. Please contact the developer."),
-                _("Error"),
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Exclamation
-            );
+            ReportStartupFailure(ex);
 
             return ExitCode.Error;
         } finally {
@@ -117,6 +111,56 @@ internal static class Program {
         if (!goOn) {
             Log.Information("The user closed PlanCake after an unhandled exception");
             Application.Exit();
+        }
+    }
+
+    /// <summary>The address problems are reported at.</summary>
+    internal const string IssuesUrl = App.RepoUrl + "/issues";
+
+    /// <summary>
+    /// The message shown when the window cannot start: what failed, where the logs are (the
+    /// portable folder or the one under the user profile) and where to report it.
+    /// </summary>
+    internal static string StartupFailureMessage(Exception ex) =>
+        _("PlanCake could not start: {0}", ex.Message)
+            + Environment.NewLine + Environment.NewLine
+            + _(
+                "The details are in the logs in {0}. Please report the problem at {1}.",
+                LogConstants.LogFolder,
+                IssuesUrl
+            );
+
+    /// <summary>
+    /// Says why the window could not start, and offers to open the log folder. The failure may
+    /// come before visual styles are on, which a task dialog needs: a plain message box then.
+    /// </summary>
+    private static void ReportStartupFailure(Exception ex) {
+        var message = StartupFailureMessage(ex);
+        bool openLogs;
+
+        try {
+            openLogs = DialogHelper.Confirm(
+                message + Environment.NewLine + Environment.NewLine + _("Open the log folder now?"),
+                _("Error"),
+                MessageBoxIcon.Error
+            );
+        } catch (Exception dialogException)
+            when (dialogException is InvalidOperationException or EntryPointNotFoundException) {
+            Log.Warning(dialogException, "App startup: no task dialog; showing a message box");
+            DialogHelper.Show(message, _("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            return;
+        }
+
+        if (!openLogs) {
+            return;
+        }
+
+        try {
+            Process.Start(new ProcessStartInfo(LogConstants.LogFolder) { UseShellExecute = true })?.Dispose();
+        } catch (Exception openException)
+            when (openException is System.ComponentModel.Win32Exception or InvalidOperationException) {
+            Log.Error(openException, "Unable to open the log folder {Folder}", LogConstants.LogFolder);
         }
     }
 
@@ -179,37 +223,63 @@ internal static class Program {
         }
     }
 
+    /// <summary>The size a log file grows to before the next one is started.</summary>
+    internal const long LogFileSizeLimit = 10 * 1024 * 1024;
+
+    /// <summary>
+    /// How many files of each log are kept. Each window and each command-line run is a process
+    /// of its own, and one that finds a log held by another writes to a numbered sibling
+    /// (<c>PlanCake_001.log</c>), so this counts those siblings too.
+    /// </summary>
+    internal const int RetainedLogFileCount = 10;
+
     /// <summary>
     /// Five sinks, three audiences: the full logs for a developer, the "-short" pair a user can
-    /// paste into a bug report, and a compact-JSON telemetry file for machine analysis.
+    /// paste into a bug report, and a compact-JSON telemetry file for machine analysis. A Debug
+    /// build logs at Debug level (every page message, every host command); a Release build from
+    /// Information up.
     /// </summary>
     private static void ConfigureLogging() {
         Log.Logger = new LoggerConfiguration()
+#if DEBUG
             .MinimumLevel.Debug()
+#else
+            .MinimumLevel.Information()
+#endif
             .WriteTo.File(
                 LogConstants.GenericFile,
-                rollOnFileSizeLimit: true
+                fileSizeLimitBytes: LogFileSizeLimit,
+                rollOnFileSizeLimit: true,
+                retainedFileCountLimit: RetainedLogFileCount
             )
             .WriteTo.File(
                 LogConstants.GenericFileShort,
+                fileSizeLimitBytes: LogFileSizeLimit,
                 rollOnFileSizeLimit: true,
+                retainedFileCountLimit: RetainedLogFileCount,
                 outputTemplate: LogConstants.OutputTemplateShort
             )
             .WriteTo.File(
                 LogConstants.ErrorsFile,
+                fileSizeLimitBytes: LogFileSizeLimit,
                 rollOnFileSizeLimit: true,
+                retainedFileCountLimit: RetainedLogFileCount,
                 restrictedToMinimumLevel: LogLevel.Warning
             )
             .WriteTo.File(
                 LogConstants.ErrorsFileShort,
+                fileSizeLimitBytes: LogFileSizeLimit,
                 rollOnFileSizeLimit: true,
+                retainedFileCountLimit: RetainedLogFileCount,
                 restrictedToMinimumLevel: LogLevel.Warning,
                 outputTemplate: LogConstants.OutputTemplateShort
             )
             .WriteTo.File(
                 new CompactJsonFormatter(),
                 LogConstants.TelemetryFile,
+                fileSizeLimitBytes: LogFileSizeLimit,
                 rollOnFileSizeLimit: true,
+                retainedFileCountLimit: RetainedLogFileCount,
                 restrictedToMinimumLevel: LogLevel.Information
             )
             .CreateLogger();

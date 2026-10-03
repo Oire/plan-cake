@@ -760,7 +760,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <tr><td><strong>Öffnen</strong></td><td><kbd>Strg+O</kbd></td><td>Öffnet eine Markdown-Datei von Ihrer Festplatte.</td></tr>
 <tr><td><strong>Aus der Zwischenablage öffnen</strong></td><td><kbd>Strg+V</kbd></td><td>Öffnet die Datei, den Pfad oder den Link, den Sie kopiert haben.</td></tr>
 <tr><td><strong>Über Link öffnen</strong></td><td><kbd>Strg+L</kbd></td><td>Lädt eine Markdown-Datei aus dem Web herunter und öffnet sie.</td></tr>
-<tr><td><strong>Im Editor öffnen</strong></td><td><kbd>Strg+E</kbd></td><td>Öffnet die Datei in dem Programm, das Windows für Markdown-Dateien verwendet, wenn Sie den Text des Plans selbst ändern möchten.</td></tr>
+<tr><td><strong>Im Editor öffnen</strong></td><td><kbd>Strg+E</kbd></td><td>Öffnet die Datei in dem Programm, das Windows für Markdown-Dateien verwendet, wenn Sie den Text des Plans selbst ändern möchten. Ist dieses Programm PlanCake selbst oder gibt es keines, öffnet sich die Datei in dem Programm, mit dem Windows sie bearbeitet, oder sonst im Windows-Editor (Notepad).</td></tr>
 <tr><td><strong>Notizen exportieren</strong></td><td>Keine</td><td>Speichert alle Notizen der Datei, mit den Blöcken, auf die sie folgen, als JSON-Datei. PlanCake liest sie nie zurück; sie ist eine Kopie für andere Werkzeuge.</td></tr>
 <tr><td><strong>Einstellungen</strong></td><td><kbd>Strg+Komma</kbd></td><td>Öffnet die Einstellungen.</td></tr>
 <tr><td><strong>Beenden</strong></td><td><kbd>Alt+F4</kbd></td><td>Schließt das Fenster.</td></tr>
@@ -864,7 +864,7 @@ cmd /c "plancake check plan.md"</code></pre>
 <li>Mit dem Installationsprogramm: <code>%APPDATA%\Oire\PlanCake\PlanCake.cfg</code></li>
 <li>Portabel: <code>userdata\PlanCake.cfg</code>, neben <code>plancake.exe</code></li>
 </ul>
-<p>Um Ihre Einstellungen auf einen anderen Computer mitzunehmen, kopieren Sie diese Datei dort an denselben Ort. Derselbe Ordner enthält einen Ordner <code>logs</code>, der aufzeichnet, was PlanCake getan hat, und beim Melden eines Problems hilft, sowie einige Arbeitsdateien der Dokumentansicht. Das Löschen dieses Ordners setzt PlanCake auf seine Standardwerte zurück und rührt nie Ihre Markdown-Dateien oder die Notizen darin an.</p>
+<p>Um Ihre Einstellungen auf einen anderen Computer mitzunehmen, kopieren Sie diese Datei dort an denselben Ort. Derselbe Ordner enthält einen Ordner <code>logs</code>, der aufzeichnet, was PlanCake getan hat, und beim Melden eines Problems hilft. Die Arbeitsdateien der Dokumentansicht liegen mit dem Installationsprogramm in <code>%LOCALAPPDATA%\Oire\PlanCake</code> und in der portablen Version im selben Ordner <code>userdata</code>. Das Löschen dieser Ordner setzt PlanCake auf seine Standardwerte zurück und rührt nie Ihre Markdown-Dateien oder die Notizen darin an.</p>
 <h3 id="data-privacy">Was über das Netzwerk übertragen wird</h3>
 <p>PlanCake verbindet sich nur für zwei Dinge mit dem Internet: um eine Datei herunterzuladen, wenn Sie eine über einen Link öffnen, und um nach Updates zu suchen. Es sendet keine Nutzungsdaten irgendwohin.</p>
 </article>

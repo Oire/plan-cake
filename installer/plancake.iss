@@ -197,20 +197,25 @@ end;
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   UserDataPath: String;
+  LocalDataPath: String;
 begin
   if CurUninstallStep = usUninstall then
     RemoveAppFromPath(ExpandConstant('{app}'));
 
   if CurUninstallStep = usPostUninstall then begin
-    // Settings, logs and the WebView2 working files (App.DataFolder). A silent uninstall
-    // (winget) keeps them: SuppressibleMsgBox answers No without asking.
+    // Settings and logs (App.DataFolder, roaming) and the WebView2 working files
+    // (App.WebView2DataFolder, local). A silent uninstall (winget) keeps them:
+    // SuppressibleMsgBox answers No without asking.
     UserDataPath := ExpandConstant('{userappdata}\{#MyAppCompany}\{#MyAppFolderName}');
-    if DirExists(UserDataPath) then begin
+    LocalDataPath := ExpandConstant('{localappdata}\{#MyAppCompany}\{#MyAppFolderName}');
+    if DirExists(UserDataPath) or DirExists(LocalDataPath) then begin
       if SuppressibleMsgBox(CustomMessage('RemoveUserData'),
                             mbConfirmation, MB_YESNO or MB_DEFBUTTON2, IDNO) = IDYES then begin
         DelTree(UserDataPath, True, True, True);
-        // Removes the Oire folder only when no other Oire application still uses it
+        DelTree(LocalDataPath, True, True, True);
+        // Removes the Oire folders only when no other Oire application still uses them
         RemoveDir(ExpandConstant('{userappdata}\{#MyAppCompany}'));
+        RemoveDir(ExpandConstant('{localappdata}\{#MyAppCompany}'));
       end;
     end;
   end;
