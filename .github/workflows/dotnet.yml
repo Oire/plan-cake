@@ -37,13 +37,26 @@ jobs:
       - name: Install gettext
         shell: pwsh
         run: |
-          choco install gettext -y --no-progress
+          # The Chocolatey community feed has outages (504 Gateway Timeout), so retry before
+          # giving up, and fail on choco's own exit code: otherwise the step carries on and dies
+          # one line later with a misleading "msgfmt.exe not found". 1641 and 3010 are success
+          # codes that ask for a reboot.
+          for ($attempt = 1; ; $attempt++) {
+              choco install gettext -y --no-progress
+              if ($LASTEXITCODE -in 0, 1641, 3010) { break }
+              if ($attempt -ge 3) { throw "choco install gettext failed $attempt times (exit code $LASTEXITCODE)" }
+              Start-Sleep -Seconds (30 * $attempt)
+          }
           # The package deploys to C:\Program Files\gettext-iconv and edits the machine PATH,
           # which the next step does not inherit: the runner captured its environment before the
           # install ran. GITHUB_PATH is how a step hands PATH to the ones after it. Locate the
           # binary rather than assuming the layout, and fail here if the package ever moves it.
-          $msgfmt = Get-ChildItem -Path "C:\Program Files\gettext-iconv" -Filter msgfmt.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $msgfmt) { throw "msgfmt.exe not found after installing gettext" }
+          # Test-Path first: given a missing -Path, Get-ChildItem -Recurse searches the parent
+          # folder for that name instead, and crawls all of Program Files for a quarter of an hour.
+          $root = "C:\Program Files\gettext-iconv"
+          if (-not (Test-Path $root)) { throw "gettext installed, but $root does not exist" }
+          $msgfmt = Get-ChildItem -Path $root -Filter msgfmt.exe -Recurse | Select-Object -First 1
+          if (-not $msgfmt) { throw "msgfmt.exe not found under $root" }
           $msgfmt.DirectoryName | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
 
       # MO files are build output and are gitignored, so a clean checkout has only the PO
