@@ -69,6 +69,8 @@ decisions.
   `TextDirection.Apply(this)`; send every message box through `DialogHelper`; and add the form
   to the lists in `MnemonicTests` and `TextDirectionTests` (both fail until you do: each checks
   that its list covers every `Form` type).
+- **Ukrainian says «папка», never «тека»**, as Ukrainian Windows does, in the catalog, the manual
+  and the installer alike (`help/glossaries/uk.json` has the term).
 - **A label that wraps is a `Ui/WrappingLabel`.** With the system code page set to UTF-8 (the
   "Beta: Use Unicode UTF-8 for worldwide language support" option), Windows text drawing takes
   every letter outside ASCII for a double-byte character and breaks a line between any two of
@@ -300,6 +302,24 @@ that pipe, asks the owner to come to the front, and opens nothing (`Program` che
 creating a window, `MainWindow` before showing a file). Two windows can therefore never write
 conflicting notes into one file. The same process-per-window design is why update checks run in
 one window only (Updates below).
+
+### Outside changes and WSL
+
+`Utils/FileWatcher.cs` watches the file's folder with `FileSystemWatcher` and debounces its
+events. On a WSL distribution's files (`\\wsl.localhost\<distro>\…`, which is how a plan written
+in WSL reaches PlanCake) the watcher starts without an error and then reports nothing at all, not
+even PlanCake's own writes, so a file on a network path (`FileWatcher.IsOnNetwork`: a UNC path or
+a network drive) is also polled every second, and read only when its size or time of last write
+changed. Writing into WSL needs nothing special: `File.Replace` works there, though the file's
+Linux permissions go back to the default.
+
+From WSL, PlanCake is `plancake.exe` (WSL appends the Windows `PATH`, where the installer puts
+it), started with the Windows working directory set to the matching `\\wsl.localhost` folder, so
+a relative path resolves; an absolute Linux path needs `wslpath -w`. WSL waits for a Windows
+program to exit, so the window has to be started in the background, while `list`, `check`,
+`clear` and `export` stay in the foreground for their output and exit codes. The `pk` bash
+function that does all this is printed in seven places, the six manuals' `pk-wsl` section and the
+README's "Plans in WSL": a change to it changes all seven, word for word.
 
 ### Command-line output
 

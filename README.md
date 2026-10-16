@@ -130,6 +130,39 @@ alias pk=plancake
 
 Then `pk plan.md` opens a plan, and `pk list plan.md` works like `plancake list plan.md`.
 
+### Plans in WSL
+
+PlanCake opens plans that live in a WSL distribution, for example ones Claude writes while it runs
+there. Inside WSL, Windows programs are run by their file name, `plancake.exe`. A plain alias is
+not enough, though: Linux paths have to become Windows ones, and the shell would wait for the
+window to close. To set it up:
+
+1. Make sure WSL finds `plancake.exe`. The installer puts PlanCake on the Windows `PATH`, and WSL
+   adds the Windows `PATH` to its own by default, so after installing, open a new WSL terminal and
+   check with `command -v plancake.exe`. With the portable version, add its folder to the Windows
+   `PATH` first. If nothing is found, look for `appendWindowsPath = false` in `/etc/wsl.conf`.
+2. Add this function to `~/.bashrc` in WSL (it works in zsh too, in `~/.zshrc`):
+
+   ```bash
+   pk() {
+       local args=() a
+       for a in "$@"; do
+           if [[ "$a" == /* || -e "$a" ]]; then args+=("$(wslpath -w "$a")"); else args+=("$a"); fi
+       done
+       case "$1" in
+           list|check|clear|export|-*) plancake.exe "${args[@]}" ;;
+           *) (plancake.exe "${args[@]}" &) ;;
+       esac
+   }
+   ```
+
+3. Run `source ~/.bashrc`, or open a new terminal.
+
+Then `pk docs/plans/001-plan.md` opens the plan in a window and returns at once, and
+`pk list plan.md` prints its output in WSL, with the exit codes above. Windows reports no
+changes to files in WSL, so PlanCake checks such a file (and one on a network share or drive)
+about once a second: a change made in WSL shows up within a second or two.
+
 ## Reviewing a plan with Claude
 
 When Claude writes a plan and asks you to review it, open it with `pk plan.md`, read it, and
@@ -137,6 +170,10 @@ leave notes wherever you want changes. Tell Claude you are done: it runs
 `plancake list plan.md --json` to read your notes with the blocks they refer to, reworks the
 plan, removes the notes it has dealt with, and confirms with `plancake check plan.md` that none
 is left.
+
+When Claude runs in WSL, it calls PlanCake `plancake.exe` there, or uses the `pk` function above
+if its shell has it (`plancake.exe list plan.md --json` with a relative path works without it,
+since WSL starts PlanCake in the matching `\\wsl.localhost` folder).
 
 The [Debussy](https://debussy.oire.dev/) plugins for Claude Code have this manual-review step
 built in. They find notes by the markers in their `noteMarkers` setting, where a pair is written

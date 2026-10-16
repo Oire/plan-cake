@@ -244,6 +244,7 @@ footer {
 <li><a href="#portable">The portable version</a></li>
 <li><a href="#uninstalling">Uninstalling PlanCake</a></li>
 <li><a href="#pk-alias">A shorter command: pk</a></li>
+<li><a href="#pk-wsl">Plans in WSL</a></li>
 </ol>
 </li>
 <li><a href="#main-window">The main window</a>
@@ -385,6 +386,20 @@ footer {
 <pre><code>alias pk=plancake</code></pre></li>
 </ul>
 <p>After that, <code>pk plan.md</code> opens a plan, and every command in <a href="#command-line">Working from the command line</a> works with <code>pk</code> in place of <code>plancake</code>.</p>
+<h3 id="pk-wsl">Plans in WSL</h3>
+<p>If you work in WSL (Windows Subsystem for Linux), for example with an AI assistant that runs there, PlanCake can open the plans in your Linux distribution. WSL runs Windows programs by their full file name, so there PlanCake is <code>plancake.exe</code>. A plain alias is not enough, though: Linux paths have to be turned into Windows ones, and the shell would wait until you close the window. Add this function to your <code>~/.bashrc</code> in WSL instead:</p>
+<pre><code>pk() {
+    local args=() a
+    for a in "$@"; do
+        if [[ "$a" == /* || -e "$a" ]]; then args+=("$(wslpath -w "$a")"); else args+=("$a"); fi
+    done
+    case "$1" in
+        list|check|clear|export|-*) plancake.exe "${args[@]}" ;;
+        *) (plancake.exe "${args[@]}" &) ;;
+    esac
+}</code></pre>
+<p>After that, <code>pk docs/plans/001-plan.md</code> in WSL opens the plan in a PlanCake window, and the prompt comes back at once. The commands in <a href="#command-line">Working from the command line</a> work too, such as <code>pk list plan.md</code>, and print their output in WSL.</p>
+<p>Windows does not tell PlanCake when a file in WSL changes, so PlanCake looks at such a file about once a second instead: a change made in WSL shows up in the window within a second or two.</p>
 </article>
 
 <article aria-labelledby="main-window">
@@ -557,6 +572,7 @@ footer {
 <article aria-labelledby="outside-changes">
 <h2 id="outside-changes">When the file changes outside PlanCake</h2>
 <p>A plan under review rarely stands still: an AI assistant updates it, a colleague edits it, version control brings in a new revision. PlanCake notices when the open file changes on disk and reloads it at once. The status bar says “File reloaded”, and you stay where you were reading — the page is updated in place rather than jumping back to the top.</p>
+<p>A file in WSL, on another computer’s network share or on a network drive is looked at about once a second, because Windows does not always report changes there; a change to it shows up within a second or two. See <a href="#pk-wsl">Plans in WSL</a>.</p>
 <p>If you would rather decide yourself, set <strong>When the file changes on disk</strong> to <strong>Ask before reloading it</strong> in Settings. PlanCake then asks whether to reload. If you say No, it tells you that <kbd>F5</kbd> reloads the file whenever you are ready.</p>
 <p>If the file is deleted, renamed or moved away, PlanCake tells you, and note commands are unavailable until the file is back. When it reappears at the same place, PlanCake says it is back and reloads it.</p>
 <p>PlanCake never overwrites a change it has not seen. Suppose the file changes while you are typing a note. When you save, PlanCake refuses to write, shows the file as it is now, and says “The file changed. Please try again.” Nothing is lost on either side: add your note again, and it goes into the current version of the file.</p>

@@ -244,6 +244,7 @@ footer {
 <li><a href="#portable">La version portable</a></li>
 <li><a href="#uninstalling">Désinstaller PlanCake</a></li>
 <li><a href="#pk-alias">Une commande plus courte&nbsp;: pk</a></li>
+<li><a href="#pk-wsl">Des plans dans WSL</a></li>
 </ol>
 </li>
 <li><a href="#main-window">La fenêtre principale</a>
@@ -385,6 +386,20 @@ footer {
 <pre><code>alias pk=plancake</code></pre></li>
 </ul>
 <p>Ensuite, <code>pk plan.md</code> ouvre un plan, et toutes les commandes de <a href="#command-line">Travailler depuis la ligne de commande</a> fonctionnent avec <code>pk</code> à la place de <code>plancake</code>.</p>
+<h3 id="pk-wsl">Des plans dans WSL</h3>
+<p>Si vous travaillez dans WSL (le sous-système Windows pour Linux), par exemple avec un assistant IA qui s’y exécute, PlanCake peut ouvrir les plans de votre distribution Linux. WSL lance les programmes Windows par leur nom de fichier complet&nbsp;: PlanCake s’y appelle donc <code>plancake.exe</code>. Un simple alias ne suffit pas pour autant&nbsp;: les chemins Linux doivent être convertis en chemins Windows, et le shell attendrait que vous fermiez la fenêtre. Ajoutez plutôt cette fonction à votre <code>~/.bashrc</code> dans WSL&nbsp;:</p>
+<pre><code>pk() {
+    local args=() a
+    for a in "$@"; do
+        if [[ "$a" == /* || -e "$a" ]]; then args+=("$(wslpath -w "$a")"); else args+=("$a"); fi
+    done
+    case "$1" in
+        list|check|clear|export|-*) plancake.exe "${args[@]}" ;;
+        *) (plancake.exe "${args[@]}" &) ;;
+    esac
+}</code></pre>
+<p>Ensuite, <code>pk docs/plans/001-plan.md</code> dans WSL ouvre le plan dans une fenêtre PlanCake, et l’invite revient aussitôt. Les commandes de <a href="#command-line">Travailler depuis la ligne de commande</a> fonctionnent aussi, comme <code>pk list plan.md</code>, et affichent leur sortie dans WSL.</p>
+<p>Windows ne prévient pas PlanCake quand un fichier de WSL change&nbsp;; PlanCake examine donc un tel fichier environ une fois par seconde&nbsp;: une modification faite dans WSL apparaît dans la fenêtre en une ou deux secondes.</p>
 </article>
 
 <article aria-labelledby="main-window">
@@ -557,6 +572,7 @@ footer {
 <article aria-labelledby="outside-changes">
 <h2 id="outside-changes">Quand le fichier change en dehors de PlanCake</h2>
 <p>Un plan en cours de relecture reste rarement figé&nbsp;: un assistant IA le met à jour, un collègue le modifie, le contrôle de version apporte une nouvelle révision. PlanCake remarque quand le fichier ouvert change sur le disque et le recharge aussitôt. La barre d’état affiche « Fichier rechargé », et vous restez où vous en étiez dans votre lecture — la page est mise à jour sur place plutôt que de revenir en haut.</p>
+<p>Un fichier dans WSL, sur le partage réseau d’un autre ordinateur ou sur un lecteur réseau est examiné environ une fois par seconde, car Windows n’y signale pas toujours les modifications&nbsp;; une modification y apparaît en une ou deux secondes. Voir <a href="#pk-wsl">Des plans dans WSL</a>.</p>
 <p>Si vous préférez décider vous-même, réglez <strong>Quand le fichier change sur le disque</strong> sur <strong>Demander avant de le recharger</strong> dans les paramètres. PlanCake demande alors s’il faut recharger. Si vous répondez Non, il vous indique que <kbd>F5</kbd> recharge le fichier dès que vous êtes prêt.</p>
 <p>Si le fichier est supprimé, renommé ou déplacé ailleurs, PlanCake vous le signale, et les commandes de notes deviennent indisponibles jusqu’à ce que le fichier soit de retour. Quand il réapparaît au même endroit, PlanCake indique qu’il est de retour et le recharge.</p>
 <p>PlanCake n’écrase jamais un changement qu’il n’a pas vu. Supposons que le fichier change pendant que vous tapez une note. Quand vous enregistrez, PlanCake refuse d’écrire, affiche le fichier tel qu’il est maintenant, et indique « Le fichier a changé. Veuillez réessayer. » Rien n’est perdu d’un côté comme de l’autre&nbsp;: ajoutez de nouveau votre note, et elle ira dans la version actuelle du fichier.</p>

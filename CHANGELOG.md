@@ -9,6 +9,13 @@ update window come from `changelogs/<X.Y.Z>.md`.
 
 ## [Unreleased]
 
+### Added
+
+- **Plans in WSL**: a plan in a WSL distribution, or on a network share or drive, is now checked
+  for outside changes about once a second, since Windows reports none for files in WSL, so a plan
+  an AI assistant updates in WSL reloads as it does on a local disk. The manual's new "Plans in
+  WSL" section gives the `pk` shell function that opens a plan from WSL.
+
 ## [1.0.0.11] - 2026-10-04
 
 The first release. PlanCake lets you read Markdown files comfortably and leave notes
