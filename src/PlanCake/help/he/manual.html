@@ -244,6 +244,7 @@ footer {
 <li><a href="#portable">הגרסה הניידת</a></li>
 <li><a href="#uninstalling">הסרת PlanCake</a></li>
 <li><a href="#pk-alias">פקודה קצרה יותר: pk</a></li>
+<li><a href="#pk-wsl">תוכניות ב-WSL</a></li>
 </ol>
 </li>
 <li><a href="#main-window">החלון הראשי</a>
@@ -385,6 +386,20 @@ footer {
 <pre dir="ltr"><code>alias pk=plancake</code></pre></li>
 </ul>
 <p>לאחר מכן, <code dir="ltr">pk plan.md</code> פותח תוכנית, וכל פקודה ב<a href="#command-line">עבודה משורת הפקודה</a> פועלת עם <code dir="ltr">pk</code> במקום <code dir="ltr">plancake</code>.</p>
+<h3 id="pk-wsl">תוכניות ב-WSL</h3>
+<p>אם אתם עובדים ב-WSL (תת-המערכת של Windows עבור Linux), למשל עם עוזר בינה מלאכותית שרץ שם, PlanCake יכול לפתוח את התוכניות שבהפצת ה-Linux שלכם. WSL מפעיל תוכנות Windows לפי שם הקובץ המלא שלהן, ולכן שם PlanCake נקרא <code dir="ltr">plancake.exe</code>. עם זאת, כינוי (alias) פשוט אינו מספיק: יש להמיר נתיבי Linux לנתיבי Windows, והמעטפת הייתה ממתינה עד שתסגרו את החלון. במקום זאת, הוסיפו את הפונקציה הזאת לקובץ <code dir="ltr">~/.bashrc</code> שלכם ב-WSL:</p>
+<pre dir="ltr"><code>pk() {
+    local args=() a
+    for a in "$@"; do
+        if [[ "$a" == /* || -e "$a" ]]; then args+=("$(wslpath -w "$a")"); else args+=("$a"); fi
+    done
+    case "$1" in
+        list|check|clear|export|-*) plancake.exe "${args[@]}" ;;
+        *) (plancake.exe "${args[@]}" &) ;;
+    esac
+}</code></pre>
+<p>לאחר מכן, <code dir="ltr">pk docs/plans/001-plan.md</code> ב-WSL פותח את התוכנית בחלון PlanCake, ושורת הפקודה חוזרת מיד. גם הפקודות ב<a href="#command-line">עבודה משורת הפקודה</a> פועלות, כמו <code dir="ltr">pk list plan.md</code>, ומדפיסות את הפלט שלהן ב-WSL.</p>
+<p>Windows אינו מודיע ל-PlanCake כאשר קובץ ב-WSL משתנה, ולכן PlanCake בודק קובץ כזה בערך פעם בשנייה: שינוי שנעשה ב-WSL מופיע בחלון תוך שנייה או שתיים.</p>
 </article>
 
 <article aria-labelledby="main-window">
@@ -557,6 +572,7 @@ footer {
 <article aria-labelledby="outside-changes">
 <h2 id="outside-changes">כאשר הקובץ משתנה מחוץ ל-PlanCake</h2>
 <p>תוכנית שנמצאת בסקירה לעיתים רחוקות עומדת במקום: עוזר בינה מלאכותית מעדכן אותה, קולגה עורך אותה, בקרת גרסאות מביאה גרסה חדשה. PlanCake מבחין כאשר הקובץ הפתוח משתנה בדיסק וטוען אותו מחדש מיד. שורת המצב אומרת „הקובץ נטען מחדש”, ואתם נשארים איפה שקראתם — הדף מתעדכן במקומו במקום לקפוץ בחזרה לראש.</p>
+<p>PlanCake בודק קובץ ב-WSL, בשיתוף רשת של מחשב אחר או בכונן רשת בערך פעם בשנייה, כי Windows אינו מדווח תמיד על שינויים שם; שינוי בקובץ כזה מופיע תוך שנייה או שתיים. ראו <a href="#pk-wsl">תוכניות ב-WSL</a>.</p>
 <p>אם תעדיפו להחליט בעצמכם, קבעו את <strong>כאשר הקובץ משתנה בדיסק</strong> ל<strong>שאל לפני טעינה מחדש</strong> בהגדרות. PlanCake ישאל אז אם לטעון מחדש. אם תענו לא, הוא יאמר לכם ש-<kbd dir="ltr">F5</kbd> טוען את הקובץ מחדש בכל פעם שתהיו מוכנים.</p>
 <p>אם הקובץ נמחק, שמו שונה או הוא הועבר, PlanCake אומר לכם זאת, ופקודות ההערות אינן זמינות עד שהקובץ יחזור. כשהוא מופיע מחדש באותו מקום, PlanCake אומר שהוא חזר וטוען אותו מחדש.</p>
 <p>PlanCake לעולם לא כותב מעל שינוי שהוא לא ראה. נניח שהקובץ משתנה בזמן שאתם מקלידים הערה. כשאתם שומרים, PlanCake מסרב לכתוב, מציג את הקובץ כפי שהוא עכשיו, ואומר „הקובץ השתנה. נסו שוב.” שום דבר לא אובד בשני הצדדים: הוסיפו את ההערה שלכם שוב, והיא תיכנס לגרסה הנוכחית של הקובץ.</p>

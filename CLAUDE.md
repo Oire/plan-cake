@@ -301,6 +301,18 @@ creating a window, `MainWindow` before showing a file). Two windows can therefor
 conflicting notes into one file. The same process-per-window design is why update checks run in
 one window only (Updates below).
 
+### Outside changes and WSL
+
+`Utils/FileWatcher.cs` watches the file's folder with `FileSystemWatcher` and debounces its
+events. On a WSL distribution's files (`\\wsl.localhost\<distro>\…`, which is how a plan written
+in WSL reaches PlanCake) the watcher starts without an error and then reports nothing at all, not
+even PlanCake's own writes, so a file on a network path (`FileWatcher.IsOnNetwork`: a UNC path or
+a network drive) is also polled every second, and read only when its size or time of last write
+changed. Writing into WSL needs nothing special: `File.Replace` works there, though the file's
+Linux permissions go back to the default. The manuals' `pk-wsl` section gives the bash function
+that opens a plan from WSL (`wslpath -w`, and the window started in the background, since WSL
+waits for a Windows program to exit).
+
 ### Command-line output
 
 `plancake.exe` is a GUI-subsystem exe and gets no console of its own. `ConsoleAttacher` (only

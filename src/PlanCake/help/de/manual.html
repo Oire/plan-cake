@@ -244,6 +244,7 @@ footer {
 <li><a href="#portable">Die portable Version</a></li>
 <li><a href="#uninstalling">PlanCake deinstallieren</a></li>
 <li><a href="#pk-alias">Ein kürzerer Befehl: pk</a></li>
+<li><a href="#pk-wsl">Pläne in WSL</a></li>
 </ol>
 </li>
 <li><a href="#main-window">Das Hauptfenster</a>
@@ -385,6 +386,20 @@ footer {
 <pre><code>alias pk=plancake</code></pre></li>
 </ul>
 <p>Danach öffnet <code>pk plan.md</code> einen Plan, und jeder Befehl unter <a href="#command-line">Über die Befehlszeile arbeiten</a> funktioniert mit <code>pk</code> anstelle von <code>plancake</code>.</p>
+<h3 id="pk-wsl">Pläne in WSL</h3>
+<p>Wenn Sie in WSL (Windows-Subsystem für Linux) arbeiten, etwa mit einem KI-Assistenten, der dort läuft, kann PlanCake die Pläne in Ihrer Linux-Distribution öffnen. WSL startet Windows-Programme mit ihrem vollständigen Dateinamen, dort heißt PlanCake also <code>plancake.exe</code>. Ein einfacher Alias genügt allerdings nicht: Linux-Pfade müssen in Windows-Pfade umgewandelt werden, und die Shell würde warten, bis Sie das Fenster schließen. Fügen Sie stattdessen diese Funktion zu Ihrer <code>~/.bashrc</code> in WSL hinzu:</p>
+<pre><code>pk() {
+    local args=() a
+    for a in "$@"; do
+        if [[ "$a" == /* || -e "$a" ]]; then args+=("$(wslpath -w "$a")"); else args+=("$a"); fi
+    done
+    case "$1" in
+        list|check|clear|export|-*) plancake.exe "${args[@]}" ;;
+        *) (plancake.exe "${args[@]}" &) ;;
+    esac
+}</code></pre>
+<p>Danach öffnet <code>pk docs/plans/001-plan.md</code> in WSL den Plan in einem PlanCake-Fenster, und die Eingabeaufforderung kehrt sofort zurück. Auch die Befehle unter <a href="#command-line">Über die Befehlszeile arbeiten</a> funktionieren, etwa <code>pk list plan.md</code>, und geben ihre Ausgabe in WSL aus.</p>
+<p>Windows teilt PlanCake nicht mit, wenn sich eine Datei in WSL ändert, deshalb sieht PlanCake stattdessen etwa einmal pro Sekunde nach: Eine Änderung in WSL erscheint innerhalb von ein, zwei Sekunden im Fenster.</p>
 </article>
 
 <article aria-labelledby="main-window">
@@ -557,6 +572,7 @@ footer {
 <article aria-labelledby="outside-changes">
 <h2 id="outside-changes">Wenn sich die Datei außerhalb von PlanCake ändert</h2>
 <p>Ein Plan in Überprüfung steht selten still: Ein KI-Assistent aktualisiert ihn, ein Kollege bearbeitet ihn, die Versionsverwaltung bringt eine neue Revision. PlanCake bemerkt, wenn sich die geöffnete Datei auf der Festplatte ändert, und lädt sie sofort neu. Die Statusleiste zeigt „Datei neu geladen“, und Sie bleiben dort, wo Sie gelesen haben – die Seite wird an Ort und Stelle aktualisiert, statt zurück an den Anfang zu springen.</p>
+<p>Eine Datei in WSL, auf der Netzwerkfreigabe eines anderen Computers oder auf einem Netzlaufwerk prüft PlanCake etwa einmal pro Sekunde, weil Windows Änderungen dort nicht immer meldet; eine Änderung erscheint innerhalb von ein, zwei Sekunden. Siehe <a href="#pk-wsl">Pläne in WSL</a>.</p>
 <p>Möchten Sie lieber selbst entscheiden, stellen Sie <strong>Wenn sich die Datei auf dem Datenträger ändert</strong> in den Einstellungen auf <strong>Vor dem Neuladen fragen</strong>. PlanCake fragt dann, ob neu geladen werden soll. Sagen Sie Nein, teilt es Ihnen mit, dass <kbd>F5</kbd> die Datei neu lädt, sobald Sie bereit sind.</p>
 <p>Wird die Datei gelöscht, umbenannt oder verschoben, sagt PlanCake Ihnen das, und Notizbefehle sind nicht verfügbar, bis die Datei zurück ist. Erscheint sie wieder am selben Ort, sagt PlanCake, dass sie zurück ist, und lädt sie neu.</p>
 <p>PlanCake überschreibt nie eine Änderung, die es nicht gesehen hat. Angenommen, die Datei ändert sich, während Sie eine Notiz eintippen. Wenn Sie speichern, weigert sich PlanCake zu schreiben, zeigt die Datei so, wie sie jetzt ist, und meldet: „Die Datei hat sich geändert. Bitte versuchen Sie es erneut.“ Auf keiner Seite geht etwas verloren: Fügen Sie Ihre Notiz erneut hinzu, und sie geht in die aktuelle Version der Datei ein.</p>

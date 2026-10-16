@@ -88,6 +88,13 @@ internal sealed class UiDebounceTimer: IDebounceTimer {
 /// folder, so events about either path count, and the target's folder is watched too when it is
 /// another one. The file is still read through the link.
 /// </para>
+/// <para>
+/// A file on a network path (a UNC path such as <c>\\wsl.localhost\Ubuntu\…</c>, or a mapped
+/// network drive) is also polled: <see cref="FileSystemWatcher"/> starts there without an error
+/// and then reports nothing at all about a WSL distribution's files, so every
+/// <see cref="PollInterval"/> the file's size and time of last write are compared with the last
+/// ones seen, and it is read when they differ.
+/// </para>
 /// </remarks>
 internal sealed class FileWatcher: IDisposable {
     /// <summary>How long after the last event the file is looked at.</summary>
@@ -103,12 +110,19 @@ internal sealed class FileWatcher: IDisposable {
     /// <summary>The longest wait before a file that cannot be read is looked at again.</summary>
     public static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(10);
 
+    /// <summary>How often a file on a network path is looked at.</summary>
+    public static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(1);
+
     private readonly IDebounceTimer _timer;
     private readonly Func<string, string?> _readText;
     private readonly List<FileSystemWatcher> _watchers = [];
     private string? _known;
     private bool _missing;
     private bool _disposed;
+    private bool _pollingStarted;
+
+    /// <summary>What the last poll saw; <see langword="null"/> before the first one.</summary>
+    private FileStamp? _stamp;
 
     /// <summary>How many times in a row the file could not be read.</summary>
     private int _failedReads;
@@ -125,7 +139,16 @@ internal sealed class FileWatcher: IDisposable {
     /// passes one that decodes the file exactly as it does (its document language), or the two
     /// texts of a legacy file could differ and every event would look like a change.
     /// </param>
-    public FileWatcher(string path, IDebounceTimer timer, Func<string, string?>? readText = null) {
+    /// <param name="polling">
+    /// Whether to poll the file; by default, when it or the file a symbolic link leads to is on a
+    /// network path (<see cref="IsOnNetwork"/>).
+    /// </param>
+    public FileWatcher(
+        string path,
+        IDebounceTimer timer,
+        Func<string, string?>? readText = null,
+        bool? polling = null
+    ) {
         ArgumentException.ThrowIfNullOrEmpty(path);
         ArgumentNullException.ThrowIfNull(timer);
 
@@ -133,6 +156,7 @@ internal sealed class FileWatcher: IDisposable {
         TargetPath = FinalTarget(Path);
         _timer = timer;
         _readText = readText ?? (file => ReadText(file));
+        Polling = polling ?? (IsOnNetwork(Path) || (TargetPath is not null && IsOnNetwork(TargetPath)));
     }
 
     /// <summary>The watched file's full path.</summary>
@@ -144,6 +168,12 @@ internal sealed class FileWatcher: IDisposable {
     /// </summary>
     public string? TargetPath { get; }
 
+    /// <summary>
+    /// True when the file is also looked at every <see cref="PollInterval"/>, besides the events
+    /// about it.
+    /// </summary>
+    public bool Polling { get; }
+
     /// <summary>True while the file is missing (deleted, or renamed or moved away).</summary>
     public bool IsMissing => _missing;
 
@@ -154,19 +184,29 @@ internal sealed class FileWatcher: IDisposable {
     /// Starts watching the file's folder, and the folder of the file a symbolic link leads to
     /// when that is another one. The file system's events are marshaled through
     /// <paramref name="synchronizingObject"/> (the window), so everything runs on the UI thread.
+    /// When <see cref="Polling"/>, polling starts as well, whether or not the folder can be watched.
     /// </summary>
-    /// <returns>False when the file's folder cannot be watched; the failure is logged.</returns>
+    /// <returns>
+    /// False when the file's folder cannot be watched and the file is not polled; the failure is
+    /// logged.
+    /// </returns>
     public bool Start(ISynchronizeInvoke? synchronizingObject) {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (_watchers.Count > 0) {
+        if (_watchers.Count > 0 || _pollingStarted) {
             return true;
+        }
+
+        if (Polling) {
+            _pollingStarted = true;
+            Log.Information("{Path} is on a network path; looking at it every {Interval}", Path, PollInterval);
+            _timer.Restart(PollInterval, Poll);
         }
 
         var folder = System.IO.Path.GetDirectoryName(Path);
 
         if (String.IsNullOrEmpty(folder) || !Watch(folder, Path, synchronizingObject)) {
-            return false;
+            return Polling;
         }
 
         // Without it outside changes to the target are missed, but the link's folder still tells.
@@ -264,12 +304,81 @@ internal sealed class FileWatcher: IDisposable {
         && (String.Equals(path, Path, StringComparison.OrdinalIgnoreCase)
             || String.Equals(path, TargetPath, StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>Looks at the file once the events have settled, and reports what changed.</summary>
+    /// <summary>
+    /// Whether <paramref name="path"/> is on a network path: a UNC path, or a drive that Windows
+    /// reports as a network drive.
+    /// </summary>
+    internal static bool IsOnNetwork(string path) {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        if (path.StartsWith(@"\\?\UNC\", StringComparison.OrdinalIgnoreCase)) {
+            return true;
+        }
+
+        // A device path to a drive (\\?\C:\…, \\.\C:\…) is on that drive.
+        if (path.StartsWith(@"\\?\", StringComparison.Ordinal)
+            || path.StartsWith(@"\\.\", StringComparison.Ordinal)) {
+            path = path[4..];
+        } else if (path.StartsWith(@"\\", StringComparison.Ordinal)) {
+            return true;
+        }
+
+        var root = System.IO.Path.GetPathRoot(path);
+
+        if (String.IsNullOrEmpty(root) || root.StartsWith('\\')) {
+            return false;
+        }
+
+        try {
+            return new DriveInfo(root).DriveType == DriveType.Network;
+        } catch (ArgumentException) {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Compares the size and time of last write of the file (or of the file a symbolic link leads
+    /// to) with what the last poll saw, and looks at the file when they changed.
+    /// </summary>
+    private void Poll() {
+        if (_disposed) {
+            return;
+        }
+
+        var stamp = FileStamp.Of(TargetPath ?? Path);
+
+        if (_stamp == stamp) {
+            _timer.Restart(PollInterval, Poll);
+
+            return;
+        }
+
+        _stamp = stamp;
+        // A change: a file that could not be read is worth trying again from the start.
+        _failedReads = 0;
+        Check();
+    }
+
+    /// <summary>
+    /// Looks at the file once the events have settled, and reports what changed; when
+    /// <see cref="Polling"/>, the next poll follows.
+    /// </summary>
     private void Check() {
         if (_disposed) {
             return;
         }
 
+        var retrying = Look();
+
+        // The handler of FileChanged may have disposed the watcher.
+        if (Polling && !retrying && !_disposed) {
+            _timer.Restart(PollInterval, Poll);
+        }
+    }
+
+    /// <summary>Reads the file and reports what changed.</summary>
+    /// <returns>True when the file could not be read and is looked at again later.</returns>
+    private bool Look() {
         string? text;
 
         try {
@@ -283,13 +392,13 @@ internal sealed class FileWatcher: IDisposable {
             if (_failedReads > MaxReadRetries) {
                 Log.Warning(ex, "{Path} cannot be read; waiting for the next change to it", Path);
 
-                return;
+                return false;
             }
 
             Log.Debug(ex, "{Path} cannot be read yet; checking again", Path);
             _timer.Restart(RetryDelay(_failedReads), Check);
 
-            return;
+            return true;
         }
 
         _failedReads = 0;
@@ -301,7 +410,7 @@ internal sealed class FileWatcher: IDisposable {
                 FileChanged?.Invoke(this, new FileChangeEventArgs(FileChangeKind.Missing, null));
             }
 
-            return;
+            return false;
         }
 
         if (_missing) {
@@ -310,17 +419,19 @@ internal sealed class FileWatcher: IDisposable {
             Log.Information("{Path} is back", Path);
             FileChanged?.Invoke(this, new FileChangeEventArgs(FileChangeKind.Restored, text));
 
-            return;
+            return false;
         }
 
         if (_known is not null && String.Equals(text, _known, StringComparison.Ordinal)) {
-            return;
+            return false;
         }
 
         // Reported once: the same text again is not a new change, whether or not the window reloads.
         _known = text;
         Log.Information("{Path} changed on disk", Path);
         FileChanged?.Invoke(this, new FileChangeEventArgs(FileChangeKind.Changed, text));
+
+        return false;
     }
 
     /// <summary>
@@ -370,5 +481,21 @@ internal sealed class FileWatcher: IDisposable {
         }
 
         _watchers.Clear();
+    }
+
+    /// <summary>
+    /// A file's size and time of last write, as a poll sees them; the default when the file is
+    /// missing or cannot be looked at.
+    /// </summary>
+    private readonly record struct FileStamp(long Length, DateTime WrittenUtc) {
+        public static FileStamp Of(string path) {
+            try {
+                var info = new FileInfo(path);
+
+                return info.Exists ? new FileStamp(info.Length, info.LastWriteTimeUtc) : default;
+            } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) {
+                return default;
+            }
+        }
     }
 }

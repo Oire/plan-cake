@@ -130,6 +130,30 @@ alias pk=plancake
 
 Then `pk plan.md` opens a plan, and `pk list plan.md` works like `plancake list plan.md`.
 
+### Plans in WSL
+
+PlanCake opens plans that live in a WSL distribution, for example ones Claude writes while it runs
+there. WSL starts Windows programs by their file name, `plancake.exe`, but a plain alias is not
+enough: Linux paths have to become Windows ones, and the shell would wait for the window to close.
+Add this function to `~/.bashrc` in WSL instead:
+
+```bash
+pk() {
+    local args=() a
+    for a in "$@"; do
+        if [[ "$a" == /* || -e "$a" ]]; then args+=("$(wslpath -w "$a")"); else args+=("$a"); fi
+    done
+    case "$1" in
+        list|check|clear|export|-*) plancake.exe "${args[@]}" ;;
+        *) (plancake.exe "${args[@]}" &) ;;
+    esac
+}
+```
+
+Then `pk docs/plans/001-plan.md` opens the plan in a window and returns at once, and
+`pk list plan.md` prints its output in WSL. Windows reports no changes to files in WSL, so
+PlanCake checks such a file (and one on a network share or drive) about once a second.
+
 ## Reviewing a plan with Claude
 
 When Claude writes a plan and asks you to review it, open it with `pk plan.md`, read it, and

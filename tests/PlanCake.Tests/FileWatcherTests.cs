@@ -430,6 +430,154 @@ public class FileWatcherTests: IDisposable {
         timer.Restarted.Wait(TimeSpan.FromSeconds(10)).Should().BeTrue();
     }
 
+    /// <summary>A polling watcher that knows the file's current text, as the window does after rendering it.</summary>
+    private FileWatcher PollingWatcher(Func<string, string?>? readText = null) {
+        var watcher = new FileWatcher(_path, _timer, readText, polling: true);
+        watcher.FileChanged += (_, e) => _changes.Add(e);
+        watcher.Acknowledge(File.ReadAllText(_path));
+
+        return watcher;
+    }
+
+    [Fact]
+    public void LocalFile_IsNotPolled() {
+        using var watcher = new FileWatcher(_path, _timer);
+
+        watcher.Polling.Should().BeFalse();
+        watcher.Start(null).Should().BeTrue();
+        _timer.IsPending.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(@"\\server\share\plan.md")]
+    [InlineData(@"\\wsl.localhost\Ubuntu\home\user\plan.md")]
+    [InlineData(@"\\wsl$\Ubuntu\home\user\plan.md")]
+    [InlineData(@"\\?\UNC\server\share\plan.md")]
+    public void UncPath_IsOnNetwork(string path) => FileWatcher.IsOnNetwork(path).Should().BeTrue();
+
+    [Fact]
+    public void LocalPath_IsNotOnNetwork() {
+        FileWatcher.IsOnNetwork(_path).Should().BeFalse();
+        FileWatcher.IsOnNetwork(@"\\?\" + _path).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Polling_LooksAtTheFileEverySecond_AndReportsAChange() {
+        using var watcher = PollingWatcher();
+
+        watcher.Start(null).Should().BeTrue();
+        _timer.Delay.Should().Be(FileWatcher.PollInterval);
+        _timer.Fire();
+
+        _changes.Should().BeEmpty();
+        _timer.IsPending.Should().BeTrue();
+        _timer.Delay.Should().Be(FileWatcher.PollInterval);
+
+        File.WriteAllText(_path, "# Plan\n\nSecond, longer.\n", _utf8);
+        _timer.Fire();
+
+        _changes.Should().ContainSingle().Which.Text.Should().Be("# Plan\n\nSecond, longer.\n");
+        _timer.IsPending.Should().BeTrue();
+        _timer.Delay.Should().Be(FileWatcher.PollInterval);
+    }
+
+    [Fact]
+    public void Polling_ReadsTheFileOnlyWhenItsSizeOrTimeChanged() {
+        var reads = 0;
+        using var watcher = PollingWatcher(path => {
+            reads++;
+
+            return FileWatcher.ReadText(path);
+        });
+        watcher.Start(null);
+
+        _timer.Fire();
+        _timer.Fire();
+        _timer.Fire();
+        reads.Should().Be(1);
+
+        File.WriteAllText(_path, "# Plan\n\nSecond, longer.\n", _utf8);
+        _timer.Fire();
+        _timer.Fire();
+        reads.Should().Be(2);
+    }
+
+    [Fact]
+    public void Polling_ReportsAMissingFile_AndItsReturn() {
+        using var watcher = PollingWatcher();
+        watcher.Start(null);
+        _timer.Fire();
+
+        File.Delete(_path);
+        _timer.Fire();
+        _changes.Should().ContainSingle().Which.Kind.Should().Be(FileChangeKind.Missing);
+        _timer.IsPending.Should().BeTrue();
+
+        File.WriteAllText(_path, "# Plan\n\nBack.\n", _utf8);
+        _timer.Fire();
+        _changes.Should().HaveCount(2);
+        _changes[1].Kind.Should().Be(FileChangeKind.Restored);
+        _changes[1].Text.Should().Be("# Plan\n\nBack.\n");
+    }
+
+    [Fact]
+    public void Polling_UnreadableFile_IsRetried_ThenPollingGoesOn() {
+        var locked = true;
+        using var watcher = PollingWatcher(path => locked ? throw new IOException("Locked") : FileWatcher.ReadText(path));
+        watcher.Start(null);
+
+        _timer.Fire();
+        _timer.Delay.Should().Be(FileWatcher.Debounce);
+
+        locked = false;
+        File.WriteAllText(_path, "# Plan\n\nSecond, longer.\n", _utf8);
+        _timer.Fire();
+
+        _changes.Should().ContainSingle().Which.Kind.Should().Be(FileChangeKind.Changed);
+        _timer.IsPending.Should().BeTrue();
+        _timer.Delay.Should().Be(FileWatcher.PollInterval);
+    }
+
+    [Fact]
+    public void Polling_EventAboutTheFile_IsCheckedAndPollingGoesOn() {
+        using var watcher = PollingWatcher();
+        watcher.Start(null);
+
+        File.WriteAllText(_path, "# Plan\n\nSecond, longer.\n", _utf8);
+        Changed(watcher);
+        _timer.Delay.Should().Be(FileWatcher.Debounce);
+        _timer.Fire();
+
+        _changes.Should().ContainSingle().Which.Kind.Should().Be(FileChangeKind.Changed);
+        _timer.Delay.Should().Be(FileWatcher.PollInterval);
+
+        // The poll after the event reads the same text again and reports nothing new.
+        _timer.Fire();
+        _changes.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Polling_StartsEvenWhenTheFolderCannotBeWatched() {
+        using var watcher = new FileWatcher(Path.Combine(_folder, "missing", "plan.md"), _timer, polling: true);
+
+        watcher.Start(null).Should().BeTrue();
+        _timer.IsPending.Should().BeTrue();
+        _timer.Delay.Should().Be(FileWatcher.PollInterval);
+    }
+
+    [Fact]
+    public void Polling_DisposedWatcher_StopsPolling() {
+        var watcher = PollingWatcher();
+        watcher.Start(null);
+        watcher.Dispose();
+
+        File.WriteAllText(_path, "# Plan\n\nSecond, longer.\n", _utf8);
+        _timer.Fire();
+
+        _changes.Should().BeEmpty();
+        _timer.IsPending.Should().BeFalse();
+    }
+
     /// <summary>A debounce timer that only signals a restart, from whatever thread made it.</summary>
     private sealed class SignalTimer: IDebounceTimer {
         public ManualResetEventSlim Restarted { get; } = new();
