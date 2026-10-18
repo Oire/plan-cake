@@ -945,7 +945,7 @@ check tasks off from the document.
   `tests/PlanCake.Tests/SettingsDialogTests.cs`
 
 - [x] port SIC's `UpdateService` and `UpdateCheckInterval`; `App.AppcastUrl` =
-      `https://plancake.oire.dev/appcast.xml`.
+      `https://plan-cake.oire.dev/appcast.xml`.
       Found while building it: every window is a process, so only the first one still open
       does the startup and background checks (a named `Local\` mutex); otherwise opening five
       plans checked five times and could offer one update five times. Help → Check for updates
@@ -966,7 +966,7 @@ check tasks off from the document.
 - [x] **ask the user** to check with JAWS: the two new settings on the General tab ("Check for
       updates on startup" and "Check for updates in the background") are read with their
       labels; Help → Check for updates with no update available announces it (until the
-      appcast exists at plancake.oire.dev it says "Unable to check for updates. Please try
+      appcast exists at plan-cake.oire.dev it says "Unable to check for updates. Please try
       again later."); the startup check does not steal the focus or interrupt reading.
       Results: all four pass (labels and defaults read, the manual check says it is unable to
       check and returns to the document, the startup check leaves focus and reading alone)
@@ -1144,7 +1144,7 @@ reach every block with their own reading cursor.
       `alias pk=plancake` in bash), how to point Debussy's `noteMarkers` at PlanCake's markers
       (written for a general audience, like the manual: the "Why" is reading long plans
       comfortably and annotating them for an AI assistant, with accessibility as part of it;
-      installing from plancake.oire.dev, the portable zip and winget `Oire.PlanCake`; building
+      installing from plan-cake.oire.dev, the portable zip and winget `Oire.PlanCake`; building
       adds `Build-Installer.ps1`)
 - [x] CLAUDE.md: architecture (Notes, Rendering, Ui, Cli, Services, `web/`), the page protocol,
       the WebView2 gotchas (user data folder, accelerator keys, single-file native loader,
@@ -1401,6 +1401,6 @@ For the user to run in the spike build, with JAWS in the virtual cursor:
   import surface today (SQLCipher-encrypted SQLite store).
 - Add `Set-Alias pk plancake` to the PowerShell profile (and `alias pk=plancake` to the bash
   profile).
-- Set up `plancake.oire.dev` to host the appcast and downloads (`deploy.json` points
+- Set up `plan-cake.oire.dev` to host the appcast and downloads (`deploy.json` points
   `Build-Installer.ps1 -Deploy` at it), create the GitHub release and submit the winget
   manifest with `wingetcreate` at the first release.

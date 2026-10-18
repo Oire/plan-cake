@@ -23,7 +23,7 @@ internal static class App {
     public const string RepoUrl = "https://github.com/Oire/plan-cake";
 
     /// <summary>The NetSparkle appcast the update checks read.</summary>
-    public const string AppcastUrl = "https://plancake.oire.dev/appcast.xml";
+    public const string AppcastUrl = "https://plan-cake.oire.dev/appcast.xml";
 
     /// <summary>
     /// The Ed25519 public key the appcast and the downloads are verified with: the contents of

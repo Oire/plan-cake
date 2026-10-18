@@ -9,7 +9,7 @@
 #define MyAppPublisher "Oire Software SARL"
 #define MyAppCompany "Oire"
 #define MyAppFolderName "PlanCake"
-#define MyAppURL "https://plancake.oire.dev"
+#define MyAppURL "https://plan-cake.oire.dev"
 #define MyAppSupportURL "https://github.com/Oire/plan-cake/issues"
 #define MyAppExeName "plancake.exe"
 

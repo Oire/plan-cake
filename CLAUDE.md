@@ -106,7 +106,7 @@ into a `.csproj`.** Every version has four parts, `X.Y.Z.N`, the same model as S
   where `N` is the commit distance from that tag.
 - When the cycle is ready, the release commit gets a **four-part tag `vX.Y.Z.N`** with exactly
   the version that commit builds as (`v1.0.0.7`). That is the release: on GitHub, on
-  plancake.oire.dev and on winget, and in the installer and zip names. GitVersion does not count
+  plan-cake.oire.dev and on winget, and in the installer and zip names. GitVersion does not count
   from a four-part tag; it only marks the commit.
 - Right after the release, the **next cycle's three-part tag** (`v1.1.0`, or `v1.0.1` for a
   patch) goes on the next commit, never on the release commit itself: with two tags on one
@@ -392,7 +392,7 @@ compiles `installer/plancake.iss` with Inno Setup 6, and writes to `installer/Ou
 (gitignored) the installer `plancake-v<VERSION>-setup.exe` and the portable
 `plancake-v<VERSION>-portable.zip`, where `<VERSION>` is the four-part file version.
 `-Appcast` adds `appcast.xml` and its signature, signed with the key in `keys/` (it needs
-`netsparkle-generate-appcast`); `-Deploy` uploads the lot to plancake.oire.dev over SCP with the
+`netsparkle-generate-appcast`); `-Deploy` uploads the lot to plan-cake.oire.dev over SCP with the
 host and path in `installer/deploy.json` (gitignored; copy `deploy.example.json`). Release notes
 come from `changelogs/<X.Y.Z>.md`, named after the three-part version of the cycle, since `N` is
 only known once the release commit exists; the script hands the file to the generator under the
@@ -458,7 +458,7 @@ From start to finish, by hand on the maintainer's machine (CI never builds a rel
    the UI. Write `changelogs/<X.Y.Z>.md` (the update window's notes) and move the
    `[Unreleased]` entries of `CHANGELOG.md` under the version. Commit: the tree must be clean.
 2. `./installer/Build-Installer.ps1 -Appcast`, or `-Deploy`, which implies `-Appcast` and
-   uploads the installer, the zip, `appcast.xml` and its signature to plancake.oire.dev (build
+   uploads the installer, the zip, `appcast.xml` and its signature to plan-cake.oire.dev (build
    without `-Deploy` first to try the installer). The file names carry the version:
    `plancake-v1.0.0.7-setup.exe` comes from the commit at distance 7 from `v1.0.0`.
 3. Tag that commit with the same four-part version and push the tag:

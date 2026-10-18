@@ -329,7 +329,7 @@ compiles `installer/plancake.iss` with Inno Setup 6, and writes to `installer/Ou
 (gitignored) the installer `plancake-v<VERSION>-setup.exe` and the portable
 `plancake-v<VERSION>-portable.zip`, where `<VERSION>` is the four-part file version.
 `-Appcast` adds `appcast.xml` and its signature, signed with the key in `keys/` (it needs
-`netsparkle-generate-appcast`); `-Deploy` uploads the lot to plancake.oire.dev over SCP with the
+`netsparkle-generate-appcast`); `-Deploy` uploads the lot to plan-cake.oire.dev over SCP with the
 host and path in `installer/deploy.json` (gitignored; copy `deploy.example.json`). Release notes
 come from `changelogs/<X.Y.Z>.md`, named after the tag; the script hands the file to the
 generator under the four-part name it looks for.

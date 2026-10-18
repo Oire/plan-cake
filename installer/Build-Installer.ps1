@@ -23,7 +23,7 @@ param(
     [switch]$OpenOutput,
     [switch]$AllowDirty,
     [string]$InnoSetupPath = "",
-    [string]$BaseUrl = "https://plancake.oire.dev",
+    [string]$BaseUrl = "https://plan-cake.oire.dev",
     [string]$KeyPath = "",
     [string]$ChangeLog = ""
 )

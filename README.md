@@ -33,7 +33,7 @@ punctuation.
 
 ## Installing
 
-Download PlanCake from [plancake.oire.dev](https://plancake.oire.dev), in one of two forms:
+Download PlanCake from [plan-cake.oire.dev](https://plan-cake.oire.dev), in one of two forms:
 
 - **The installer** sets everything up: it installs the .NET 10 Desktop Runtime and the
   Microsoft Edge WebView2 Runtime if they are missing, and puts `plancake` on your `PATH`.
