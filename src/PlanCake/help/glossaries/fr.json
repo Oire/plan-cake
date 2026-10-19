@@ -139,6 +139,42 @@
       "translation": "Raw",
       "context": "The GitHub \"Raw\" link/button used to reach a file's raw Markdown",
       "notes": "Left untranslated: GitHub's own UI does not localize this button/label either."
+    },
+    {
+      "term": "Default apps",
+      "translation": "Applications par défaut",
+      "context": "The Windows Settings page under Applications where the user chooses which program opens each file type; PlanCake's button opens PlanCake's own page there",
+      "notes": "Capitalized as the page's name, without quotes: la page Applications par défaut"
+    },
+    {
+      "term": "Windows Settings",
+      "translation": "Paramètres Windows",
+      "context": "The Windows Settings app, as in 'PlanCake's page in Windows Settings'",
+      "notes": "The app is Paramètres; capitalized, with the article in running text: dans les Paramètres Windows"
+    },
+    {
+      "term": "Open with",
+      "translation": "Ouvrir avec",
+      "context": "File Explorer's context menu command that lists the programs able to open a file",
+      "notes": "Capitalized as a command name"
+    },
+    {
+      "term": "Choose another app",
+      "translation": "Choisir une autre application",
+      "context": "The item at the bottom of File Explorer's Open with submenu that shows every program able to open the file",
+      "notes": "Capitalized as a command name"
+    },
+    {
+      "term": "Set defaults by app",
+      "translation": "Définir les valeurs par défaut par application",
+      "context": "Windows 10 only: the link on the Default apps page that lists the programs; choosing PlanCake there, then Manage, sets its file types. Named in the manual for Windows versions where PlanCake's Settings button opens the general Default apps page",
+      "notes": "Capitalized as a link name"
+    },
+    {
+      "term": "Manage",
+      "translation": "Gérer",
+      "context": "Windows 10 only: the button under a program in Set defaults by app that opens its file types",
+      "notes": "The button's name"
     }
   ]
 }

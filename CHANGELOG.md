@@ -15,6 +15,10 @@ update window come from `changelogs/<X.Y.Z>.md`.
   for outside changes about once a second, since Windows reports none for files in WSL, so a plan
   an AI assistant updates in WSL reloads as it does on a local disk. The manual's new "Plans in
   WSL" section gives the `pk` shell function that opens a plan from WSL.
+- **Open Markdown files with PlanCake**: the installer lists PlanCake among the programs that
+  open `.md` and `.markdown` files, in Open with and in Windows Settings → Default apps, without
+  changing which program opens them. The new button in Settings → Advanced opens PlanCake's page
+  in Default apps, where you make it the default.
 
 ## [1.0.0.11] - 2026-10-04
 

@@ -131,6 +131,48 @@
       "translation": "Raw",
       "context": "GitHub's \"Raw\" link for viewing/downloading a file's plain contents",
       "notes": "Left untranslated, in Latin script"
+    },
+    {
+      "term": "Default apps",
+      "translation": "אפליקציות ברירת מחדל",
+      "context": "The Windows Settings page under אפליקציות where the user chooses which program opens each file type; PlanCake's button opens PlanCake's own page there",
+      "notes": "The page's name in Hebrew Windows 11; Windows says אפליקציות for apps, while PlanCake's own text says תוכנה for a program"
+    },
+    {
+      "term": "Windows Settings",
+      "translation": "הגדרות Windows",
+      "context": "The Windows Settings app, as in 'PlanCake's page in Windows Settings'",
+      "notes": "With a prefix, as written: בהגדרות Windows, את הגדרות Windows"
+    },
+    {
+      "term": "Open with",
+      "translation": "פתח באמצעות",
+      "context": "File Explorer's context menu command that lists the programs able to open a file",
+      "notes": "Masculine singular imperative, as Windows writes its commands"
+    },
+    {
+      "term": "Choose another app",
+      "translation": "בחר אפליקציה אחרת",
+      "context": "The item at the bottom of File Explorer's Open with submenu that shows every program able to open the file",
+      "notes": "Masculine singular imperative, as Windows writes its commands"
+    },
+    {
+      "term": "Set defaults by app",
+      "translation": "הגדר ברירות מחדל לפי אפליקציה",
+      "context": "Windows 10 only: the link on the Default apps page that lists the programs; choosing PlanCake there, then Manage, sets its file types. Named in the manual for Windows versions where PlanCake's Settings button opens the general Default apps page",
+      "notes": "Masculine singular imperative, as Windows writes its commands"
+    },
+    {
+      "term": "Manage",
+      "translation": "נהל",
+      "context": "Windows 10 only: the button under a program in Set defaults by app that opens its file types",
+      "notes": "Masculine singular imperative, as Windows writes its commands"
+    },
+    {
+      "term": "button",
+      "translation": "כפתור",
+      "context": "A push button in a dialog, as in 'the button opens PlanCake's page in Windows Settings'",
+      "notes": "Not לחצן. The Settings dialog and the manual both say כפתור, and a page of Settings is עמוד, not דף"
     }
   ]
 }

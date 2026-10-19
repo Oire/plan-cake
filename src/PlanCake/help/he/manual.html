@@ -366,15 +366,17 @@ footer {
 <p>הריצו את תוכנת ההתקנה ועקבו אחר השלבים שלה. מלבד PlanCake עצמו, היא דואגת גם למה ש-PlanCake זקוק לו כדי לפעול: היא מתקינה את .NET 10 Desktop Runtime ואת Microsoft Edge WebView2 Runtime אם המחשב שלכם עדיין לא כולל אותם. היא גם מוסיפה את PlanCake ל-PATH שלכם, כך שהפקודה <code dir="ltr">plancake</code> פועלת בכל חלון PowerShell או שורת הפקודה חדש.</p>
 <p>ההגדרות שלכם נשמרות ב-<code dir="ltr">%APPDATA%\Oire\PlanCake</code>.</p>
 <p>תוכנת ההתקנה מוסיפה את PlanCake לתפריט התחל, יחד עם קיצור דרך למדריך הזה בשפה שבחרתם לתוכנת ההתקנה.</p>
+<p>תוכנת ההתקנה גם הופכת את PlanCake לאחת התוכנות שיכולות לפתוח קובצי Markdown (<code dir="ltr">.md</code> ו-<code dir="ltr">.markdown</code>), כך שהוא מופיע ב<strong>פתח באמצעות</strong> בסייר הקבצים ובעמוד <strong>אפליקציות ברירת מחדל</strong> בהגדרות Windows. היא אינה משנה את התוכנה שפותחת אותם: Windows משאיר את הבחירה הזו בידיכם. כדי ש-PlanCake יפתח קובצי Markdown בלחיצה כפולה, בחרו בו בעמוד הזה, או השתמשו בכפתור שבלשונית <strong>מתקדם</strong> ב<a href="#settings-advanced">הגדרות</a>.</p>
 <p>PlanCake אינו חתום בתעודת חתימת קוד. לכן בפעם הראשונה שתריצו את תוכנת ההתקנה, או את <code dir="ltr">plancake.exe</code> מקובץ ה-zip הנייד, Windows SmartScreen עשוי להציג את ההודעה „Windows הגן על המחשב שלך” ומפרסם לא ידוע. כדי להמשיך, בחרו <strong>מידע נוסף</strong> ואז <strong>הפעל בכל זאת</strong>.</p>
 
 <h3 id="portable">הגרסה הניידת</h3>
 <p>חלצו את קובץ ה-zip לכל תיקייה שתרצו והריצו משם את <code dir="ltr">plancake.exe</code>. קובץ ה-zip כולל תיקייה ריקה בשם <code dir="ltr">userdata</code> לצד <code dir="ltr">plancake.exe</code>; כל עוד תיקייה זו קיימת, PlanCake שומר את ההגדרות שלו בתוכה ואינו כותב דבר לפרופיל המשתמש שלכם. מחקו או שנו את שם התיקייה <code dir="ltr">userdata</code>, ו-PlanCake יחזור להשתמש ב-<code dir="ltr">%APPDATA%\Oire\PlanCake</code>.</p>
 <p>הגרסה הניידת אינה מתקינה דבר, כך שהמחשב שלכם צריך כבר להכיל את <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> ואת <a href="https://developer.microsoft.com/microsoft-edge/webview2/">Microsoft Edge WebView2 Runtime</a>. Windows 11 מגיע עם WebView2 מובנה; אם הוא חסר, PlanCake יגיד לכם זאת עם ההפעלה ויציע לפתוח את עמוד ההורדה.</p>
 <p>כדי להשתמש בפקודה <code dir="ltr">plancake</code> עם הגרסה הניידת, הקלידו את הנתיב המלא שלה או הוסיפו את התיקייה שלה ל-PATH בעצמכם.</p>
+<p>הגרסה הניידת אינה רושמת דבר ב-Windows, ולכן היא אינה מופיעה ב<strong>פתח באמצעות</strong>: כדי לפתוח בה קובץ Markdown מסייר הקבצים, בחרו <strong>פתח באמצעות</strong>, אחר כך <strong>בחר אפליקציה אחרת</strong>, וחפשו את <code dir="ltr">plancake.exe</code> בתיקייה שלה.</p>
 
 <h3 id="uninstalling">הסרת PlanCake</h3>
-<p>הסירו את PlanCake מ<strong>אפליקציות</strong> בהגדרות Windows, או באמצעות <strong>הסר את PlanCake</strong> בתפריט התחל. תוכנת ההסרה מוציאה את PlanCake מה-PATH שלכם ושואלת אם להסיר גם את ההגדרות והיומנים; קובצי ה-Markdown שלכם וההערות שבהם לעולם אינם מושפעים. הגרסה הניידת אינה מתקינה דבר: כדי להסיר אותה, מחקו את התיקייה שלה.</p>
+<p>הסירו את PlanCake מ<strong>אפליקציות</strong> בהגדרות Windows, או באמצעות <strong>הסר את PlanCake</strong> בתפריט התחל. תוכנת ההסרה מוציאה את PlanCake מה-PATH שלכם, מ<strong>פתח באמצעות</strong> ומעמוד <strong>אפליקציות ברירת מחדל</strong>, ושואלת אם להסיר גם את ההגדרות והיומנים; קובצי ה-Markdown שלכם וההערות שבהם לעולם אינם מושפעים. הגרסה הניידת אינה מתקינה דבר: כדי להסיר אותה, מחקו את התיקייה שלה.</p>
 <p>אם אתם עובדים בחשבון Windows רגיל ומנהל מקליד את הסיסמה שלו כדי לאשר את ההסרה, תוכנת ההסרה פועלת בתור אותו מנהל ומחפשת את ההגדרות שלו, לא שלכם, ולכן אינה שואלת עליהן. ההגדרות והיומנים שלכם נשארים אז ב-<code dir="ltr">%APPDATA%\Oire\PlanCake</code> וב-<code dir="ltr">%LOCALAPPDATA%\Oire\PlanCake</code>; מחקו את התיקיות האלה בעצמכם אם אינכם צריכים אותן עוד.</p>
 
 <h3 id="pk-alias">פקודה קצרה יותר: pk</h3>
@@ -460,6 +462,7 @@ footer {
 
 <h3 id="open-dialog">מתיבת הדו-שיח פתיחה או בגרירה</h3>
 <p>גררו קובץ Markdown מסייר הקבצים ושחררו אותו על חלון PlanCake. או הקישו <kbd dir="ltr">Ctrl+O</kbd>, או בחרו <strong>פתח</strong> בתפריט <strong>קובץ</strong>: תיבת הדו-שיח הרגילה של Windows לפתיחת קבצים מציגה קובצי Markdown (<code dir="ltr">.md</code> ו-<code dir="ltr">.markdown</code>); שנו את סוג הקובץ ל<strong>כל הקבצים</strong> כדי לראות הכול.</p>
+<p>כאשר PlanCake הוא התוכנה שפותחת קובצי Markdown, לחיצה כפולה על קובץ כזה בסייר הקבצים פותחת אותו ב-PlanCake. כדי להגדיר זאת, ראו <a href="#installer">באמצעות תוכנת ההתקנה</a>.</p>
 
 <h3 id="open-clipboard">מלוח הגזירים</h3>
 <p>הקישו <kbd dir="ltr">Ctrl+V</kbd> בחלון PlanCake, או בחרו <strong>פתח מלוח הגזירים</strong> בתפריט <strong>קובץ</strong>. PlanCake בודק מה העתקתם:</p>
@@ -630,6 +633,8 @@ footer {
 <dl>
 <dt>המר ל-UTF-8 בעת הפתיחה</dt>
 <dd>כבוי כברירת מחדל, כך שקבצים בקידודים ישנים נפתחים לקריאה בלבד ולעולם לא משתנים. הפעילו אותו כדי ש-PlanCake ימיר קובץ שאינו ב-UTF-8 ל-UTF-8 בלי סימון סדר בתים (BOM) כשאתם פותחים אותו, כדי שתוכלו להוסיף הערות. ההמרה כותבת מחדש את הקובץ בדיסק. קובץ שאת הקידוד שלו PlanCake לא מצליח לזהות לעולם לא מומר. ראו <a href="#encodings">קבצים שאינם ב-UTF-8</a>.</dd>
+<dt>בחר ב-PlanCake עבור קובצי Markdown בהגדרות Windows...</dt>
+<dd>פותח את העמוד של PlanCake בהגדרות Windows, תחת <strong>אפליקציות ברירת מחדל</strong>, שם אתם בוחרים ב-PlanCake עבור קובצי <code dir="ltr">.md</code> ו-<code dir="ltr">.markdown</code>. Windows משאיר את הבחירה הזו רק בידיכם, ולכן PlanCake לא יכול לבצע אותה במקומכם. בגרסאות ישנות יותר של Windows, הכפתור פותח את העמוד הכללי <strong>אפליקציות ברירת מחדל</strong>. ב-Windows 10, בחרו בו <strong>הגדר ברירות מחדל לפי אפליקציה</strong>, אחר כך את PlanCake, ואז <strong>נהל</strong>. הכפתור והטקסט שמעליו מופיעים רק אם תוכנת ההתקנה רשמה את PlanCake, ולכן בגרסה הניידת אין כפתור כזה. ראו <a href="#installer">באמצעות תוכנת ההתקנה</a>.</dd>
 </dl>
 </article>
 

@@ -141,6 +141,42 @@
       "translation": "Raw",
       "context": "GitHub's \"Raw\" link/button for viewing a file's raw content",
       "notes": "Left untranslated, matching GitHub's own (unlocalized) button label."
+    },
+    {
+      "term": "Default apps",
+      "translation": "Standard-Apps",
+      "context": "The Windows Settings page under Apps where the user chooses which program opens each file type; PlanCake's button opens PlanCake's own page there",
+      "notes": "Written with the hyphen, as Windows does"
+    },
+    {
+      "term": "Windows Settings",
+      "translation": "Windows-Einstellungen",
+      "context": "The Windows Settings app, as in 'PlanCake's page in Windows Settings'",
+      "notes": "The app is Einstellungen; in running text with the article: in den Windows-Einstellungen"
+    },
+    {
+      "term": "Open with",
+      "translation": "Öffnen mit",
+      "context": "File Explorer's context menu command that lists the programs able to open a file",
+      "notes": "Capitalized as a command name"
+    },
+    {
+      "term": "Choose another app",
+      "translation": "Andere App auswählen",
+      "context": "The item at the bottom of File Explorer's Open with submenu that shows every program able to open the file",
+      "notes": "Capitalized as a command name"
+    },
+    {
+      "term": "Set defaults by app",
+      "translation": "Standardwerte nach App festlegen",
+      "context": "Windows 10 only: the link on the Default apps page that lists the programs; choosing PlanCake there, then Manage, sets its file types. Named in the manual for Windows versions where PlanCake's Settings button opens the general Default apps page",
+      "notes": "Capitalized as a link name"
+    },
+    {
+      "term": "Manage",
+      "translation": "Verwalten",
+      "context": "Windows 10 only: the button under a program in Set defaults by app that opens its file types",
+      "notes": "The button's name"
     }
   ]
 }

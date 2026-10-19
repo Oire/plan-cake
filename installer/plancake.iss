@@ -16,6 +16,22 @@
 ; Where the machine-wide environment, the PATH among it, lives.
 #define EnvironmentKey "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 
+; PlanCake's value name under Software\RegisteredApplications. Must equal
+; DefaultApps.RegisteredName, which Settings > Advanced puts in the Default apps link
+; (InstallerTests checks).
+#define RegisteredAppName "PlanCake"
+
+; The file type (ProgID) PlanCake registers for .md and .markdown files.
+#define AppProgId "PlanCake.Markdown"
+
+; PlanCake's own registry keys, from the same names as the folders. The parent keys and the
+; capabilities key must spell them alike, or uninsdeletekeyifempty leaves the parents behind.
+#define CompanyKey "Software\" + MyAppCompany
+#define AppKey CompanyKey + "\" + MyAppFolderName
+
+; Where PlanCake lists its capabilities for Default apps.
+#define CapabilitiesKey AppKey + "\Capabilities"
+
 ; The publish folder Build-Installer.ps1 writes to (relative to this script).
 #define SourcePath "..\src\PlanCake\bin\x64\Release\publish"
 
@@ -71,6 +87,9 @@ DisableProgramGroupPage=yes
 
 ; {app} goes on the machine PATH (see [Registry]); tell running programs to reload it.
 ChangesEnvironment=yes
+; PlanCake registers itself for .md and .markdown (see [Registry]); tell Explorer to reload
+; the file associations.
+ChangesAssociations=yes
 
 ; Language options
 ShowLanguageDialog=yes
@@ -111,6 +130,35 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Comment: 
 ; existing value ({olddata}) and skipped when it is already there. No uninsdeletevalue flag:
 ; that would delete the whole Path value. RemoveAppFromPath takes the entry out on uninstall.
 Root: HKLM; Subkey: "{#EnvironmentKey}"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; Check: NeedsAddPath(ExpandConstant('{app}'))
+
+; PlanCake as one of the programs that open .md and .markdown files: a file type, an entry in
+; each extension's OpenWithProgids, an Applications entry, and capabilities listed under
+; RegisteredApplications, so PlanCake shows in Open with and in Default apps.
+; - The extensions' default value is never written: it would take Markdown files away from the
+;   program the user or Windows picked.
+; - The user makes PlanCake the default in Default apps, which Settings > Advanced opens.
+; - No verb but open: File > Open in editor looks for an edit verb, and must not find PlanCake.
+; - The parent keys come first because Inno Setup uninstalls in reverse order, so an emptied key
+;   is checked after its children are gone.
+Root: HKLM; Subkey: "Software\Classes\{#AppProgId}"; ValueType: string; ValueName: ""; ValueData: "{cm:MarkdownFileType}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Classes\{#AppProgId}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"
+Root: HKLM; Subkey: "Software\Classes\{#AppProgId}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
+Root: HKLM; Subkey: "Software\Classes\.md"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "Software\Classes\.md\OpenWithProgids"; ValueType: string; ValueName: "{#AppProgId}"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty
+Root: HKLM; Subkey: "Software\Classes\.markdown"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "Software\Classes\.markdown\OpenWithProgids"; ValueType: string; ValueName: "{#AppProgId}"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty
+Root: HKLM; Subkey: "Software\Classes\Applications\{#MyAppExeName}"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "{#MyAppName}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes"; ValueType: string; ValueName: ".md"; ValueData: ""
+Root: HKLM; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes"; ValueType: string; ValueName: ".markdown"; ValueData: ""
+Root: HKLM; Subkey: "Software\Classes\Applications\{#MyAppExeName}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
+Root: HKLM; Subkey: "{#CompanyKey}"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "{#AppKey}"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "{#CapabilitiesKey}"; ValueType: string; ValueName: "ApplicationName"; ValueData: "{#MyAppName}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "{#CapabilitiesKey}"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "{cm:AppDescription}"
+Root: HKLM; Subkey: "{#CapabilitiesKey}"; ValueType: string; ValueName: "ApplicationIcon"; ValueData: "{app}\{#MyAppExeName},0"
+Root: HKLM; Subkey: "{#CapabilitiesKey}\FileAssociations"; ValueType: string; ValueName: ".md"; ValueData: "{#AppProgId}"
+Root: HKLM; Subkey: "{#CapabilitiesKey}\FileAssociations"; ValueType: string; ValueName: ".markdown"; ValueData: "{#AppProgId}"
+Root: HKLM; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "{#RegisteredAppName}"; ValueData: "{#CapabilitiesKey}"; Flags: uninsdeletevalue
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

@@ -366,15 +366,17 @@ footer {
 <p>Run the installer and follow its steps. Besides PlanCake itself, it takes care of what PlanCake needs to run: it installs the .NET 10 Desktop Runtime and the Microsoft Edge WebView2 Runtime if your computer does not have them yet. It also adds PlanCake to your PATH, so the <code>plancake</code> command works in any new PowerShell or Command Prompt window.</p>
 <p>Your settings are kept in <code>%APPDATA%\Oire\PlanCake</code>.</p>
 <p>The installer adds PlanCake to the Start menu, together with a shortcut to this manual in the language you chose for the installer.</p>
+<p>The installer also makes PlanCake one of the programs that can open Markdown files (<code>.md</code> and <code>.markdown</code>), so it appears in <strong>Open with</strong> in File Explorer and on the <strong>Default apps</strong> page of Windows Settings. It does not change which program opens them: Windows leaves that choice to you. To have PlanCake open Markdown files when you double-click them, choose it on that page, or use the button on the <strong>Advanced</strong> tab of <a href="#settings-advanced">Settings</a>.</p>
 <p>PlanCake is not signed with a code-signing certificate. The first time you run the installer, or <code>plancake.exe</code> from the portable zip, Windows SmartScreen may show “Windows protected your PC” and an unknown publisher. To go on, choose <strong>More info</strong>, then <strong>Run anyway</strong>.</p>
 
 <h3 id="portable">The portable version</h3>
 <p>Unpack the zip file into any folder and run <code>plancake.exe</code> from there. The zip includes an empty folder named <code>userdata</code> next to <code>plancake.exe</code>; as long as that folder is there, PlanCake keeps its settings inside it and writes nothing to your user profile. Delete or rename the <code>userdata</code> folder and PlanCake goes back to using <code>%APPDATA%\Oire\PlanCake</code>.</p>
 <p>The portable version does not install anything, so your computer needs the <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> and the <a href="https://developer.microsoft.com/microsoft-edge/webview2/">Microsoft Edge WebView2 Runtime</a> already. Windows 11 comes with WebView2; if it is missing, PlanCake tells you so when it starts and offers to open the download page.</p>
 <p>To use the <code>plancake</code> command with the portable version, either type its full path or add its folder to your PATH yourself.</p>
+<p>The portable version registers nothing with Windows, so it is not listed in <strong>Open with</strong>: to open a Markdown file with it from File Explorer, choose <strong>Open with</strong>, then <strong>Choose another app</strong>, and look for <code>plancake.exe</code> in its folder.</p>
 
 <h3 id="uninstalling">Uninstalling PlanCake</h3>
-<p>Uninstall PlanCake from <strong>Apps</strong> in Windows Settings, or with <strong>Uninstall PlanCake</strong> in the Start menu. The uninstaller takes PlanCake off your PATH and asks whether to remove your settings and logs as well; your Markdown files and the notes in them are never touched. The portable version installs nothing: to remove it, delete its folder.</p>
+<p>Uninstall PlanCake from <strong>Apps</strong> in Windows Settings, or with <strong>Uninstall PlanCake</strong> in the Start menu. The uninstaller takes PlanCake off your PATH, out of <strong>Open with</strong> and off the <strong>Default apps</strong> page, and asks whether to remove your settings and logs as well; your Markdown files and the notes in them are never touched. The portable version installs nothing: to remove it, delete its folder.</p>
 <p>If you work in a standard Windows account and an administrator types their password to allow the uninstall, the uninstaller runs as that administrator and looks for the administrator's settings, not yours, so it does not ask about them. Your settings and logs then stay in <code>%APPDATA%\Oire\PlanCake</code> and <code>%LOCALAPPDATA%\Oire\PlanCake</code>; delete those folders yourself if you no longer need them.</p>
 
 <h3 id="pk-alias">A shorter command: pk</h3>
@@ -460,6 +462,7 @@ footer {
 
 <h3 id="open-dialog">From the Open dialog or by dragging</h3>
 <p>Drag a Markdown file from File Explorer and drop it onto the PlanCake window. Or press <kbd>Ctrl+O</kbd>, or choose <strong>Open</strong> in the <strong>File</strong> menu: the standard Windows Open dialog shows Markdown files (<code>.md</code> and <code>.markdown</code>); switch the file type to <strong>All files</strong> to see everything.</p>
+<p>Once PlanCake is the program that opens Markdown files, double-click one in File Explorer and it opens in PlanCake. See <a href="#installer">With the installer</a> for how to set this up.</p>
 
 <h3 id="open-clipboard">From the clipboard</h3>
 <p>Press <kbd>Ctrl+V</kbd> in the PlanCake window, or choose <strong>Open from clipboard</strong> in the <strong>File</strong> menu. PlanCake looks at what you copied:</p>
@@ -630,6 +633,8 @@ footer {
 <dl>
 <dt>Convert to UTF-8 on opening</dt>
 <dd>Off by default, so files in legacy encodings open read-only and are never changed. Turn it on to have PlanCake convert a file that is not in UTF-8 to UTF-8 without a byte order mark (BOM) when you open it, so you can add notes. The conversion rewrites the file on disk. A file whose encoding PlanCake cannot recognize is never converted. See <a href="#encodings">Files that are not in UTF-8</a>.</dd>
+<dt>Choose PlanCake for Markdown files in Windows Settings...</dt>
+<dd>Opens PlanCake's page in Windows Settings, under <strong>Default apps</strong>, where you choose PlanCake for <code>.md</code> and <code>.markdown</code> files. Windows lets only you make that choice, so PlanCake cannot make it for you. On older versions of Windows, the button opens the general <strong>Default apps</strong> page. In Windows 10, choose <strong>Set defaults by app</strong> there, then PlanCake, then <strong>Manage</strong>. The button and the text above it appear only when the installer has registered PlanCake, so the portable version has no such button. See <a href="#installer">With the installer</a>.</dd>
 </dl>
 </article>
 

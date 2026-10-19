@@ -58,9 +58,26 @@ public class SettingsDialogTests {
             Find(dialog, "noteEnterLabel").Text.Should().Be("Enter in the note dialo&g (Ctrl+Enter does the other):");
         });
 
+    [Fact]
+    public void DefaultAppButton_IsOnTheAdvancedTabWithAWrappingLabel() =>
+        Sta.Run(() => {
+            using var dialog = new SettingsDialog();
+            var advanced = Find(dialog, "advancedLayout");
+            var button = Find(dialog, "defaultAppButton");
+            var label = Find(dialog, "defaultAppLabel");
+
+            button.Should().BeOfType<Button>();
+            button.Parent.Should().BeSameAs(advanced, "it opens Windows Settings and is no part of the OK and Cancel row");
+            button.Text.Should().Be("Choose PlanCake for &Markdown files in Windows Settings...");
+
+            label.Should().BeOfType<WrappingLabel>("a stock label breaks words in the middle with the UTF-8 code page");
+            label.Parent.Should().BeSameAs(advanced);
+            ((TableLayoutPanel)advanced).GetRow(label).Should().BeLessThan(((TableLayoutPanel)advanced).GetRow(button));
+        });
+
     [Theory]
     [MemberData(nameof(Languages))]
-    public void ChoicesAndCheckBoxes_FitTheirTabInEveryLanguage(string language) {
+    public void ChoicesCheckBoxesAndButtons_FitTheirTabInEveryLanguage(string language) {
         Localization.SetLanguage(language);
 
         Sta.Run(() => {
@@ -75,6 +92,11 @@ public class SettingsDialogTests {
                 (checkBox.PreferredSize.Width + checkBox.Margin.Horizontal).Should()
                     .BeLessThanOrEqualTo(content, "\"{0}\" must show whole in {1}", checkBox.Text, language);
             }
+
+            // Advanced: the Default apps button sizes itself to its text, which must not overflow.
+            var button = Find(dialog, "defaultAppButton");
+            (button.PreferredSize.Width + button.Margin.Horizontal).Should()
+                .BeLessThanOrEqualTo(content, "\"{0}\" must show whole in {1}", button.Text, language);
 
             // General: the labels' column takes what its widest label needs, the boxes the rest.
             var general = (TableLayoutPanel)Find(dialog, "generalLayout");

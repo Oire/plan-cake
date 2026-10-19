@@ -7,6 +7,8 @@
 AppDescription=Lire des fichiers Markdown confortablement et laisser des notes exactement là où elles doivent être
 ; The Start menu shortcut to the user manual in the installer's language (the manual's title)
 ManualShortcut=Manuel utilisateur de PlanCake
+; The file type's name in File Explorer, for .md and .markdown files ("Markdown" stays as is)
+MarkdownFileType=Document Markdown
 
 ; Uninstall messages
 RemoveUserData=Voulez-vous aussi supprimer les paramètres et les journaux de PlanCake ? Vos fichiers Markdown et les notes qu’ils contiennent ne sont pas touchés.

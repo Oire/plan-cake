@@ -141,6 +141,42 @@
       "translation": "Raw",
       "context": "GitHub's 'Raw' link/button for viewing a file's raw content",
       "notes": "Left untranslated, in Latin script, bolded as a UI label name"
+    },
+    {
+      "term": "Default apps",
+      "translation": "Приложения по умолчанию",
+      "context": "The Windows Settings page under Приложения where the user chooses which program opens each file type; PlanCake's button opens PlanCake's own page there",
+      "notes": "Capitalized as the page's name; after a generic noun it takes « » and stays undeclined: на странице «Приложения по умолчанию»"
+    },
+    {
+      "term": "Windows Settings",
+      "translation": "Параметры Windows",
+      "context": "The Windows Settings app, as in 'PlanCake's page in Windows Settings'",
+      "notes": "The app's name in Russian Windows: Параметры, not Настройки (Настройки is PlanCake's own dialog). Capitalized; declines as a plural noun when it stands alone: в Параметрах Windows, открыть Параметры Windows"
+    },
+    {
+      "term": "Open with",
+      "translation": "Открыть с помощью",
+      "context": "File Explorer's context menu command that lists the programs able to open a file",
+      "notes": "Capitalized as a command name; in running text in « »: команда «Открыть с помощью»"
+    },
+    {
+      "term": "Choose another app",
+      "translation": "Выбрать другое приложение",
+      "context": "The item at the bottom of File Explorer's Open with submenu that shows every program able to open the file",
+      "notes": "Capitalized as a command name; in running text in « »"
+    },
+    {
+      "term": "Set defaults by app",
+      "translation": "Задать значения по умолчанию по приложению",
+      "context": "Windows 10 only: the link on the Default apps page that lists the programs; choosing PlanCake there, then Manage, sets its file types. Named in the manual for Windows versions where PlanCake's Settings button opens the general Default apps page",
+      "notes": "Capitalized as a link name; in running text in « »"
+    },
+    {
+      "term": "Manage",
+      "translation": "Управление",
+      "context": "Windows 10 only: the button under a program in Set defaults by app that opens its file types",
+      "notes": "The button's name; in running text in « »"
     }
   ]
 }

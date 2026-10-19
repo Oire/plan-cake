@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-03 15:01:50+0200\n"
+"POT-Creation-Date: 2026-10-19 14:04:24+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:58+02:00\n"
 "Last-Translator: \n"
 "Language-Team: de\n"
@@ -104,9 +104,9 @@ msgstr "Notiz &hinzufügen..."
 msgid "&Back"
 msgstr "&Zurück"
 
-#: ..\..\Ui\NoteDialog.Designer.cs:98 ..\..\Ui\OpeningDialog.Designer.cs:66
+#: ..\..\Ui\OpeningDialog.Designer.cs:66 ..\..\Ui\NoteDialog.Designer.cs:98
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:70
-#: ..\..\Ui\SettingsDialog.Designer.cs:379
+#: ..\..\Ui\SettingsDialog.Designer.cs:404
 msgid "&Cancel"
 msgstr "&Abbrechen"
 
@@ -130,8 +130,8 @@ msgstr "Info &kopieren"
 msgid "&Delete all notes"
 msgstr "&Alle Notizen löschen"
 
-#: ..\..\Ui\MainWindow.Menu.cs:82 ..\..\Ui\MainWindow.Notes.cs:264
-#: ..\..\Ui\MainWindow.NotesList.cs:82
+#: ..\..\Ui\MainWindow.Menu.cs:82 ..\..\Ui\MainWindow.NotesList.cs:82
+#: ..\..\Ui\MainWindow.Notes.cs:264
 msgid "&Delete note"
 msgstr "Notiz &löschen"
 
@@ -139,7 +139,7 @@ msgstr "Notiz &löschen"
 msgid "&Document language"
 msgstr "&Dokumentsprache"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:152
+#: ..\..\Ui\SettingsDialog.Designer.cs:154
 msgid "&Document language:"
 msgstr "&Dokumentsprache:"
 
@@ -147,12 +147,12 @@ msgstr "&Dokumentsprache:"
 msgid "&Edit"
 msgstr "&Bearbeiten"
 
-#: ..\..\Ui\MainWindow.Menu.cs:81 ..\..\Ui\MainWindow.Notes.cs:260
-#: ..\..\Ui\MainWindow.NotesList.cs:81
+#: ..\..\Ui\MainWindow.Menu.cs:81 ..\..\Ui\MainWindow.NotesList.cs:81
+#: ..\..\Ui\MainWindow.Notes.cs:260
 msgid "&Edit note..."
 msgstr "Notiz &bearbeiten..."
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:312
+#: ..\..\Ui\SettingsDialog.Designer.cs:314
 msgid "&Enter or a click on a block:"
 msgstr "Eingabetaste oder &Mausklick auf einen Block:"
 
@@ -172,7 +172,7 @@ msgstr "&Hilfe"
 msgid "&Interface language"
 msgstr "&Oberflächensprache"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:136
+#: ..\..\Ui\SettingsDialog.Designer.cs:138
 msgid "&Interface language:"
 msgstr "Oberflächen&sprache:"
 
@@ -206,7 +206,7 @@ msgstr "&Notizliste"
 
 #: ..\..\Ui\AboutDialog.Designer.cs:163 ..\..\Ui\NoteDialog.Designer.cs:92
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:64
-#: ..\..\Ui\SettingsDialog.Designer.cs:373
+#: ..\..\Ui\SettingsDialog.Designer.cs:398
 msgid "&OK"
 msgstr "&OK"
 
@@ -246,7 +246,7 @@ msgstr "Benutzer&handbuch"
 msgid "&View"
 msgstr "&Ansicht"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:168
+#: ..\..\Ui\SettingsDialog.Designer.cs:170
 msgid "&When the file changes on disk:"
 msgstr "&Wenn sich die Datei auf dem Datenträger ändert:"
 
@@ -266,7 +266,7 @@ msgstr "Es läuft bereits ein Download."
 msgid "A marker cannot contain a line break."
 msgstr "Eine Markierung darf keinen Zeilenumbruch enthalten."
 
-#: ..\..\Ui\SettingsDialog.cs:74
+#: ..\..\Ui\SettingsDialog.cs:83
 msgid "A marker cannot start or end with a double quote."
 msgstr ""
 "Eine Markierung darf nicht mit einem doppelten Anführungszeichen beginnen "
@@ -289,12 +289,12 @@ msgstr ""
 msgid "A note has no closing marker and ends with its line"
 msgstr "Eine Notiz hat keine Endmarkierung und endet mit ihrer Zeile"
 
-#: ..\..\Ui\MainWindow.Opening.cs:237
+#: ..\..\Ui\MainWindow.Opening.cs:259
 msgid "A note has no closing marker, so it runs to the end of the file."
 msgstr ""
 "Eine Notiz hat keine Endmarkierung und reicht daher bis zum Ende der Datei."
 
-#: ..\..\Ui\AboutDialog.cs:26 ..\..\Ui\HostCommands.cs:130
+#: ..\..\Ui\AboutDialog.cs:26 ..\..\Ui\HostCommands.cs:132
 msgid "About PlanCake"
 msgstr "Über PlanCake"
 
@@ -302,11 +302,11 @@ msgstr "Über PlanCake"
 msgid "Add note"
 msgstr "Notiz hinzufügen"
 
-#: ..\..\Ui\SettingsDialog.cs:93
+#: ..\..\Ui\SettingsDialog.cs:102
 msgid "Adds a note"
 msgstr "Fügt eine Notiz hinzu"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:341
+#: ..\..\Ui\SettingsDialog.Designer.cs:343
 msgid "Advanced"
 msgstr "Erweitert"
 
@@ -314,31 +314,31 @@ msgstr "Erweitert"
 msgid "All files"
 msgstr "Alle Dateien"
 
-#: ..\..\Ui\HostCommands.cs:147
+#: ..\..\Ui\HostCommands.cs:149
 msgid "Alt"
 msgstr "Alt"
 
-#: ..\..\Ui\HostCommands.cs:172
+#: ..\..\Ui\HostCommands.cs:174
 msgid "Applications"
 msgstr "Anwendungstaste"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:193
+#: ..\..\Ui\SettingsDialog.Designer.cs:195
 msgid "Ask before checking or unchecking a &task"
 msgstr "Vor dem Abha&ken einer Aufgabe oder dem Entfernen des Häkchens fragen"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:184
+#: ..\..\Ui\SettingsDialog.Designer.cs:186
 msgid "Ask before deleting a &note"
 msgstr "Vor dem Löschen einer &Notiz fragen"
 
-#: ..\..\Ui\SettingsDialog.cs:89
+#: ..\..\Ui\SettingsDialog.cs:98
 msgid "Ask before reloading it"
 msgstr "Vor dem Neuladen fragen"
 
-#: ..\..\Ui\HostCommands.cs:117
+#: ..\..\Ui\HostCommands.cs:119
 msgid "Back to the previous file"
 msgstr "Zurück zur vorherigen Datei"
 
-#: ..\..\Ui\HostCommands.cs:167
+#: ..\..\Ui\HostCommands.cs:169
 msgid "Backspace"
 msgstr "Rücktaste"
 
@@ -350,7 +350,7 @@ msgstr "Block"
 msgid "Block text copied"
 msgstr "Blocktext kopiert"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:211
+#: ..\..\Ui\SettingsDialog.Designer.cs:213
 msgid "Check for &updates on startup"
 msgstr "Beim Start nach &Updates suchen"
 
@@ -358,7 +358,7 @@ msgstr "Beim Start nach &Updates suchen"
 msgid "Check for updates"
 msgstr "Nach Updates suchen"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:220
+#: ..\..\Ui\SettingsDialog.Designer.cs:222
 msgid "Check for updates in the &background:"
 msgstr "Im &Hintergrund nach Updates suchen:"
 
@@ -366,7 +366,12 @@ msgstr "Im &Hintergrund nach Updates suchen:"
 msgid "Check task"
 msgstr "Aufgabe abhaken"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:287
+#: ..\..\Ui\SettingsDialog.Designer.cs:388
+msgid "Choose PlanCake for &Markdown files in Windows Settings..."
+msgstr ""
+"&PlanCake für Markdown-Dateien in den Windows-Einstellungen auswählen..."
+
+#: ..\..\Ui\SettingsDialog.Designer.cs:289
 msgid ""
 "Clo&sing marker (leave empty for a single marker that runs to the end of the "
 "line):"
@@ -374,7 +379,7 @@ msgstr ""
 "&Endmarkierung (leer lassen für eine einzelne Markierung, die bis zum "
 "Zeilenende reicht):"
 
-#: ..\..\Ui\HostCommands.cs:173
+#: ..\..\Ui\HostCommands.cs:175
 msgid "Comma"
 msgstr "Komma"
 
@@ -382,7 +387,7 @@ msgstr "Komma"
 msgid "Command"
 msgstr "Befehl"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:363
+#: ..\..\Ui\SettingsDialog.Designer.cs:369
 msgid "Con&vert to UTF-8 on opening"
 msgstr "Beim Öffnen in UTF-8 kon&vertieren"
 
@@ -398,11 +403,11 @@ msgstr ""
 msgid "Copied"
 msgstr "Kopiert"
 
-#: ..\..\Ui\HostCommands.cs:143
+#: ..\..\Ui\HostCommands.cs:145
 msgid "Ctrl"
 msgstr "Strg"
 
-#: ..\..\Ui\HostCommands.cs:168
+#: ..\..\Ui\HostCommands.cs:170
 msgid "Delete"
 msgstr "Entf"
 
@@ -437,7 +442,7 @@ msgstr ""
 msgid "Document language: {0}"
 msgstr "Dokumentsprache: {0}"
 
-#: ..\..\Ui\HostCommands.cs:166
+#: ..\..\Ui\HostCommands.cs:168
 msgid "Down Arrow"
 msgstr "Nach-unten"
 
@@ -459,28 +464,28 @@ msgstr "B&eenden"
 msgid "Edit note"
 msgstr "Notiz bearbeiten"
 
-#: ..\..\Ui\HostCommands.cs:169
+#: ..\..\Ui\HostCommands.cs:171
 msgid "Enter"
 msgstr "Eingabe"
 
-#: ..\..\Ui\SettingsDialog.cs:99
+#: ..\..\Ui\SettingsDialog.cs:108
 #, csharp-format
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr "Eingabetaste im Noti&zdialog ({0} bewirkt das Gegenteil):"
 
-#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Program.cs:150
-#: ..\..\Ui\AboutDialog.cs:63 ..\..\Ui\AboutDialog.cs:93
-#: ..\..\Ui\MainWindow.cs:233 ..\..\Ui\MainWindow.cs:319
+#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Ui\AboutDialog.cs:63
+#: ..\..\Program.cs:150 ..\..\Ui\AboutDialog.cs:93 ..\..\Ui\MainWindow.cs:233
+#: ..\..\Ui\MainWindow.cs:319 ..\..\Ui\SettingsDialog.cs:215
 msgid "Error"
 msgstr "Fehler"
 
 #: ..\..\Program.cs:183 ..\..\Cli\CliRunner.cs:170
-#: ..\..\Ui\SettingsDialog.cs:153
+#: ..\..\Ui\SettingsDialog.cs:162
 #, csharp-format
 msgid "Error: {0}"
 msgstr "Fehler: {0}"
 
-#: ..\..\Ui\SettingsDialog.cs:116
+#: ..\..\Ui\SettingsDialog.cs:125
 msgid "Every 3 days"
 msgstr "Alle 3 Tage"
 
@@ -492,7 +497,9 @@ msgstr "Beenden"
 msgid ""
 "Exit codes: 0 when the command succeeds, 1 on an error, 3 when \"check\" "
 "finds notes."
-msgstr "Exitcodes: 0, wenn der Befehl gelingt, 1 bei einem Fehler, 3, wenn „check“ Notizen findet."
+msgstr ""
+"Exitcodes: 0, wenn der Befehl gelingt, 1 bei einem Fehler, 3, wenn „check“ "
+"Notizen findet."
 
 #: ..\..\Ui\MainWindow.Menu.cs:26
 msgid "Export &notes..."
@@ -517,8 +524,8 @@ msgstr[1] "{0} Notizen nach {1} exportiert"
 msgid "File changed"
 msgstr "Datei geändert"
 
-#: ..\..\Ui\MainWindow.FileFollowing.cs:81
-#: ..\..\Ui\MainWindow.FileFollowing.cs:110 ..\..\Ui\MainWindow.Commands.cs:316
+#: ..\..\Ui\MainWindow.Commands.cs:316 ..\..\Ui\MainWindow.FileFollowing.cs:81
+#: ..\..\Ui\MainWindow.FileFollowing.cs:110
 msgid "File reloaded"
 msgstr "Datei neu geladen"
 
@@ -527,11 +534,11 @@ msgstr "Datei neu geladen"
 msgid "For the user manual, press {0}."
 msgstr "Für das Benutzerhandbuch drücken Sie {0}."
 
-#: ..\..\Ui\HostCommands.cs:118
+#: ..\..\Ui\HostCommands.cs:120
 msgid "Forward to the next file"
 msgstr "Weiter zur nächsten Datei"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:91
+#: ..\..\Ui\SettingsDialog.Designer.cs:93
 msgid "General"
 msgstr "Allgemein"
 
@@ -574,7 +581,7 @@ msgstr "JSON-Dateien"
 msgid "Keyboard shortcuts"
 msgstr "Tastenkombinationen"
 
-#: ..\..\Ui\HostCommands.cs:163
+#: ..\..\Ui\HostCommands.cs:165
 msgid "Left Arrow"
 msgstr "Nach-links"
 
@@ -614,7 +621,7 @@ msgstr ""
 msgid "Markdown files"
 msgstr "Markdown-Dateien"
 
-#: ..\..\Ui\HostCommands.cs:175
+#: ..\..\Ui\HostCommands.cs:177
 msgid "Minus"
 msgstr "Minus"
 
@@ -622,7 +629,7 @@ msgstr "Minus"
 msgid "N&arrower notes list"
 msgstr "Notizliste versch&mälern"
 
-#: ..\..\Ui\SettingsDialog.cs:119
+#: ..\..\Ui\SettingsDialog.cs:128
 msgid "Never"
 msgstr "Nie"
 
@@ -630,11 +637,11 @@ msgstr "Nie"
 msgid "Next &block"
 msgstr "Nächster Bl&ock"
 
-#: ..\..\Ui\HostCommands.cs:122
+#: ..\..\Ui\HostCommands.cs:124
 msgid "Next block"
 msgstr "Nächster Block"
 
-#: ..\..\Ui\HostCommands.cs:120
+#: ..\..\Ui\HostCommands.cs:122
 msgid "Next note"
 msgstr "Nächste Notiz"
 
@@ -647,8 +654,8 @@ msgstr "Keine Datei geöffnet."
 msgid "No more blocks"
 msgstr "Keine weiteren Blöcke"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:254 ..\..\Ui\MainWindow.Page.cs:142
-#: ..\..\Ui\MainWindow.Page.cs:229
+#: ..\..\Ui\MainWindow.Page.cs:142 ..\..\Ui\MainWindow.Page.cs:229
+#: ..\..\Ui\MainWindow.NotesList.cs:254
 msgid "No more notes"
 msgstr "Keine weiteren Notizen"
 
@@ -689,7 +696,7 @@ msgid "Note on:"
 msgstr "Notiz zu:"
 
 #: ..\..\Ui\MainWindow.Designer.cs:101 ..\..\Ui\MainWindow.NotesList.cs:49
-#: ..\..\Ui\SettingsDialog.Designer.cs:234
+#: ..\..\Ui\SettingsDialog.Designer.cs:236
 msgid "Notes"
 msgstr "Notizen"
 
@@ -722,27 +729,27 @@ msgstr ""
 "Es wurde nichts entfernt: Eine Notiz ohne Endmarkierung würde den Rest der "
 "Datei mitnehmen. Fügen Sie zuerst die Endmarkierung hinzu."
 
-#: ..\..\Ui\HostCommands.cs:177
+#: ..\..\Ui\HostCommands.cs:179
 msgid "Numpad Minus"
 msgstr "Minus (Ziffernblock)"
 
-#: ..\..\Ui\HostCommands.cs:176
+#: ..\..\Ui\HostCommands.cs:178
 msgid "Numpad Plus"
 msgstr "Plus (Ziffernblock)"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:272
+#: ..\..\Ui\SettingsDialog.Designer.cs:274
 msgid "O&pening marker:"
 msgstr "An&fangsmarkierung:"
 
-#: ..\..\Ui\SettingsDialog.cs:115
+#: ..\..\Ui\SettingsDialog.cs:124
 msgid "Once a day"
 msgstr "Einmal täglich"
 
-#: ..\..\Ui\SettingsDialog.cs:118
+#: ..\..\Ui\SettingsDialog.cs:127
 msgid "Once a month"
 msgstr "Einmal monatlich"
 
-#: ..\..\Ui\SettingsDialog.cs:117
+#: ..\..\Ui\SettingsDialog.cs:126
 msgid "Once a week"
 msgstr "Einmal wöchentlich"
 
@@ -754,7 +761,7 @@ msgstr "Nur Markdown-Dateien (.md, .markdown) können geöffnet werden."
 msgid "Open"
 msgstr "Öffnen"
 
-#: ..\..\Ui\HostCommands.cs:111
+#: ..\..\Ui\HostCommands.cs:113
 msgid "Open a file"
 msgstr "Eine Datei öffnen"
 
@@ -766,7 +773,7 @@ msgstr "Aus der &Zwischenablage öffnen"
 msgid "Open from &link..."
 msgstr "Über &Link öffnen..."
 
-#: ..\..\Ui\HostCommands.cs:113
+#: ..\..\Ui\HostCommands.cs:115
 msgid "Open from a link"
 msgstr "Über einen Link öffnen"
 
@@ -774,7 +781,7 @@ msgstr "Über einen Link öffnen"
 msgid "Open from link"
 msgstr "Über Link öffnen"
 
-#: ..\..\Ui\HostCommands.cs:112
+#: ..\..\Ui\HostCommands.cs:114
 msgid "Open from the clipboard"
 msgstr "Aus der Zwischenablage öffnen"
 
@@ -782,7 +789,7 @@ msgstr "Aus der Zwischenablage öffnen"
 msgid "Open in &editor"
 msgstr "Im E&ditor öffnen"
 
-#: ..\..\Ui\HostCommands.cs:114
+#: ..\..\Ui\HostCommands.cs:116
 msgid "Open in the editor"
 msgstr "Im Editor öffnen"
 
@@ -803,7 +810,7 @@ msgstr "{0} wird geöffnet…"
 msgid "Opening a file"
 msgstr "Datei wird geöffnet"
 
-#: ..\..\Ui\SettingsDialog.cs:94
+#: ..\..\Ui\SettingsDialog.cs:103
 msgid "Opens the context menu"
 msgstr "Öffnet das Kontextmenü"
 
@@ -869,7 +876,7 @@ msgstr ""
 "Bitte geben Sie einen gültigen Link ein, der mit http:// oder https:// "
 "beginnt."
 
-#: ..\..\Ui\HostCommands.cs:174
+#: ..\..\Ui\HostCommands.cs:176
 msgid "Plus"
 msgstr "Plus"
 
@@ -877,11 +884,11 @@ msgstr "Plus"
 msgid "Previous b&lock"
 msgstr "Vorheriger Bloc&k"
 
-#: ..\..\Ui\HostCommands.cs:123
+#: ..\..\Ui\HostCommands.cs:125
 msgid "Previous block"
 msgstr "Vorheriger Block"
 
-#: ..\..\Ui\HostCommands.cs:121
+#: ..\..\Ui\HostCommands.cs:123
 msgid "Previous note"
 msgstr "Vorherige Notiz"
 
@@ -908,7 +915,7 @@ msgstr ""
 msgid "Ready"
 msgstr "Bereit"
 
-#: ..\..\Ui\HostCommands.cs:125
+#: ..\..\Ui\HostCommands.cs:127
 msgid "Redo"
 msgstr "Wiederholen"
 
@@ -936,11 +943,11 @@ msgstr "Abhaken der Aufgabe wiederholt"
 msgid "Redone: task unchecked"
 msgstr "Entfernen des Häkchens wiederholt"
 
-#: ..\..\Ui\SettingsDialog.cs:88
+#: ..\..\Ui\SettingsDialog.cs:97
 msgid "Reload it"
 msgstr "Neu laden"
 
-#: ..\..\Ui\HostCommands.cs:116
+#: ..\..\Ui\HostCommands.cs:118
 msgid "Reload the file"
 msgstr "Die Datei neu laden"
 
@@ -955,23 +962,23 @@ msgid_plural "Removed {0} notes"
 msgstr[0] "{0} Notiz entfernt"
 msgstr[1] "{0} Notizen entfernt"
 
-#: ..\..\Ui\HostCommands.cs:128
+#: ..\..\Ui\HostCommands.cs:130
 msgid "Reset zoom"
 msgstr "Zoom zurücksetzen"
 
-#: ..\..\Ui\HostCommands.cs:164
+#: ..\..\Ui\HostCommands.cs:166
 msgid "Right Arrow"
 msgstr "Nach-rechts"
 
-#: ..\..\Ui\SettingsDialog.cs:101
+#: ..\..\Ui\SettingsDialog.cs:110
 msgid "Saves the note"
 msgstr "Speichert die Notiz"
 
-#: ..\..\Ui\HostCommands.cs:115 ..\..\Ui\SettingsDialog.cs:36
+#: ..\..\Ui\HostCommands.cs:117 ..\..\Ui\SettingsDialog.cs:39
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: ..\..\Ui\HostCommands.cs:151
+#: ..\..\Ui\HostCommands.cs:153
 msgid "Shift"
 msgstr "Umschalt"
 
@@ -979,7 +986,7 @@ msgstr "Umschalt"
 msgid "Shortcut"
 msgstr "Tastenkombination"
 
-#: ..\..\Ui\SettingsDialog.Designer.cs:202
+#: ..\..\Ui\SettingsDialog.Designer.cs:204
 msgid "Show the notes &list"
 msgstr "Notiz&liste anzeigen"
 
@@ -988,23 +995,23 @@ msgstr "Notiz&liste anzeigen"
 msgid "Something went wrong: {0}"
 msgstr "Etwas ist schiefgelaufen: {0}"
 
-#: ..\..\Ui\HostCommands.cs:170
+#: ..\..\Ui\HostCommands.cs:172
 msgid "Space"
 msgstr "Leertaste"
 
-#: ..\..\Ui\SettingsDialog.cs:102
+#: ..\..\Ui\SettingsDialog.cs:111
 msgid "Starts a new line"
 msgstr "Beginnt eine neue Zeile"
 
-#: ..\..\Ui\HostCommands.cs:119
+#: ..\..\Ui\HostCommands.cs:121
 msgid "Switch between the document and the notes list"
 msgstr "Zwischen dem Dokument und der Notizliste wechseln"
 
-#: ..\..\Ui\MainWindow.Menu.cs:49 ..\..\Ui\SettingsDialog.cs:81
+#: ..\..\Ui\MainWindow.Menu.cs:49 ..\..\Ui\SettingsDialog.cs:90
 msgid "System default"
 msgstr "Systemsprache"
 
-#: ..\..\Ui\HostCommands.cs:171
+#: ..\..\Ui\HostCommands.cs:173
 msgid "Tab"
 msgstr "Tab"
 
@@ -1071,7 +1078,7 @@ msgstr ""
 "schreibgeschützt geöffnet und wird nie geändert. Notizen können nicht "
 "hinzugefügt werden."
 
-#: ..\..\Cli\CliRunner.cs:427 ..\..\Ui\MainWindow.Opening.cs:125
+#: ..\..\Cli\CliRunner.cs:427 ..\..\Ui\MainWindow.Opening.cs:147
 #, csharp-format
 msgid "The file {0} does not exist."
 msgstr "Die Datei {0} existiert nicht."
@@ -1102,7 +1109,7 @@ msgid "The file is larger than {0} MB, the most PlanCake downloads."
 msgstr ""
 "Die Datei ist größer als {0} MB, das Maximum, das PlanCake herunterlädt."
 
-#: ..\..\Cli\CliRunner.cs:263 ..\..\Ui\MainWindow.Opening.cs:231
+#: ..\..\Cli\CliRunner.cs:263 ..\..\Ui\MainWindow.Opening.cs:253
 #, csharp-format
 msgid "The file was converted from {0} to UTF-8."
 msgstr "Die Datei wurde von {0} in UTF-8 konvertiert."
@@ -1161,7 +1168,7 @@ msgstr ""
 "Die Markierung, mit der eine Notiz beginnt (Standard: die in den "
 "Einstellungen)"
 
-#: ..\..\Ui\SettingsDialog.cs:206
+#: ..\..\Ui\SettingsDialog.cs:228
 msgid "The markers cannot be used"
 msgstr "Die Markierungen können nicht verwendet werden"
 
@@ -1220,8 +1227,8 @@ msgstr "Die Anfangsmarkierung darf nicht leer sein."
 msgid "The output file cannot be the file itself: {0}"
 msgstr "Die Ausgabedatei darf nicht die Datei selbst sein: {0}"
 
-#: ..\..\Ui\MainWindow.Settings.cs:34 ..\..\Ui\MainWindow.NotesList.cs:182
-#: ..\..\Ui\MainWindow.Settings.cs:152
+#: ..\..\Ui\MainWindow.Settings.cs:34 ..\..\Ui\MainWindow.Settings.cs:152
+#: ..\..\Ui\MainWindow.NotesList.cs:182
 msgid "The settings could not be saved. They apply until PlanCake is closed."
 msgstr ""
 "Die Einstellungen konnten nicht gespeichert werden. Sie gelten, bis PlanCake "
@@ -1239,7 +1246,9 @@ msgstr "Das Benutzerhandbuch wurde nicht gefunden."
 msgid ""
 "The user manual describes every command: press F1 in the window, or open "
 "help\\<language>\\manual.html in the folder of plancake.exe."
-msgstr "Das Benutzerhandbuch beschreibt jeden Befehl: Drücken Sie F1 im Fenster, oder öffnen Sie help\\<Sprache>\\manual.html im Ordner von plancake.exe."
+msgstr ""
+"Das Benutzerhandbuch beschreibt jeden Befehl: Drücken Sie F1 im Fenster, "
+"oder öffnen Sie help\\<Sprache>\\manual.html im Ordner von plancake.exe."
 
 #: ..\..\Notes\NoteActionRunner.cs:179 ..\..\Ui\MainWindow.Notes.cs:344
 msgid "There are no notes to delete."
@@ -1321,10 +1330,14 @@ msgid "Unable to open {0}"
 msgstr "{0} kann nicht geöffnet werden"
 
 #: ..\..\Cli\CliRunner.cs:433 ..\..\Ui\MainWindow.Opening.cs:50
-#: ..\..\Ui\MainWindow.Opening.cs:131
+#: ..\..\Ui\MainWindow.Opening.cs:153
 #, csharp-format
 msgid "Unable to open {0}: {1}"
 msgstr "{0} kann nicht geöffnet werden: {1}"
+
+#: ..\..\Ui\SettingsDialog.cs:215
+msgid "Unable to open Windows Settings."
+msgstr "Die Windows-Einstellungen können nicht geöffnet werden."
 
 #: ..\..\Ui\MainWindow.Commands.cs:82
 msgid "Unable to read the clipboard"
@@ -1360,7 +1373,7 @@ msgstr "Die Datei kann nicht geschrieben werden: {0}"
 msgid "Uncheck task"
 msgstr "Häkchen entfernen"
 
-#: ..\..\Ui\HostCommands.cs:124
+#: ..\..\Ui\HostCommands.cs:126
 msgid "Undo"
 msgstr "Rückgängig"
 
@@ -1398,7 +1411,7 @@ msgstr "Unbekannter Befehl: {0}. Meinten Sie {1}?"
 msgid "Unrecognized option: {0}"
 msgstr "Unbekannte Option: {0}"
 
-#: ..\..\Ui\HostCommands.cs:165
+#: ..\..\Ui\HostCommands.cs:167
 msgid "Up Arrow"
 msgstr "Nach-oben"
 
@@ -1408,7 +1421,7 @@ msgstr ""
 "Die Prüfung auf Aktualisierungen konnte nicht gestartet werden. Die "
 "Einzelheiten stehen im Protokoll."
 
-#: ..\..\Ui\HostCommands.cs:129 ..\..\Ui\MainWindow.Commands.cs:365
+#: ..\..\Ui\HostCommands.cs:131 ..\..\Ui\MainWindow.Commands.cs:365
 msgid "User manual"
 msgstr "Benutzerhandbuch"
 
@@ -1452,6 +1465,17 @@ msgstr ""
 msgid "WebView2 Runtime not found"
 msgstr "WebView2-Runtime nicht gefunden"
 
+#: ..\..\Ui\SettingsDialog.Designer.cs:379
+msgid ""
+"Windows lets only you choose which program opens Markdown files. This button "
+"opens PlanCake's page in Windows Settings, where you can choose PlanCake "
+"for .md and .markdown files."
+msgstr ""
+"Welches Programm Markdown-Dateien öffnet, können unter Windows nur Sie "
+"selbst festlegen. Diese Schaltfläche öffnet die Seite von PlanCake in den "
+"Windows-Einstellungen, wo Sie PlanCake für .md- und .markdown-Dateien "
+"auswählen können."
+
 #: ..\..\Cli\CliRunner.cs:186
 msgid "Write to this file (UTF-8 without BOM) instead of the standard output"
 msgstr "In diese Datei (UTF-8 ohne BOM) statt in die Standardausgabe schreiben"
@@ -1474,10 +1498,10 @@ msgstr "Zoom {0} %"
 msgid "Zoom &out"
 msgstr "Ver&kleinern"
 
-#: ..\..\Ui\HostCommands.cs:126
+#: ..\..\Ui\HostCommands.cs:128
 msgid "Zoom in"
 msgstr "Vergrößern"
 
-#: ..\..\Ui\HostCommands.cs:127
+#: ..\..\Ui\HostCommands.cs:129
 msgid "Zoom out"
 msgstr "Verkleinern"
