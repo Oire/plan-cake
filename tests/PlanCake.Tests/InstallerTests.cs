@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using AwesomeAssertions;
 using Oire.PlanCake.Utils;
 using Xunit;
@@ -10,7 +11,7 @@ namespace Oire.PlanCake.Tests;
 /// this file's path; <c>installer\</c> is not copied to the build output). There is no Inno
 /// Setup parser here: matching lines is enough.
 /// </summary>
-public class InstallerTests {
+public partial class InstallerTests {
     private static readonly byte[] Utf8Bom = [0xEF, 0xBB, 0xBF];
 
     public static TheoryData<string> Languages => new(LanguageCodes());
@@ -26,7 +27,7 @@ public class InstallerTests {
 
     [Fact]
     public void Script_StartsWithAUtf8Bom() {
-        StartsWithBom(Path.Combine(InstallerFolder(), "plancake.iss")).Should().BeTrue(
+        StartsWithBom(ScriptPath()).Should().BeTrue(
             "ISCC reads a script without a BOM in the ANSI code page");
     }
 
@@ -44,8 +45,10 @@ public class InstallerTests {
 
     [Fact]
     public void Registry_ListsPlanCakeUnderRegisteredApplications() {
+        // DefaultApps.IsRegistered reads HKLM, and the Settings link names registeredAppMachine.
         RegistryLines().Should().Contain(line =>
-            line.Contains(@"Subkey: ""Software\RegisteredApplications""", StringComparison.Ordinal)
+            line.StartsWith("Root: HKLM;", StringComparison.Ordinal)
+            && line.Contains(@"Subkey: ""Software\RegisteredApplications""", StringComparison.Ordinal)
             && line.Contains(@"ValueName: ""{#RegisteredAppName}""", StringComparison.Ordinal)
             && line.Contains(@"ValueData: ""{#CapabilitiesKey}""", StringComparison.Ordinal));
     }
@@ -61,11 +64,14 @@ public class InstallerTests {
 
     [Fact]
     public void Registry_NeverWritesTheExtensionsDefaultValue() {
-        RegistryLines()
-            .Where(line => line.Contains(@"Subkey: ""Software\Classes\.md""", StringComparison.Ordinal)
-                || line.Contains(@"Subkey: ""Software\Classes\.markdown""", StringComparison.Ordinal))
-            .Should().OnlyContain(line => !line.Contains("ValueType:", StringComparison.Ordinal)
-                && !line.Contains("ValueName:", StringComparison.Ordinal));
+        // The extension's own key, under any root and in any case: HKCR\.md as well as
+        // HKLM\Software\Classes\.MD.
+        var extensionKeys = RegistryLines().Where(line => ExtensionKey().IsMatch(line)).ToList();
+
+        extensionKeys.Should().HaveCount(2, "the installer creates the .md and .markdown keys to clean them up");
+        extensionKeys.Should().OnlyContain(line => !line.Contains("ValueType:", StringComparison.OrdinalIgnoreCase)
+                && !line.Contains("ValueName:", StringComparison.OrdinalIgnoreCase),
+            "a value on the extension's key would take Markdown files away from the program the user chose");
     }
 
     [Fact]
@@ -92,6 +98,13 @@ public class InstallerTests {
         return Path.Combine(root, "installer");
     }
 
+    /// <summary>A <c>[Registry]</c> line whose subkey is a Markdown extension's own key.</summary>
+    [GeneratedRegex(@"Subkey:\s*""(?:Software\\Classes\\)?\.(?:md|markdown)""",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex ExtensionKey();
+
+    private static string ScriptPath() => Path.Combine(InstallerFolder(), "plancake.iss");
+
     private static string IslPath(string code) =>
         Path.Combine(InstallerFolder(), "Languages", $"Custom.{code}.isl");
 
@@ -113,13 +126,13 @@ public class InstallerTests {
             .ToList();
 
     private static List<string> RegistryLines() =>
-        SectionLines(File.ReadLines(Path.Combine(InstallerFolder(), "plancake.iss")), "Registry").ToList();
+        SectionLines(File.ReadLines(ScriptPath()), "Registry").ToList();
 
     /// <summary>The value of a <c>#define Name "value"</c> line in <c>plancake.iss</c>.</summary>
     private static string? Define(string name) {
         var prefix = $"#define {name} ";
 
-        return File.ReadLines(Path.Combine(InstallerFolder(), "plancake.iss"))
+        return File.ReadLines(ScriptPath())
             .Where(line => line.StartsWith(prefix, StringComparison.Ordinal))
             .Select(line => line[prefix.Length..].Trim().Trim('"'))
             .FirstOrDefault();
@@ -133,7 +146,7 @@ public class InstallerTests {
         var inside = false;
 
         foreach (var raw in lines) {
-            var line = raw.TrimStart('﻿').Trim();
+            var line = raw.Trim();
 
             if (line.StartsWith('[') || line.StartsWith('#')) {
                 inside = line.Equals($"[{section}]", StringComparison.Ordinal);

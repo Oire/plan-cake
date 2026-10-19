@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-19 13:37:45+0200\n"
+"POT-Creation-Date: 2026-10-19 14:04:24+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: fr\n"
@@ -103,7 +103,7 @@ msgstr "&Ajouter une note..."
 msgid "&Back"
 msgstr "&Précédent"
 
-#: ..\..\Ui\NoteDialog.Designer.cs:98 ..\..\Ui\OpeningDialog.Designer.cs:66
+#: ..\..\Ui\OpeningDialog.Designer.cs:66 ..\..\Ui\NoteDialog.Designer.cs:98
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:70
 #: ..\..\Ui\SettingsDialog.Designer.cs:404
 msgid "&Cancel"
@@ -365,6 +365,11 @@ msgstr "Rechercher les mises à jour en a&rrière-plan :"
 msgid "Check task"
 msgstr "Cocher la tâche"
 
+#: ..\..\Ui\SettingsDialog.Designer.cs:388
+msgid "Choose PlanCake for &Markdown files in Windows Settings..."
+msgstr ""
+"Choisir PlanCake pour les fichiers &Markdown dans les Paramètres Windows..."
+
 #: ..\..\Ui\SettingsDialog.Designer.cs:289
 msgid ""
 "Clo&sing marker (leave empty for a single marker that runs to the end of the "
@@ -467,9 +472,9 @@ msgstr "Entrée"
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr "Entrée dans la boîte de dialo&gue de note ({0} fait l'inverse) :"
 
-#: ..\..\Ui\MainWindow.cs:233 ..\..\Program.cs:107 ..\..\Program.cs:144
-#: ..\..\Program.cs:150 ..\..\Ui\MainWindow.cs:319 ..\..\Ui\AboutDialog.cs:63
-#: ..\..\Ui\AboutDialog.cs:93 ..\..\Ui\SettingsDialog.cs:215
+#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Ui\AboutDialog.cs:63
+#: ..\..\Program.cs:150 ..\..\Ui\AboutDialog.cs:93 ..\..\Ui\MainWindow.cs:233
+#: ..\..\Ui\MainWindow.cs:319 ..\..\Ui\SettingsDialog.cs:215
 msgid "Error"
 msgstr "Erreur"
 
@@ -518,8 +523,8 @@ msgstr[1] "{0} notes exportées vers {1}"
 msgid "File changed"
 msgstr "Fichier modifié"
 
-#: ..\..\Ui\MainWindow.FileFollowing.cs:81
-#: ..\..\Ui\MainWindow.FileFollowing.cs:110 ..\..\Ui\MainWindow.Commands.cs:316
+#: ..\..\Ui\MainWindow.Commands.cs:316 ..\..\Ui\MainWindow.FileFollowing.cs:81
+#: ..\..\Ui\MainWindow.FileFollowing.cs:110
 msgid "File reloaded"
 msgstr "Fichier rechargé"
 
@@ -752,10 +757,6 @@ msgstr "Seuls les fichiers Markdown (.md, .markdown) peuvent être ouverts."
 #: ..\..\Ui\MainWindow.Commands.cs:54
 msgid "Open"
 msgstr "Ouvrir"
-
-#: ..\..\Ui\SettingsDialog.Designer.cs:388
-msgid "Open &Markdown files with PlanCake..."
-msgstr "Ouvrir les fichiers &Markdown avec PlanCake..."
 
 #: ..\..\Ui\HostCommands.cs:113
 msgid "Open a file"
@@ -1341,7 +1342,7 @@ msgstr "Impossible d'enregistrer le fichier dans {0} : {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "Impossible de démarrer l'affichage du document : {0}"
 
-#: ..\..\Cli\CliRunner.cs:304 ..\..\Ui\MainWindow.Commands.cs:287
+#: ..\..\Ui\MainWindow.Commands.cs:287 ..\..\Cli\CliRunner.cs:304
 #: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"
@@ -1450,9 +1451,9 @@ msgstr "Runtime WebView2 introuvable"
 
 #: ..\..\Ui\SettingsDialog.Designer.cs:379
 msgid ""
-"Windows lets only you choose which program opens Markdown files. This opens "
-"PlanCake's page in Windows Settings, where you can choose PlanCake for .md "
-"and .markdown files."
+"Windows lets only you choose which program opens Markdown files. This button "
+"opens PlanCake's page in Windows Settings, where you can choose PlanCake "
+"for .md and .markdown files."
 msgstr ""
 "Windows ne laisse aucun programme décider à votre place lequel ouvre les "
 "fichiers Markdown. Ce bouton ouvre la page de PlanCake dans les Paramètres "

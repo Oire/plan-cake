@@ -68,8 +68,7 @@ public class SettingsDialogTests {
 
             button.Should().BeOfType<Button>();
             button.Parent.Should().BeSameAs(advanced, "it opens Windows Settings and is no part of the OK and Cancel row");
-            button.Parent.Should().NotBeSameAs(Find(dialog, "buttonLayout"));
-            button.Text.Should().Be("Open &Markdown files with PlanCake...");
+            button.Text.Should().Be("Choose PlanCake for &Markdown files in Windows Settings...");
 
             label.Should().BeOfType<WrappingLabel>("a stock label breaks words in the middle with the UTF-8 code page");
             label.Parent.Should().BeSameAs(advanced);
@@ -78,7 +77,7 @@ public class SettingsDialogTests {
 
     [Theory]
     [MemberData(nameof(Languages))]
-    public void ChoicesAndCheckBoxes_FitTheirTabInEveryLanguage(string language) {
+    public void ChoicesCheckBoxesAndButtons_FitTheirTabInEveryLanguage(string language) {
         Localization.SetLanguage(language);
 
         Sta.Run(() => {

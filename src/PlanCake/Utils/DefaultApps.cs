@@ -37,7 +37,7 @@ internal static class DefaultApps {
             using var key = Registry.LocalMachine.OpenSubKey(RegisteredApplicationsKey);
             return key?.GetValue(RegisteredName) is not null;
         } catch (Exception ex) when (ex is System.Security.SecurityException or IOException or UnauthorizedAccessException) {
-            Log.Debug(ex, "Unable to read the registered applications");
+            Log.Warning(ex, "Unable to read the registered applications");
             return false;
         }
     }

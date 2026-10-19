@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-19 13:37:45+0200\n"
-"PO-Revision-Date: 2026-10-19 13:37:45+0200\n"
+"POT-Creation-Date: 2026-10-19 14:04:24+0200\n"
+"PO-Revision-Date: 2026-10-19 14:04:25+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -93,8 +93,8 @@ msgstr ""
 msgid "&Back"
 msgstr ""
 
-#: ..\..\Ui\NoteDialog.Designer.cs:98
 #: ..\..\Ui\OpeningDialog.Designer.cs:66
+#: ..\..\Ui\NoteDialog.Designer.cs:98
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:70
 #: ..\..\Ui\SettingsDialog.Designer.cs:404
 msgid "&Cancel"
@@ -356,6 +356,10 @@ msgstr ""
 msgid "Check task"
 msgstr ""
 
+#: ..\..\Ui\SettingsDialog.Designer.cs:388
+msgid "Choose PlanCake for &Markdown files in Windows Settings..."
+msgstr ""
+
 #: ..\..\Ui\SettingsDialog.Designer.cs:289
 msgid ""
 "Clo&sing marker (leave empty for a single marker that runs to the end of the "
@@ -451,13 +455,13 @@ msgstr ""
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr ""
 
-#: ..\..\Ui\MainWindow.cs:233
 #: ..\..\Program.cs:107
 #: ..\..\Program.cs:144
-#: ..\..\Program.cs:150
-#: ..\..\Ui\MainWindow.cs:319
 #: ..\..\Ui\AboutDialog.cs:63
+#: ..\..\Program.cs:150
 #: ..\..\Ui\AboutDialog.cs:93
+#: ..\..\Ui\MainWindow.cs:233
+#: ..\..\Ui\MainWindow.cs:319
 #: ..\..\Ui\SettingsDialog.cs:215
 msgid "Error"
 msgstr ""
@@ -506,9 +510,9 @@ msgstr[1] ""
 msgid "File changed"
 msgstr ""
 
+#: ..\..\Ui\MainWindow.Commands.cs:316
 #: ..\..\Ui\MainWindow.FileFollowing.cs:81
 #: ..\..\Ui\MainWindow.FileFollowing.cs:110
-#: ..\..\Ui\MainWindow.Commands.cs:316
 msgid "File reloaded"
 msgstr ""
 
@@ -738,10 +742,6 @@ msgstr ""
 
 #: ..\..\Ui\MainWindow.Commands.cs:54
 msgid "Open"
-msgstr ""
-
-#: ..\..\Ui\SettingsDialog.Designer.cs:388
-msgid "Open &Markdown files with PlanCake..."
 msgstr ""
 
 #: ..\..\Ui\HostCommands.cs:113
@@ -1298,8 +1298,8 @@ msgstr ""
 msgid "Unable to start the document view: {0}"
 msgstr ""
 
-#: ..\..\Cli\CliRunner.cs:304
 #: ..\..\Ui\MainWindow.Commands.cs:287
+#: ..\..\Cli\CliRunner.cs:304
 #: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"
@@ -1401,9 +1401,9 @@ msgstr ""
 
 #: ..\..\Ui\SettingsDialog.Designer.cs:379
 msgid ""
-"Windows lets only you choose which program opens Markdown files. This opens "
-"PlanCake's page in Windows Settings, where you can choose PlanCake for .md and "
-".markdown files."
+"Windows lets only you choose which program opens Markdown files. This button "
+"opens PlanCake's page in Windows Settings, where you can choose PlanCake for "
+".md and .markdown files."
 msgstr ""
 
 #: ..\..\Cli\CliRunner.cs:186

@@ -165,6 +165,18 @@
       "translation": "Andere App auswählen",
       "context": "The item at the bottom of File Explorer's Open with submenu that shows every program able to open the file",
       "notes": "Capitalized as a command name"
+    },
+    {
+      "term": "Set defaults by app",
+      "translation": "Standardwerte nach App festlegen",
+      "context": "Windows 10 only: the link on the Default apps page that lists the programs; choosing PlanCake there, then Manage, sets its file types. Named in the manual for Windows versions where PlanCake's Settings button opens the general Default apps page",
+      "notes": "Capitalized as a link name"
+    },
+    {
+      "term": "Manage",
+      "translation": "Verwalten",
+      "context": "Windows 10 only: the button under a program in Set defaults by app that opens its file types",
+      "notes": "The button's name"
     }
   ]
 }

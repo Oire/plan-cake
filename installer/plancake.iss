@@ -24,8 +24,13 @@
 ; The file type (ProgID) PlanCake registers for .md and .markdown files.
 #define AppProgId "PlanCake.Markdown"
 
+; PlanCake's own registry keys, from the same names as the folders. The parent keys and the
+; capabilities key must spell them alike, or uninsdeletekeyifempty leaves the parents behind.
+#define CompanyKey "Software\" + MyAppCompany
+#define AppKey CompanyKey + "\" + MyAppFolderName
+
 ; Where PlanCake lists its capabilities for Default apps.
-#define CapabilitiesKey "Software\Oire\PlanCake\Capabilities"
+#define CapabilitiesKey AppKey + "\Capabilities"
 
 ; The publish folder Build-Installer.ps1 writes to (relative to this script).
 #define SourcePath "..\src\PlanCake\bin\x64\Release\publish"
@@ -146,8 +151,8 @@ Root: HKLM; Subkey: "Software\Classes\Applications\{#MyAppExeName}"; ValueType: 
 Root: HKLM; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes"; ValueType: string; ValueName: ".md"; ValueData: ""
 Root: HKLM; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes"; ValueType: string; ValueName: ".markdown"; ValueData: ""
 Root: HKLM; Subkey: "Software\Classes\Applications\{#MyAppExeName}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
-Root: HKLM; Subkey: "Software\Oire"; Flags: uninsdeletekeyifempty
-Root: HKLM; Subkey: "Software\Oire\PlanCake"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "{#CompanyKey}"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "{#AppKey}"; Flags: uninsdeletekeyifempty
 Root: HKLM; Subkey: "{#CapabilitiesKey}"; ValueType: string; ValueName: "ApplicationName"; ValueData: "{#MyAppName}"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "{#CapabilitiesKey}"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "{cm:AppDescription}"
 Root: HKLM; Subkey: "{#CapabilitiesKey}"; ValueType: string; ValueName: "ApplicationIcon"; ValueData: "{app}\{#MyAppExeName},0"

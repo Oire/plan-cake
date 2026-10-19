@@ -376,7 +376,7 @@ partial class SettingsDialog {
         defaultAppLabel.Margin = new Padding(3, 16, 3, 3);
         defaultAppLabel.Name = "defaultAppLabel";
         defaultAppLabel.TabIndex = 1;
-        defaultAppLabel.Text = "Windows lets only you choose which program opens Markdown files. This opens PlanCake's page in Windows Settings, where you can choose PlanCake for .md and .markdown files.";
+        defaultAppLabel.Text = "Windows lets only you choose which program opens Markdown files. This button opens PlanCake's page in Windows Settings, where you can choose PlanCake for .md and .markdown files.";
         //
         // defaultAppButton: opens PlanCake's page in Windows Settings → Default apps.
         //
@@ -385,7 +385,7 @@ partial class SettingsDialog {
         defaultAppButton.MinimumSize = new Size(100, 0);
         defaultAppButton.Name = "defaultAppButton";
         defaultAppButton.TabIndex = 2;
-        defaultAppButton.Text = "Open &Markdown files with PlanCake...";
+        defaultAppButton.Text = "Choose PlanCake for &Markdown files in Windows Settings...";
         //
         // buttonLayout: OK, then Cancel, together at the end of the row (DialogButtons).
         //

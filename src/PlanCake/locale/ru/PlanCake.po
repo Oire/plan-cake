@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-19 13:37:45+0200\n"
+"POT-Creation-Date: 2026-10-19 14:04:24+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: ru\n"
@@ -106,7 +106,7 @@ msgstr "&Добавить заметку..."
 msgid "&Back"
 msgstr "&Назад"
 
-#: ..\..\Ui\NoteDialog.Designer.cs:98 ..\..\Ui\OpeningDialog.Designer.cs:66
+#: ..\..\Ui\OpeningDialog.Designer.cs:66 ..\..\Ui\NoteDialog.Designer.cs:98
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:70
 #: ..\..\Ui\SettingsDialog.Designer.cs:404
 msgid "&Cancel"
@@ -366,6 +366,10 @@ msgstr "Проверять обновления в &фоне:"
 msgid "Check task"
 msgstr "Отметить задачу"
 
+#: ..\..\Ui\SettingsDialog.Designer.cs:388
+msgid "Choose PlanCake for &Markdown files in Windows Settings..."
+msgstr "&Выбрать PlanCake для файлов Markdown в Параметрах Windows..."
+
 #: ..\..\Ui\SettingsDialog.Designer.cs:289
 msgid ""
 "Clo&sing marker (leave empty for a single marker that runs to the end of the "
@@ -469,9 +473,9 @@ msgstr "Enter"
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr "Enter в диало&ге заметки ({0} — наоборот):"
 
-#: ..\..\Ui\MainWindow.cs:233 ..\..\Program.cs:107 ..\..\Program.cs:144
-#: ..\..\Program.cs:150 ..\..\Ui\MainWindow.cs:319 ..\..\Ui\AboutDialog.cs:63
-#: ..\..\Ui\AboutDialog.cs:93 ..\..\Ui\SettingsDialog.cs:215
+#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Ui\AboutDialog.cs:63
+#: ..\..\Program.cs:150 ..\..\Ui\AboutDialog.cs:93 ..\..\Ui\MainWindow.cs:233
+#: ..\..\Ui\MainWindow.cs:319 ..\..\Ui\SettingsDialog.cs:215
 msgid "Error"
 msgstr "Ошибка"
 
@@ -521,8 +525,8 @@ msgstr[2] "Экспортировано {0} заметок в {1}"
 msgid "File changed"
 msgstr "Файл изменён"
 
-#: ..\..\Ui\MainWindow.FileFollowing.cs:81
-#: ..\..\Ui\MainWindow.FileFollowing.cs:110 ..\..\Ui\MainWindow.Commands.cs:316
+#: ..\..\Ui\MainWindow.Commands.cs:316 ..\..\Ui\MainWindow.FileFollowing.cs:81
+#: ..\..\Ui\MainWindow.FileFollowing.cs:110
 msgid "File reloaded"
 msgstr "Файл перезагружен"
 
@@ -754,10 +758,6 @@ msgstr "Открывать можно только файлы Markdown (.md, .ma
 #: ..\..\Ui\MainWindow.Commands.cs:54
 msgid "Open"
 msgstr "Открыть"
-
-#: ..\..\Ui\SettingsDialog.Designer.cs:388
-msgid "Open &Markdown files with PlanCake..."
-msgstr "Откры&вать файлы Markdown в PlanCake..."
 
 #: ..\..\Ui\HostCommands.cs:113
 msgid "Open a file"
@@ -1333,7 +1333,7 @@ msgstr "Не удалось сохранить файл в {0}: {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "Не удалось запустить просмотр документа: {0}"
 
-#: ..\..\Cli\CliRunner.cs:304 ..\..\Ui\MainWindow.Commands.cs:287
+#: ..\..\Ui\MainWindow.Commands.cs:287 ..\..\Cli\CliRunner.cs:304
 #: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"
@@ -1441,9 +1441,9 @@ msgstr "Среда выполнения WebView2 не найдена"
 
 #: ..\..\Ui\SettingsDialog.Designer.cs:379
 msgid ""
-"Windows lets only you choose which program opens Markdown files. This opens "
-"PlanCake's page in Windows Settings, where you can choose PlanCake for .md "
-"and .markdown files."
+"Windows lets only you choose which program opens Markdown files. This button "
+"opens PlanCake's page in Windows Settings, where you can choose PlanCake "
+"for .md and .markdown files."
 msgstr ""
 "Windows позволяет только вам выбрать, какая программа открывает файлы "
 "Markdown. Эта кнопка открывает страницу PlanCake в Параметрах Windows, где "

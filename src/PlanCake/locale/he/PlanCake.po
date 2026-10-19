@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-19 13:37:45+0200\n"
+"POT-Creation-Date: 2026-10-19 14:04:24+0200\n"
 "PO-Revision-Date: 2026-09-26 19:07:58+02:00\n"
 "Last-Translator: \n"
 "Language-Team: he\n"
@@ -102,7 +102,7 @@ msgstr "&הוסף הערה..."
 msgid "&Back"
 msgstr "&אחורה"
 
-#: ..\..\Ui\NoteDialog.Designer.cs:98 ..\..\Ui\OpeningDialog.Designer.cs:66
+#: ..\..\Ui\OpeningDialog.Designer.cs:66 ..\..\Ui\NoteDialog.Designer.cs:98
 #: ..\..\Ui\OpenLinkDialog.Designer.cs:70
 #: ..\..\Ui\SettingsDialog.Designer.cs:404
 msgid "&Cancel"
@@ -360,6 +360,10 @@ msgstr "בדיקת עדכונים ב&רקע:"
 msgid "Check task"
 msgstr "סימון משימה"
 
+#: ..\..\Ui\SettingsDialog.Designer.cs:388
+msgid "Choose PlanCake for &Markdown files in Windows Settings..."
+msgstr "בחר ב-PlanCake עבור &קובצי Markdown בהגדרות Windows..."
+
 #: ..\..\Ui\SettingsDialog.Designer.cs:289
 msgid ""
 "Clo&sing marker (leave empty for a single marker that runs to the end of the "
@@ -458,9 +462,9 @@ msgstr "Enter"
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr "Enter ב&חלון ההערה ({0} עושה את ההפך):"
 
-#: ..\..\Ui\MainWindow.cs:233 ..\..\Program.cs:107 ..\..\Program.cs:144
-#: ..\..\Program.cs:150 ..\..\Ui\MainWindow.cs:319 ..\..\Ui\AboutDialog.cs:63
-#: ..\..\Ui\AboutDialog.cs:93 ..\..\Ui\SettingsDialog.cs:215
+#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Ui\AboutDialog.cs:63
+#: ..\..\Program.cs:150 ..\..\Ui\AboutDialog.cs:93 ..\..\Ui\MainWindow.cs:233
+#: ..\..\Ui\MainWindow.cs:319 ..\..\Ui\SettingsDialog.cs:215
 msgid "Error"
 msgstr "שגיאה"
 
@@ -507,8 +511,8 @@ msgstr[1] "{0} הערות יוצאו אל {1}"
 msgid "File changed"
 msgstr "הקובץ השתנה"
 
-#: ..\..\Ui\MainWindow.FileFollowing.cs:81
-#: ..\..\Ui\MainWindow.FileFollowing.cs:110 ..\..\Ui\MainWindow.Commands.cs:316
+#: ..\..\Ui\MainWindow.Commands.cs:316 ..\..\Ui\MainWindow.FileFollowing.cs:81
+#: ..\..\Ui\MainWindow.FileFollowing.cs:110
 msgid "File reloaded"
 msgstr "הקובץ נטען מחדש"
 
@@ -739,10 +743,6 @@ msgstr "ניתן לפתוח רק קובצי Markdown (.md, .markdown)."
 #: ..\..\Ui\MainWindow.Commands.cs:54
 msgid "Open"
 msgstr "פתיחה"
-
-#: ..\..\Ui\SettingsDialog.Designer.cs:388
-msgid "Open &Markdown files with PlanCake..."
-msgstr "פתח &קובצי Markdown באמצעות PlanCake..."
 
 #: ..\..\Ui\HostCommands.cs:113
 msgid "Open a file"
@@ -1306,7 +1306,7 @@ msgstr "לא ניתן לשמור את הקובץ ב-{0}: {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "לא ניתן להפעיל את תצוגת המסמך: {0}"
 
-#: ..\..\Cli\CliRunner.cs:304 ..\..\Ui\MainWindow.Commands.cs:287
+#: ..\..\Ui\MainWindow.Commands.cs:287 ..\..\Cli\CliRunner.cs:304
 #: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"
@@ -1409,13 +1409,13 @@ msgstr "לא נמצא WebView2 Runtime"
 
 #: ..\..\Ui\SettingsDialog.Designer.cs:379
 msgid ""
-"Windows lets only you choose which program opens Markdown files. This opens "
-"PlanCake's page in Windows Settings, where you can choose PlanCake for .md "
-"and .markdown files."
+"Windows lets only you choose which program opens Markdown files. This button "
+"opens PlanCake's page in Windows Settings, where you can choose PlanCake "
+"for .md and .markdown files."
 msgstr ""
-"ב-Windows, רק אתם יכולים לבחור איזו תוכנה פותחת קובצי Markdown. לחצן זה פותח "
-"את הדף של PlanCake בהגדרות Windows, שבו תוכלו לבחור ב-PlanCake עבור קובצי "
-"Markdown (md, markdown)."
+"ב-Windows, רק אתם יכולים לבחור איזו תוכנה פותחת קובצי Markdown. כפתור זה "
+"פותח את העמוד של PlanCake בהגדרות Windows, שבו תוכלו לבחור ב-PlanCake עבור "
+"קובצי Markdown (md, markdown)."
 
 #: ..\..\Cli\CliRunner.cs:186
 msgid "Write to this file (UTF-8 without BOM) instead of the standard output"

@@ -40,7 +40,8 @@ This ships in PlanCake 1.1; the release waits for it.
 - [ ] Installing does not change which program opens Markdown files when the user had chosen one
 - [ ] Uninstalling removes every registry entry and every key the installer created for the
       association, and leaves the extensions' other handlers alone
-- [x] Settings → Advanced has a label and the button "Open &Markdown files with PlanCake...", which
+- [x] Settings → Advanced has a label and the button "Choose PlanCake for &Markdown files in Windows
+      Settings...", which
       opens PlanCake's page in Default apps (the general Default apps page on Windows versions
       without the per-app link); both are hidden in the portable version and when the
       registration is missing
@@ -145,7 +146,8 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
     button).
   - `IsRegistered()`: true when `HKLM\Software\RegisteredApplications` has a `RegisteredName`
     value. Read it through `Microsoft.Win32.Registry`. Catch `SecurityException`, `IOException`
-    and `UnauthorizedAccessException`, log at Debug and return false; never throw.
+    and `UnauthorizedAccessException`, log at Warning (a Release build logs from Information up,
+    and a hidden button must be traceable from the user's log) and return false; never throw.
   - `ShowsSettingsButton(bool isPortable, bool isRegistered)` =>
     `!isPortable && isRegistered`, kept pure so it can be tested.
 - [x] Tests:
@@ -209,9 +211,10 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
   - `defaultAppLabel`, a `Ui/WrappingLabel` laid out like `openingMarkerLabel`
     (`Anchor = AnchorStyles.Left | AnchorStyles.Right`, `AutoSize = true`), with
     `Margin = new Padding(3, 16, 3, 3)` to set it apart from the check box. Its text: "Windows
-    lets only you choose which program opens Markdown files. This opens PlanCake's page in
+    lets only you choose which program opens Markdown files. This button opens PlanCake's page in
     Windows Settings, where you can choose PlanCake for .md and .markdown files."
-  - `defaultAppButton`, with the text "Open &Markdown files with PlanCake...". Size it like the
+  - `defaultAppButton`, with the text "Choose PlanCake for &Markdown files in Windows Settings...",
+    which says where it goes, since JAWS reads only the button's own text on Tab. Size it like the
     About dialog's buttons (`AutoSize = true`, `MinimumSize = new Size(100, 0)`, no
     `MaximumSize`), anchored left.
 
@@ -288,10 +291,11 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
   - `#portable`: one sentence that the portable version registers nothing, so you pick it through
     Open with → Choose another app.
   - `#uninstalling`: add that the uninstaller also removes PlanCake from those lists.
-- [x] English `#settings-advanced`: add a `<dt>` with the button's label word for word ("Open
-      Markdown files with PlanCake...", without the `&`). Its `<dd>` says what the button opens,
+- [x] English `#settings-advanced`: add a `<dt>` with the button's label word for word ("Choose
+      PlanCake for Markdown files in Windows Settings...", without the `&`). Its `<dd>` says what the button opens,
       that you pick PlanCake for `.md` and `.markdown` there, that on older Windows versions it
-      opens the general Default apps page, and that the portable version has no such button.
+      opens the general Default apps page (in Windows 10, Set defaults by app, then PlanCake, then
+      Manage), and that the portable version has no such button.
 - [x] English `#opening-files`, in `#open-dialog` (it already speaks of File Explorer): one
       sentence that once PlanCake opens Markdown files, a double-click on one in File Explorer
       opens it, linking to `#installer`.
