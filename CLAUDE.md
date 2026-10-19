@@ -149,6 +149,7 @@ src/PlanCake/          -- namespace Oire.PlanCake, builds plancake.exe
 tests/PlanCake.Tests/  -- namespace Oire.PlanCake.Tests
 installer/       -- Inno Setup script, Build-Installer.ps1
 changelogs/      -- release notes per version, for the appcast
+manifests/       -- the winget manifests of every version, as submitted to winget-pkgs
 PlanCake.slnx
 ```
 
@@ -458,16 +459,20 @@ The SDK is pinned by `global.json` (feature band, `rollForward: latestPatch`), a
 `setup-dotnet` reads the same file, so a release built locally and CI use the same band. Bump it
 deliberately: a new band can bring new analyzer warnings, which are errors here.
 
-PlanCake is published to winget as `Oire.PlanCake`. The first release creates the manifest with
-`wingetcreate new` on the release's installer URL; after every later GitHub release, update it:
+PlanCake is published to winget as `Oire.PlanCake`, first with 1.1.0.8. After every GitHub
+release, update it from the repository root:
 
 ```bash
-wingetcreate update -u 'https://github.com/Oire/plan-cake/releases/download/v<VERSION>/plancake-v<VERSION>-setup.exe|x64' -v <VERSION> --submit --token "$(gh auth token)" Oire.PlanCake
+wingetcreate update -u 'https://github.com/Oire/plan-cake/releases/download/v<VERSION>/plancake-v<VERSION>-setup.exe|x64' -v <VERSION> --out . --submit --token "$(gh auth token)" Oire.PlanCake
 ```
 
 The installer is x64 only, but wingetcreate detects an Inno Setup installer as x86: without the
-`|x64` suffix the update fails with "Multiple matches" (and in `wingetcreate new`, set the
-architecture to x64 by hand). `<VERSION>` here is the four-part version, as in the tag.
+`|x64` suffix the update fails with "Multiple matches". `<VERSION>` here is the four-part version,
+as in the tag. The update carries over the previous version's locale files, a description in each
+of PlanCake's six languages. `--out .` writes the submitted manifests into
+`manifests/o/Oire/PlanCake/<VERSION>/`, the same path as in `microsoft/winget-pkgs`; commit that
+folder, so the repository keeps every version's manifests. A change to the descriptions goes
+into the new folder before it is submitted, in all six languages.
 
 ### Releasing
 
@@ -489,8 +494,8 @@ From start to finish, by hand on the maintainer's machine (CI never builds a rel
 4. Create the GitHub release from the tag with the installer and the zip from
    `installer/Output/`:
    `gh release create v1.0.0.7 installer/Output/plancake-v1.0.0.7-setup.exe installer/Output/plancake-v1.0.0.7-portable.zip --title "PlanCake 1.0.0.7" --notes-file changelogs/1.0.0.md`.
-5. Update winget with the four-part version (the `wingetcreate update` command above;
-   `wingetcreate new` for the first release).
+5. Update winget with the four-part version (the `wingetcreate update` command above), and
+   commit the new `manifests/` folder.
 6. Open the next cycle on the next commit, not on the release commit:
    `git tag -s v1.1.0 -m "Start development of version 1.1.0"`, then push it.
 
