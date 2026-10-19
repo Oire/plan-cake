@@ -276,10 +276,10 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
 - Modify: `src/PlanCake/help/{en,ru,uk,fr,he,de}/manual.html`
 
 #### Steps
-- [ ] Edit by hand, in the style the `write-manual` skill set for these manuals: plain
+- [x] Edit by hand, in the style the `write-manual` skill set for these manuals: plain
       sentences, labels word for word in `<strong>`, glossary terms. Add no new ids, or add each
       new id to all six.
-- [ ] English, Installing:
+- [x] English, Installing:
   - `#installer`: a paragraph saying the installer makes PlanCake one of the programs that can
     open `.md` and `.markdown` files, so it appears in Open with and in Windows Settings →
     Default apps, without changing which program opens them. To have PlanCake open them on a
@@ -288,16 +288,16 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
   - `#portable`: one sentence that the portable version registers nothing, so you pick it through
     Open with → Choose another app.
   - `#uninstalling`: add that the uninstaller also removes PlanCake from those lists.
-- [ ] English `#settings-advanced`: add a `<dt>` with the button's label word for word ("Open
+- [x] English `#settings-advanced`: add a `<dt>` with the button's label word for word ("Open
       Markdown files with PlanCake...", without the `&`). Its `<dd>` says what the button opens,
       that you pick PlanCake for `.md` and `.markdown` there, that on older Windows versions it
       opens the general Default apps page, and that the portable version has no such button.
-- [ ] English `#opening-files`, in `#open-dialog` (it already speaks of File Explorer): one
+- [x] English `#opening-files`, in `#open-dialog` (it already speaks of File Explorer): one
       sentence that once PlanCake opens Markdown files, a double-click on one in File Explorer
       opens it, linking to `#installer`.
-- [ ] Carry all of it into the other five manuals in the same places. Word the button label exactly
+- [x] Carry all of it into the other five manuals in the same places. Word the button label exactly
       as that language's catalog does (Task 4), and use the glossary terms from Task 4.
-- [ ] Validation commands pass (`ManualParityTests` above all).
+- [x] Validation commands pass (`ManualParityTests` above all).
 
 ### Task 6: Update documentation
 
