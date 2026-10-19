@@ -249,7 +249,7 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
   terms)
 
 #### Steps
-- [ ] Add these Windows terms to the `terms` of each glossary, as Windows itself names them in
+- [x] Add these Windows terms to the `terms` of each glossary, as Windows itself names them in
       that language:
   - "Default apps" (the Settings page);
   - "Windows Settings";
@@ -258,16 +258,16 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
 
   Give each a `context`, and `notes` where declension or « » quotes matter. These are what the
   catalogs (here) and the manuals (Task 5) use.
-- [ ] Run `./src/PlanCake/locale/scripts/Extract-Strings.ps1`, then `Update-Translations.ps1`.
+- [x] Run `./src/PlanCake/locale/scripts/Extract-Strings.ps1`, then `Update-Translations.ps1`.
       Expect three new messages: the label, the button and "Unable to open Windows Settings.".
       Expect line re-wrapping in the catalogs too; it is harmless.
-- [ ] Translate them in all five catalogs with the glossary terms. Leave no entry fuzzy or empty.
+- [x] Translate them in all five catalogs with the glossary terms. Leave no entry fuzzy or empty.
   - The button needs a mnemonic, in every catalog, that no other control in the Settings dialog
     uses in that catalog. `MnemonicTests` checks labels and buttons across all three tabs; German
     must not use M.
   - In Hebrew, keep `.md` and `.markdown` out of the label's running text, or put them where a
     right-to-left label cannot move their leading period (for example "Markdown (md, markdown)").
-- [ ] Validation commands pass, starting with `Compile-Translations.ps1 -Strict`. Task 3's German
+- [x] Validation commands pass, starting with `Compile-Translations.ps1 -Strict`. Task 3's German
       mnemonic failure is gone now.
 
 ### Task 5: Update the six manuals
