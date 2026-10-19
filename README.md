@@ -37,6 +37,9 @@ Download PlanCake from [plan-cake.oire.dev](https://plan-cake.oire.dev), in one 
 
 - **The installer** sets everything up: it installs the .NET 10 Desktop Runtime and the
   Microsoft Edge WebView2 Runtime if they are missing, and puts `plancake` on your `PATH`.
+  It also makes PlanCake one of the programs that can open `.md` and `.markdown` files without
+  taking them over; to have a double-click open them in PlanCake, choose it in Windows Settings →
+  Default apps, which the button in PlanCake's Settings → Advanced opens.
 - **The portable zip** runs from any folder. Keep the empty `userdata` folder next to
   `plancake.exe`, and PlanCake keeps its settings there instead of in `%APPDATA%\Oire\PlanCake`.
 

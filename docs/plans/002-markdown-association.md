@@ -40,16 +40,16 @@ This ships in PlanCake 1.1; the release waits for it.
 - [ ] Installing does not change which program opens Markdown files when the user had chosen one
 - [ ] Uninstalling removes every registry entry and every key the installer created for the
       association, and leaves the extensions' other handlers alone
-- [ ] Settings → Advanced has a label and the button "Open &Markdown files with PlanCake...", which
+- [x] Settings → Advanced has a label and the button "Open &Markdown files with PlanCake...", which
       opens PlanCake's page in Default apps (the general Default apps page on Windows versions
       without the per-app link); both are hidden in the portable version and when the
       registration is missing
-- [ ] The new installer message is in all six `Custom.<code>.isl` files, and a test keeps their
+- [x] The new installer message is in all six `Custom.<code>.isl` files, and a test keeps their
       keys in step and the BOMs in place; the new interface strings are in all five catalogs
       with no fuzzy entries and unique mnemonics
-- [ ] All six manuals describe the registration (Installing, Opening a file) and the button
+- [x] All six manuals describe the registration (Installing, Opening a file) and the button
       (Settings → Advanced), and `CHANGELOG.md` has the entry under Unreleased
-- [ ] All validation commands pass
+- [x] All validation commands pass
 
 ## Validation commands
 
@@ -307,13 +307,13 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
 - Modify: `CLAUDE.md`
 
 #### Steps
-- [ ] `CHANGELOG.md`, under `[Unreleased]` → `### Added`: an entry in the style of the existing
+- [x] `CHANGELOG.md`, under `[Unreleased]` → `### Added`: an entry in the style of the existing
       ones. **Open Markdown files with PlanCake**: the installer lists PlanCake among the
       programs that open `.md` and `.markdown` files, and Settings → Advanced opens Windows'
       Default apps page to make it the default.
-- [ ] `README.md` "Installing": one sentence that the installer registers PlanCake for Markdown
+- [x] `README.md` "Installing": one sentence that the installer registers PlanCake for Markdown
       files without taking them over, and how to make it the default.
-- [ ] `CLAUDE.md`:
+- [x] `CLAUDE.md`:
   - "Installer and releases": a short paragraph on the registration. Say what is written, that
     the extensions' default value never is, and that there must be no "edit" verb (Open in
     editor relies on it). Mention `ChangesAssociations`, and that the uninstaller removes the
@@ -322,7 +322,7 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
     this, the `.isl` keys and the BOMs.
   - "Adding a language": a new `Custom.<code>.isl` needs every key of `Custom.en.isl`, which
     `InstallerTests` checks.
-- [ ] Validation commands pass, including `./installer/Build-Installer.ps1 -AllowDirty` once
+- [x] Validation commands pass, including `./installer/Build-Installer.ps1 -AllowDirty` once
       more.
 
 ## Technical details

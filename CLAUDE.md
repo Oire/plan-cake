@@ -62,7 +62,8 @@ decisions.
   `<SatelliteResourceLanguages>` in the `.csproj`; `LanguageList.SupportedCodes` (the document
   languages and the menu order) and `LegacyEncoding.CodePageOf` (its legacy code page); the
   manual, `help/<code>/manual.html`, with a glossary in `help/glossaries/`; and the installer,
-  `installer/Languages/Custom.<code>.isl` plus a `[Languages]` line in `plancake.iss`.
+  `installer/Languages/Custom.<code>.isl` plus a `[Languages]` line in `plancake.iss`. The new
+  `.isl` needs every key of `Custom.en.isl` and a UTF-8 BOM, which `InstallerTests` checks.
 
 - **A new dialog:** set its title in the constructor right after `Localizer.Localize`
   (`Text = _("…");`), because the extractor misses a designer `Text =` on the form itself; call
@@ -416,6 +417,25 @@ Desktop Runtime and the WebView2 Runtime when missing (`CodeDependencies.iss`, f
 InnoDependencyInstaller). The `AppId` in `plancake.iss` is permanent: Windows and winget know
 PlanCake by it. The `.iss` and `.isl` files are UTF-8 with a BOM, which Inno Setup needs to
 read them as UTF-8.
+
+The installer also registers PlanCake as one of the programs that open `.md` and `.markdown`
+files, always and without a checkbox, all under `HKLM`: the file type `PlanCake.Markdown` (its
+name from `{cm:MarkdownFileType}`, an icon and an `open` command with the quoted `"%1"`), that
+ProgID in each extension's `OpenWithProgids`, an `Applications\plancake.exe` entry, and
+capabilities under `Software\Oire\PlanCake\Capabilities` listed in `Software\RegisteredApplications`.
+That puts PlanCake in Open with and in Windows Settings → Default apps. The extensions' default
+value is never written: since Windows 10 only the user picks the default program, in Default apps,
+which Settings → Advanced opens (`Utils/DefaultApps.cs`; the button shows only when the
+`RegisteredApplications` value is there and PlanCake is not portable). The ProgID must have no
+verb but `open`, above all no `edit`: File → Open in editor looks for one and would reopen the
+file in PlanCake. `ChangesAssociations=yes` tells Explorer to reload the associations. The
+uninstaller removes PlanCake's own keys whole and only its values from the shared ones
+(`.md`, `.markdown`, `OpenWithProgids`, `Software\Oire`, `RegisteredApplications`), which carry
+`uninsdeletevalue` or `uninsdeletekeyifempty`; the parent keys come first in `[Registry]` because
+Inno Setup uninstalls in reverse order. `RegisteredAppName` in `plancake.iss` must equal
+`DefaultApps.RegisteredName`, which goes into the Default apps link. `InstallerTests` reads the
+`.iss` and `.isl` files as text and checks that name, the registration lines (no default value
+written, `open` the only verb, both commands quoted), the `.isl` keys and the BOMs.
 
 The uninstaller's question about removing settings and logs looks in `{userappdata}` and
 `{localappdata}`, the folders of the account it runs as. When a standard user uninstalls with
