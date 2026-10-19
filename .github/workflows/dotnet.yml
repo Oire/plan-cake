@@ -37,27 +37,31 @@ jobs:
       - name: Install gettext
         shell: pwsh
         run: |
-          # The Chocolatey community feed has outages (504 Gateway Timeout), so retry before
-          # giving up, and fail on choco's own exit code: otherwise the step carries on and dies
-          # one line later with a misleading "msgfmt.exe not found". 1641 and 3010 are success
-          # codes that ask for a reboot.
+          # Straight from the gettext-iconv-windows release on GitHub, the build the Chocolatey
+          # package wraps. Chocolatey's community feed has outages (503, 504), and during one
+          # choco can exit 0 after installing nothing ("installed 0/0 packages"), so its exit code
+          # proves nothing. The download is pinned by its SHA-256 (the release page lists it);
+          # to update, change the tag, the file name and the hash together.
+          $url = "https://github.com/mlocati/gettext-iconv-windows/releases/download/v1.0-v1.19/gettext1.0-iconv1.19-static-64.zip"
+          $sha256 = "2B999BC37B56FA052FF98578E9CB188152009F634E3A66AA8FF263A016E9C466"
+          $zip = Join-Path $env:RUNNER_TEMP "gettext.zip"
+          $root = Join-Path $env:RUNNER_TEMP "gettext"
           for ($attempt = 1; ; $attempt++) {
-              choco install gettext -y --no-progress
-              if ($LASTEXITCODE -in 0, 1641, 3010) { break }
-              if ($attempt -ge 3) { throw "choco install gettext failed $attempt times (exit code $LASTEXITCODE)" }
-              Start-Sleep -Seconds (30 * $attempt)
+              try {
+                  Invoke-WebRequest -Uri $url -OutFile $zip
+                  break
+              } catch {
+                  if ($attempt -ge 3) { throw "gettext download failed $attempt times: $_" }
+                  Start-Sleep -Seconds (15 * $attempt)
+              }
           }
-          # The package deploys to C:\Program Files\gettext-iconv and edits the machine PATH,
-          # which the next step does not inherit: the runner captured its environment before the
-          # install ran. GITHUB_PATH is how a step hands PATH to the ones after it. Locate the
-          # binary rather than assuming the layout, and fail here if the package ever moves it.
-          # Test-Path first: given a missing -Path, Get-ChildItem -Recurse searches the parent
-          # folder for that name instead, and crawls all of Program Files for a quarter of an hour.
-          $root = "C:\Program Files\gettext-iconv"
-          if (-not (Test-Path $root)) { throw "gettext installed, but $root does not exist" }
-          $msgfmt = Get-ChildItem -Path $root -Filter msgfmt.exe -Recurse | Select-Object -First 1
-          if (-not $msgfmt) { throw "msgfmt.exe not found under $root" }
-          $msgfmt.DirectoryName | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          $actual = (Get-FileHash -Path $zip -Algorithm SHA256).Hash
+          if ($actual -ne $sha256) { throw "gettext.zip has SHA-256 $actual, expected $sha256" }
+          Expand-Archive -Path $zip -DestinationPath $root
+          # GITHUB_PATH is how a step hands PATH to the ones after it.
+          $msgfmt = Join-Path $root "bin\msgfmt.exe"
+          if (-not (Test-Path $msgfmt)) { throw "msgfmt.exe not found at $msgfmt" }
+          Split-Path $msgfmt | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
 
       # MO files are build output and are gitignored, so a clean checkout has only the PO
       # sources. Without this the locale folders never reach the build output, and
