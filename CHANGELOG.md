@@ -9,6 +9,8 @@ update window come from `changelogs/<X.Y.Z>.md`.
 
 ## [Unreleased]
 
+## [1.1.0.8] - 2026-10-19
+
 ### Added
 
 - **Plans in WSL**: a plan in a WSL distribution, or on a network share or drive, is now checked
@@ -19,6 +21,11 @@ update window come from `changelogs/<X.Y.Z>.md`.
   open `.md` and `.markdown` files, in Open with and in Windows Settings → Default apps, without
   changing which program opens them. The new button in Settings → Advanced opens PlanCake's page
   in Default apps, where you make it the default.
+
+### Changed
+
+- **A shorter installer**: Setup no longer shows the Ready to Install page, which only repeated
+  the choices just made. The button on the Select Additional Tasks page now says Install.
 
 ## [1.0.0.11] - 2026-10-04
 
@@ -70,5 +77,6 @@ line.
 - **Licenses**: PlanCake's license and the notices of the components it includes ship with it,
   and **Licenses** in About PlanCake opens them.
 
-[Unreleased]: https://github.com/Oire/plan-cake/compare/v1.0.0.11...master
+[Unreleased]: https://github.com/Oire/plan-cake/compare/v1.1.0.8...master
+[1.1.0.8]: https://github.com/Oire/plan-cake/releases/tag/v1.1.0.8
 [1.0.0.11]: https://github.com/Oire/plan-cake/releases/tag/v1.0.0.11

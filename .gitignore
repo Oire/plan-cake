@@ -421,6 +421,8 @@ FodyWeavers.xsd
 .claude/settings.local.json
 .claude/agent-memory/
 .claude/project-audit/
+.claude/exec-plan/progress/
+.claude/exec-plan/codex-prompt.txt
 
 # Compiled gettext catalogs are build output: CI compiles them from the .po sources.
 *.mo
