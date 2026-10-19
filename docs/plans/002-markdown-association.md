@@ -134,7 +134,7 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
 - Create: `tests/PlanCake.Tests/DefaultAppsTests.cs`
 
 #### Steps
-- [ ] In `Utils/DefaultApps.cs`, add an `internal static class DefaultApps` (namespace
+- [x] In `Utils/DefaultApps.cs`, add an `internal static class DefaultApps` (namespace
       `Oire.PlanCake.Utils`), UI-free:
   - `public const string RegisteredName = "PlanCake";`: the value name under
     `HKLM\Software\RegisteredApplications`. Its doc comment says it must equal
@@ -148,11 +148,11 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
     and `UnauthorizedAccessException`, log at Debug and return false; never throw.
   - `ShowsSettingsButton(bool isPortable, bool isRegistered)` =>
     `!isPortable && isRegistered`, kept pure so it can be tested.
-- [ ] Tests:
+- [x] Tests:
   - `SettingsUri` is exactly `ms-settings:defaultapps?registeredAppMachine=PlanCake`;
   - `ShowsSettingsButton` is true only when not portable and registered (all four cases);
   - `IsRegistered()` returns without throwing on the test machine, whatever the answer.
-- [ ] Validation commands pass.
+- [x] Validation commands pass.
 
 ### Task 2: Register PlanCake for .md and .markdown in the installer
 
