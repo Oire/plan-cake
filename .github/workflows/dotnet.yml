@@ -34,6 +34,16 @@ jobs:
           # The SDK band global.json pins, so CI builds with the SDK a release is built with.
           global-json-file: global.json
 
+      # Restore downloads every package afresh otherwise. The key changes with any project file
+      # (a package added or bumped) or the SDK; a miss falls back to the newest cache and restore
+      # fetches only what changed.
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
       - name: Install gettext
         shell: pwsh
         run: |
@@ -74,7 +84,7 @@ jobs:
         run: dotnet restore
 
       - name: Check format
-        run: dotnet format --verify-no-changes
+        run: dotnet format --verify-no-changes --no-restore
 
       - name: Build
         run: dotnet build --no-restore
