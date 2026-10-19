@@ -204,7 +204,7 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
 - Modify: `tests/PlanCake.Tests/SettingsDialogTests.cs`
 
 #### Steps
-- [ ] Designer: `advancedLayout` gets two more AutoSize rows after `convertToUtf8CheckBox` and
+- [x] Designer: `advancedLayout` gets two more AutoSize rows after `convertToUtf8CheckBox` and
       before the filler, for 4 rows in all:
   - `defaultAppLabel`, a `Ui/WrappingLabel` laid out like `openingMarkerLabel`
     (`Anchor = AnchorStyles.Left | AnchorStyles.Right`, `AutoSize = true`), with
@@ -217,18 +217,18 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
 
   Set the tab order after `convertToUtf8CheckBox`. `M` is free in this dialog's English
   mnemonics.
-- [ ] `SettingsDialog.cs`: in the constructor, after the existing setup, set both controls'
+- [x] `SettingsDialog.cs`: in the constructor, after the existing setup, set both controls'
       `Visible` to
       `DefaultApps.ShowsSettingsButton(App.IsPortable, DefaultApps.IsRegistered())`. Wire
       `defaultAppButton.Click` in the constructor and unwire it in `OnFormClosed`, as
       `AboutDialog` does.
-- [ ] The click opens `DefaultApps.SettingsUri` with
+- [x] The click opens `DefaultApps.SettingsUri` with
       `Process.Start(new ProcessStartInfo(DefaultApps.SettingsUri) { UseShellExecute = true })?.Dispose()`.
   - On `Win32Exception` or `InvalidOperationException`: `Log.Error(ex, …)`, then
     `DialogHelper.Show(_("Unable to open Windows Settings."), _("Error"), MessageBoxButtons.OK,
     MessageBoxIcon.Error)`, as `AboutDialog` does.
   - The Settings dialog stays open, and the button saves nothing.
-- [ ] Tests in `SettingsDialogTests`:
+- [x] Tests in `SettingsDialogTests`:
   - the button is a child of `advancedLayout` and not of `buttonLayout`;
   - the label is a `WrappingLabel`;
   - extend the fit-in-every-language check, or add a sibling test, so the button's preferred

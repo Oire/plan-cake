@@ -46,6 +46,8 @@ partial class SettingsDialog {
         advancedTab = new TabPage();
         advancedLayout = new TableLayoutPanel();
         convertToUtf8CheckBox = new CheckBox();
+        defaultAppLabel = new WrappingLabel();
+        defaultAppButton = new Button();
 
         okButton = new Button();
         cancelButton = new Button();
@@ -341,14 +343,18 @@ partial class SettingsDialog {
         advancedTab.Text = "Advanced";
         advancedTab.UseVisualStyleBackColor = true;
         //
-        // advancedLayout
+        // advancedLayout: the conversion, then the Default apps button with the label that explains it.
         //
         advancedLayout.ColumnCount = 1;
         advancedLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        advancedLayout.RowCount = 2;
+        advancedLayout.RowCount = 4;
+        advancedLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        advancedLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         advancedLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         advancedLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         advancedLayout.Controls.Add(convertToUtf8CheckBox, 0, 0);
+        advancedLayout.Controls.Add(defaultAppLabel, 0, 1);
+        advancedLayout.Controls.Add(defaultAppButton, 0, 2);
         advancedLayout.Dock = DockStyle.Fill;
         advancedLayout.Name = "advancedLayout";
         advancedLayout.TabIndex = 0;
@@ -361,6 +367,25 @@ partial class SettingsDialog {
         convertToUtf8CheckBox.Name = "convertToUtf8CheckBox";
         convertToUtf8CheckBox.TabIndex = 0;
         convertToUtf8CheckBox.Text = "Con&vert to UTF-8 on opening";
+        //
+        // defaultAppLabel: why the button below exists. Shown, like the button, only when the
+        // installer registered PlanCake (set in code).
+        //
+        defaultAppLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+        defaultAppLabel.AutoSize = true;
+        defaultAppLabel.Margin = new Padding(3, 16, 3, 3);
+        defaultAppLabel.Name = "defaultAppLabel";
+        defaultAppLabel.TabIndex = 1;
+        defaultAppLabel.Text = "Windows lets only you choose which program opens Markdown files. This opens PlanCake's page in Windows Settings, where you can choose PlanCake for .md and .markdown files.";
+        //
+        // defaultAppButton: opens PlanCake's page in Windows Settings → Default apps.
+        //
+        defaultAppButton.Anchor = AnchorStyles.Left;
+        defaultAppButton.AutoSize = true;
+        defaultAppButton.MinimumSize = new Size(100, 0);
+        defaultAppButton.Name = "defaultAppButton";
+        defaultAppButton.TabIndex = 2;
+        defaultAppButton.Text = "Open &Markdown files with PlanCake...";
         //
         // buttonLayout: OK, then Cancel, together at the end of the row (DialogButtons).
         //
@@ -445,6 +470,8 @@ partial class SettingsDialog {
     private TabPage advancedTab;
     private TableLayoutPanel advancedLayout;
     private CheckBox convertToUtf8CheckBox;
+    private WrappingLabel defaultAppLabel;
+    private Button defaultAppButton;
 
     private Button okButton;
     private Button cancelButton;

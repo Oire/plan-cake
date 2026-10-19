@@ -1,9 +1,12 @@
+using System.ComponentModel;
+using System.Diagnostics;
 using GetText.WindowsForms;
 using Oire.PlanCake.Notes;
 using Oire.PlanCake.Utils;
 using Oire.PlanCake.Utils.Enums;
 using Serilog;
 using static Oire.PlanCake.Utils.Localization;
+using App = Oire.PlanCake.Utils.Constants.App;
 
 namespace Oire.PlanCake.Ui;
 
@@ -52,6 +55,12 @@ internal sealed partial class SettingsDialog: Form {
         closingMarkerTextBox.TextChanged += OnMarkerTextChanged;
         tabControl.Selected += OnTabSelected;
         ShowMarkersError();
+
+        // The portable version registers nothing, so Windows has no PlanCake page to open.
+        var showsDefaultApp = DefaultApps.ShowsSettingsButton(App.IsPortable, DefaultApps.IsRegistered());
+        defaultAppLabel.Visible = showsDefaultApp;
+        defaultAppButton.Visible = showsDefaultApp;
+        defaultAppButton.Click += OnDefaultAppClick;
 
         // The first field of the first tab, not the tab strip.
         ActiveControl = languageComboBox;
@@ -194,6 +203,19 @@ internal sealed partial class SettingsDialog: Form {
         BeginInvoke(() => page.SelectNextControl(null, forward: true, tabStopOnly: true, nested: true, wrap: true));
     }
 
+    /// <summary>
+    /// Opens PlanCake's page in Windows Settings → Default apps. A launcher, not a setting: it
+    /// saves nothing, and the dialog stays open.
+    /// </summary>
+    private void OnDefaultAppClick(object? sender, EventArgs e) {
+        try {
+            Process.Start(new ProcessStartInfo(DefaultApps.SettingsUri) { UseShellExecute = true })?.Dispose();
+        } catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) {
+            Log.Error(ex, "Unable to open {Uri}", DefaultApps.SettingsUri);
+            DialogHelper.Show(_("Unable to open Windows Settings."), _("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
     protected override void OnFormClosing(FormClosingEventArgs e) {
         base.OnFormClosing(e);
 
@@ -242,6 +264,7 @@ internal sealed partial class SettingsDialog: Form {
         openingMarkerTextBox.TextChanged -= OnMarkerTextChanged;
         closingMarkerTextBox.TextChanged -= OnMarkerTextChanged;
         tabControl.Selected -= OnTabSelected;
+        defaultAppButton.Click -= OnDefaultAppClick;
         _markersErrorTimer.Stop();
         _markersErrorTimer.Tick -= OnMarkersErrorTimerTick;
         base.OnFormClosed(e);
