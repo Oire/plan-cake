@@ -82,8 +82,10 @@ LicenseFile=..\LICENSE
 ; Privileges: the install folder is under Program Files and the PATH entry is machine-wide.
 PrivilegesRequired=admin
 DisableProgramGroupPage=yes
-; The Ready to Install page stays: it lists the .NET and WebView2 runtimes Setup is about to
-; download (CodeDependencies.iss, UpdateReadyMemo), and its button is the one that says Install.
+; No Ready to Install page: it only repeated the choices just made. Installing starts from the
+; Select Additional Tasks page, whose button says Install (CurPageChanged), and the .NET and
+; WebView2 runtimes Setup downloads show on its own download page (CodeDependencies.iss).
+DisableReadyPage=yes
 
 ; {app} goes on the machine PATH (see [Registry]); tell running programs to reload it.
 ChangesEnvironment=yes
@@ -246,6 +248,15 @@ begin
   Dependency_AddWebView2;
 
   Result := True;
+end;
+
+// With the Ready to Install page off, Select Additional Tasks (always shown: the desktop icon
+// task is there) is the last page before installing, so its button says Install. Inno Setup
+// sets every other page's caption itself before calling this.
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if CurPageID = wpSelectTasks then
+    WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall);
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);

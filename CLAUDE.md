@@ -411,8 +411,9 @@ Licenses opens them in Notepad). The publish folder holds more (the `.pdb`, WebV
 a second `WebView2Loader.dll` under `runtimes\`), so a new file beside the exe must be added to
 both the `[Files]` section of `plancake.iss` and `$ShippedItems` in the script. The installer
 puts `{app}` on the machine `PATH` and takes it off on uninstall, adds a Start menu shortcut to the manual in the language Setup ran in
-(`help\{language}\manual.html`), shows the Ready to Install page (it lists the runtimes Setup
-is about to download, and its button is the one that says Install), and installs the .NET 10
+(`help\{language}\manual.html`), skips the Ready to Install page (`DisableReadyPage`; the
+Select Additional Tasks page, always shown for the desktop icon task, is the last one, and
+`CurPageChanged` makes its button say Install), and installs the .NET 10
 Desktop Runtime and the WebView2 Runtime when missing (`CodeDependencies.iss`, from
 InnoDependencyInstaller). The `AppId` in `plancake.iss` is permanent: Windows and winget know
 PlanCake by it. The `.iss` and `.isl` files are UTF-8 with a BOM, which Inno Setup needs to
