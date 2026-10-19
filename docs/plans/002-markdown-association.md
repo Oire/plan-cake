@@ -163,14 +163,14 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
 - Create: `tests/PlanCake.Tests/InstallerTests.cs`
 
 #### Steps
-- [ ] Add three `#define`s to `plancake.iss` next to `EnvironmentKey`, each with a comment:
+- [x] Add three `#define`s to `plancake.iss` next to `EnvironmentKey`, each with a comment:
   - `RegisteredAppName "PlanCake"`, which must equal `DefaultApps.RegisteredName`;
   - `AppProgId "PlanCake.Markdown"`;
   - `CapabilitiesKey "Software\Oire\PlanCake\Capabilities"`.
 
   Add `ChangesAssociations=yes` to `[Setup]` next to `ChangesEnvironment=yes`, with a comment
   that it tells Explorer to reload the associations.
-- [ ] Add to `[Registry]` the lines in Technical details → Registry entries, exactly as given
+- [x] Add to `[Registry]` the lines in Technical details → Registry entries, exactly as given
       there and in that order. Put a comment block above them saying three things:
   - the extensions' default value is never written, because it would take Markdown files away
     from the program the user or Windows picked;
@@ -179,11 +179,11 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
     is checked after its children are gone.
 
   Keep the `PATH` entry as it is.
-- [ ] Add `MarkdownFileType` (the file type's name in Explorer, "Markdown document" in English) to
+- [x] Add `MarkdownFileType` (the file type's name in Explorer, "Markdown document" in English) to
       `[CustomMessages]` in all six `Custom.<code>.isl` files, each with a `;` comment like the
       others. Use each language's usual word for "document" and keep "Markdown" as is. Keep every
       edited file UTF-8 with a BOM (first three bytes `EF BB BF`), `plancake.iss` included.
-- [ ] `InstallerTests`, finding the repository root through `[CallerFilePath]` as Context says:
+- [x] `InstallerTests`, finding the repository root through `[CallerFilePath]` as Context says:
   - every `Custom.<code>.isl` has the same `[CustomMessages]` keys as `Custom.en.isl`;
   - `plancake.iss` and every `Custom.<code>.isl` start with a UTF-8 BOM;
   - registration parity: the `#define RegisteredAppName` value equals
@@ -193,7 +193,7 @@ locked, so build and test into a temporary artifacts folder (CLAUDE.md, Tests).
     `shell\open\command` lines have the quoted `""%1""`.
 
   Plain text matching on lines is enough; no Inno parser.
-- [ ] Validation commands pass, including `./installer/Build-Installer.ps1 -AllowDirty`, which
+- [x] Validation commands pass, including `./installer/Build-Installer.ps1 -AllowDirty`, which
       compiles the `.iss` (the compile only; do not run the installer).
 
 ### Task 3: Add the Default apps button to Settings → Advanced
