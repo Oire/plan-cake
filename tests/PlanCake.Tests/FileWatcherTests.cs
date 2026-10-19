@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text;
 using AwesomeAssertions;
 using Oire.PlanCake.Notes;
@@ -13,6 +14,11 @@ public class FileWatcherTests: IDisposable {
     private readonly string _path;
     private readonly FakeTimer _timer = new();
     private readonly List<FileChangeEventArgs> _changes = [];
+
+    // The polling tests drive the watcher through the fake timer alone. The folder is still
+    // watched for real, and an event about the test's own write would otherwise land on a pool
+    // thread at any moment and replace the pending poll.
+    private readonly EventsDropped _eventsDropped = new();
 
     public FileWatcherTests() {
         _folder = Path.Combine(Path.GetTempPath(), $"PlanCake.Tests-{Guid.NewGuid():N}");
@@ -465,7 +471,7 @@ public class FileWatcherTests: IDisposable {
     public void Polling_LooksAtTheFileEverySecond_AndReportsAChange() {
         using var watcher = PollingWatcher();
 
-        watcher.Start(null).Should().BeTrue();
+        watcher.Start(_eventsDropped).Should().BeTrue();
         _timer.Delay.Should().Be(FileWatcher.PollInterval);
         _timer.Fire();
 
@@ -489,7 +495,7 @@ public class FileWatcherTests: IDisposable {
 
             return FileWatcher.ReadText(path);
         });
-        watcher.Start(null);
+        watcher.Start(_eventsDropped);
 
         _timer.Fire();
         _timer.Fire();
@@ -505,7 +511,7 @@ public class FileWatcherTests: IDisposable {
     [Fact]
     public void Polling_ReportsAMissingFile_AndItsReturn() {
         using var watcher = PollingWatcher();
-        watcher.Start(null);
+        watcher.Start(_eventsDropped);
         _timer.Fire();
 
         File.Delete(_path);
@@ -524,7 +530,7 @@ public class FileWatcherTests: IDisposable {
     public void Polling_UnreadableFile_IsRetried_ThenPollingGoesOn() {
         var locked = true;
         using var watcher = PollingWatcher(path => locked ? throw new IOException("Locked") : FileWatcher.ReadText(path));
-        watcher.Start(null);
+        watcher.Start(_eventsDropped);
 
         _timer.Fire();
         _timer.Delay.Should().Be(FileWatcher.Debounce);
@@ -541,7 +547,7 @@ public class FileWatcherTests: IDisposable {
     [Fact]
     public void Polling_EventAboutTheFile_IsCheckedAndPollingGoesOn() {
         using var watcher = PollingWatcher();
-        watcher.Start(null);
+        watcher.Start(_eventsDropped);
 
         File.WriteAllText(_path, "# Plan\n\nSecond, longer.\n", _utf8);
         Changed(watcher);
@@ -560,7 +566,7 @@ public class FileWatcherTests: IDisposable {
     public void Polling_StartsEvenWhenTheFolderCannotBeWatched() {
         using var watcher = new FileWatcher(Path.Combine(_folder, "missing", "plan.md"), _timer, polling: true);
 
-        watcher.Start(null).Should().BeTrue();
+        watcher.Start(_eventsDropped).Should().BeTrue();
         _timer.IsPending.Should().BeTrue();
         _timer.Delay.Should().Be(FileWatcher.PollInterval);
     }
@@ -568,7 +574,7 @@ public class FileWatcherTests: IDisposable {
     [Fact]
     public void Polling_DisposedWatcher_StopsPolling() {
         var watcher = PollingWatcher();
-        watcher.Start(null);
+        watcher.Start(_eventsDropped);
         watcher.Dispose();
 
         File.WriteAllText(_path, "# Plan\n\nSecond, longer.\n", _utf8);
@@ -587,6 +593,17 @@ public class FileWatcherTests: IDisposable {
         public void Stop() { }
 
         public void Dispose() => Restarted.Dispose();
+    }
+
+    /// <summary>A synchronizing object that drops every event a <see cref="FileSystemWatcher"/> hands it.</summary>
+    private sealed class EventsDropped: ISynchronizeInvoke {
+        public bool InvokeRequired => true;
+
+        public IAsyncResult BeginInvoke(Delegate method, object?[]? args) => Task.CompletedTask;
+
+        public object? EndInvoke(IAsyncResult result) => null;
+
+        public object? Invoke(Delegate method, object?[]? args) => null;
     }
 
     /// <summary>A debounce timer the test fires by hand.</summary>
