@@ -60,7 +60,7 @@
     <PackageReference Include="GitVersion.MsBuild" Version="6.8.2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Markdig" Version="1.4.0" />
+    <PackageReference Include="Markdig" Version="1.4.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.402" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
     <PackageReference Include="NetSparkleUpdater.SparkleUpdater" Version="3.1.0" />
