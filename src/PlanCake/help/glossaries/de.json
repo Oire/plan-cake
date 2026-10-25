@@ -177,6 +177,30 @@
       "translation": "Verwalten",
       "context": "Windows 10 only: the button under a program in Set defaults by app that opens its file types",
       "notes": "The button's name"
+    },
+    {
+      "term": "Verified publisher",
+      "translation": "Verifizierter Herausgeber",
+      "context": "The line of the User Account Control prompt that names who signed the installer, Oire Software",
+      "notes": "Windows' own localized wording, quoted with the publisher's name after a colon"
+    },
+    {
+      "term": "User Account Control",
+      "translation": "Benutzerkontensteuerung",
+      "context": "The Windows prompt that asks for permission before the installer runs",
+      "notes": "Windows' own localized name, in parentheses after a plain description of the prompt"
+    },
+    {
+      "term": "Properties",
+      "translation": "Eigenschaften",
+      "context": "A file's Properties dialog in File Explorer, opened with Alt+Enter",
+      "notes": "Windows' own localized name"
+    },
+    {
+      "term": "Digital Signatures",
+      "translation": "Digitale Signaturen",
+      "context": "The tab of a file's Properties dialog that lists who signed the file",
+      "notes": "Windows' own localized tab name"
     }
   ]
 }

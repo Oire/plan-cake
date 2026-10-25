@@ -43,9 +43,11 @@ Download PlanCake from [plan-cake.oire.dev](https://plan-cake.oire.dev), in one 
 - **The portable zip** runs from any folder. Keep the empty `userdata` folder next to
   `plancake.exe`, and PlanCake keeps its settings there instead of in `%APPDATA%\Oire\PlanCake`.
 
-PlanCake is not signed with a code-signing certificate, so the first time you run the installer
-or `plancake.exe` from the zip, Windows SmartScreen may say "Windows protected your PC" and name
-an unknown publisher. Choose **More info**, then **Run anyway**.
+Starting with version 1.2, PlanCake is signed by Oire Software: the installer and `plancake.exe`
+carry its digital signature, and Windows names Oire Software as the verified publisher when you
+install. For a while after a new release, Windows SmartScreen may still say "Windows protected
+your PC"; choose **More info**, check that the publisher is Oire Software, then choose
+**Run anyway**.
 
 PlanCake can also be installed with [winget](https://learn.microsoft.com/windows/package-manager/winget/):
 
