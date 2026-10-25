@@ -9,6 +9,17 @@ update window come from `changelogs/<X.Y.Z>.md`.
 
 ## [Unreleased]
 
+### Changed
+
+- **Signed by Oire Software**: the installer, its uninstaller and `plancake.exe` now carry Oire
+  Software's digital signature ([#16](https://github.com/Oire/plan-cake/issues/16)). When you
+  install, Windows' permission prompt names Oire Software as the verified publisher instead of
+  an unknown one, and a file's Properties show the signature on the Digital Signatures tab.
+  Windows SmartScreen may still warn for a while after a release; the manual's "Installing
+  PlanCake" section explains what to check.
+- The publisher shown in Windows' list of installed apps is now **Oire Software**, the
+  company's name as registered and as the signature gives it.
+
 ## [1.1.0.8] - 2026-10-19
 
 ### Added
