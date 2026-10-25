@@ -1,6 +1,6 @@
 #
 # PlanCake installer build script
-# Copyright (c) 2026 Oire Software SARL.
+# Copyright (c) 2026 Oire Software.
 #
 # Compiles the translations, publishes PlanCake (Release, win-x64, single file) and builds the
 # Inno Setup installer from installer\plancake.iss. Also creates the portable ZIP archive (use
@@ -13,6 +13,11 @@
 # trial build). With -Appcast or -Deploy it warns when HEAD does not carry the four-part tag
 # vX.Y.Z.N of the version it built (see "Releasing" in CLAUDE.md).
 #
+# plancake.exe, the installer and its uninstaller are signed with Azure Artifact Signing whenever
+# installer\signing.json exists (-NoSign skips it; -Appcast and -Deploy refuse to go out
+# unsigned unless -NoSign says so). Signing needs the Artifact Signing client tools and an
+# Azure CLI session (az login --use-device-code); see "Code signing" in CLAUDE.md.
+#
 
 [CmdletBinding(PositionalBinding=$false)]
 param(
@@ -22,7 +27,10 @@ param(
     [switch]$Deploy,
     [switch]$OpenOutput,
     [switch]$AllowDirty,
+    [switch]$NoSign,
     [string]$InnoSetupPath = "",
+    [string]$SignToolPath = "",
+    [string]$DlibPath = "",
     [string]$BaseUrl = "https://plan-cake.oire.dev",
     [string]$KeyPath = "",
     [string]$ChangeLog = ""
@@ -89,6 +97,108 @@ if ([string]::IsNullOrEmpty($InnoSetupPath) -or !(Test-Path $InnoSetupPath)) {
 }
 
 Write-Host "Using Inno Setup: $InnoSetupPath" -ForegroundColor Yellow
+
+# Code signing with Azure Artifact Signing. signing.json (gitignored; copy signing.example.json)
+# is the signtool plugin's own metadata file: the account endpoint, account and certificate
+# profile. Without it a trial build goes out unsigned with a warning, but a release does not.
+$SigningConfigPath = Join-Path $ScriptDir "signing.json"
+$TimestampUrl = "http://timestamp.acs.microsoft.com"
+# The UAC prompt shows the description as the program name (instead of the file name); the URL
+# is the signature's more-info link
+$SignDescription = "PlanCake"
+$Sign =!$NoSign -and (Test-Path $SigningConfigPath)
+
+if (!$NoSign -and !$Sign) {
+    if ($Appcast) {
+        Write-Error "Signing configuration not found at: $SigningConfigPath"
+        Write-Host "Copy signing.example.json to signing.json and fill in the Artifact Signing details, or pass -NoSign to release unsigned." -ForegroundColor Yellow
+        exit 1
+    }
+
+    Write-Warning "signing.json not found: building unsigned. Copy signing.example.json to signing.json to sign."
+}
+
+if ($Sign) {
+    # The newest signtool of the Windows SDK
+    if ([string]::IsNullOrEmpty($SignToolPath)) {
+        $SignToolPath = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" -ErrorAction SilentlyContinue |
+            Where-Object { $null -ne ($_.Directory.Parent.Name -as [version]) } |
+            Sort-Object { $_.Directory.Parent.Name -as [version] } -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
+    }
+
+    if ([string]::IsNullOrEmpty($SignToolPath) -or !(Test-Path $SignToolPath)) {
+        Write-Error "signtool.exe not found. Install the Windows SDK signing tools or specify the path using the -SignToolPath parameter."
+        exit 1
+    }
+
+    # The signtool plugin, from the Artifact Signing client tools (it needs .NET 8 or later)
+    if ([string]::IsNullOrEmpty($DlibPath)) {
+        $PossiblePaths = @(
+            "${env:LOCALAPPDATA}\Microsoft\MicrosoftArtifactSigningClientTools\Azure.CodeSigning.Dlib.dll",
+            "${env:LOCALAPPDATA}\Microsoft\MicrosoftTrustedSigningClientTools\Azure.CodeSigning.Dlib.dll"
+        )
+
+        foreach ($Path in $PossiblePaths) {
+            if (Test-Path $Path) {
+                $DlibPath = $Path
+                break
+            }
+        }
+    }
+
+    if ([string]::IsNullOrEmpty($DlibPath) -or !(Test-Path $DlibPath)) {
+        Write-Error "Azure.CodeSigning.Dlib.dll not found. Install it with:"
+        Write-Host "  winget install --id Microsoft.Azure.ArtifactSigningClientTools --exact"
+        exit 1
+    }
+
+    # The plugin signs in through the Azure CLI session, unless service principal credentials
+    # are in the environment (AZURE_CLIENT_ID and the rest). Checking here fails in a second
+    # rather than after the publish.
+    if ([string]::IsNullOrEmpty($env:AZURE_CLIENT_ID)) {
+        if ($null -eq (Get-Command az -ErrorAction SilentlyContinue)) {
+            Write-Error "Azure CLI not found. Install it with: winget install --id Microsoft.AzureCLI --exact"
+            exit 1
+        }
+
+        $AzAccount = & az account show --query user.name --output tsv 2>&1
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Not signed in to Azure. Run: az login --use-device-code"
+            exit 1
+        }
+
+        Write-Host "Signing as: $AzAccount" -ForegroundColor Yellow
+    }
+
+    Write-Host "Using signtool: $SignToolPath" -ForegroundColor Yellow
+}
+
+# Signs a file with Artifact Signing and checks the result
+function Invoke-CodeSigning([string]$FilePath) {
+    Write-Host "Signing $(Split-Path -Leaf $FilePath)..." -ForegroundColor Yellow
+
+    & "$SignToolPath" sign /fd SHA256 /tr $TimestampUrl /td SHA256 /d "$SignDescription" /du $BaseUrl /dlib "$DlibPath" /dmdf "$SigningConfigPath" "$FilePath"
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Signing failed with exit code $LASTEXITCODE"
+        exit $LASTEXITCODE
+    }
+
+    Assert-Signed $FilePath
+}
+
+function Assert-Signed([string]$FilePath) {
+    $Signature = Get-AuthenticodeSignature -FilePath $FilePath
+
+    if ($Signature.Status -ne "Valid") {
+        Write-Error "$(Split-Path -Leaf $FilePath) has no valid signature: $($Signature.StatusMessage)"
+        exit 1
+    }
+
+    Write-Host "  $(Split-Path -Leaf $FilePath) signed by: $($Signature.SignerCertificate.Subject)" -ForegroundColor Gray
+}
 
 # A release is built from what is committed: an uncommitted change or an untracked file would
 # ship under the version number of the commit, and nobody could rebuild it. -AllowDirty is for
@@ -194,6 +304,18 @@ if (Test-Path (Join-Path $PublishOutputPath "help\glossaries")) {
     exit 1
 }
 
+# Sign the exe before the installer and the portable zip take it. With -SkipBuild it may still
+# carry the signature of an earlier run. WebView2Loader.dll is Microsoft's and already signed.
+if ($Sign) {
+    $ExePath = Join-Path $PublishOutputPath "plancake.exe"
+
+    if ((Get-AuthenticodeSignature -FilePath $ExePath).Status -eq "Valid") {
+        Write-Host "plancake.exe is already signed, skipping" -ForegroundColor Gray
+    } else {
+        Invoke-CodeSigning $ExePath
+    }
+}
+
 # Clean and (re)create output directory
 if (Test-Path $OutputDir) {
     Write-Host "Cleaning output directory..." -ForegroundColor Yellow
@@ -206,8 +328,20 @@ if (Test-Path $OutputDir) {
 Write-Host "Compiling installer..." -ForegroundColor Yellow
 Write-Host "ISS File: $IssPath" -ForegroundColor Gray
 
+$IsccArgs = @()
+
+if ($Sign) {
+    # Inno Setup signs the installer and its uninstaller itself, through the "azure" sign tool
+    # that plancake.iss turns on under /DSign. In the command $q is a quote and $f the quoted
+    # file name; single quotes keep PowerShell from expanding them.
+    $SignCommand = '$q' + $SignToolPath + '$q sign /fd SHA256 /tr ' + $TimestampUrl + ' /td SHA256 /d $q' + $SignDescription + '$q /du ' + $BaseUrl + ' /dlib $q' + $DlibPath + '$q /dmdf $q' + $SigningConfigPath + '$q $f'
+    $IsccArgs += @("/DSign", "/Sazure=$SignCommand")
+}
+
+$IsccArgs += $IssPath
+
 try {
-    & "$InnoSetupPath" "$IssPath"
+    & "$InnoSetupPath" @IsccArgs
 
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Installer compilation failed with exit code $LASTEXITCODE"
@@ -231,6 +365,11 @@ if ($InstallerFiles.Count -eq 0) {
 
 $Installer = $InstallerFiles[0]
 $FileSize = [math]::Round($Installer.Length / 1MB, 2)
+
+# The appcast signs the installer's bytes, which Authenticode signing changes: it must come after
+if ($Sign) {
+    Assert-Signed $Installer.FullName
+}
 
 if ($Installer.Name -match 'v([\d.]+)-setup') {
     $Version = $Matches[1]

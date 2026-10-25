@@ -1,7 +1,7 @@
 PlanCake: third-party notices
 ==============================================================================
 
-PlanCake is Copyright © 2026 Oire Software SARL and is licensed under the Apache
+PlanCake is Copyright © 2026 Oire Software and is licensed under the Apache
 License, Version 2.0: see the LICENSE file next to this one.
 
 plancake.exe and WebView2Loader.dll contain the third-party components listed
@@ -340,7 +340,7 @@ Oire.WinForms.NativeControls
 
 Native Windows controls that screen readers understand.
 https://github.com/Oire/winforms-native-controls
-Copyright © 2026 André Polykanine, Oire Software SARL, and contributors.
+Copyright © 2026 André Polykanine, Oire Software, and contributors.
 License: Apache License, Version 2.0 (full text at the end of this file)
 
 ==============================================================================

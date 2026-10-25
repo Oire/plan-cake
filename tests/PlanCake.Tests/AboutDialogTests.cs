@@ -12,7 +12,7 @@ public class AboutDialogTests {
 
         executable.Should().NotBeNull("the project file sets Copyright");
         AboutDialog.Copyright.Should().Be(executable!.Copyright);
-        AboutDialog.Copyright.Should().Contain("Oire Software SARL", "the About dialog names the company the installer and the license name");
+        AboutDialog.Copyright.Should().Contain("Oire Software", "the About dialog names the company the installer, the license and the code signing certificate name");
     }
 
     [Fact]

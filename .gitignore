@@ -438,3 +438,6 @@ installer/Output/
 
 # Deploy configuration (contains the SSH host and path)
 installer/deploy.json
+
+# Code signing configuration (the Artifact Signing account and certificate profile)
+installer/signing.json

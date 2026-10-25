@@ -1,12 +1,12 @@
 ﻿; PlanCake Inno Setup installer script
-; Copyright © 2026 Oire Software SARL.
+; Copyright © 2026 Oire Software.
 ;
 ; Build it with Build-Installer.ps1, which compiles the translations, publishes the app and
 ; then runs ISCC on this file. Saved as UTF-8 with a BOM: without one ISCC reads the script
 ; in the ANSI code page.
 
 #define MyAppName "PlanCake"
-#define MyAppPublisher "Oire Software SARL"
+#define MyAppPublisher "Oire Software"
 #define MyAppCompany "Oire"
 #define MyAppFolderName "PlanCake"
 #define MyAppURL "https://plan-cake.oire.dev"
@@ -62,6 +62,13 @@ OutputBaseFilename=plancake-v{#MyAppVersion}-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
+
+; Code signing: Build-Installer.ps1 passes /DSign and the "azure" sign tool command when
+; installer\signing.json exists. SignedUninstaller signs the uninstaller too.
+#ifdef Sign
+SignTool=azure
+SignedUninstaller=yes
+#endif
 
 ; The wizard's own icon. Shortcuts and Apps & features take theirs from the exe, which
 ; carries the same icon (ApplicationIcon in PlanCake.csproj), so the .ico is not shipped.

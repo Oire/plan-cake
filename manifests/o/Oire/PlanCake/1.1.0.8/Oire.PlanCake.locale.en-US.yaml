@@ -3,7 +3,7 @@
 PackageIdentifier: Oire.PlanCake
 PackageVersion: 1.1.0.8
 PackageLocale: en-US
-Publisher: Oire Software SARL
+Publisher: Oire Software
 PublisherUrl: https://oire.org/
 PublisherSupportUrl: https://github.com/Oire/plan-cake/issues
 Author: André Polykanine
@@ -11,7 +11,7 @@ PackageName: PlanCake
 PackageUrl: https://plan-cake.oire.dev/
 License: Apache-2.0
 LicenseUrl: https://github.com/Oire/plan-cake/blob/master/LICENSE
-Copyright: Copyright © 2026 Oire Software SARL.
+Copyright: Copyright © 2026 Oire Software.
 ShortDescription: Read Markdown files comfortably and leave notes right where they belong
 Description: An accessible Markdown reader for Windows, made for the long implementation plans AI coding assistants write. It shows a Markdown file as a document and writes your notes straight into the file, right after the block they are about. Works with the mouse, the keyboard alone and a screen reader, and from the command line.
 Moniker: plancake
