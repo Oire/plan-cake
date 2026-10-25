@@ -3,7 +3,7 @@
 PackageIdentifier: Oire.PlanCake
 PackageVersion: 1.1.0.8
 PackageLocale: uk-UA
-Publisher: Oire Software SARL
+Publisher: Oire Software
 PublisherUrl: https://oire.org/
 PublisherSupportUrl: https://github.com/Oire/plan-cake/issues
 Author: André Polykanine
@@ -11,7 +11,7 @@ PackageName: PlanCake
 PackageUrl: https://plan-cake.oire.dev/
 License: Apache-2.0
 LicenseUrl: https://github.com/Oire/plan-cake/blob/master/LICENSE
-Copyright: Copyright © 2026 Oire Software SARL.
+Copyright: Copyright © 2026 Oire Software.
 ShortDescription: Зручно читайте файли Markdown і залишайте нотатки саме там, де їм і місце
 Description: Доступна програма для читання файлів Markdown у Windows, створена для довгих планів реалізації, які пишуть ШІ-асистенти для програмування. Вона показує файл Markdown як документ і записує ваші нотатки просто у файл, одразу після блоку, якого вони стосуються. Однаково добре працює мишею, лише з клавіатури та з програмою читання з екрана, а також із командного рядка.
 ManifestType: locale

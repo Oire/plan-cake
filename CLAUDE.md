@@ -420,6 +420,30 @@ InnoDependencyInstaller). The `AppId` in `plancake.iss` is permanent: Windows an
 PlanCake by it. The `.iss` and `.isl` files are UTF-8 with a BOM, which Inno Setup needs to
 read them as UTF-8.
 
+### Code signing
+
+Releases are Authenticode-signed with Azure Artifact Signing (issue #16), whenever
+`installer/signing.json` exists (gitignored; copy `signing.example.json`). It is the signtool
+plugin's own metadata file (`Endpoint`, `CodeSigningAccountName`, `CertificateProfileName`,
+`ExcludeCredentials`), passed as-is with `/dmdf`. The script signs `plancake.exe` right after the
+publish is verified, so the installer and the zip both carry the signed exe, then lets Inno
+Setup sign the installer and its uninstaller: `plancake.iss` turns on `SignTool=azure` only under
+`/DSign`, which the script passes along with the `/Sazure=` command. Every signed file is checked
+with `Get-AuthenticodeSignature`, and anything but `Valid` fails the build. The appcast comes
+after, and must: its Ed25519 signature covers the installer's bytes, which Authenticode signing
+changes. `WebView2Loader.dll` already carries Microsoft's signature and is left alone. Without
+`signing.json` a trial build warns and goes on unsigned; `-Appcast` and `-Deploy` refuse unless
+`-NoSign` says so.
+
+The build machine needs `signtool.exe` from the Windows SDK, the Artifact Signing client tools
+(`winget install --id Microsoft.Azure.ArtifactSigningClientTools --exact`, which provide
+`Azure.CodeSigning.Dlib.dll` and need .NET 8 or later), and an Azure CLI session. Sign in with
+`az login --use-device-code`: the account picker plain `az login` opens is not usable with a
+screen reader. Never drop the RFC 3161 timestamp (`/tr`): Artifact Signing certificates live
+about three days, and the timestamp is what keeps a signature valid after that. The certificate
+names `Oire Software`, the company exactly as registered, without its legal form; the publisher
+in `plancake.iss`, the `.csproj`'s `Company` and `Copyright` and the manuals' footers say the same.
+
 The installer also registers PlanCake as one of the programs that open `.md` and `.markdown`
 files, always and without a checkbox, all under `HKLM`: the file type `PlanCake.Markdown` (its
 name from `{cm:MarkdownFileType}`, an icon and an `open` command with the quoted `"%1"`), that
@@ -474,6 +498,13 @@ of PlanCake's six languages. `--out .` writes the submitted manifests into
 folder, so the repository keeps every version's manifests. A change to the descriptions goes
 into the new folder before it is submitted, in all six languages.
 
+**Next update only:** the manifests already in `microsoft/winget-pkgs` still say
+`Oire Software SARL` (the local copies were corrected), and the update carries them over. Run it
+once without `--submit`, set `Publisher: Oire Software` and `Copyright: Copyright © 2026 Oire
+Software.` in all six locale files of the new folder, then submit that folder with
+`wingetcreate submit --token "$(gh auth token)" manifests/o/Oire/PlanCake/<VERSION>`. Delete this
+paragraph afterwards.
+
 ### Releasing
 
 From start to finish, by hand on the maintainer's machine (CI never builds a release):
@@ -483,7 +514,9 @@ From start to finish, by hand on the maintainer's machine (CI never builds a rel
    anything new in all five catalogs (no fuzzy entries), and check that the six manuals match
    the UI. Write `changelogs/<X.Y.Z>.md` (the update window's notes) and move the
    `[Unreleased]` entries of `CHANGELOG.md` under the version. Commit: the tree must be clean.
-2. `./installer/Build-Installer.ps1 -Appcast`, or `-Deploy`, which implies `-Appcast` and
+2. `az login --use-device-code` if the Azure CLI session has expired (the build checks, and
+   signs everything it ships; see Code signing), then
+   `./installer/Build-Installer.ps1 -Appcast`, or `-Deploy`, which implies `-Appcast` and
    uploads the installer, the zip, `appcast.xml` and its signature to plan-cake.oire.dev (build
    without `-Deploy` first to try the installer). The file names carry the version:
    `plancake-v1.0.0.7-setup.exe` comes from the commit at distance 7 from `v1.0.0`.

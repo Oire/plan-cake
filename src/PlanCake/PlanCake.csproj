@@ -27,8 +27,8 @@
          without it they show the assembly name, plancake. -->
     <AssemblyTitle>PlanCake</AssemblyTitle>
     <Description>Read Markdown files comfortably and leave notes right where they belong</Description>
-    <Company>Oire Software SARL</Company>
-    <Copyright>Copyright © 2026 Oire Software SARL.</Copyright>
+    <Company>Oire Software</Company>
+    <Copyright>Copyright © 2026 Oire Software.</Copyright>
     <!-- Version numbers come from GitVersion (see GitVersion.yml), never from a literal here.
          The +sha suffix would otherwise end up in the informational version and in the
          About box; GitVersion already encodes the commit distance in the fourth field. -->

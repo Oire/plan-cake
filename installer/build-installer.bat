@@ -1,6 +1,6 @@
 @echo off
 REM PlanCake installer build script (batch wrapper)
-REM Copyright (c) 2026 Oire Software SARL.
+REM Copyright (c) 2026 Oire Software.
 
 echo Building the PlanCake installer...
 echo.
