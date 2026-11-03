@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-19 19:01:15+0200\n"
+"POT-Creation-Date: 2026-11-04 00:44:15+0100\n"
 "PO-Revision-Date: 2026-09-26 19:07:58+02:00\n"
 "Last-Translator: \n"
 "Language-Team: he\n"
@@ -128,8 +128,8 @@ msgstr "&העתק מידע"
 msgid "&Delete all notes"
 msgstr "&מחק את כל ההערות"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:82 ..\..\Ui\MainWindow.Menu.cs:82
-#: ..\..\Ui\MainWindow.Notes.cs:264
+#: ..\..\Ui\MainWindow.NotesList.cs:82 ..\..\Ui\MainWindow.Notes.cs:264
+#: ..\..\Ui\MainWindow.Menu.cs:82
 msgid "&Delete note"
 msgstr "&מחק הערה"
 
@@ -145,8 +145,8 @@ msgstr "שפת &מסמך:"
 msgid "&Edit"
 msgstr "&עריכה"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:81 ..\..\Ui\MainWindow.Menu.cs:81
-#: ..\..\Ui\MainWindow.Notes.cs:260
+#: ..\..\Ui\MainWindow.NotesList.cs:81 ..\..\Ui\MainWindow.Notes.cs:260
+#: ..\..\Ui\MainWindow.Menu.cs:81
 msgid "&Edit note..."
 msgstr "&ערוך הערה..."
 
@@ -462,10 +462,9 @@ msgstr "Enter"
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr "Enter ב&חלון ההערה ({0} עושה את ההפך):"
 
-#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Program.cs:150
-#: ..\..\Ui\AboutDialog.cs:63 ..\..\Ui\AboutDialog.cs:93
-#: ..\..\Ui\MainWindow.cs:233 ..\..\Ui\MainWindow.cs:319
-#: ..\..\Ui\SettingsDialog.cs:215
+#: ..\..\Ui\MainWindow.cs:233 ..\..\Program.cs:107 ..\..\Program.cs:144
+#: ..\..\Program.cs:150 ..\..\Ui\AboutDialog.cs:63 ..\..\Ui\MainWindow.cs:319
+#: ..\..\Ui\AboutDialog.cs:93 ..\..\Ui\SettingsDialog.cs:215
 msgid "Error"
 msgstr "שגיאה"
 
@@ -1183,8 +1182,8 @@ msgstr "סמן הפתיחה לא יכול להיות ריק."
 msgid "The output file cannot be the file itself: {0}"
 msgstr "קובץ הפלט לא יכול להיות הקובץ עצמו: {0}"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:182 ..\..\Ui\MainWindow.Settings.cs:34
-#: ..\..\Ui\MainWindow.Settings.cs:152
+#: ..\..\Ui\MainWindow.Settings.cs:34 ..\..\Ui\MainWindow.Settings.cs:152
+#: ..\..\Ui\MainWindow.NotesList.cs:182
 msgid "The settings could not be saved. They apply until PlanCake is closed."
 msgstr "לא ניתן לשמור את ההגדרות. הן יחולו עד לסגירת PlanCake."
 
@@ -1307,8 +1306,8 @@ msgstr "לא ניתן לשמור את הקובץ ב-{0}: {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "לא ניתן להפעיל את תצוגת המסמך: {0}"
 
-#: ..\..\Cli\CliRunner.cs:304 ..\..\Cli\CliRunner.cs:510
-#: ..\..\Ui\MainWindow.Commands.cs:287
+#: ..\..\Ui\MainWindow.Commands.cs:287 ..\..\Cli\CliRunner.cs:304
+#: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"
 msgstr "לא ניתן לכתוב את {0}: {1}"
@@ -1372,7 +1371,7 @@ msgstr "לא ניתן היה להפעיל את בדיקת העדכונים. הפ
 msgid "User manual"
 msgstr "מדריך המשתמש"
 
-#: ..\..\Utils\LocalizedText.cs:65
+#: ..\..\Utils\LocalizedText.cs:68
 msgid "User note"
 msgstr "הערת משתמש"
 
@@ -1447,3 +1446,8 @@ msgstr "הגדלת התצוגה"
 #: ..\..\Ui\HostCommands.cs:129
 msgid "Zoom out"
 msgstr "הקטנת התצוגה"
+
+#: ..\..\Utils\LocalizedText.cs:68
+msgctxt "Task check box"
+msgid "Done"
+msgstr "בוצע"

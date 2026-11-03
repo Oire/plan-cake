@@ -87,17 +87,23 @@ public class LocalizationTests: IDisposable {
 
     /// <summary>
     /// The message IDs of <c>locale/messages.pot</c> in the source tree (found from this file's
-    /// path, so the tests find it whatever their output folder).
+    /// path, so the tests find it whatever their output folder). A message with a context
+    /// (<c>_p</c>) is keyed as the catalog keys it: the context, U+0004, then the ID.
     /// </summary>
     private static HashSet<string> TemplateMessageIds([CallerFilePath] string testFile = "") {
         var root = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(testFile)))!;
         var template = Path.Combine(root, "src", "PlanCake", "locale", "messages.pot");
         var ids = new HashSet<string>(StringComparer.Ordinal);
         StringBuilder? current = null;
+        string? context = null;
 
         foreach (var line in File.ReadLines(template).Append(String.Empty)) {
-            if (line.StartsWith("msgid ", StringComparison.Ordinal)) {
-                current = new StringBuilder(Unquote(line["msgid ".Length..]));
+            if (line.StartsWith("msgctxt ", StringComparison.Ordinal)) {
+                context = Unquote(line["msgctxt ".Length..]);
+            } else if (line.StartsWith("msgid ", StringComparison.Ordinal)) {
+                var prefix = context is null ? String.Empty : context + '\u0004';
+                current = new StringBuilder(prefix + Unquote(line["msgid ".Length..]));
+                context = null;
             } else if (current is not null && line.StartsWith('"')) {
                 current.Append(Unquote(line));
             } else if (current is not null) {

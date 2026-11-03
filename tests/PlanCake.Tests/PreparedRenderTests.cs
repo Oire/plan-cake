@@ -11,7 +11,7 @@ public class PreparedRenderTests: IDisposable {
     private static readonly Encoding _windows1251 = CodePagesEncodingProvider.Instance.GetEncoding(1251)!;
 
     private static readonly RenderOptions _renderOptions =
-        new(NoteMarkers.Default, RenderMode.Interactive, new RenderStrings("User note"));
+        new(NoteMarkers.Default, RenderMode.Interactive, new RenderStrings("User note", "Done"));
 
     private static readonly MarkdownFileOptions _converting =
         new(ConvertToUtf8: true, AnsiEncoding: _windows1251, RetryDelay: TimeSpan.FromMilliseconds(20));

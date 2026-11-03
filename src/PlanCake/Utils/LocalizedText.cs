@@ -61,6 +61,9 @@ internal static class LocalizedText {
             : null;
     }
 
-    /// <summary>The strings the renderer writes into the document: the name of a note's region.</summary>
-    public static RenderStrings RenderStrings() => new(_("User note"));
+    /// <summary>
+    /// The strings the renderer writes into the document: the name of a note's region and of a
+    /// task-list check box.
+    /// </summary>
+    public static RenderStrings RenderStrings() => new(_("User note"), _p("Task check box", "Done"));
 }

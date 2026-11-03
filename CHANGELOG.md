@@ -19,6 +19,10 @@ update window come from `changelogs/<X.Y.Z>.md`.
   PlanCake" section explains what to check.
 - The publisher shown in Windows' list of installed apps is now **Oire Software**, the
   company's name as registered and as the signature gives it.
+- A screen reader now calls every task-list checkbox **"Done"**, followed by its state, instead
+  of the task's first sentence. Reading a plan line by line, with Say All or on a braille
+  display, you no longer hear the start of each task twice: "Done, check box, not checked, Write
+  the tests".
 
 ## [1.1.0.8] - 2026-10-19
 
