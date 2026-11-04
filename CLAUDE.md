@@ -437,10 +437,31 @@ changes. `WebView2Loader.dll` already carries Microsoft's signature and is left 
 
 The build machine needs `signtool.exe` from the Windows SDK, the Artifact Signing client tools
 (`winget install --id Microsoft.Azure.ArtifactSigningClientTools --exact`, which provide
-`Azure.CodeSigning.Dlib.dll` and need .NET 8 or later), and an Azure CLI session. Sign in with
-`az login --use-device-code`: the account picker plain `az login` opens is not usable with a
-screen reader. Never drop the RFC 3161 timestamp (`/tr`): Artifact Signing certificates live
-about three days, and the timestamp is what keeps a signature valid after that. The certificate
+`Azure.CodeSigning.Dlib.dll` and need .NET 8 or later), and the signing service principal. Never
+drop the RFC 3161 timestamp (`/tr`): Artifact Signing certificates live about three days, and the
+timestamp is what keeps a signature valid after that.
+
+The build signs in as a service principal, never as a person, so it needs no browser and no
+second factor. The tenant's security defaults block device code sign-in outright
+(`AADSTS530035`, even for an existing session that came from one), and a person's session runs
+out. Each build machine has its own principal, `oire-signing-<COMPUTERNAME>`, shared by every
+Oire repository on that machine and holding only the Artifact Signing Certificate Profile Signer
+role on the `oire-software` profile. Its certificate, private key included, lives in
+`%USERPROFILE%\.oire\signing\oire-signing-<COMPUTERNAME>.pem`, readable by that user only and
+never in a repository: it signs as Oire Software. Three user environment variables point to it:
+`AZURE_TENANT_ID`, `AZURE_CLIENT_ID` and `AZURE_CLIENT_CERTIFICATE_PATH`. With
+`AZURE_CLIENT_ID` set the script checks the certificate file and skips `az`; a program started
+before the variables were set (a running Claude Code session) does not see them.
+
+The certificate is valid for two years (the one on ANDRE-ACCESSMIN until 2028-11-04). To renew
+it, or to set up a new machine, sign in once with `az config set
+core.enable_broker_on_windows=false` and `az login --tenant <tenant>` (the browser sign-in; the
+Windows account picker az shows by default is not usable with a screen reader), then:
+`az ad sp create-for-rbac --name oire-signing-<COMPUTERNAME> --role "Artifact Signing
+Certificate Profile Signer" --scopes <profile id> --create-cert --years 2`. From PowerShell, not
+Git Bash, which rewrites the `/subscriptions/...` scope into a Windows path. It writes the
+certificate into the home folder; move it into `.oire\signing\`, set the three variables, and
+`az logout`. The certificate
 names `Oire Software`, the company exactly as registered, without its legal form; the publisher
 in `plancake.iss`, the `.csproj`'s `Company` and `Copyright` and the manuals' footers say the same.
 
@@ -483,8 +504,11 @@ The SDK is pinned by `global.json` (feature band, `rollForward: latestPatch`), a
 `setup-dotnet` reads the same file, so a release built locally and CI use the same band. Bump it
 deliberately: a new band can bring new analyzer warnings, which are errors here.
 
-PlanCake is published to winget as `Oire.PlanCake`, first with 1.1.0.8. After every GitHub
-release, update it from the repository root:
+PlanCake is submitted to winget as `Oire.PlanCake`. The first version, 1.1.0.8, is
+[microsoft/winget-pkgs#456158](https://github.com/microsoft/winget-pkgs/pull/456158), which
+passed validation on 2026-10-19 and waits for a moderator; until it is merged, `wingetcreate
+update` fails with "was not found", and 1.2.0.9 goes to winget right after the merge. After
+every GitHub release, update it from the repository root:
 
 ```bash
 wingetcreate update -u 'https://github.com/Oire/plan-cake/releases/download/v<VERSION>/plancake-v<VERSION>-setup.exe|x64' -v <VERSION> --out . --submit --token "$(gh auth token)" Oire.PlanCake
@@ -514,9 +538,8 @@ From start to finish, by hand on the maintainer's machine (CI never builds a rel
    anything new in all five catalogs (no fuzzy entries), and check that the six manuals match
    the UI. Write `changelogs/<X.Y.Z>.md` (the update window's notes) and move the
    `[Unreleased]` entries of `CHANGELOG.md` under the version. Commit: the tree must be clean.
-2. `az login --use-device-code` if the Azure CLI session has expired (the build checks, and
-   signs everything it ships; see Code signing), then
-   `./installer/Build-Installer.ps1 -Appcast`, or `-Deploy`, which implies `-Appcast` and
+2. `./installer/Build-Installer.ps1 -Appcast` (it signs everything it ships as the signing
+   service principal; see Code signing), or `-Deploy`, which implies `-Appcast` and
    uploads the installer, the zip, `appcast.xml` and its signature to plan-cake.oire.dev (build
    without `-Deploy` first to try the installer). The file names carry the version:
    `plancake-v1.0.0.7-setup.exe` comes from the commit at distance 7 from `v1.0.0`.

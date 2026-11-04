@@ -15,8 +15,8 @@
 #
 # plancake.exe, the installer and its uninstaller are signed with Azure Artifact Signing whenever
 # installer\signing.json exists (-NoSign skips it; -Appcast and -Deploy refuse to go out
-# unsigned unless -NoSign says so). Signing needs the Artifact Signing client tools and an
-# Azure CLI session (az login --use-device-code); see "Code signing" in CLAUDE.md.
+# unsigned unless -NoSign says so). Signing needs the Artifact Signing client tools and the
+# signing service principal's variables in the environment; see "Code signing" in CLAUDE.md.
 #
 
 [CmdletBinding(PositionalBinding=$false)]
@@ -153,19 +153,28 @@ if ($Sign) {
         exit 1
     }
 
-    # The plugin signs in through the Azure CLI session, unless service principal credentials
-    # are in the environment (AZURE_CLIENT_ID and the rest). Checking here fails in a second
-    # rather than after the publish.
-    if ([string]::IsNullOrEmpty($env:AZURE_CLIENT_ID)) {
+    # The plugin signs in as the service principal whose credentials are in the environment
+    # (AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_CERTIFICATE_PATH), or else through the
+    # Azure CLI session. Checking here fails in a second rather than after the publish.
+    if (![string]::IsNullOrEmpty($env:AZURE_CLIENT_ID)) {
+        $CertPath = $env:AZURE_CLIENT_CERTIFICATE_PATH
+
+        if ([string]::IsNullOrEmpty($CertPath) -or !(Test-Path $CertPath)) {
+            Write-Error "AZURE_CLIENT_CERTIFICATE_PATH does not name an existing certificate file: '$CertPath'"
+            exit 1
+        }
+
+        Write-Host "Signing as service principal: $env:AZURE_CLIENT_ID" -ForegroundColor Yellow
+    } else {
         if ($null -eq (Get-Command az -ErrorAction SilentlyContinue)) {
-            Write-Error "Azure CLI not found. Install it with: winget install --id Microsoft.AzureCLI --exact"
+            Write-Error "No signing credentials: set the service principal variables (see Code signing in CLAUDE.md) or install the Azure CLI."
             exit 1
         }
 
         $AzAccount = & az account show --query user.name --output tsv 2>&1
 
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Not signed in to Azure. Run: az login --use-device-code"
+            Write-Error "No signing credentials: set the service principal variables (see Code signing in CLAUDE.md) or run az login."
             exit 1
         }
 
