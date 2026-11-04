@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-11-04 00:44:15+0100\n"
+"POT-Creation-Date: 2026-11-04 17:11:29+0100\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: uk\n"
@@ -132,8 +132,8 @@ msgstr "&Копіювати інформацію"
 msgid "&Delete all notes"
 msgstr "&Видалити всі нотатки"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:82 ..\..\Ui\MainWindow.Notes.cs:264
-#: ..\..\Ui\MainWindow.Menu.cs:82
+#: ..\..\Ui\MainWindow.Menu.cs:82 ..\..\Ui\MainWindow.NotesList.cs:82
+#: ..\..\Ui\MainWindow.Notes.cs:264
 msgid "&Delete note"
 msgstr "&Видалити нотатку"
 
@@ -149,8 +149,8 @@ msgstr "Мова &документа:"
 msgid "&Edit"
 msgstr "&Редагування"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:81 ..\..\Ui\MainWindow.Notes.cs:260
-#: ..\..\Ui\MainWindow.Menu.cs:81
+#: ..\..\Ui\MainWindow.Menu.cs:81 ..\..\Ui\MainWindow.NotesList.cs:81
+#: ..\..\Ui\MainWindow.Notes.cs:260
 msgid "&Edit note..."
 msgstr "&Редагувати нотатку..."
 
@@ -1331,7 +1331,7 @@ msgstr "Не вдалося зберегти файл у {0}: {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "Не вдалося запустити перегляд документа: {0}"
 
-#: ..\..\Ui\MainWindow.Commands.cs:287 ..\..\Cli\CliRunner.cs:304
+#: ..\..\Cli\CliRunner.cs:304 ..\..\Ui\MainWindow.Commands.cs:287
 #: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"

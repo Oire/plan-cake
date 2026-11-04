@@ -9,6 +9,8 @@ update window come from `changelogs/<X.Y.Z>.md`.
 
 ## [Unreleased]
 
+## [1.2.0.9] - 2026-11-04
+
 ### Changed
 
 - **Signed by Oire Software**: the installer, its uninstaller and `plancake.exe` now carry Oire
@@ -92,6 +94,7 @@ line.
 - **Licenses**: PlanCake's license and the notices of the components it includes ship with it,
   and **Licenses** in About PlanCake opens them.
 
-[Unreleased]: https://github.com/Oire/plan-cake/compare/v1.1.0.8...master
+[Unreleased]: https://github.com/Oire/plan-cake/compare/v1.2.0.9...master
+[1.2.0.9]: https://github.com/Oire/plan-cake/releases/tag/v1.2.0.9
 [1.1.0.8]: https://github.com/Oire/plan-cake/releases/tag/v1.1.0.8
 [1.0.0.11]: https://github.com/Oire/plan-cake/releases/tag/v1.0.0.11

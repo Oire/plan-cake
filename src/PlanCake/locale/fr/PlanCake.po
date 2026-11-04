@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-11-04 00:44:15+0100\n"
+"POT-Creation-Date: 2026-11-04 17:11:29+0100\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: fr\n"
@@ -129,8 +129,8 @@ msgstr "&Copier les infos"
 msgid "&Delete all notes"
 msgstr "&Supprimer toutes les notes"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:82 ..\..\Ui\MainWindow.Notes.cs:264
-#: ..\..\Ui\MainWindow.Menu.cs:82
+#: ..\..\Ui\MainWindow.Menu.cs:82 ..\..\Ui\MainWindow.NotesList.cs:82
+#: ..\..\Ui\MainWindow.Notes.cs:264
 msgid "&Delete note"
 msgstr "&Supprimer la note"
 
@@ -146,8 +146,8 @@ msgstr "Langue du &document :"
 msgid "&Edit"
 msgstr "É&dition"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:81 ..\..\Ui\MainWindow.Notes.cs:260
-#: ..\..\Ui\MainWindow.Menu.cs:81
+#: ..\..\Ui\MainWindow.Menu.cs:81 ..\..\Ui\MainWindow.NotesList.cs:81
+#: ..\..\Ui\MainWindow.Notes.cs:260
 msgid "&Edit note..."
 msgstr "&Modifier la note..."
 
@@ -1342,7 +1342,7 @@ msgstr "Impossible d'enregistrer le fichier dans {0} : {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "Impossible de démarrer l'affichage du document : {0}"
 
-#: ..\..\Ui\MainWindow.Commands.cs:287 ..\..\Cli\CliRunner.cs:304
+#: ..\..\Cli\CliRunner.cs:304 ..\..\Ui\MainWindow.Commands.cs:287
 #: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"
