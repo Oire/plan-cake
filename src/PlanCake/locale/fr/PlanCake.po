@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-19 19:01:15+0200\n"
+"POT-Creation-Date: 2026-11-04 00:44:15+0100\n"
 "PO-Revision-Date: 2026-09-26 19:07:57+02:00\n"
 "Last-Translator: \n"
 "Language-Team: fr\n"
@@ -129,8 +129,8 @@ msgstr "&Copier les infos"
 msgid "&Delete all notes"
 msgstr "&Supprimer toutes les notes"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:82 ..\..\Ui\MainWindow.Menu.cs:82
-#: ..\..\Ui\MainWindow.Notes.cs:264
+#: ..\..\Ui\MainWindow.NotesList.cs:82 ..\..\Ui\MainWindow.Notes.cs:264
+#: ..\..\Ui\MainWindow.Menu.cs:82
 msgid "&Delete note"
 msgstr "&Supprimer la note"
 
@@ -146,8 +146,8 @@ msgstr "Langue du &document :"
 msgid "&Edit"
 msgstr "É&dition"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:81 ..\..\Ui\MainWindow.Menu.cs:81
-#: ..\..\Ui\MainWindow.Notes.cs:260
+#: ..\..\Ui\MainWindow.NotesList.cs:81 ..\..\Ui\MainWindow.Notes.cs:260
+#: ..\..\Ui\MainWindow.Menu.cs:81
 msgid "&Edit note..."
 msgstr "&Modifier la note..."
 
@@ -472,10 +472,9 @@ msgstr "Entrée"
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr "Entrée dans la boîte de dialo&gue de note ({0} fait l'inverse) :"
 
-#: ..\..\Program.cs:107 ..\..\Program.cs:144 ..\..\Program.cs:150
-#: ..\..\Ui\AboutDialog.cs:63 ..\..\Ui\AboutDialog.cs:93
-#: ..\..\Ui\MainWindow.cs:233 ..\..\Ui\MainWindow.cs:319
-#: ..\..\Ui\SettingsDialog.cs:215
+#: ..\..\Ui\MainWindow.cs:233 ..\..\Program.cs:107 ..\..\Program.cs:144
+#: ..\..\Program.cs:150 ..\..\Ui\AboutDialog.cs:63 ..\..\Ui\MainWindow.cs:319
+#: ..\..\Ui\AboutDialog.cs:93 ..\..\Ui\SettingsDialog.cs:215
 msgid "Error"
 msgstr "Erreur"
 
@@ -1214,8 +1213,8 @@ msgstr "Le marqueur d'ouverture ne peut pas être vide."
 msgid "The output file cannot be the file itself: {0}"
 msgstr "Le fichier de sortie ne peut pas être le fichier lui-même : {0}"
 
-#: ..\..\Ui\MainWindow.NotesList.cs:182 ..\..\Ui\MainWindow.Settings.cs:34
-#: ..\..\Ui\MainWindow.Settings.cs:152
+#: ..\..\Ui\MainWindow.Settings.cs:34 ..\..\Ui\MainWindow.Settings.cs:152
+#: ..\..\Ui\MainWindow.NotesList.cs:182
 msgid "The settings could not be saved. They apply until PlanCake is closed."
 msgstr ""
 "Impossible d'enregistrer les paramètres. Ils s'appliquent jusqu'à la "
@@ -1343,8 +1342,8 @@ msgstr "Impossible d'enregistrer le fichier dans {0} : {1}"
 msgid "Unable to start the document view: {0}"
 msgstr "Impossible de démarrer l'affichage du document : {0}"
 
-#: ..\..\Cli\CliRunner.cs:304 ..\..\Cli\CliRunner.cs:510
-#: ..\..\Ui\MainWindow.Commands.cs:287
+#: ..\..\Ui\MainWindow.Commands.cs:287 ..\..\Cli\CliRunner.cs:304
+#: ..\..\Cli\CliRunner.cs:510
 #, csharp-format
 msgid "Unable to write {0}: {1}"
 msgstr "Impossible d'écrire {0} : {1}"
@@ -1410,7 +1409,7 @@ msgstr ""
 msgid "User manual"
 msgstr "Manuel utilisateur"
 
-#: ..\..\Utils\LocalizedText.cs:65
+#: ..\..\Utils\LocalizedText.cs:68
 msgid "User note"
 msgstr "Note de l'utilisateur"
 
@@ -1491,3 +1490,8 @@ msgstr "Zoom avant"
 #: ..\..\Ui\HostCommands.cs:129
 msgid "Zoom out"
 msgstr "Zoom arrière"
+
+#: ..\..\Utils\LocalizedText.cs:68
+msgctxt "Task check box"
+msgid "Done"
+msgstr "Fait"

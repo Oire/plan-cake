@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PlanCake\n"
-"POT-Creation-Date: 2026-10-19 19:01:15+0200\n"
-"PO-Revision-Date: 2026-10-19 19:01:16+0200\n"
+"POT-Creation-Date: 2026-11-04 00:44:15+0100\n"
+"PO-Revision-Date: 2026-11-04 00:44:15+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -121,8 +121,8 @@ msgid "&Delete all notes"
 msgstr ""
 
 #: ..\..\Ui\MainWindow.NotesList.cs:82
-#: ..\..\Ui\MainWindow.Menu.cs:82
 #: ..\..\Ui\MainWindow.Notes.cs:264
+#: ..\..\Ui\MainWindow.Menu.cs:82
 msgid "&Delete note"
 msgstr ""
 
@@ -139,8 +139,8 @@ msgid "&Edit"
 msgstr ""
 
 #: ..\..\Ui\MainWindow.NotesList.cs:81
-#: ..\..\Ui\MainWindow.Menu.cs:81
 #: ..\..\Ui\MainWindow.Notes.cs:260
+#: ..\..\Ui\MainWindow.Menu.cs:81
 msgid "&Edit note..."
 msgstr ""
 
@@ -455,13 +455,13 @@ msgstr ""
 msgid "Enter in the note dialo&g ({0} does the other):"
 msgstr ""
 
+#: ..\..\Ui\MainWindow.cs:233
 #: ..\..\Program.cs:107
 #: ..\..\Program.cs:144
 #: ..\..\Program.cs:150
 #: ..\..\Ui\AboutDialog.cs:63
-#: ..\..\Ui\AboutDialog.cs:93
-#: ..\..\Ui\MainWindow.cs:233
 #: ..\..\Ui\MainWindow.cs:319
+#: ..\..\Ui\AboutDialog.cs:93
 #: ..\..\Ui\SettingsDialog.cs:215
 msgid "Error"
 msgstr ""
@@ -1177,9 +1177,9 @@ msgstr ""
 msgid "The output file cannot be the file itself: {0}"
 msgstr ""
 
-#: ..\..\Ui\MainWindow.NotesList.cs:182
 #: ..\..\Ui\MainWindow.Settings.cs:34
 #: ..\..\Ui\MainWindow.Settings.cs:152
+#: ..\..\Ui\MainWindow.NotesList.cs:182
 msgid "The settings could not be saved. They apply until PlanCake is closed."
 msgstr ""
 
@@ -1298,9 +1298,9 @@ msgstr ""
 msgid "Unable to start the document view: {0}"
 msgstr ""
 
+#: ..\..\Ui\MainWindow.Commands.cs:287
 #: ..\..\Cli\CliRunner.cs:304
 #: ..\..\Cli\CliRunner.cs:510
-#: ..\..\Ui\MainWindow.Commands.cs:287
 #, csharp-format
 msgid "Unable to write {0}: {1}"
 msgstr ""
@@ -1365,7 +1365,7 @@ msgstr ""
 msgid "User manual"
 msgstr ""
 
-#: ..\..\Utils\LocalizedText.cs:65
+#: ..\..\Utils\LocalizedText.cs:68
 msgid "User note"
 msgstr ""
 
@@ -1434,4 +1434,9 @@ msgstr ""
 
 #: ..\..\Ui\HostCommands.cs:129
 msgid "Zoom out"
+msgstr ""
+
+#: ..\..\Utils\LocalizedText.cs:68
+msgctxt "Task check box"
+msgid "Done"
 msgstr ""

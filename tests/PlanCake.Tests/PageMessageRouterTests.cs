@@ -20,7 +20,7 @@ public class PageMessageRouterTests {
 
     private static readonly RenderResult _render = MarkdownRenderer.Render(
         Text,
-        new RenderOptions(NoteMarkers.Default, RenderMode.Interactive, new RenderStrings("User note"))
+        new RenderOptions(NoteMarkers.Default, RenderMode.Interactive, new RenderStrings("User note", "Done"))
     );
 
     private static PageState State(BlockEnterAction enterAction = BlockEnterAction.AddNote) =>

@@ -70,7 +70,7 @@ public class DocumentViewLockdownTests: IDisposable {
     public void HostileRawHtml_PostsNothingAndNavigatesNowhere() {
         var render = MarkdownRenderer.Render(
             HostilePlan,
-            new RenderOptions(NoteMarkers.Default, RenderMode.Interactive, new RenderStrings("User note"))
+            new RenderOptions(NoteMarkers.Default, RenderMode.Interactive, new RenderStrings("User note", "Done"))
         );
         var page = new Uri(DocumentView.BaseUri, "index.html").AbsoluteUri;
         var messages = new List<string>();

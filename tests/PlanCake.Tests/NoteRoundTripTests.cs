@@ -14,7 +14,7 @@ namespace Oire.PlanCake.Tests;
 /// code, so they start with no notes.
 /// </summary>
 public class NoteRoundTripTests: IDisposable {
-    private static readonly RenderStrings _strings = new("User note");
+    private static readonly RenderStrings _strings = new("User note", "Done");
     private static readonly NoteMarkers _singleToken = new("!USERNOTE!");
     private static readonly UTF8Encoding _utf8 = new(false);
 

@@ -6,7 +6,7 @@ using Xunit;
 namespace Oire.PlanCake.Tests;
 
 public class MarkdownRendererTests {
-    private static readonly RenderStrings _strings = new("User note");
+    private static readonly RenderStrings _strings = new("User note", "Done");
 
     private static RenderResult Render(
         string source,
@@ -153,9 +153,9 @@ public class MarkdownRendererTests {
         var result = Render("- [x] done\n- [ ] todo\n");
 
         result.Html.Should().Contain(
-            """<li class="task-list-item" dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" aria-label="done" checked="checked" /> done</li>"""
+            """<li class="task-list-item" dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" aria-label="Done" checked="checked" /> done</li>"""
         ).And.Contain(
-            """<li class="task-list-item" dir="auto" data-lines="2-2"><input data-plancake-task="true" type="checkbox" aria-label="todo" /> todo</li>"""
+            """<li class="task-list-item" dir="auto" data-lines="2-2"><input data-plancake-task="true" type="checkbox" aria-label="Done" /> todo</li>"""
         );
         result.Html.Should().NotContain("disabled");
         Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "2-2");
@@ -166,22 +166,22 @@ public class MarkdownRendererTests {
         var result = Render("- [ ] one\n\n- [x] two\n");
 
         result.Html.Should().Contain(
-            """<p dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" aria-label="one" /> one</p>"""
+            """<p dir="auto" data-lines="1-1"><input data-plancake-task="true" type="checkbox" aria-label="Done" /> one</p>"""
         );
         Ranges(result, BlockKind.ListItem).Should().Equal("1-1", "3-3");
     }
 
     // Partially checked parents
 
-    // A check box named after its item, then the item's text.
+    // A check box named "Done", then the item's text.
     private static string Unchecked(string text) =>
-        $"""<input data-plancake-task="true" type="checkbox" aria-label="{text}" /> {text}""";
+        $"""<input data-plancake-task="true" type="checkbox" aria-label="Done" /> {text}""";
 
     private static string Mixed(string text) =>
-        $"""<input data-plancake-task="true" type="checkbox" data-mixed="true" aria-label="{text}" /> {text}""";
+        $"""<input data-plancake-task="true" type="checkbox" data-mixed="true" aria-label="Done" /> {text}""";
 
     private static string Checked(string text) =>
-        $"""<input data-plancake-task="true" type="checkbox" aria-label="{text}" checked="checked" /> {text}""";
+        $"""<input data-plancake-task="true" type="checkbox" aria-label="Done" checked="checked" /> {text}""";
 
     [Fact]
     public void Render_TaskParentWithOneOfTwoChildrenChecked_IsMixed() {
@@ -221,7 +221,7 @@ public class MarkdownRendererTests {
         var result = Render("- [ ] parent\n  - [x] one\n  - [ ] two\n", RenderMode.Export);
 
         result.Html.Should().Contain(
-            """<input disabled="disabled" type="checkbox" aria-checked="mixed" aria-label="parent" /> parent"""
+            """<input disabled="disabled" type="checkbox" aria-checked="mixed" aria-label="Done" /> parent"""
         );
         result.Html.Should().NotContain("data-mixed");
     }
@@ -230,37 +230,21 @@ public class MarkdownRendererTests {
     public void Render_TaskListExport_CheckboxesStayDisabled() {
         var result = Render("- [x] done\n- [ ] todo\n", RenderMode.Export);
 
-        result.Html.Should().Contain("""<input disabled="disabled" type="checkbox" aria-label="done" checked="checked" />""")
-            .And.Contain("""<input disabled="disabled" type="checkbox" aria-label="todo" />""");
+        result.Html.Should().Contain("""<input disabled="disabled" type="checkbox" aria-label="Done" checked="checked" />""")
+            .And.Contain("""<input disabled="disabled" type="checkbox" aria-label="Done" />""");
         result.Html.Should().NotContain("data-plancake-task");
     }
 
-    [Fact]
-    public void Render_TaskCheckbox_IsNamedAfterItsItemWithoutTheMarker() {
-        var result = Render("- [ ] Fix \"quotes\" & **bold** text\n");
+    // Not the item's words: whatever part of them names the check box is heard twice when reading by
+    // line, in Say All and on a braille display, where the item's text follows the name.
+    [Theory]
+    [InlineData("- [ ] Fix \"quotes\" & **bold** text\n")]
+    [InlineData("- [x] A first sentence. Then more.\n")]
+    public void Render_TaskCheckbox_IsNamedDoneWhateverItsItem(string source) {
+        var html = Render(source).Html;
 
-        result.Html.Should().Contain(
-            """<input data-plancake-task="true" type="checkbox" aria-label="Fix &quot;quotes&quot; &amp; bold text" />"""
-        );
-    }
-
-    [Fact]
-    public void Render_TaskItem_NamesItsCheckboxWithTheFirstSentence() {
-        var words = String.Join(' ', Enumerable.Repeat("word", 20));
-
-        var result = Render($"- [x] {words}\n  continued. Then more.\n");
-
-        result.Html.Should().Contain($"""aria-label="{words} continued." checked="checked" />""");
-    }
-
-    [Fact]
-    public void Render_LongTaskSentence_NamesItsCheckboxUpToAPause() {
-        var clause = String.Join(' ', Enumerable.Repeat("word", 20));
-        var rest = String.Join(' ', Enumerable.Repeat("more", 20));
-
-        var result = Render($"- [ ] {clause}, {rest}.\n");
-
-        result.Html.Should().Contain($"""aria-label="{clause}…" />""");
+        html.Should().MatchRegex("""<input data-plancake-task="true" type="checkbox" aria-label="Done"( checked="checked")? />""");
+        html.Split("aria-label=").Should().HaveCount(2);
     }
 
     [Fact]
@@ -520,11 +504,12 @@ public class MarkdownRendererTests {
 
     [Fact]
     public void Render_LocalizedStrings_AreWrittenEncoded() {
-        var strings = new RenderStrings("Заметка \"пользователя\"");
+        var strings = new RenderStrings("Заметка \"пользователя\"", "Готово & \"сделано\"");
 
-        var result = Render("Para\n[usernote]n[/usernote]\n", strings: strings);
+        var result = Render("- [ ] Task\n[usernote]n[/usernote]\n", strings: strings);
 
-        result.Html.Should().Contain("""aria-label="Заметка &quot;пользователя&quot;" """);
+        result.Html.Should().Contain("""aria-label="Заметка &quot;пользователя&quot;" """)
+            .And.Contain("""type="checkbox" aria-label="Готово &amp; &quot;сделано&quot;" />""");
     }
 
     /// <summary>The HTML of the user note with this <c>data-note</c> index.</summary>

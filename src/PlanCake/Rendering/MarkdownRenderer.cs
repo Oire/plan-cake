@@ -130,7 +130,7 @@ internal static partial class MarkdownRenderer {
         walker.Walk(document);
 
         var notes = InsertNotes(document, parse.Notes, walker.Blocks, options);
-        var body = ToHtml(document, options.Mode, FindMixedTasks(document), walker.TaskLabels);
+        var body = ToHtml(document, options.Mode, FindMixedTasks(document), options.Strings.TaskLabel);
         var title = walker.Title;
         var html = options.Mode == RenderMode.Export
             ? ExportDocument(
@@ -204,7 +204,7 @@ internal static partial class MarkdownRenderer {
         MarkdownDocument document,
         RenderMode mode,
         IReadOnlySet<TaskList> mixedTasks,
-        IReadOnlyDictionary<TaskList, string> taskLabels
+        string taskLabel
     ) {
         using var writer = new StringWriter(CultureInfo.InvariantCulture);
         var renderer = new HtmlRenderer(writer);
@@ -212,7 +212,7 @@ internal static partial class MarkdownRenderer {
 
         // The window's task-list check boxes can be toggled; an exported file's stay disabled, as
         // Markdig renders them. Both show a partially checked parent.
-        renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListRenderer(mode, mixedTasks, taskLabels));
+        renderer.ObjectRenderers.Replace<HtmlTaskListRenderer>(new TaskListRenderer(mode, mixedTasks, taskLabel));
 
         // The block's attributes (data-lines, dir) belong on the <pre> the user lands on, not on
         // the <code> inside it.
@@ -441,15 +441,18 @@ internal static partial class MarkdownRenderer {
     /// done item carries <c>data-mixed</c>, which the page turns into the check box's
     /// <c>indeterminate</c> state. In an exported file it stays disabled as Markdig renders it,
     /// and a partially done item gets <c>aria-checked="mixed"</c>, since no script runs there.
-    /// Both carry the item's first sentence as their <c>aria-label</c>: an input takes no name from the text
-    /// after it, and a screen reader that focuses the check box (after a toggle, in forms mode)
-    /// would say only "check box". Not a <c>&lt;label&gt;</c> around the text, which would make a
-    /// click on the text toggle the task instead of adding a note.
+    /// Both are named "Done" (<see cref="RenderStrings.TaskLabel"/>) through <c>aria-label</c>: with
+    /// no name, a screen reader guesses one from the text after the check box and reads the whole
+    /// task twice, and a name taken from the task's own words (it was the first sentence) is still
+    /// heard twice when reading by line, in Say All and on a braille display. "Done" says what the
+    /// check box is for and never changes, unlike "Completed task" and "Incomplete task", which
+    /// repeat the check box's state and change on every toggle. Not a <c>&lt;label&gt;</c> around
+    /// the text, which would make a click on the text toggle the task instead of adding a note.
     /// </summary>
     private sealed class TaskListRenderer(
         RenderMode mode,
         IReadOnlySet<TaskList> mixedTasks,
-        IReadOnlyDictionary<TaskList, string> labels
+        string label
     ): HtmlObjectRenderer<TaskList> {
         protected override void Write(HtmlRenderer renderer, TaskList obj) {
             if (!renderer.EnableHtmlForInline) {
@@ -473,9 +476,7 @@ internal static partial class MarkdownRenderer {
                 }
             }
 
-            if (labels.TryGetValue(obj, out var label) && label.Length > 0) {
-                renderer.Write($" aria-label=\"{HtmlEncode(label)}\"");
-            }
+            renderer.Write($" aria-label=\"{HtmlEncode(label)}\"");
 
             if (obj.Checked) {
                 renderer.Write(" checked=\"checked\"");
@@ -683,9 +684,6 @@ internal static partial class MarkdownRenderer {
 
         public List<Annotatable> Blocks { get; } = [];
 
-        /// <summary>The text of each task-list item, without its marker, for its check box's name.</summary>
-        public Dictionary<TaskList, string> TaskLabels { get; } = new(ReferenceEqualityComparer.Instance);
-
         public string? Title { get; private set; }
 
         public void Walk(ContainerBlock container) {
@@ -709,13 +707,6 @@ internal static partial class MarkdownRenderer {
                     SetDirection(lead);
                     var itemText = PlainText(lead);
                     Add(BlockKind.ListItem, lead, itemText, item);
-
-                    // The first sentence, as long as a note's in the notes list: enough to tell the
-                    // task by when the check box has the focus, and short enough not to make the
-                    // item heard twice over in browse mode, where its text follows the name.
-                    if (TaskOf(item) is { } task) {
-                        TaskLabels[task] = FirstSentence(TaskToggle.WithoutMarker(OneLine(itemText)));
-                    }
 
                     for (var i = 1; i < item.Count; i++) {
                         Visit(item[i]);

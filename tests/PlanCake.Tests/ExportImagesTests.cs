@@ -28,7 +28,7 @@ public sealed class ExportImagesTests: IDisposable {
 
     private string Export(string source) => MarkdownRenderer.Render(
         source,
-        new RenderOptions(NoteMarkers.Default, RenderMode.Export, new RenderStrings("User note"), DocumentFolder: _folder)
+        new RenderOptions(NoteMarkers.Default, RenderMode.Export, new RenderStrings("User note", "Done"), DocumentFolder: _folder)
     ).Html;
 
     [Fact]

@@ -97,7 +97,7 @@ public class PositionRestorerTests {
 
     [Fact]
     public void FindTarget_AfterARealReRender_ReturnsToTheSameParagraph() {
-        var strings = new RenderStrings("User note");
+        var strings = new RenderStrings("User note", "Done");
         var options = new RenderOptions(
             Notes.NoteMarkers.Default, RenderMode.Interactive, strings
         );
